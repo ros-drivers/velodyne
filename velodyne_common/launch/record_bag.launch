@@ -1,0 +1,12 @@
+<!-- -*- mode: nXML -*- -->
+<!-- record an ROS bag from the raw device, with corresponding
+     odometry, GPS and coordinate transforms
+-->
+
+<launch>
+  <node pkg="art_common" type="vehicle_static_tf" name="vehicle_static_tf"/>
+  <node pkg="applanix" type="odometry" name="odometry"/>
+  <node pkg="velodyne_common" type="read" name="read"/>
+  <node pkg="rosrecord" type="rosrecord" name="rosrecord"
+        args="/velodyne/rawscan /odom /gps /tf" />
+</launch>

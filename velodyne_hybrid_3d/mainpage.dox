@@ -1,0 +1,9 @@
+/**
+\mainpage
+\htmlinclude manifest.html
+
+This package reads data from the \b velodyne/rawscan topic, identifies
+drivable terrain and publishes it as a \b velodyne/hybridcloud
+PointCloud.
+
+*/

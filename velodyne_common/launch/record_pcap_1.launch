@@ -1,0 +1,14 @@
+<!-- -*- mode: nXML -*- -->
+<!-- record one copy of a PCAP file in an ROS bag
+
+     environment: $PCAP = full path name of PCAP file.
+ -->
+<launch>
+  <node pkg="rosrecord" type="rosrecord" name="rosrecord"
+        args="/velodyne/rawscan" />
+  <node pkg="velodyne_common" type="read" name="read">
+    <param name="input/read_once" value="true" />
+    <param name="input/dump_file"
+           value="-f $(optenv BAG /home/joq/velodyne/class.pcap)"/>
+  </node>
+</launch>

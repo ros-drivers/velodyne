@@ -1,0 +1,10 @@
+<!-- -*- mode: nXML -*- -->
+<launch>
+  <!-- start the nodes in the 'pcapconvert' namespace -->
+  <group ns="pcapconvert">
+    <node pkg="velodyne_common" type="print" name="writer"
+      args="-n260 -q10 -f /home/joq/velodyne/testout.vxyz" />
+    <node pkg="velodyne_common" type="read" name="reader"
+      args="-f /home/joq/velodyne/class.pcap" />
+  </group>
+</launch>

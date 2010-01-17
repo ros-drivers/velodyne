@@ -1,0 +1,11 @@
+<!-- -*- mode: nXML -*- -->
+<!-- run rviz on a raw velodyne ROS bag (~/velodyne/test.bag) 
+
+     environment: $BAG = full path name of bag file.
+-->
+<launch>
+  <node pkg="rviz" type="rviz" name="rviz" />
+  <node pkg="velodyne_common" type="cloud" name="cloud" />
+  <node pkg="rosrecord" type="rosplay" name="rosplay"
+        args="-f $(optenv BAG /home/joq/velodyne/test.bag)" />
+</launch>

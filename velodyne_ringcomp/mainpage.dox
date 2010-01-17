@@ -1,0 +1,8 @@
+/**
+\mainpage
+\htmlinclude manifest.html
+
+This package reads data from the \b velodyne/rawscan topic, identifies
+obstacles and publishes them as a \b velodyne/obstacles PointCloud.
+
+*/

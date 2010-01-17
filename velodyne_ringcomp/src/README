@@ -1,0 +1,6 @@
+IMPORTANT:
+
+Currently, ringcomp outputs to a file named velodyne_ringcomp_output.txt
+Because the pcap loops, the program will never stop running.
+
+You MUST stop the process manually or you will end up with gigabytes of text file.

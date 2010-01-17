@@ -1,0 +1,17 @@
+<package>
+  <description brief="velodyne_ringcomp">
+
+    Identify obstacles in Velodyne HDL-64E 3D Lidar data.
+
+  </description>
+  <author>Joseph Campbell</author>
+  <license>BSD</license>
+  <review status="unreviewed" notes=""/>
+  <url>http://www.landrobot.com</url>
+  <depend package="roscpp"/>
+  <depend package="sensor_msgs"/>
+  <depend package="velodyne_common"/>
+
+</package>
+
+

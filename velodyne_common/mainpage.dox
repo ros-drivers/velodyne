@@ -1,0 +1,261 @@
+/**
+\mainpage
+
+\htmlinclude manifest.html
+
+The velodyne_common ROS package contains includes, messages, libraries
+and utilities for the Velodyne HDL-64E 3D Lidar.
+
+
+\section codeapi Programming API
+
+\subsection data_class Velodyne Data classes
+
+The <velodyne/data.h> classes unpacks raw Velodyne lidar packets into
+several formats.
+
+ROS parameters are relative to the calling node's name space:
+
+ - \b ~/data/output (string): output file name (default: none).
+ - \b ~/data/angles (string): device-specific angles correction file
+   name (default: "$(find velodyne_common)/etc/angles.config").
+
+\subsection input_class Velodyne Input classes
+
+The <velodyne/input.h> classes provide raw Velodyne lidar input
+packets from either a live socket interface or a previously-saved PCAP
+dump file.
+
+ROS parameters are relative to the calling node's name space:
+
+ - \b ~/input/read_once (bool): if true, read input file only once
+   (default false).
+ - \b ~/input/read_fast (bool): if true, read input file as fast as
+   possible (default false).
+ - \b ~/input/repeat_delay (double): number of seconds to delay before
+   repeating input file (default: 0.0).
+
+
+\section read Velodyne read device driver
+
+ROS device driver node that captures Velodyne HDL-64E 3D Lidar data
+and publishes it to the \b velodyne/rawscan topic.
+
+\subsection read_usage Usage
+
+\verbatim
+  rosrun velodyne_common read [options]
+
+Options:
+    -f <filename>  PCAP packet dump file name (default: use real device)
+    -h, -?         print help text
+    -q <integer>   set ROS topic queue depth (default: 1)
+\endverbatim
+
+\subsection read_examples Examples
+
+Read the Velodyne input socket as fast as possible.  Publish each
+complete revolution to \b velodyne/rawscan.
+
+\verbatim
+$ rosrun velodyne_common read
+\endverbatim
+
+Read previously captured Velodyne packets from dump.pcap file.
+Publish messages to \b velodyne/rawscan at approximately 10 Hz rate.
+
+Dump files can be grabbed by libpcap, Velodyne's DSR software,
+ethereal, wireshark, tcpdump, or the velodyne_common vdump command.
+
+\verbatim
+$ rosrun velodyne_common read _pcap:=dump.pcap
+\endverbatim
+
+\subsection read_names ROS names
+
+Node name: \b velodyne_read
+
+Publishes: \b velodyne/rawscan raw Velodyne data packets for one
+entire revolution of the device.
+
+Parameters:
+
+ - \b ~/pcap (string): PCAP dump input file name; overrides the
+   \b -f command line parameter.
+ - \b ~/input/* : parameters defined by <velodyne/input.h>
+
+\section print_command Print Command
+
+The print command reads raw data from the \b velodyne/rawscan topic to
+print in human-readable form for off-line processing.
+
+\subsection print_usage Usage
+
+\verbatim
+  rosrun velodyne_common print [options]
+
+Options:
+        -h, -?         print help text
+        -t <type>      defines output type (default 2)
+        -n <integer>   read this many packets (default: all)
+        -q <integer>   set ROS topic queue depth (default: 1)
+        -f <filename>  write output to this file (default: none)
+        -f-            write data to stdout
+\endverbatim
+
+The output file format is determined by the -t option, the
+corresponding file suffixes are:
+
+-# file.vdmp -- x, y, z
+-# file.vxyz -- laser number, direction, x, y, z, intensity
+-# file.vtpr -- theta, phi, range, intensity, laser number, revolution
+-# file.vrgb -- x, y, z, r, g, b (r, g, b are all set to 255)
+
+\subsection print_examples Examples
+
+Print contents of one revolution (260 packets) in XYZ format to file
+onerev.vxyz.
+
+\verbatim
+$ rosrun velodyne_common print -t2 -n260 -f onerev.vxyz 
+\endverbatim
+
+Print contents of two revolutions (520 packets) in theta, phi, range
+format to tworevs.vtpr.
+
+\verbatim
+$ rosrun velodyne_common print -t3 -n 520 -f tworevs.vtpr
+\endverbatim
+
+Print contents of a hundred revolutions in theta, phi, range format to
+100revs.vtpr.  Set ROS topic queue depth to 100, reducing the number
+of dropped packets some while incurring considerable extra latency.
+
+\verbatim
+$ rosrun velodyne_common print -t3 -n26000 -q100 -f 100revs.vtpr
+\endverbatim
+
+Read all data, but do not create an output file.  When cancelled via
+SIGINT (^c), this command will log some summary message latency
+statistics.
+
+\verbatim
+$ rosrun velodyne_common print 
+\endverbatim
+
+Print all data in XYZ format to standard output.  You will see a \b
+lot of numbers on the terminal.  Output can be redirected via the
+shell, but some ROS log messages will be interspersed with the data.
+This almost certainly will not be able to keep up with the bandwidth
+of the device.
+
+\verbatim
+$ rosrun velodyne_common print -f-
+\endverbatim
+
+\subsection print_names ROS names
+
+Node name: \b velodyne_print
+
+Subscribes to: \b velodyne/rawscan, raw Velodyne data packets for one
+complete revolution of the device.
+
+Parameters: uses the <velodyne/data.h> class parameters.
+
+
+\section cloud_command Cloud Command
+
+The cloud command reads raw data from the \b velodyne/rawscan topic,
+converts to PointCloud format, and republishes as \b velodyne/pointcloud.
+
+\subsection cloud_usage Usage
+
+\verbatim
+  rosrun velodyne_common cloud [options]
+
+Options:
+        -h, -?         print help text
+        -q <integer>   set ROS topic queue depth (default: 1)
+\endverbatim
+
+\subsection cloud_examples Examples
+
+Continuously convert raw Velodyne data into PointCloud messages.
+
+\verbatim
+$ rosrun velodyne_common cloud
+\endverbatim
+
+\subsection cloud_names ROS names
+
+Node name: \b velodyne_cloud
+
+Subscribes to: \b velodyne/rawscan, raw Velodyne data packets for one
+complete revolution of the device.
+
+Publishes: \b velodyne/pointcloud, corresponding 3D PointCloud
+messages.
+
+Parameters: uses the <velodyne/data.h> class parameters.
+
+
+\section vdump_command Vdump Command
+
+The vdump command dumps raw data from the Velodyne lidar in PCAP
+format.  It is a shell script wrapper with some obscure options for
+the powerful tcpdump command.
+
+Other methods of acquiring PCAP data include using tcpdump directly,
+wireshark, Velodyne's DSR software, and programming with libpcap.
+
+\subsection vdump_usage Usage
+
+\verbatim
+  rosrun velodyne_common vdump <file_prefix> [ <interface> ]
+
+        <file_prefix>   file name to dump (with 3-digit number suffix)
+        <interface>     interface to read from (default: "eth1")
+\endverbatim
+
+\subsection vdump_examples Examples
+
+Dump Velodyne packets to a series of files named "pcap-000",
+"pcap-001", etc.  Each file will be about 100MB, holding a little more
+than 30 seconds of Velodyne packets.  Type ^C when finished.
+
+\verbatim
+$ rosrun velodyne_common vdump pcap- eth0
+\endverbatim
+
+
+\section launch Launch Files
+
+This package includes several launch files for capturing and viewing
+Velodyne data.  See the launch subdirectory for a complete list.  
+
+\subsection launch_examples Example Launch Commands
+
+Visualize a PCAP file as a point cloud using rviz.
+
+\verbatim
+$ PCAP=/path/to/file.pcap roslaunch velodyne_common cloud.launch
+\endverbatim
+
+Record one copy of a PCAP file in an ROS bag.
+
+\verbatim
+$ PCAP=/path/to/file.pcap roslaunch velodyne_common record_pcap_1.launch
+\endverbatim
+
+Capture a raw Velodyne bag file from a live device, including
+odometry, GPS, and coordinate transforms.  The bag file will be named
+automatically by rosrecord.
+
+Interrupt the capture using ^C when finished.  Be aware that the
+device generates about 3.1MB of data per second.
+
+\verbatim
+$ roslaunch velodyne_common record_bag.launch
+\endverbatim
+
+*/

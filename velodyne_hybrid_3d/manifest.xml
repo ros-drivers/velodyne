@@ -1,0 +1,18 @@
+<package>
+  <description brief="velodyne_hybrid_3d">
+
+    Construct drivability map based on height and depth of Velodyne
+    HDL-64E 3D Lidar data.
+
+  </description>
+  <author>Chau Nguyen</author>
+  <license>BSD</license>
+  <review status="unreviewed" notes=""/>
+  <url>http://www.landrobot.com</url>
+  <depend package="roscpp"/>
+  <depend package="velodyne_common"/>
+  <depend package="sensor_msgs" />
+
+</package>
+
+
