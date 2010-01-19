@@ -8,7 +8,7 @@
   <author> Yaxin Liu, Pat Beeson, Michael Quinlan, Jack O'Quin</author>
   <license>BSD</license>
   <review status="unreviewed" notes=""/>
-  <url>http://www.landrobot.com</url>
+  <url>http://code.google.com/p/utexas-art-ros-pkg</url>
   <depend package="roscpp"/>
   <depend package="sensor_msgs"/>
   <depend package="angles"/>
