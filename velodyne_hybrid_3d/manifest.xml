@@ -1,14 +1,14 @@
 <package>
-  <description brief="velodyne_hybrid_3d">
+  <description brief="Velodyne hybrid 3D drive-ability map">
 
-    Construct drivability map based on height and depth of Velodyne
+    Identify drive-able terrain based on height and depth of Velodyne
     HDL-64E 3D Lidar data.
 
   </description>
   <author>Chau Nguyen</author>
   <license>BSD</license>
   <review status="unreviewed" notes=""/>
-  <url>http://code.google.com/p/utexas-art-ros-pkg</url>
+  <url>http://www.ros.org/wiki/velodyne_hybrid_3d</url>
   <depend package="roscpp"/>
   <depend package="velodyne_common"/>
   <depend package="sensor_msgs" />

@@ -1,14 +1,14 @@
 <package>
-  <description brief="velodyne_common">
+  <description brief="Common Velodyne HDL-64E 3D Lidar support">
 
-     Common message, header, library and utility interfaces for
-     Velodyne HDL-64E 3D Lidar support.
+     Basic device driver, message, header, library and utility
+     interfaces for the Velodyne HDL-64E 3D Lidar.
 
   </description>
   <author> Yaxin Liu, Pat Beeson, Michael Quinlan, Jack O'Quin</author>
   <license>BSD</license>
   <review status="unreviewed" notes=""/>
-  <url>http://code.google.com/p/utexas-art-ros-pkg</url>
+  <url>http://www.ros.org/wiki/velodyne_common</url>
   <depend package="roscpp"/>
   <depend package="sensor_msgs"/>
   <depend package="angles"/>

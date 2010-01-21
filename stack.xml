@@ -1,15 +1,13 @@
 <stack>
-
   <description brief="Velodyne HDL-64E 3D Lidar support">
 
-    Nodes and utilities to process Velodyne data obtained from live
-    input or PCAP socket dumps.
+    ROS support for the Velodyne HDL-64E 3D Lidar.
 
   </description>
   <author>Maintained by Jack O'Quin</author>
   <license>BSD</license>  
   <review status="unreviewed" notes=""/>
-  <url>http://www.landrobot.com</url>
+  <url>http://www.ros.org/wiki/velodyne</url>
   <depend stack="common_msgs" /> <!-- nav_msgs, sensor_msgs -->
   <depend stack="geometry" /> <!-- angles -->
   <depend stack="ros" /> <!-- roscpp -->
