@@ -5,7 +5,7 @@
      interfaces for the Velodyne HDL-64E 3D Lidar.
 
   </description>
-  <author> Yaxin Liu, Pat Beeson, Michael Quinlan, Jack O'Quin</author>
+  <author> Patrick Beeson, Jack O'Quin, Michael Quinlan, Yaxin Liu </author>
   <license>BSD</license>
   <review status="unreviewed" notes=""/>
   <url>http://www.ros.org/wiki/velodyne_common</url>
