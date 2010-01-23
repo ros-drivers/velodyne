@@ -8,7 +8,7 @@
 
 /** \file
 
-    This ROS node converts raw Velodyne HDL-64E 3D Lidar data to a
+    This ROS node converts raw Velodyne HDL-64E 3D LIDAR data to a
     PointCloud.
 
 */

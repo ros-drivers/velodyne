@@ -4,7 +4,7 @@
 \htmlinclude manifest.html
 
 The velodyne_common ROS package contains includes, messages, libraries
-and utilities for the Velodyne HDL-64E 3D Lidar.
+and utilities for the Velodyne HDL-64E 3D LIDAR.
 
 
 \section codeapi Programming API

@@ -1,8 +1,8 @@
 <package>
-  <description brief="Common Velodyne HDL-64E 3D Lidar support">
+  <description brief="Common Velodyne HDL-64E 3D LIDAR support">
 
      Basic device driver, message, header, library and utility
-     interfaces for the Velodyne HDL-64E 3D Lidar.
+     interfaces for the Velodyne HDL-64E 3D LIDAR.
 
   </description>
   <author> Patrick Beeson, Jack O'Quin, Michael Quinlan, Yaxin Liu </author>

@@ -10,11 +10,11 @@
 
 /** \file
  *
- *  Velodyne HDL-64E 3D Lidar data input classes
+ *  Velodyne HDL-64E 3D LIDAR data input classes
  *
  *  \ingroup velodyne
  *
- *    These classes provide raw Velodyne lidar input packets from
+ *    These classes provide raw Velodyne LIDAR input packets from
  *    either a live socket interface or a previously-saved PCAP dump
  *    file.
  *

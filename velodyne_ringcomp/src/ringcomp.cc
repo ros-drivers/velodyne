@@ -9,7 +9,7 @@
 
 /** \file
 
-    This ROS node processes raw Velodyne HDL-64E 3D Lidar data using
+    This ROS node processes raw Velodyne HDL-64E 3D LIDAR data using
     ring compression.
 
 */

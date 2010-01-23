@@ -1,7 +1,7 @@
 <stack>
-  <description brief="Velodyne HDL-64E 3D Lidar support">
+  <description brief="Velodyne HDL-64E 3D LIDAR support">
 
-    ROS support for the Velodyne HDL-64E 3D Lidar.
+    ROS support for the Velodyne HDL-64E 3D LIDAR.
 
   </description>
   <author>Maintained by Jack O'Quin</author>

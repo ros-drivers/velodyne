@@ -1,7 +1,7 @@
 <package>
   <description brief="Velodyne ring compression obstacle detection">
 
-    Identify obstacles in Velodyne HDL-64E 3D Lidar data using ring
+    Identify obstacles in Velodyne HDL-64E 3D LIDAR data using a ring
     compression algorithm.
 
   </description>

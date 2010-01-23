@@ -9,7 +9,7 @@
 
 /** \file
 
-    This ROS node captures Velodyne HDL-64E 3D Lidar data and prints
+    This ROS node captures Velodyne HDL-64E 3D LIDAR data and prints
     it in several human-readable file formats.
 
 */

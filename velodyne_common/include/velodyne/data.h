@@ -10,11 +10,11 @@
 
 /** \file
  *
- *  Velodyne HDL-64E 3D Lidar data accessors
+ *  Velodyne HDL-64E 3D LIDAR data accessors
  *
  *  \ingroup velodyne
  *
- *  These classes unpack raw Velodyne lidar packets into several
+ *  These classes unpack raw Velodyne LIDAR packets into several
  *  useful formats.
  *
  *     velodyne::Data -- virtual base class for unpacking data into

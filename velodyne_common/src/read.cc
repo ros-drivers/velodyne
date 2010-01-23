@@ -9,7 +9,7 @@
 
 /** \file
  *
- *  ROS driver node for the Velodyne HDL-64E 3D Lidar
+ *  ROS driver node for the Velodyne HDL-64E 3D LIDAR
  */
 
 #include <string>

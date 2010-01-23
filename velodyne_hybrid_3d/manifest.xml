@@ -2,7 +2,7 @@
   <description brief="Velodyne hybrid 3D drive-ability map">
 
     Identify drive-able terrain based on height and depth of Velodyne
-    HDL-64E 3D Lidar data.
+    HDL-64E 3D LIDAR data.
 
   </description>
   <author>Chau Nguyen</author>

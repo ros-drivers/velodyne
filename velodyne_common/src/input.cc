@@ -9,7 +9,7 @@
 
 /** \file
  *
- *  Input classes for the Velodyne HDL-64E 3D Lidar:
+ *  Input classes for the Velodyne HDL-64E 3D LIDAR:
  * 
  *     Input -- virtual base class than can be used to access the data
  *              independently of its source
