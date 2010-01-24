@@ -10,7 +10,7 @@
 /**
  *  \file
  *
- *  Classes for unpacking Velodyne HDL-64E 3D Lidar data into several
+ *  Classes for unpacking Velodyne HDL-64E 3D LIDAR data into several
  *  formats.
  *
  *  These classes accept raw Velodyne data for either single packets

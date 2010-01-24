@@ -11,7 +11,7 @@ and utilities for the Velodyne HDL-64E 3D LIDAR.
 
 \subsection data_class Velodyne Data classes
 
-The <velodyne/data.h> classes unpacks raw Velodyne lidar packets into
+The <velodyne/data.h> classes unpacks raw Velodyne LIDAR packets into
 several formats.
 
 ROS parameters are relative to the calling node's name space:
@@ -22,7 +22,7 @@ ROS parameters are relative to the calling node's name space:
 
 \subsection input_class Velodyne Input classes
 
-The <velodyne/input.h> classes provide raw Velodyne lidar input
+The <velodyne/input.h> classes provide raw Velodyne LIDAR input
 packets from either a live socket interface or a previously-saved PCAP
 dump file.
 
@@ -38,7 +38,7 @@ ROS parameters are relative to the calling node's name space:
 
 \section read Velodyne read device driver
 
-ROS device driver node that captures Velodyne HDL-64E 3D Lidar data
+ROS device driver node that captures Velodyne HDL-64E 3D LIDAR data
 and publishes it to the \b velodyne/rawscan topic.
 
 \subsection read_usage Usage
@@ -201,7 +201,7 @@ Parameters: uses the <velodyne/data.h> class parameters.
 
 \section vdump_command Vdump Command
 
-The vdump command dumps raw data from the Velodyne lidar in PCAP
+The vdump command dumps raw data from the Velodyne LIDAR in PCAP
 format.  It is a shell script wrapper with some obscure options for
 the powerful tcpdump command.
 
