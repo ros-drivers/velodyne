@@ -7,7 +7,7 @@
   </description>
   <author>Joseph Campbell</author>
   <license>BSD</license>
-  <review status="unreviewed" notes=""/>
+  <review status="experimental" notes=""/>
   <url>http://www.ros.org/wiki/velodyne_ringcomp</url>
   <depend package="roscpp"/>
   <depend package="sensor_msgs"/>
