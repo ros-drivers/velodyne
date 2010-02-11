@@ -1,12 +1,8 @@
 <!-- -*- mode: nXML -*- -->
-<!-- visualize a PCAP file as a point cloud
-
-     environment: $PCAP = full path name of PCAP file.
--->
+<!-- visualize Velodyne input as a point cloud -->
 
 <launch>
   <node pkg="velodyne_common" type="cloud" name="cloud"/>
-  <node pkg="velodyne_common" type="read" name="read"
-        args="-f $(optenv PCAP /home/joq/velodyne/class.pcap)" />
+  <node pkg="velodyne_common" type="read" name="read" />
   <node pkg="rviz" type="rviz" name="rviz" />
 </launch>
