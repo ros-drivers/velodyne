@@ -1,0 +1,16 @@
+<package>
+  <description brief="Simple examples for dealing with Velodyne HDL-64E lidar">
+
+     Examples to be used as templates for dealing with the velodyne lidar
+
+  </description>
+  <author>Michael Quinlan</author>
+  <license>BSD</license>
+  <review status="unreviewed" notes=""/>
+  <url>http://ros.org/wiki/velodyne_examples</url>
+  <depend package="roscpp"/>
+  <depend package="velodyne_common"/>
+  <depend package="sensor_msgs"/>
+  <depend package="angles"/>
+
+</package>
