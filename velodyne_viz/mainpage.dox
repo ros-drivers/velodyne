@@ -1,0 +1,27 @@
+/**
+\mainpage
+\htmlinclude manifest.html
+
+
+\section launch_examples Launch Command Examples
+
+Visualize data coming directly from the device as a point cloud using rviz.
+
+\verbatim
+$ roslaunch velodyne_viz dev.launch
+\endverbatim
+
+Visualize a bag file as a point cloud using rviz.
+
+\verbatim
+$ BAG=/full/path/to/file.bag roslaunch velodyne_viz bag.launch
+\endverbatim
+
+Visualize a Velodyne PCAP dump file as a point cloud using rviz.  Keep
+repeating the data after reaching end of file.
+
+\verbatim
+$ PCAP=/full/path/to/file.pcap roslaunch velodyne_viz pcap.launch
+\endverbatim
+
+*/

@@ -235,16 +235,10 @@ Velodyne data.  See the launch subdirectory for a complete list.
 
 \subsection launch_examples Example Launch Commands
 
-Visualize a PCAP file as a point cloud using rviz.
+Convert a Velodyne PCAP file to an ROS bag.
 
 \verbatim
-$ PCAP=/path/to/file.pcap roslaunch velodyne_common cloud.launch
-\endverbatim
-
-Record one copy of a PCAP file in an ROS bag.
-
-\verbatim
-$ PCAP=/path/to/file.pcap roslaunch velodyne_common record_pcap_1.launch
+$ PCAP=/path/to/file.pcap roslaunch velodyne_common pcap2bag.launch
 \endverbatim
 
 Capture a raw Velodyne bag file from a live device, including

@@ -1,0 +1,21 @@
+<package>
+  <description brief="Velodyne HDL-64E LIDAR visualization">
+
+    Tools for visualizing Velodyne LIDAR data in three dimensions.
+
+    Making this a separate package allows the other Velodyne packages
+    to build on machines with poor 3D graphics support.  The rviz 3D
+    visualization is excellent, but it depends on OGRE, which is hard
+    to build on some machines and only useful for machines with good
+    3D graphics.
+
+  </description>
+  <author></author>
+  <license>BSD</license>
+  <review status="experimental" notes=""/>
+  <url>http://ros.org/wiki/velodyne_viz</url>
+  <depend package="velodyne_common"/>
+  <depend package="rviz"/>
+
+</package>
+

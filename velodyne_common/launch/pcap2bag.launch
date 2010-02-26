@@ -1,0 +1,13 @@
+<!-- -*- mode: nXML -*- -->
+<!-- convert a Velodyne PCAP file to an ROS bag
+
+     environment: $PCAP = full path name of PCAP file.
+ -->
+<launch>
+  <node pkg="rosbag" type="rosbag" name="rosbag"
+        args="record -o velodyne /velodyne/rawscan" />
+  <node pkg="velodyne_common" type="read" name="read">
+    <param name="input/read_once" value="true" />
+    <param name="pcap" value="$(env PCAP)"/>
+  </node>
+</launch>

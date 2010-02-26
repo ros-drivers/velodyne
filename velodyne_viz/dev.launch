@@ -1,0 +1,8 @@
+<!-- -*- mode: nXML -*- -->
+<!-- visualize Velodyne input as a point cloud -->
+
+<launch>
+  <node pkg="velodyne_common" type="cloud" name="cloud"/>
+  <node pkg="velodyne_common" type="read" name="read" />
+  <node pkg="rviz" type="rviz" name="rviz" />
+</launch>
