@@ -235,7 +235,8 @@ Velodyne data.  See the launch subdirectory for a complete list.
 
 \subsection launch_examples Example Launch Commands
 
-Convert a Velodyne PCAP file to an ROS bag.
+Convert a Velodyne PCAP file to a ROS bag.  Unfortunately, the result
+goes into the $ROS_ROOT directory.
 
 \verbatim
 $ PCAP=/path/to/file.pcap roslaunch velodyne_common pcap2bag.launch
@@ -243,7 +244,8 @@ $ PCAP=/path/to/file.pcap roslaunch velodyne_common pcap2bag.launch
 
 Capture a raw Velodyne bag file from a live device, including
 odometry, GPS, and coordinate transforms.  The bag file will be named
-automatically by rosrecord.
+automatically by rosbag (with a "velodyne" prefix).  Unfortunately,
+the result goes into the $ROS_ROOT directory.
 
 Interrupt the capture using ^C when finished.  Be aware that the
 device generates about 3.1MB of data per second.

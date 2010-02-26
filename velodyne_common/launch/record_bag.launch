@@ -7,6 +7,6 @@
   <node pkg="art_common" type="vehicle_static_tf" name="vehicle_static_tf"/>
   <node pkg="applanix" type="odometry" name="odometry"/>
   <node pkg="velodyne_common" type="read" name="read"/>
-  <node pkg="rosrecord" type="rosrecord" name="rosrecord"
-        args="/velodyne/rawscan /odom /gps /tf" />
+  <node pkg="rosbag" type="rosbag" name="rosbag"
+        args="record -o velodyne /velodyne/rawscan /odom /gps /tf" />
 </launch>
