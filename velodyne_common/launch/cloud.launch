@@ -1,5 +1,6 @@
 <!-- -*- mode: nXML -*- -->
 <!-- visualize Velodyne input as a point cloud -->
+<!--- DEPRECATED: use velodyne_viz/dev.launch, instead. -->
 
 <launch>
   <node pkg="velodyne_common" type="cloud" name="cloud"/>

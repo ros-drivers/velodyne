@@ -8,5 +8,5 @@
   <node pkg="applanix" type="odometry" name="odometry"/>
   <node pkg="velodyne_common" type="read" name="read"/>
   <node pkg="rosbag" type="rosbag" name="rosbag"
-        args="record -o velodyne /velodyne/rawscan /odom /gps /tf" />
+        args="record -o $(env PWD)/velodyne /velodyne/rawscan /odom /gps /tf" />
 </launch>
