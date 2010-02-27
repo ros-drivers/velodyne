@@ -243,16 +243,4 @@ time.
 $ PCAP=/path/to/file.pcap roslaunch velodyne_common pcap2bag.launch
 \endverbatim
 
-Capture a raw Velodyne bag file from the live device, including
-odometry, GPS, and coordinate transforms.  The bag file goes in the
-current directory with a "velodyne_" prefix to the current date and
-time.
-
-Interrupt the capture using ^C when finished.  Be aware that the
-device generates about 3.1MB of data per second.
-
-\verbatim
-$ roslaunch velodyne_common record_bag.launch
-\endverbatim
-
 */
