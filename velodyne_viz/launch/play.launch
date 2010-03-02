@@ -4,9 +4,7 @@
      environment: $BAG = full path name of bag file.
 -->
 <launch>
-  <!--
   <node pkg="rviz" type="rviz" name="rviz" />
-  -->
   <node pkg="velodyne_common" type="cloud" name="cloud" />
   <node pkg="rosrecord" type="rosplay" name="rosplay" args="-a $(env BAG)" />
 </launch>
