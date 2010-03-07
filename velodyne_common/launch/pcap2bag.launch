@@ -1,4 +1,4 @@
-<!-- -*- mode: nXML -*- -->
+<!-- -*- mode: XML -*- -->
 <!-- convert a Velodyne PCAP file to a ROS bag
 
      environment: $PCAP = full path name of PCAP file.

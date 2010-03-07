@@ -1,4 +1,4 @@
-<!-- -*- mode: nXML -*- -->
+<!-- -*- mode: XML -*- -->
 <!-- visualize a Velodyne PCAP file as a point cloud
 
      environment: $PCAP = full path name of PCAP file.

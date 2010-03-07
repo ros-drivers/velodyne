@@ -1,4 +1,4 @@
-<!-- -*- mode: nXML -*- -->
+<!-- -*- mode: XML -*- -->
 <!-- Visualize a bag file as a point cloud using rviz.
 
      environment: $BAG = full path name of bag file.

@@ -1,4 +1,4 @@
-<!-- -*- mode: nXML -*- -->
+<!-- -*- mode: XML -*- -->
 <!-- visualize Velodyne input as a point cloud -->
 
 <launch>
