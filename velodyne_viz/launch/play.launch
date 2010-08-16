@@ -6,5 +6,5 @@
 <launch>
   <node pkg="rviz" type="rviz" name="rviz" />
   <node pkg="velodyne_common" type="cloud" name="cloud" />
-  <node pkg="rosrecord" type="rosplay" name="rosplay" args="-a $(env BAG)" />
+  <node pkg="rosbag" type="rosbag" name="rosbag" args="play $(env BAG)" />
 </launch>
