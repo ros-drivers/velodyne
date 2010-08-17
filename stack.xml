@@ -10,7 +10,7 @@
   <url>http://ros.org/wiki/velodyne</url>
   <depend stack="common_msgs" /> <!-- sensor_msgs -->
   <depend stack="geometry" /> <!-- angles -->
-  <depend stack="ros" /> <!-- roscpp -->
+  <depend stack="ros" /> <!-- rosbag, roscpp -->
   <depend stack="visualization" /> <!-- rviz -->
 
 </stack>
