@@ -40,6 +40,7 @@
 #include <stdint.h>
 #include <string>
 
+#include <ros/ros.h>
 #include <velodyne_common/RawScan.h>
 
 namespace velodyne
