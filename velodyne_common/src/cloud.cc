@@ -96,7 +96,7 @@ void processXYZ(const std::vector<velodyne::laserscan_xyz_t> &scan)
       pc.channels[0].values[i] = (float) scan[i].intensity;
     }
 
-  ROS_DEBUG("Publishing %u Velodyne points.", npoints);
+  ROS_DEBUG_STREAM("Publishing " << npoints << " Velodyne points.");
   output.publish(pc);
 }
 
