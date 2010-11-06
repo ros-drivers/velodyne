@@ -29,22 +29,5 @@ rosbuild_genmsg()
 #rosbuild_add_executable(example examples/example.cpp)
 #target_link_libraries(example ${PROJECT_NAME})
 
-rosbuild_add_library(velodyne
-                     src/data.cc
-                     src/input.cc)
-target_link_libraries(velodyne pcap)
-
-rosbuild_add_executable(read src/read.cc)
-include_directories(read ${PROJECT_NAME}/include)
-link_directories(read ${PROJECT_NAME}/lib)
-target_link_libraries(read pcap velodyne)
-
-rosbuild_add_executable(print src/print.cc)
-include_directories(print ${PROJECT_NAME}/include)
-link_directories(print ${PROJECT_NAME}/lib)
-target_link_libraries(print pcap velodyne)
-
-rosbuild_add_executable(cloud src/cloud.cc)
-include_directories(cloud ${PROJECT_NAME}/include)
-link_directories(cloud ${PROJECT_NAME}/lib)
-target_link_libraries(cloud pcap velodyne)
+add_subdirectory(src/lib)
+add_subdirectory(src/nodes)

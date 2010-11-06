@@ -134,7 +134,8 @@ namespace velodyne
           --result;
         else
           {
-            ROS_DEBUG("incomplete Velodyne packet read: %u bytes\n", nbytes);
+            ROS_DEBUG_STREAM("incomplete Velodyne packet read: "
+                             << nbytes << " bytes");
             --i;                        // rerun this loop iteration
           }
       }
