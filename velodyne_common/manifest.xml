@@ -9,9 +9,10 @@
   <license>BSD</license>
   <review status="experimental" notes=""/>
   <url>http://www.ros.org/wiki/velodyne_common</url>
-  <depend package="roscpp"/>
-  <depend package="sensor_msgs"/>
   <depend package="angles"/>
+  <depend package="roscpp"/>
+  <depend package="rostest"/>
+  <depend package="sensor_msgs"/>
 
   <!-- declare build dependency on pcap library -->
   <rosdep name="libpcap"/>

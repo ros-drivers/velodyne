@@ -31,3 +31,7 @@ rosbuild_genmsg()
 
 add_subdirectory(src/lib)
 add_subdirectory(src/nodes)
+
+# for make test
+add_subdirectory(tests)
+rosbuild_add_rostest(tests/pcap_hertz.test)
