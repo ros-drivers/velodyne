@@ -31,6 +31,7 @@ rosbuild_genmsg()
 
 add_subdirectory(src/lib)
 add_subdirectory(src/nodes)
+add_subdirectory(src/nodelets)
 
 # for make test
 add_subdirectory(tests)

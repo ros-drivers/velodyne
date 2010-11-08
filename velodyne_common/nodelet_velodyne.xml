@@ -1,0 +1,9 @@
+<library path="lib/libpointcloud_nodelet">
+  <class name="velodyne_common/PointCloudNodelet"
+         type="PointCloudNodelet"
+         base_class_type="nodelet::Nodelet">
+    <description> 
+      Republish raw Velodyne data as a PointCloud.
+    </description>
+  </class>
+</library>
