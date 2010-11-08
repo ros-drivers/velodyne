@@ -42,6 +42,7 @@
 
 #include <ros/ros.h>
 #include <velodyne_common/RawScan.h>
+#include <boost/format.hpp>
 
 namespace velodyne
 {
@@ -355,6 +356,7 @@ namespace velodyne
    * time stamp, sequence number, and frame ID.
    */
   typedef void (*xyz_callback_t)(const std::vector<laserscan_xyz_t> &scan);
+  typedef boost::function<void(const std::vector<laserscan_xyz_t> &)> boost_callback_t;
 
   /** \brief Convert Velodyne raw input to XYZ format */
   class DataXYZ: public DataScans
@@ -368,6 +370,7 @@ namespace velodyne
       // reallocate in real time
       xyzScans_.resize(SCANS_PER_REV);
       xyzCB_ = NULL;
+      cb_ = NULL;
     }
 
     virtual int print(void);
@@ -380,11 +383,19 @@ namespace velodyne
       xyzCB_ = xyzCB;
     }
 
+    /** \brief Boost subscribe to XYZ laser scans for each revolution. */
+    void subscribe(boost_callback_t xyzCB)
+    {
+      ROS_INFO("boost XYZ callback defined");
+      cb_ = xyzCB;
+    }
+
   protected:
     void scan2xyz(const laserscan_t *scan, laserscan_xyz_t *point);
 
     // derived class data
     xyz_callback_t xyzCB_;
+    boost_callback_t cb_;
     std::vector<laserscan_xyz_t> xyzScans_;
   };
 

@@ -338,6 +338,8 @@ namespace velodyne
     // invoke the subscribed XYZ callback, if any
     if (xyzCB_)
       (*xyzCB_)(xyzScans_);
+    else if (cb_)
+      cb_(xyzScans_);
   }
 
 

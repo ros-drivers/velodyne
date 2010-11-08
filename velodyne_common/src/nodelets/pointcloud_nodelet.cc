@@ -50,7 +50,8 @@ void PointCloudNodelet::onInit()
   ros::NodeHandle node = getNodeHandle();
 
   data_->getParams();
-  //data_->subscribeXYZ(processXYZ, (void *) this);
+
+  data_->subscribe(boost::bind(&PointCloudNodelet::processXYZ, this, _1));
 
   if (0 != data_->setup())
     return;
@@ -58,10 +59,9 @@ void PointCloudNodelet::onInit()
   // subscribe to velodyne input -- make sure queue depth is minimal,
   // so any missed scans are discarded.  Otherwise latency gets out of
   // hand.  It's bad enough anyway.
-  ros::Subscriber velodyne_scan_ =
-    node.subscribe("velodyne/rawscan", 1,
-                   &velodyne::Data::processRawScan, (velodyne::Data *) data_,
-                   ros::TransportHints().tcpNoDelay(true));
+  velodyne_scan_ = node.subscribe("velodyne/rawscan", 1,
+                                  &velodyne::Data::processRawScan, (velodyne::Data *) data_,
+                                  ros::TransportHints().tcpNoDelay(true));
 
   output_ = node.advertise<sensor_msgs::PointCloud>("velodyne/pointcloud", 1);
 }
