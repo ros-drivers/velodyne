@@ -66,8 +66,6 @@ void DriverNodelet::onInit()
 
   ros::NodeHandle node = getNodeHandle();
 
-  using velodyne_common::RawScan;
-
   // open Velodyne input device or file
   if(input_->vopen() != 0)
     {
@@ -75,21 +73,22 @@ void DriverNodelet::onInit()
       return;
     }
 
-  output_ = node.advertise<RawScan>("velodyne/rawscan", 1);
+  output_ = node.advertise<velodyne_common::RawScan>("velodyne/rawscan", 1);
 
-  RawScan rawscan;
-  int npackets = RawScan::PACKETS_PER_REVOLUTION;
-  rawscan.data.resize(npackets * RawScan::PACKET_SIZE);
-  rawscan.header.frame_id = "/velodyne";
+  int npackets = velodyne_common::RawScan::PACKETS_PER_REVOLUTION;
 
   // Loop until shut down.
   while(ros::ok())
     {
       double time;
 
+      // allocate a new shared pointer for zero-copy sharing with other nodelets
+      velodyne_common::RawScanPtr scan(new velodyne_common::RawScan);
+      scan->data.resize(npackets * velodyne_common::RawScan::PACKET_SIZE);
+
       // Since the velodyne delivers data at a very high rate, keep
       // reading and publishing scans as fast as possible.
-      int packets_left = input_->getPackets(&rawscan.data[0], npackets, &time);
+      int packets_left = input_->getPackets(&scan->data[0], npackets, &time);
 
       if (packets_left != 0)            // incomplete scan received?
         {
@@ -103,8 +102,9 @@ void DriverNodelet::onInit()
       else
         {
           NODELET_DEBUG("Publishing a full Velodyne scan.");
-          rawscan.header.stamp = ros::Time(time);
-          output_.publish(rawscan);
+          scan->header.stamp = ros::Time(time);
+          scan->header.frame_id = "/velodyne";
+          output_.publish(scan);
         }
     }
 
