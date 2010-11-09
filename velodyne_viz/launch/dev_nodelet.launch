@@ -1,0 +1,12 @@
+<!-- -*- mode: XML -*- -->
+<!-- visualize Velodyne input as a point cloud (nodelet version) -->
+
+<launch>
+  <node pkg="nodelet" type="nodelet" name="velodyne_nodelet_manager"
+        args="manager" />
+  <node pkg="nodelet" type="nodelet" name="driver_nodelet"
+        args="load velodyne_common/DriverNodelet velodyne_nodelet_manager" />
+  <node pkg="nodelet" type="nodelet" name="pointcloud_nodelet"
+        args="load velodyne_common/PointCloudNodelet velodyne_nodelet_manager" />
+  <node pkg="rviz" type="rviz" name="rviz" />
+</launch>

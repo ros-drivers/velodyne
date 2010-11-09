@@ -1,0 +1,18 @@
+<!-- -*- mode: XML -*- -->
+<!-- visualize a Velodyne PCAP file as a point cloud (nodelet version)
+
+     environment: $PCAP = full path name of PCAP file.
+-->
+
+<launch>
+  <node pkg="nodelet" type="nodelet" name="velodyne_nodelet_manager"
+        args="manager" />
+  <node pkg="nodelet" type="nodelet" name="pointcloud_nodelet"
+        args="load velodyne_common/PointCloudNodelet velodyne_nodelet_manager" />
+  <node pkg="nodelet" type="nodelet" name="driver_nodelet"
+        args="load velodyne_common/DriverNodelet velodyne_nodelet_manager" >
+    <param name="pcap" value="$(env PCAP)" />
+  </node>
+
+  <node pkg="rviz" type="rviz" name="rviz" />
+</launch>
