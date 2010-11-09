@@ -253,9 +253,11 @@ namespace velodyne
     if (!ros::ok())                     // check for ROS shutdown
       return;
 
-    // invoke the subscribed XYZ callback, if any
+    // invoke the subscribed scans callback, if any
     if (scansCB_)
       (*scansCB_)(scans_);
+    else if (cb_)
+      cb_(scans_);
   }
 
   /** \brief print laser scan data

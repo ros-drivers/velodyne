@@ -243,7 +243,7 @@ namespace velodyne
     }
 
     /** \brief Subscribe to raw packets for a each revolution. */
-    virtual void subscribeRaw(raw_callback_t rawCB)
+    void subscribeRaw(raw_callback_t rawCB)
     {
       ROS_INFO("raw callback defined");
       rawCB_ = rawCB;
@@ -299,6 +299,7 @@ namespace velodyne
    * time stamp, sequence number, and frame ID.
    */
   typedef void (*scans_callback_t)(const std::vector<laserscan_t> &scan);
+  typedef boost::function<void(const std::vector<laserscan_t> &)> scanCallback;
 
   /** \brief Convert Velodyne raw input to laserscans format */
   class DataScans: public Data
@@ -318,6 +319,13 @@ namespace velodyne
     virtual void processRaw(const raw_packet_t *raw, size_t npackets);
 
     /** \brief Subscribe to laser scans for each revolution. */
+    virtual void subscribe(scanCallback callback)
+    {
+      ROS_INFO("generic scan callback defined");
+      cb_ = callback;
+    }
+
+    /** \brief Subscribe to laser scans for each revolution (\deprecated). */
     virtual void subscribeScans(scans_callback_t scansCB)
     {
       ROS_INFO("scans callback defined");
@@ -328,8 +336,11 @@ namespace velodyne
     void packet2scans(const raw_packet_t *raw, laserscan_t *scans);
 
     // derived class data
-    scans_callback_t scansCB_;
     std::vector<laserscan_t> scans_;
+
+  private:
+    scans_callback_t scansCB_;          // deprecated
+    scanCallback cb_;                   ///< scan data callback
   };
 
 
@@ -356,7 +367,7 @@ namespace velodyne
    * time stamp, sequence number, and frame ID.
    */
   typedef void (*xyz_callback_t)(const std::vector<laserscan_xyz_t> &scan);
-  typedef boost::function<void(const std::vector<laserscan_xyz_t> &)> boost_callback_t;
+  typedef boost::function<void(const std::vector<laserscan_xyz_t> &)> xyzCallback;
 
   /** \brief Convert Velodyne raw input to XYZ format */
   class DataXYZ: public DataScans
@@ -370,33 +381,34 @@ namespace velodyne
       // reallocate in real time
       xyzScans_.resize(SCANS_PER_REV);
       xyzCB_ = NULL;
-      cb_ = NULL;
     }
 
     virtual int print(void);
     virtual void processRaw(const raw_packet_t *raw, size_t npackets);
 
     /** \brief Subscribe to XYZ laser scans for each revolution. */
+    virtual void subscribe(xyzCallback callback)
+    {
+      ROS_INFO("generic XYZ callback defined");
+      cb_ = callback;
+    }
+
+    /** \brief Subscribe to XYZ laser scans for each revolution (\deprecated). */
     virtual void subscribeXYZ(xyz_callback_t xyzCB)
     {
       ROS_INFO("XYZ callback defined");
       xyzCB_ = xyzCB;
     }
 
-    /** \brief Boost subscribe to XYZ laser scans for each revolution. */
-    void subscribe(boost_callback_t xyzCB)
-    {
-      ROS_INFO("boost XYZ callback defined");
-      cb_ = xyzCB;
-    }
-
   protected:
     void scan2xyz(const laserscan_t *scan, laserscan_xyz_t *point);
 
     // derived class data
-    xyz_callback_t xyzCB_;
-    boost_callback_t cb_;
     std::vector<laserscan_xyz_t> xyzScans_;
+
+  private:
+    xyz_callback_t xyzCB_;              // deprecated
+    xyzCallback cb_;                    ///< XYZ data callback
   };
 
 
