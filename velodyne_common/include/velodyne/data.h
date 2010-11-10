@@ -318,14 +318,33 @@ namespace velodyne
     virtual int print(void);
     virtual void processRaw(const raw_packet_t *raw, size_t npackets);
 
-    /** \brief Subscribe to laser scans for each revolution. */
-    virtual void subscribe(scanCallback callback)
+    /** \brief Subscribe to laser scans.
+     *
+     * \param node the ros::NodeHandle to use to subscribe.
+     * \param base_topic the topic to subscribe to.
+     * \param queue_size the subscription queue size
+     * \param callback function or method to receive scan data
+     * \param transport_hints optional transport hints for this subscription
+     */
+    ros::Subscriber subscribe(ros::NodeHandle node,
+                              const std::string &topic,
+                              uint32_t queue_size,
+                              const scanCallback callback,
+                              const ros::TransportHints &transport_hints
+                                      = ros::TransportHints())
     {
       ROS_INFO("generic scan callback defined");
       cb_ = callback;
+      return node.subscribe(topic, queue_size,
+                            &velodyne::Data::processRawScan,
+                            (velodyne::Data *) this,
+                            transport_hints);
     }
 
-    /** \brief Subscribe to laser scans for each revolution (\deprecated). */
+    /** \brief Subscribe to laser scans.
+     *
+     *  \deprecated must separately subscribe to the topic
+     */
     virtual void subscribeScans(scans_callback_t scansCB)
     {
       ROS_INFO("scans callback defined");
@@ -386,14 +405,33 @@ namespace velodyne
     virtual int print(void);
     virtual void processRaw(const raw_packet_t *raw, size_t npackets);
 
-    /** \brief Subscribe to XYZ laser scans for each revolution. */
-    virtual void subscribe(xyzCallback callback)
+    /** \brief Subscribe to XYZ laser scans.
+     *
+     * \param node the ros::NodeHandle to use to subscribe.
+     * \param base_topic the topic to subscribe to.
+     * \param queue_size the subscription queue size
+     * \param callback function or method to receive XYZ data
+     * \param transport_hints optional transport hints for this subscription
+     */
+    ros::Subscriber subscribe(ros::NodeHandle node,
+                              const std::string &topic,
+                              uint32_t queue_size,
+                              const xyzCallback callback,
+                              const ros::TransportHints &transport_hints
+                                      = ros::TransportHints())
     {
-      ROS_INFO("generic XYZ callback defined");
+      ROS_INFO("XYZ callback subscribed");
       cb_ = callback;
+      return node.subscribe(topic, queue_size,
+                            &velodyne::Data::processRawScan,
+                            (velodyne::Data *) this,
+                            transport_hints);
     }
 
-    /** \brief Subscribe to XYZ laser scans for each revolution (\deprecated). */
+    /** \brief Subscribe to XYZ laser scans.
+     *
+     *  \deprecated must separately subscribe to the topic
+     */
     virtual void subscribeXYZ(xyz_callback_t xyzCB)
     {
       ROS_INFO("XYZ callback defined");

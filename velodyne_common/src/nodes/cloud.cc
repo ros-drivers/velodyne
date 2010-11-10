@@ -110,7 +110,6 @@ int getParameters(int argc, char *argv[])
 
   data = new velodyne::DataXYZ();
   data->getParams();
-  data->subscribe(boost::bind(&processXYZ, _1));
 
   return 0;
 }
@@ -130,9 +129,9 @@ int main(int argc, char *argv[])
   // so any missed scans are discarded.  Otherwise latency gets out of
   // hand.  It's bad enough anyway.
   ros::Subscriber velodyne_scan =
-    node.subscribe("velodyne/rawscan", qDepth,
-                   &velodyne::Data::processRawScan, (velodyne::Data *) data,
-                   ros::TransportHints().tcpNoDelay(true));
+    data->subscribe(node, "velodyne/rawscan", qDepth,
+                    boost::bind(&processXYZ, _1),
+                    ros::TransportHints().tcpNoDelay(true));
 
   output = node.advertise<sensor_msgs::PointCloud>("velodyne/pointcloud",
                                                    qDepth);
