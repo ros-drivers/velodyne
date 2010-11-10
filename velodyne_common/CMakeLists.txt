@@ -33,6 +33,7 @@ add_subdirectory(src/lib)
 add_subdirectory(src/nodes)
 add_subdirectory(src/nodelets)
 
-# for make test
+# testing
 add_subdirectory(tests)
 rosbuild_add_rostest(tests/pcap_hertz.test)
+rosbuild_add_rostest(tests/pointcloud_nodelet_hertz.test)
