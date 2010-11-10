@@ -13,6 +13,7 @@
  */
 
 #include <string>
+#include <boost/thread.hpp>
 
 #include <pluginlib/class_list_macros.h>
 #include <nodelet/nodelet.h>
@@ -26,18 +27,35 @@ class DriverNodelet: public nodelet::Nodelet
 {
 public:
   DriverNodelet()
-    : input_(0)
-  {}
+  {
+    input_ = NULL;
+    running_ = false;
+  }
+
   ~DriverNodelet()
   {
-    if (input_) delete input_;
+    if (running_)
+      {
+        NODELET_INFO("shutting down driver thread");
+        running_ = false;
+        deviceThread_->join();
+        NODELET_INFO("driver thread stopped");
+      }
+    if (input_)
+      {
+        input_->vclose();
+        delete input_;
+      }
   }
 
 private:
   virtual void onInit();
+  virtual void devicePoll();
 
+  bool running_;                        ///< device is running
   velodyne::Input *input_;
   ros::Publisher output_;
+  boost::shared_ptr<boost::thread> deviceThread_;
 };
 
 void DriverNodelet::onInit()
@@ -75,14 +93,22 @@ void DriverNodelet::onInit()
 
   output_ = node.advertise<velodyne_common::RawScan>("velodyne/rawscan", 1);
 
+  // spawn device thread
+  running_ = true;
+  deviceThread_ = boost::shared_ptr< boost::thread >
+    (new boost::thread(boost::bind(&DriverNodelet::devicePoll, this)));
+}
+
+void DriverNodelet::devicePoll()
+{
   int npackets = velodyne_common::RawScan::PACKETS_PER_REVOLUTION;
 
-  // Loop until shut down.
-  while(ros::ok())
+  // Loop until shut down...
+  while(running_)
     {
       double time;
 
-      // allocate a new shared pointer for zero-copy sharing with other nodelets
+      // Allocate a new shared pointer for zero-copy sharing with other nodelets.
       velodyne_common::RawScanPtr scan(new velodyne_common::RawScan);
       scan->data.resize(npackets * velodyne_common::RawScan::PACKET_SIZE);
 
@@ -107,8 +133,6 @@ void DriverNodelet::onInit()
           output_.publish(scan);
         }
     }
-
-  input_->vclose();
 }
 
 // Register this plugin with pluginlib.  Names must match nodelet_velodyne.xml.
