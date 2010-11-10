@@ -72,6 +72,9 @@ void PointCloudNodelet::onInit()
  */
 void PointCloudNodelet::processXYZ(const std::vector<velodyne::laserscan_xyz_t> &scan)
 {
+  if (output_.getNumSubscribers() == 0)         // no one listening?
+    return;
+
   const roslib::Header *hdr = data_->getMsgHeader();
 
   // allocate a new shared pointer for zero-copy sharing with other nodelets
