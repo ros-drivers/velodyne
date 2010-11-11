@@ -30,6 +30,7 @@ public:
   {
     input_ = NULL;
     running_ = false;
+    npackets_ = velodyne_common::RawScan::PACKETS_PER_REVOLUTION;
   }
 
   ~DriverNodelet()
@@ -52,6 +53,9 @@ private:
   virtual void onInit();
   virtual void devicePoll();
 
+  // configuration parameters
+  int npackets_;
+
   bool running_;                        ///< device is running
   velodyne::Input *input_;
   ros::Publisher output_;
@@ -62,6 +66,9 @@ void DriverNodelet::onInit()
 {
   // use private node handle to get parameters
   ros::NodeHandle private_nh = getPrivateNodeHandle();
+
+  private_nh.getParam("npackets", npackets_);
+
   std::string dump_file;
   private_nh.param("pcap", dump_file, std::string(""));
 
@@ -101,8 +108,6 @@ void DriverNodelet::onInit()
 
 void DriverNodelet::devicePoll()
 {
-  int npackets = velodyne_common::RawScan::PACKETS_PER_REVOLUTION;
-
   // Loop until shut down...
   while(running_)
     {
@@ -110,18 +115,18 @@ void DriverNodelet::devicePoll()
 
       // Allocate a new shared pointer for zero-copy sharing with other nodelets.
       velodyne_common::RawScanPtr scan(new velodyne_common::RawScan);
-      scan->data.resize(npackets * velodyne_common::RawScan::PACKET_SIZE);
+      scan->data.resize(npackets_ * velodyne_common::RawScan::PACKET_SIZE);
 
       // Since the velodyne delivers data at a very high rate, keep
       // reading and publishing scans as fast as possible.
-      int packets_left = input_->getPackets(&scan->data[0], npackets, &time);
+      int packets_left = input_->getPackets(&scan->data[0], npackets_, &time);
 
       if (packets_left != 0)            // incomplete scan received?
         {
           if (packets_left < 0)         // end of file reached?
             break;
 
-          if (packets_left < npackets)  // partial scan read?
+          if (packets_left < npackets_)  // partial scan read?
             NODELET_WARN("Incomplete Velodyne scan: %d packets missing",
                      packets_left);
         }
