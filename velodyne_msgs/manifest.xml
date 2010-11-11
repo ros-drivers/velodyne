@@ -1,0 +1,20 @@
+<package>
+  <description brief="Velodyne HDL-64E 3D LIDAR messages">
+
+     ROS message definitions for Velodyne HDL-64E 3D LIDAR.
+
+  </description>
+  <author>Jack O'Quin</author>
+  <license>BSD</license>
+  <review status="unreviewed" notes=""/>
+  <url>http://ros.org/wiki/velodyne_msgs</url>
+
+  <depend package="rosbagmigration"/>
+
+  <export>
+    <rosbagmigration rule_file="migration_rules/velodyne_msgs.bmr" />
+  </export>
+
+</package>
+
+
