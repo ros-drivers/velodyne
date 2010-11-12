@@ -15,6 +15,7 @@
   <depend package="roscpp"/>
   <depend package="rostest"/>
   <depend package="sensor_msgs"/>
+  <depend package="tf"/>
   <depend package="velodyne_msgs"/>
 
   <!-- declare build dependency on pcap library -->

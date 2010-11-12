@@ -18,10 +18,11 @@
 #include <pluginlib/class_list_macros.h>
 #include <nodelet/nodelet.h>
 #include <ros/ros.h>
+#include <tf/transform_listener.h>
 
 #include <velodyne/input.h>
 #include <velodyne_common/RawScan.h>
-
+#include <velodyne_msgs/VelodyneScan.h>
 
 class DriverNodelet: public nodelet::Nodelet
 {
@@ -30,7 +31,6 @@ public:
   {
     input_ = NULL;
     running_ = false;
-    npackets_ = velodyne_common::RawScan::PACKETS_PER_REVOLUTION;
   }
 
   ~DriverNodelet()
@@ -57,8 +57,10 @@ private:
   int npackets_;
 
   bool running_;                        ///< device is running
+  std::string frame_id_;                ///< tf frame ID
   velodyne::Input *input_;
   ros::Publisher output_;
+  ros::Publisher raw_output_;
   boost::shared_ptr<boost::thread> deviceThread_;
 };
 
@@ -67,7 +69,13 @@ void DriverNodelet::onInit()
   // use private node handle to get parameters
   ros::NodeHandle private_nh = getPrivateNodeHandle();
 
-  private_nh.getParam("npackets", npackets_);
+  private_nh.param("frame_id", frame_id_, std::string("velodyne"));
+  std::string tf_prefix = tf::getPrefixParam(private_nh);
+  ROS_DEBUG_STREAM("tf_prefix: " << tf_prefix);
+  frame_id_ = tf::resolve(tf_prefix, frame_id_);
+
+  private_nh.param("npackets", npackets_,
+                   (int) velodyne_common::RawScan::PACKETS_PER_REVOLUTION);
 
   std::string dump_file;
   private_nh.param("pcap", dump_file, std::string(""));
@@ -89,10 +97,12 @@ void DriverNodelet::onInit()
   if(input_->vopen() != 0)
     {
       NODELET_FATAL("Cannot open Velodyne input.");
+      // there should be an exception to throw here
       return;
     }
 
-  output_ = node.advertise<velodyne_common::RawScan>("velodyne/rawscan", 1);
+  output_ = node.advertise<velodyne_msgs::VelodyneScan>("velodyne/packets", 1);
+  raw_output_ = node.advertise<velodyne_common::RawScan>("velodyne/rawscan", 1);
 
   // spawn device thread
   running_ = true;
@@ -102,34 +112,48 @@ void DriverNodelet::onInit()
 
 void DriverNodelet::devicePoll()
 {
-  // Loop until shut down...
+  // Loop until shut down or end of file
   while(running_)
     {
-      double time;
-
       // Allocate a new shared pointer for zero-copy sharing with other nodelets.
-      velodyne_common::RawScanPtr scan(new velodyne_common::RawScan);
-      scan->data.resize(npackets_ * velodyne_common::RawScan::PACKET_SIZE);
+      velodyne_msgs::VelodyneScanPtr scan(new velodyne_msgs::VelodyneScan);
+      scan->packets.resize(npackets_);
 
       // Since the velodyne delivers data at a very high rate, keep
       // reading and publishing scans as fast as possible.
-      int packets_left = input_->getPackets(&scan->data[0], npackets_, &time);
-
-      if (packets_left != 0)            // incomplete scan received?
+      for (int i = 0; i < npackets_; ++i)
         {
-          if (packets_left < 0)         // end of file reached?
-            break;
-
-          if (packets_left < npackets_)  // partial scan read?
-            NODELET_WARN("Incomplete Velodyne scan: %d packets missing",
-                     packets_left);
+          while (true)
+            {
+              // keep reading until full packet received
+              int rc = input_->getPacket(&scan->packets[i]);
+              if (rc == 0) break;       // got a full packet?
+              if (rc < 0) return;       // end of file reached?
+            }
         }
-      else
+
+      // publish message using time of last packet read
+      NODELET_DEBUG("Publishing a full Velodyne scan.");
+      scan->header.stamp = ros::Time(scan->packets[npackets_ - 1].stamp);
+      scan->header.frame_id = frame_id_;
+
+      if (output_.getNumSubscribers() > 0) // anyone subscribed?
         {
-          NODELET_DEBUG("Publishing a full Velodyne scan.");
-          scan->header.stamp = ros::Time(time);
-          scan->header.frame_id = "/velodyne";
           output_.publish(scan);
+        }
+
+      if (raw_output_.getNumSubscribers() > 0) // anyone subscribed?
+        {
+          // allocate a new RawScan message and copy the data
+          velodyne_common::RawScanPtr raw(new velodyne_common::RawScan);
+          size_t psize = velodyne_common::RawScan::PACKET_SIZE;
+          raw->data.resize(npackets_ * psize);
+          raw->header = scan->header;
+          for (int i = 0; i < npackets_; ++i)
+            {
+              memcpy(&raw->data[i*psize], &scan->packets[i].data[0], psize);
+            }
+          raw_output_.publish(raw);
         }
     }
 }

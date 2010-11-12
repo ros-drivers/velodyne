@@ -57,8 +57,9 @@ namespace velodyne
      *
      * \returns 0 if successful,
      *          -1 if end of file
+     *          > 0 if incomplete packet (is this possible?)
      */
-    virtual int getPacket(velodyne_msgs::VelodynePacketPtr pkt);
+    virtual int getPacket(velodyne_msgs::VelodynePacket *pkt);
 
     /** \brief Read velodyne packets.
      *
