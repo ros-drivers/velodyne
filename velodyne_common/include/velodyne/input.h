@@ -74,20 +74,6 @@ namespace velodyne
      */
     virtual int getPackets(uint8_t *buffer, int npacks, double *data_time) = 0;
 
-    /** \brief Get ROS parameters.
-     *
-     *  ROS parameter settings override constructor options
-     *
-     * \returns: 0, if successful;
-     *           errno value, for failure
-     *
-     * \deprecated Parameters are now read in constructor, if needed.
-     */
-    virtual int getParams(void)
-    {
-      return 0;
-    }
-
     /** \brief Close the data socket or file
      *
      * \returns 0, if successful

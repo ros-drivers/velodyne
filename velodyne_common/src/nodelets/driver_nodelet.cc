@@ -83,12 +83,6 @@ void DriverNodelet::onInit()
       input_ = new velodyne::InputSocket();
     }
 
-  if (input_->getParams() != 0)
-    {
-      NODELET_FATAL("Failed to read Velodyne packet input parameters.");
-      return;
-    }
-
   ros::NodeHandle node = getNodeHandle();
 
   // open Velodyne input device or file

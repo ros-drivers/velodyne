@@ -91,7 +91,7 @@ int getParameters(int argc, char *argv[])
       input = new InputSocket();
     }
 
-  return input->getParams();
+  return 0;
 }
 
 
