@@ -1,7 +1,7 @@
 /* -*- mode: C++ -*-
  *
  *  Copyright (C) 2007 Austin Robot Technology, Yaxin Liu, Patrick Beeson
- *  Copyright (C) 2009 Austin Robot Technology, Jack O'Quin
+ *  Copyright (C) 2009, 2010 Austin Robot Technology, Jack O'Quin
  *
  *  License: Modified BSD Software License Agreement
  *

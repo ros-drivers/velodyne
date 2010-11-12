@@ -1,5 +1,5 @@
 /*
- *  Copyright (C) 2009 Austin Robot Technology, Jack O'Quin
+ *  Copyright (C) 2009, 2010 Austin Robot Technology, Jack O'Quin
  *  License: Modified BSD Software License Agreement
  *
  *  $Id$
@@ -17,19 +17,15 @@
 #include <ros/ros.h>
 #include <sensor_msgs/PointCloud.h>
 
-#include <velodyne/data.h>
-#include <velodyne/running_stats.hh>
-
-#define NODE "velodyne_cloud"
-
-//using namespace velodyne_common;
+#include <velodyne/data_xyz.h>
+using namespace Velodyne;
 
 class PointCloudNodelet: public nodelet::Nodelet
 {
 public:
   PointCloudNodelet()
   {
-    data_ = new velodyne::DataXYZ();
+    data_ = new DataXYZ();
   }
   ~PointCloudNodelet()
   {
@@ -38,9 +34,9 @@ public:
 
 private:
   virtual void onInit();
-  void processXYZ(const std::vector<velodyne::laserscan_xyz_t> &scan);
+  void processXYZ(const std::vector<laserscan_xyz_t> &scan);
 
-  velodyne::DataXYZ *data_;
+  DataXYZ *data_;
   ros::Subscriber velodyne_scan_;
   ros::Publisher output_;
 };
@@ -68,7 +64,7 @@ void PointCloudNodelet::onInit()
  *
  * publishes Velodyne data points as a point cloud
  */
-void PointCloudNodelet::processXYZ(const std::vector<velodyne::laserscan_xyz_t> &scan)
+void PointCloudNodelet::processXYZ(const std::vector<laserscan_xyz_t> &scan)
 {
   if (output_.getNumSubscribers() == 0)         // no one listening?
     return;
@@ -79,21 +75,21 @@ void PointCloudNodelet::processXYZ(const std::vector<velodyne::laserscan_xyz_t> 
   sensor_msgs::PointCloudPtr pc(new sensor_msgs::PointCloud);
 
   // allocate the anticipated amount of space for the point cloud
-  pc->points.resize(velodyne::SCANS_PER_REV);
+  pc->points.resize(SCANS_PER_REV);
   pc->channels.resize(1);
   pc->channels[0].name = "intensity";
-  pc->channels[0].values.resize(velodyne::SCANS_PER_REV);
+  pc->channels[0].values.resize(SCANS_PER_REV);
 
 #if 0   // TODO add more channels (depending on parameters)
   pc->channels.resize(4);
   pc->channels[0].name = VC_RING;
-  pc->channels[0].values.resize(velodyne::SCANS_PER_REV);
+  pc->channels[0].values.resize(SCANS_PER_REV);
   pc->channels[1].name = VC_HEADING;
-  pc->channels[1].values.resize(velodyne::SCANS_PER_REV);
+  pc->channels[1].values.resize(SCANS_PER_REV);
   pc->channels[2].name = VC_INTENSITY;
-  pc->channels[2].values.resize(velodyne::SCANS_PER_REV);
+  pc->channels[2].values.resize(SCANS_PER_REV);
   pc->channels[3].name = VC_AVAILABLE;
-  pc->channels[3].values.resize(velodyne::SCANS_PER_REV);
+  pc->channels[3].values.resize(SCANS_PER_REV);
 #endif
 
   // pass along original time stamp and frame ID
