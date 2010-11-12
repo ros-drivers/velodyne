@@ -39,30 +39,40 @@
 
 #include <ros/ros.h>
 #include <velodyne_common/RawScan.h>
+#include <velodyne_msgs/VelodynePacket.h>
 
 namespace velodyne
 {
   static uint16_t UDP_PORT_NUMBER = 2368;
 
-  // Base Velodyne input class -- not used directly
+  // Pure virtual base Velodyne input class -- not used directly
   class Input
   {
   public:
-    Input() {}
-    ~Input() {}
+    Input() {};
 
-    // Read velodyne packets.
-    //
-    // buffer = array to receive raw data packets
-    // npacks = number of packets to read
-    // data_time -> average time when data received
-    //
-    // returns: number of packets not read, if any
-    //          0 if successful,
-    //          -1 if end of file
-    //
-    virtual int getPackets(uint8_t *buffer, int npacks, double *data_time)
-    {return 0;}
+    /** \brief Read velodyne packet.
+     *
+     * \param pkt[out] points to VelodynePacket message
+     *
+     * \returns 0 if successful,
+     *          -1 if end of file
+     */
+    virtual int getPacket(velodyne_msgs::VelodynePacketPtr pkt);
+
+    /** \brief Read velodyne packets.
+     *
+     * \param buffer array to receive raw data packets
+     * \param npacks number of packets to read
+     * \param data_time[out] average time when data received
+     *
+     * \returns number of packets not read, if any
+     *          0 if successful,
+     *          -1 if end of file
+     *
+     * \deprecated Use getPacket() instead
+     */
+    virtual int getPackets(uint8_t *buffer, int npacks, double *data_time) = 0;
 
     /** \brief Get ROS parameters.
      *
@@ -70,29 +80,31 @@ namespace velodyne
      *
      * \returns: 0, if successful;
      *           errno value, for failure
+     *
+     * \deprecated Parameters are now read in constructor, if needed.
      */
     virtual int getParams(void)
-    {return 0;}
+    {
+      return 0;
+    }
 
-    // Close the data socket or file
-    //
-    // returns: 0, if successful
-    //          errno value, for failure
-    //
-    virtual int vclose(void)
-    {return 0;}
+    /** \brief Close the data socket or file
+     *
+     * \returns 0, if successful
+     *          errno value, for failure
+     */
+    virtual int vclose(void) = 0;
 
-    /** Open the data socket or file
+    /** \brief Open the data socket or file
      *
      * \returns: 0, if successful;
      *           -1 for failure
      * \todo return errno value for failure
      */
-    virtual int vopen(void)
-    {return 0;}
+    virtual int vopen(void) = 0;
   };
 
-  // live Velodyne input from socket.
+  /** \brief Live Velodyne input from socket. */
   class InputSocket: public Input
   {
   public:
@@ -114,7 +126,7 @@ namespace velodyne
   };
 
 
-  /** Velodyne input from PCAP dump file.
+  /** \brief Velodyne input from PCAP dump file.
    *
    * Dump files can be grabbed by libpcap, Velodyne's DSR software,
    * ethereal, wireshark, tcpdump, or the \ref vdump_command.
@@ -131,13 +143,17 @@ namespace velodyne
       fp_ = NULL;  
       pcap_ = NULL;  
       empty_ = true;
-      read_once_ = read_once;
+
+      // get parameters from "input" subspace of private node handle
+      ros::NodeHandle private_nh("~/input");
+      private_nh.param("read_once", read_once_, read_once);
+      private_nh.param("read_fast", read_fast_, read_fast);
+      private_nh.param("repeat_delay", repeat_delay_, repeat_delay);
+
       if (read_once_)
         ROS_INFO("Read input file only once.");
-      read_fast_ = read_fast;
       if (read_fast_)
         ROS_INFO("Read input file as quickly as possible.");
-      repeat_delay_ = repeat_delay;
       if (repeat_delay_ > 0.0)
         ROS_INFO("Delay %.3f seconds before repeating input file.",
                  repeat_delay_);
@@ -145,7 +161,6 @@ namespace velodyne
     ~InputPCAP() {}
 
     virtual int getPackets(uint8_t *buffer, int npacks, double *data_time);
-    virtual int getParams(void);
     virtual int vclose(void);
     virtual int vopen(void);
 

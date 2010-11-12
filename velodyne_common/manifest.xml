@@ -5,7 +5,7 @@
      interfaces for the Velodyne HDL-64E 3D LIDAR.
 
   </description>
-  <author> Patrick Beeson, Jack O'Quin, Michael Quinlan, Yaxin Liu </author>
+  <author> Jack O'Quin, Patrick Beeson, Michael Quinlan, Yaxin Liu </author>
   <license>BSD</license>
   <review status="experimental" notes=""/>
   <url>http://www.ros.org/wiki/velodyne_common</url>
@@ -15,6 +15,7 @@
   <depend package="roscpp"/>
   <depend package="rostest"/>
   <depend package="sensor_msgs"/>
+  <depend package="velodyne_msgs"/>
 
   <!-- declare build dependency on pcap library -->
   <rosdep name="libpcap"/>

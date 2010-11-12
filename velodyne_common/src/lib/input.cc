@@ -33,6 +33,21 @@ namespace velodyne
 {
   using namespace velodyne_common;
 
+  /* \brief Read velodyne packet.
+   *
+   * \param pkt[out] points to VelodynePacket message
+   *
+   * \returns 0 if successful,
+   *          -1 if end of file
+   */
+  int Input::getPacket(velodyne_msgs::VelodynePacketPtr pkt)
+  {
+    double time = 0.0;
+    int rc = getPackets(&pkt->data[0], 1, &time);
+    pkt->stamp = ros::Time(time);
+    return rc;
+  }
+
   // Connect to Velodyne UDP port
   //
   // returns: socket file descriptor number >= 0, if successful
@@ -241,27 +256,6 @@ namespace velodyne
       usleep(385*npacks);               // delay about 100 msec/rev
 
     return result;
-  }
-
-  /** Get ROS parameters.
-   *
-   *  ROS parameter settings override constructor options
-   *
-   * \returns: 0, if successful;
-   *           errno value, for failure
-   */
-  int InputPCAP::getParams(void)
-  {
-    // get parameters from "input" subordinate of private node handle
-    ros::NodeHandle private_nh("~/input");
-
-    private_nh.getParam("read_once", read_once_);
-    private_nh.getParam("read_fast", read_fast_);
-    private_nh.getParam("repeat_delay", repeat_delay_);
-
-    ROS_INFO("read_once = %d, read_fast = %d, repeat_delay = %.3f",
-             read_once_, read_fast_, repeat_delay_);
-    return 0;
   }
 
   int InputPCAP::vclose(void)
