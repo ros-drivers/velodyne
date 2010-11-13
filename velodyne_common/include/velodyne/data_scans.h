@@ -47,14 +47,13 @@ namespace Velodyne
 
   /** \brief type of callback function to receive laser scans
    *
-   * \param scan -> vector containing the laser scans for a complete
-   *                    revolution in Velodyne frame of reference.
-   *
-   * Use getMsgHeader() to access the ROS message header containing
-   * time stamp, sequence number, and frame ID.
+   *  \param scan vector containing the laser scans for a single packet
+   *  \param time ROS time stamp of packet
+   *  \param frame_id ROS frame ID of packet
    */
-  typedef void (*scans_callback_t)(const std::vector<laserscan_t> &scan);
-  typedef boost::function<void(const std::vector<laserscan_t> &)> scanCallback;
+  typedef boost::function<void(const std::vector<laserscan_t> &scan,
+                               ros::Time time,
+                               const std::string &frame_id)> scanCallback;
 
   /** \brief Convert Velodyne raw input to laserscans format */
   class DataScans: public Data
@@ -63,7 +62,8 @@ namespace Velodyne
 
     DataScans(std::string ofile="", std::string anglesFile="");
     virtual int print(void);
-    virtual void processRaw(const raw_packet_t *raw, size_t npackets);
+    virtual void processPacket(const velodyne_msgs::VelodynePacket *pkt,
+                               const std::string &frame_id);
 
     /** \brief Subscribe to laser scans.
      *
@@ -83,18 +83,8 @@ namespace Velodyne
       ROS_INFO("generic scan callback defined");
       cb_ = callback;
       return node.subscribe(topic, queue_size,
-                            &Data::processRawScan, (Data *) this,
+                            &Data::processScan, (Data *) this,
                             transport_hints);
-    }
-
-    /** \brief Subscribe to laser scans.
-     *
-     *  \deprecated must separately subscribe to the topic
-     */
-    virtual void subscribeScans(scans_callback_t scansCB)
-    {
-      ROS_INFO("scans callback defined");
-      scansCB_ = scansCB;
     }
 
   protected:
@@ -104,7 +94,6 @@ namespace Velodyne
     std::vector<laserscan_t> scans_;
 
   private:
-    scans_callback_t scansCB_;          // deprecated
     scanCallback cb_;                   ///< scan data callback
   };
 

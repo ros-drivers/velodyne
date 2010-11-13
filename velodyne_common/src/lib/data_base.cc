@@ -45,7 +45,6 @@ namespace Velodyne
     anglesFile_ = anglesFile;
 
     ofp_ = NULL;
-    rawCB_ = NULL;
     memset(&upper_, 0, sizeof(upper_));
     memset(&lower_, 0, sizeof(lower_));
     getParams();
@@ -81,21 +80,18 @@ namespace Velodyne
   }
 
   /** handle raw scan ROS topic message */
-  void Data::processRawScan(const velodyne_common::RawScan::ConstPtr &raw_scan)
+  void Data::processScan(const velodyne_msgs::VelodyneScan::ConstPtr &scanMsg)
   {
-    rawScan_ = raw_scan;                // save pointer to entire message
-    raw_packet_t *raw = (raw_packet_t *) &raw_scan->data[0];
-    size_t npackets = (raw_scan->data.size()
-                       / velodyne_common::RawScan::PACKET_SIZE);
-    processRaw(raw, npackets);
-  }
+    rawScan_ = scanMsg;              // save pointer to entire message
 
+    if (uninitialized_)
+      return;
 
-  /** \brief Process raw Velodyne packets for an entire revolution. */
-  void Data::processRaw(const raw_packet_t *raw, size_t npackets)
-  {
-    if (rawCB_)
-      (*rawCB_)(raw, npackets);
+    // invoke callback for each packet
+    for (unsigned i = 0; i < rawScan_->packets.size(); ++i)
+      {
+        processPacket(&rawScan_->packets[i], rawScan_->header.frame_id);
+      }
   }
 
   /** Set up for on-line operation. */

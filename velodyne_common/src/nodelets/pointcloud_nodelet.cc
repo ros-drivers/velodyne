@@ -34,89 +34,108 @@ public:
 
 private:
   virtual void onInit();
-  void processXYZ(const std::vector<laserscan_xyz_t> &scan);
+  void processXYZ(const std::vector<laserscan_xyz_t> &scan,
+                  ros::Time stamp,
+                  const std::string &frame_id);
+  void allocSharedMsg();
 
   DataXYZ *data_;
   ros::Subscriber velodyne_scan_;
   ros::Publisher output_;
+
+  // point cloud buffer for a complete revolution
+  sensor_msgs::PointCloudPtr pc_;
+  unsigned pc_next_;
 };
 
 void PointCloudNodelet::onInit()
 {
   ros::NodeHandle node = getNodeHandle();
 
+  // allocate space for the first PointCloud message
+  allocSharedMsg();
+
   data_->getParams();
 
   if (0 != data_->setup())
     return;
 
-  // subscribe to velodyne input -- make sure queue depth is minimal,
-  // so any missed scans are discarded.  Otherwise latency gets out of
-  // hand.  It's bad enough anyway.
-  velodyne_scan_ = data_->subscribe(node, "velodyne/rawscan", 1,
-                                    boost::bind(&PointCloudNodelet::processXYZ, this, _1),
-                                    ros::TransportHints().tcpNoDelay(true));
+  // subscribe to Velodyne data
+  velodyne_scan_ =
+    data_->subscribe(node, "velodyne/packets", 10,
+                     boost::bind(&PointCloudNodelet::processXYZ,
+                                 this, _1, _2, _3),
+                     ros::TransportHints().tcpNoDelay(true));
 
   output_ = node.advertise<sensor_msgs::PointCloud>("velodyne/pointcloud", 1);
 }
 
-/** \brief callback for XYZ points
+/** \brief allocate space for shared PointCloud message
  *
- * publishes Velodyne data points as a point cloud
+ *  \post pc_ -> to message with enough space for one revolution
+ *            of the device
+ *        pc_next = 0
  */
-void PointCloudNodelet::processXYZ(const std::vector<laserscan_xyz_t> &scan)
+void PointCloudNodelet::allocSharedMsg()
 {
-  if (output_.getNumSubscribers() == 0)         // no one listening?
-    return;
-
-  const roslib::Header *hdr = data_->getMsgHeader();
-
   // allocate a new shared pointer for zero-copy sharing with other nodelets
-  sensor_msgs::PointCloudPtr pc(new sensor_msgs::PointCloud);
+  pc_ = sensor_msgs::PointCloudPtr(new sensor_msgs::PointCloud);
 
   // allocate the anticipated amount of space for the point cloud
-  pc->points.resize(SCANS_PER_REV);
-  pc->channels.resize(1);
-  pc->channels[0].name = "intensity";
-  pc->channels[0].values.resize(SCANS_PER_REV);
+  pc_->points.resize(SCANS_PER_REV);
+  pc_->channels.resize(1);
+  pc_->channels[0].name = "intensity";
+  pc_->channels[0].values.resize(SCANS_PER_REV);
 
-#if 0   // TODO add more channels (depending on parameters)
-  pc->channels.resize(4);
-  pc->channels[0].name = VC_RING;
-  pc->channels[0].values.resize(SCANS_PER_REV);
-  pc->channels[1].name = VC_HEADING;
-  pc->channels[1].values.resize(SCANS_PER_REV);
-  pc->channels[2].name = VC_INTENSITY;
-  pc->channels[2].values.resize(SCANS_PER_REV);
-  pc->channels[3].name = VC_AVAILABLE;
-  pc->channels[3].values.resize(SCANS_PER_REV);
-#endif
+  // set the exact point cloud size
+  pc_->points.resize(SCANS_PER_REV);
+  pc_->channels[0].values.resize(SCANS_PER_REV);
+  pc_next_= 0;
+}
 
-  // pass along original time stamp and frame ID
-  pc->header.stamp = hdr->stamp;
-  pc->header.frame_id = hdr->frame_id;
+/** \brief callback for XYZ points
+ *
+ *  publishes Velodyne data points as a point cloud
+ */
+void PointCloudNodelet::processXYZ(const std::vector<laserscan_xyz_t> &scan,
+                                   ros::Time stamp,
+                                   const std::string &frame_id)
+{
+  //if (output_.getNumSubscribers() == 0)         // no one listening?
+  //  return;
 
-  // set the exact point cloud size -- the vectors should already have
-  // enough space
-  size_t npoints = scan.size();
-  pc->points.resize(npoints);
-  pc->channels[0].values.resize(npoints);
+  // guard against vector indexing overflow
+  ROS_ASSERT(pc_next_ + scan.size() <= pc_->points.size());
 
-  for (unsigned i = 0; i < npoints; ++i)
+  for (unsigned i = 0; i < scan.size(); ++i)
     {
-      pc->points[i].x = scan[i].x;
-      pc->points[i].y = scan[i].y;
-      pc->points[i].z = scan[i].z;
-      pc->channels[0].values[i] = (float) scan[i].intensity;
+      pc_->points[pc_next_].x = scan[i].x;
+      pc_->points[pc_next_].y = scan[i].y;
+      pc_->points[pc_next_].z = scan[i].z;
+      pc_->channels[0].values[pc_next_] = (float) scan[i].intensity;
+      ++pc_next_;
     }
 
-  // nodelet sharing requires pc not be modified after publish()ing
-  NODELET_DEBUG_STREAM("Publishing " << npoints << " Velodyne points.");
-  output_.publish(pc);
+  if (pc_next_ == pc_->points.size())
+    {
+      // buffer is full, publish it
+      NODELET_DEBUG_STREAM("Publishing " << pc_->points.size()
+                           << " Velodyne points.");
+
+      // set time stamp and frame ID based on last packet received
+      pc_->header.stamp = stamp;
+      pc_->header.frame_id = frame_id;
+
+      output_.publish(pc_);
+
+      // nodelet sharing requires pc_ not to be modified after
+      // publish(), so allocate a new message
+      allocSharedMsg();
+    }
 }
 
 // Register this plugin with pluginlib.  Names must match nodelet_velodyne.xml.
-
-// parameters are: package, class name, class type, base class type
+//
+// parameters: package, class name, class type, base class type
 PLUGINLIB_DECLARE_CLASS(velodyne_common, PointCloudNodelet,
                         PointCloudNodelet, nodelet::Nodelet);

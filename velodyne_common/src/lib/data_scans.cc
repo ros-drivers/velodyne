@@ -39,8 +39,7 @@ namespace Velodyne
   {
     // reserve vector space before processing, we don't want to
     // reallocate in real time
-    scans_.resize(SCANS_PER_REV);
-    scansCB_ = NULL;
+    scans_.reserve(SCANS_PER_REV);
   }
 
   /** \brief convert raw packet to laserscan format */
@@ -95,30 +94,20 @@ namespace Velodyne
     ROS_ASSERT(index == SCANS_PER_PACKET);
   }
 
-  /** \brief Process raw Velodyne packets for an entire revolution. */
-  void DataScans::processRaw(const raw_packet_t *raw, size_t npackets)
+  /** \brief Process Velodyne packet. */
+  void DataScans::processPacket(const velodyne_msgs::VelodynePacket *pkt,
+                                const std::string &frame_id)
   {
-    if (uninitialized_)
-      return;
-
-    // run the base class method
-    Data::processRaw(raw, npackets);
-
-    // unpack scans from every packet
-    scans_.resize(npackets * SCANS_PER_PACKET);
-    for (unsigned i = 0; i < (unsigned) npackets; ++i)
-      {
-        packet2scans(&raw[i], &scans_[i * SCANS_PER_PACKET]);
-      }
+    // unpack scans from the raw packet
+    scans_.resize(SCANS_PER_PACKET);
+    packet2scans((raw_packet_t *) &pkt->data[0], &scans_[0]);
 
     if (!ros::ok())                     // check for ROS shutdown
       return;
 
     // invoke the subscribed scans callback, if any
-    if (scansCB_)
-      (*scansCB_)(scans_);
-    else if (cb_)
-      cb_(scans_);
+    if (cb_)
+      cb_(scans_, pkt->stamp, frame_id);
   }
 
   /** \brief print laser scan data

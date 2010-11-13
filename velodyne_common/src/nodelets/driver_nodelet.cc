@@ -101,8 +101,8 @@ void DriverNodelet::onInit()
       return;
     }
 
-  output_ = node.advertise<velodyne_msgs::VelodyneScan>("velodyne/packets", 1);
-  raw_output_ = node.advertise<velodyne_common::RawScan>("velodyne/rawscan", 1);
+  output_ = node.advertise<velodyne_msgs::VelodyneScan>("velodyne/packets", 10);
+  raw_output_ = node.advertise<velodyne_common::RawScan>("velodyne/rawscan", 10);
 
   // spawn device thread
   running_ = true;

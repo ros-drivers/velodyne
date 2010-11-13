@@ -252,7 +252,9 @@ namespace velodyne
           }
       }
 
-    // keep the reader from blowing through the file.
+    // Keep the reader from blowing through the file.  The actual
+    // device generates about 2600 packets per second at 600 RPM,
+    // around 385 microseconds per packet.
     if (read_fast_ == false)
       usleep(385*npacks);               // delay about 100 msec/rev
 

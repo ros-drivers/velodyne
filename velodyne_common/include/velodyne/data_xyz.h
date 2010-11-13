@@ -42,15 +42,13 @@ namespace Velodyne
 
   /** \brief type of callback function to receive XYZ laser scans
    *
-   * \param scan -> vector containing the laser scans for a complete
-   *                    revolution in XYZ format using Velodyne frame
-   *                    of reference.
-   *
-   * Use getMsgHeader() to access the ROS message header containing
-   * time stamp, sequence number, and frame ID.
+   *  \param scan vector containing the XYZ scans for a single packet
+   *  \param stamp ROS time stamp of packet
+   *  \param frame_id ROS frame ID of packet
    */
-  typedef void (*xyz_callback_t)(const std::vector<laserscan_xyz_t> &scan);
-  typedef boost::function<void(const std::vector<laserscan_xyz_t> &)> xyzCallback;
+  typedef boost::function<void(const std::vector<laserscan_xyz_t> &scan,
+                               ros::Time stamp,
+                               const std::string &frame_id)> xyzCallback;
 
   /** \brief Convert Velodyne raw input to XYZ format */
   class DataXYZ: public DataScans
@@ -59,7 +57,8 @@ namespace Velodyne
 
     DataXYZ(std::string ofile="", std::string anglesFile="");
     virtual int print(void);
-    virtual void processRaw(const raw_packet_t *raw, size_t npackets);
+    virtual void processPacket(const velodyne_msgs::VelodynePacket *pkt,
+                               const std::string &frame_id);
 
     /** \brief Subscribe to XYZ laser scans.
      *
@@ -79,18 +78,8 @@ namespace Velodyne
       ROS_INFO("XYZ callback subscribed");
       cb_ = callback;
       return node.subscribe(topic, queue_size,
-                            &Data::processRawScan, (Data *) this,
+                            &Data::processScan, (Data *) this,
                             transport_hints);
-    }
-
-    /** \brief Subscribe to XYZ laser scans.
-     *
-     *  \deprecated must separately subscribe to the topic
-     */
-    virtual void subscribeXYZ(xyz_callback_t xyzCB)
-    {
-      ROS_INFO("XYZ callback defined");
-      xyzCB_ = xyzCB;
     }
 
   protected:
@@ -100,8 +89,7 @@ namespace Velodyne
     std::vector<laserscan_xyz_t> xyzScans_;
 
   private:
-    xyz_callback_t xyzCB_;              // deprecated
-    xyzCallback cb_;                    ///< XYZ data callback
+    xyzCallback cb_;                    ///< XYZ packet callback
   };
 
 

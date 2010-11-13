@@ -163,54 +163,27 @@ namespace Velodyne
      * \returns 0, if successful;
      *          errno value, for failure
      */
-    virtual int print(void)
-    {
-      if (uninitialized_)
-        return EBADF;                   // bad file descriptor
-      return 0;
-    }
-
-    /** \brief handle raw scan ROS topic message
-     *
-     *  This is the main entry point for handling ROS messages from
-     *  the /velodyne/rawscan topic, published by the velodyne_read
-     *  (device driver) node.  This is \b not a virtual function;
-     *  derived classes may replace processRaw(), instead.
-     *
-     *  Typically, velodyne_read publishes all the data for a single
-     *  rotation of the device in each message.
-     *
-     *  Subscribe via the method-oriented ROS interface, like this:
-     *
-     *  \verbatim
-     *     velodyne::Data *data = new velodyne::Data();
-     *
-     *     ros::Subscriber velodyne_scan =
-     *       node.subscribe("velodyne/rawscan", 1,
-     *                      &velodyne::Data::processRawScan, data,
-     *                      ros::TransportHints().tcpNoDelay(true));
-     *  \endverbatim
-     */
-    void processRawScan(const velodyne_common::RawScan::ConstPtr &raw_scan);
+    virtual int print(void) = 0;
 
     /** \brief handle ROS topic message
      *
      *  This is the main entry point for handling ROS messages from
      *  the "velodyne/packets" topic, published by the driver nodelet.
      *  This is \b not a virtual function; derived classes may replace
-     *  processRaw(), instead.
+     *  processPacket(), instead.
      *
-     *  Typically, velodyne_read publishes all the data for a single
-     *  rotation of the device in each message.
+     *  By default, the driver publishes packets for a complete
+     *  rotation of the device in each message, but that is not
+     *  guaranteed.
      */
-    void processPackets(const velodyne_msgs::VelodyneScan::ConstPtr &scanMsg);
+    void processScan(const velodyne_msgs::VelodyneScan::ConstPtr &scanMsg);
 
-    /** \brief Process raw Velodyne packets for an entire revolution.
+    /** \brief Process a Velodyne packet.
      *
-     * \param raw -> buffer containing raw packet contents
-     * \param npackets number of packets in the buffer
+     * \param pkt -> VelodynePacket message
      */
-    virtual void processRaw(const raw_packet_t *raw, size_t npackets);
+    virtual void processPacket(const velodyne_msgs::VelodynePacket *pkt,
+                               const std::string &frame_id) = 0;
 
     /** \brief Set up for data processing.
      *
@@ -251,7 +224,7 @@ namespace Velodyne
     bool uninitialized_;                ///< false after successful setup()
 
     /** latest raw scan message received */
-    velodyne_common::RawScan::ConstPtr rawScan_;
+    velodyne_msgs::VelodyneScan::ConstPtr rawScan_;
 
     /** correction angles indexed by laser within bank
      *

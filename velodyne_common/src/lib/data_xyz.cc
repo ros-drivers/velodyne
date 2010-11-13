@@ -38,8 +38,7 @@ namespace Velodyne
   {
     // reserve vector space before processing, we don't want to
     // reallocate in real time
-    xyzScans_.resize(SCANS_PER_REV);
-    xyzCB_ = NULL;
+    xyzScans_.reserve(SCANS_PER_REV);
   }
 
   inline void DataXYZ::scan2xyz(const laserscan_t *scan,
@@ -55,14 +54,12 @@ namespace Velodyne
     point->intensity = scan->intensity;
   }
 
-  /** \brief Process raw Velodyne packets for an entire revolution. */
-  void DataXYZ::processRaw(const raw_packet_t *raw, size_t npackets)
+  /** \brief Process a Velodyne packet message. */
+  void DataXYZ::processPacket(const velodyne_msgs::VelodynePacket *pkt,
+                              const std::string &frame_id)
   {
-    if (uninitialized_)
-      return;
-
     // run the base class method
-    DataScans::processRaw(raw, npackets);
+    DataScans::processPacket(pkt, frame_id);
 
     // fill in xyzScan_ vector
     xyzScans_.resize(scans_.size());
@@ -75,12 +72,9 @@ namespace Velodyne
       return;
 
     // invoke the subscribed XYZ callback, if any
-    if (xyzCB_)
-      (*xyzCB_)(xyzScans_);
-    else if (cb_)
-      cb_(xyzScans_);
+    if (cb_)
+      cb_(xyzScans_, pkt->stamp, frame_id);
   }
-
 
   /** \brief print laser scans in XYZ format
    *
