@@ -20,8 +20,8 @@
 
   <!-- verify PointCloud publication rate -->
   <test test-name="pointcloud_nodelet_hertz_test" pkg="rostest" type="hztest" name="hztest1" >
-    <param name="hz" value="10.0" />
-    <param name="hzerror" value="0.5" />
+    <param name="hz" value="9.75" />
+    <param name="hzerror" value="0.75" />
     <param name="test_duration" value="10.0" />    
     <param name="topic" value="velodyne/pointcloud" />  
     <param name="wait_time" value="5.0" />  

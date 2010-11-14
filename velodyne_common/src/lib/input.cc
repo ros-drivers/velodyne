@@ -210,6 +210,12 @@ namespace velodyne
         int res;
         if ((res = pcap_next_ex(pcap_, &header, &pkt_data)) >= 0)
           {
+            // Keep the reader from blowing through the file.  The actual
+            // device generates about 2600 packets per second at 600 RPM,
+            // around 385 microseconds per packet.
+            if (read_fast_ == false)
+              delay_.sleep();
+            
             memcpy(&buffer[i * RawScan::PACKET_SIZE],
                    pkt_data+42, RawScan::PACKET_SIZE);
             *data_time = ros::Time::now().toSec();
@@ -251,12 +257,6 @@ namespace velodyne
             result = npacks;
           }
       }
-
-    // Keep the reader from blowing through the file.  The actual
-    // device generates about 2600 packets per second at 600 RPM,
-    // around 385 microseconds per packet.
-    if (read_fast_ == false)
-      usleep(385*npacks);               // delay about 100 msec/rev
 
     return result;
   }
