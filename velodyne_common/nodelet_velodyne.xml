@@ -17,3 +17,14 @@
     </description>
   </class>
 </library>
+
+<library path="lib/libtransform_nodelet">
+  <class name="velodyne_common/TransformNodelet"
+         type="TransformNodelet"
+         base_class_type="nodelet::Nodelet">
+    <description>
+      Transform raw Velodyne data to a PointCloud in some frame of
+      reference, typically "/odom".
+    </description>
+  </class>
+</library>

@@ -1,0 +1,18 @@
+<!-- -*- mode: XML -*- -->
+<!-- transform a Velodyne PCAP file into a point cloud in "/odom" frame
+
+     environment: $PCAP = full path name of PCAP file.
+-->
+
+<launch>
+  <node pkg="nodelet" type="nodelet" name="velodyne_nodelet_manager"
+        args="manager" />
+  <node pkg="nodelet" type="nodelet" name="transform_nodelet"
+        args="load velodyne_common/TransformNodelet velodyne_nodelet_manager" />
+  <node pkg="nodelet" type="nodelet" name="driver_nodelet"
+        args="load velodyne_common/DriverNodelet velodyne_nodelet_manager" >
+    <param name="pcap" value="$(env PCAP)" />
+  </node>
+
+  <node pkg="rviz" type="rviz" name="rviz" />
+</launch>
