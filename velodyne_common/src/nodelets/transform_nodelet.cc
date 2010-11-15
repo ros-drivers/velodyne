@@ -37,29 +37,40 @@ private:
   void processXYZ(const std::vector<laserscan_xyz_t> &scan,
                   ros::Time stamp,
                   const std::string &frame_id);
+  void allocPacketMsg(sensor_msgs::PointCloud &msg);
   void allocSharedMsg();
 
   DataXYZ *data_;
   ros::Subscriber velodyne_scan_;
   ros::Publisher output_;
-  std::string frame_id_;                ///< target tf frame ID
-  int npackets_;                        ///< number of packets to combine
+  tf::TransformListener listener_;
 
-  // point cloud buffer for a complete revolution
-  sensor_msgs::PointCloudPtr pc_;
-  unsigned pc_next_;
+  /// configuration parameters
+  typedef struct {
+    std::string frame_id;            ///< target tf frame ID
+    int npackets;                    ///< number of packets to combine
+  } Config;
+  Config config_;
+
+  // point clouds data
+  // (class members to avoid allocation and deallocation overhead)
+  sensor_msgs::PointCloud inMsg_;       ///< input packet message
+  sensor_msgs::PointCloud tfMsg_;       ///< transformed packet message
+  sensor_msgs::PointCloudPtr outPtr_;   ///< output message shared pointer
+  int packetCount_;                     ///< count of output packets collected
 };
 
+/** nodelet initialization */
 void TransformNodelet::onInit()
 {
   // use private node handle to get parameters
   ros::NodeHandle private_nh = getPrivateNodeHandle();
-  private_nh.param("frame_id", frame_id_, std::string("odom"));
+  private_nh.param("frame_id", config_.frame_id, std::string("odom"));
   std::string tf_prefix = tf::getPrefixParam(private_nh);
-  ROS_DEBUG_STREAM("tf_prefix: " << tf_prefix);
-  frame_id_ = tf::resolve(tf_prefix, frame_id_);
-  ROS_INFO_STREAM("target frame ID: " << frame_id_);
-  private_nh.param("npackets", npackets_, PACKETS_PER_REV);
+  config_.frame_id = tf::resolve(tf_prefix, config_.frame_id);
+  NODELET_INFO_STREAM("target frame ID: " << config_.frame_id);
+  private_nh.param("npackets", config_.npackets, PACKETS_PER_REV);
+  NODELET_INFO_STREAM("number of packets to accumulate: " << config_.npackets);
 
   data_->getParams();
 
@@ -68,82 +79,121 @@ void TransformNodelet::onInit()
 
   // allocate space for the first PointCloud message
   allocSharedMsg();
+  packetCount_ = 0;
+
+  // allocate exact sizes for inMsg_ and tfMsg_ (single packet)
+  allocPacketMsg(inMsg_);
+  allocPacketMsg(tfMsg_);
+
+  // advertise output point cloud (before subscribing to input data)
+  ros::NodeHandle node = getNodeHandle();
+  output_ = node.advertise<sensor_msgs::PointCloud>("velodyne/pointcloud", 10);
 
   // subscribe to Velodyne data
-  ros::NodeHandle node = getNodeHandle();
   velodyne_scan_ =
     data_->subscribe(node, "velodyne/packets", 10,
                      boost::bind(&TransformNodelet::processXYZ,
                                  this, _1, _2, _3),
                      ros::TransportHints().tcpNoDelay(true));
+}
 
-  output_ = node.advertise<sensor_msgs::PointCloud>("velodyne/pointcloud", 10);
+/** \brief allocate space in a single packet PointCloud message
+ *
+ *  \param msg message with enough space for one packet
+ */
+void TransformNodelet::allocPacketMsg(sensor_msgs::PointCloud &msg)
+{
+  msg.points.resize(SCANS_PER_PACKET);
+  msg.channels.resize(1);
+  msg.channels[0].name = "intensity";
+  msg.channels[0].values.resize(SCANS_PER_PACKET);
 }
 
 /** \brief allocate space for shared PointCloud message
  *
- *  \post pc_ -> to message with enough space for one revolution
- *            of the device
- *        pc_next = 0
+ *  \post outPtr_ -> message with enough space reserved for the
+ *                configured number of packets
  */
 void TransformNodelet::allocSharedMsg()
 {
   // allocate a new shared pointer for zero-copy sharing with other nodelets
-  pc_ = sensor_msgs::PointCloudPtr(new sensor_msgs::PointCloud);
+  outPtr_ = sensor_msgs::PointCloudPtr(new sensor_msgs::PointCloud);
 
   // allocate the anticipated amount of space for the point cloud
-  pc_->points.resize(npackets_*SCANS_PER_PACKET);
-  pc_->channels.resize(1);
-  pc_->channels[0].name = "intensity";
-  pc_->channels[0].values.resize(npackets_*SCANS_PER_PACKET);
+  outPtr_->points.reserve(config_.npackets*SCANS_PER_PACKET);
+  outPtr_->channels.resize(1);
+  outPtr_->channels[0].name = "intensity";
+  outPtr_->channels[0].values.reserve(config_.npackets*SCANS_PER_PACKET);
 
-  // set the exact point cloud size
-  pc_->points.resize(npackets_*SCANS_PER_PACKET);
-  pc_->channels[0].values.resize(npackets_*SCANS_PER_PACKET);
-  pc_next_= 0;
+  // clear the contents (should already be done by constructor)
+  outPtr_->points.clear();
+  outPtr_->channels[0].values.clear();
 }
 
-/** \brief callback for XYZ points
+/** \brief callback for packets in XYZ format
  *
  *  converts Velodyne data for a single packet into a point cloud
  *  transforms the packet point cloud into the target frame
  *  collects transformed packets into a larger message (generally a full revolution)
- *  publishes those collected transformed data as a point cloud
+ *  periodically publishes those collected transformed data as a point cloud
  */
 void TransformNodelet::processXYZ(const std::vector<laserscan_xyz_t> &scan,
                                    ros::Time stamp,
                                    const std::string &frame_id)
 {
   if (output_.getNumSubscribers() == 0)         // no one listening?
-    return;                                     // skip a lot of work
+    return;                                     // avoid much work
 
-  // guard against vector indexing overflow
-  ROS_ASSERT(pc_next_ + scan.size() <= pc_->points.size());
-
+  // convert Velodyne data for this packet into a point cloud
+  inMsg_.header.stamp = stamp;
+  inMsg_.header.frame_id = frame_id;
+  inMsg_.points.resize(scan.size());
+  inMsg_.channels[0].values.resize(scan.size());
   for (unsigned i = 0; i < scan.size(); ++i)
     {
-      pc_->points[pc_next_].x = scan[i].x;
-      pc_->points[pc_next_].y = scan[i].y;
-      pc_->points[pc_next_].z = scan[i].z;
-      pc_->channels[0].values[pc_next_] = (float) scan[i].intensity;
-      ++pc_next_;
+      inMsg_.points[i].x = scan[i].x;
+      inMsg_.points[i].y = scan[i].y;
+      inMsg_.points[i].z = scan[i].z;
+      inMsg_.channels[0].values[i] = (float) scan[i].intensity;
     }
 
-  if (pc_next_ == pc_->points.size())
+  // transform the packet point cloud into the target frame
+  try
+    {
+      NODELET_DEBUG_STREAM("transforming from" << inMsg_.header.frame_id
+                           << " to " << config_.frame_id);
+      listener_.transformPointCloud(config_.frame_id, stamp,
+                                    inMsg_, frame_id, tfMsg_);
+    }
+  catch (tf::TransformException ex)
+    {
+      ROS_ERROR_THROTTLE(5, "%s", ex.what());
+      return;                           // skip this packet
+    }
+
+  // append transformed packet data to end of output message
+  outPtr_->points.insert(outPtr_->points.end(),
+                         tfMsg_.points.begin(),
+                         tfMsg_.points.end());
+  outPtr_->channels[0].values.insert(outPtr_->channels[0].values.end(),
+                                     tfMsg_.channels[0].values.begin(),
+                                     tfMsg_.channels[0].values.end());
+
+  if (++packetCount_ >= config_.npackets)
     {
       // buffer is full, publish it
-      NODELET_DEBUG_STREAM("Publishing " << pc_->points.size()
+      NODELET_DEBUG_STREAM("Publishing " << outPtr_->points.size()
                            << " Velodyne points.");
 
-      // set time stamp and frame ID based on last packet received
-      pc_->header.stamp = stamp;
-      pc_->header.frame_id = frame_id_; // target frame ID
+      // publish the accumulated, transformed point cloud
+      outPtr_->header.stamp = stamp;               // time of last packet
+      outPtr_->header.frame_id = config_.frame_id; // target frame ID
+      output_.publish(outPtr_);
 
-      output_.publish(pc_);
-
-      // nodelet sharing requires pc_ not to be modified after
+      // nodelet sharing requires outPtr_ not to be modified after
       // publish(), so allocate a new message
       allocSharedMsg();
+      packetCount_ = 0;
     }
 }
 

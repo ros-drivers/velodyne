@@ -90,6 +90,8 @@ namespace Velodyne
     // invoke callback for each packet
     for (unsigned i = 0; i < rawScan_->packets.size(); ++i)
       {
+        if (!ros::ok())                 // node shutting down?
+          break;
         processPacket(&rawScan_->packets[i], rawScan_->header.frame_id);
       }
   }
