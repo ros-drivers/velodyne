@@ -115,16 +115,6 @@ namespace Velodyne
     int   enabled;
   };
 
-  /** \brief type of callback function to receive raw data for one revolution.
-   *
-   * \param raw -> buffer containing raw packet contents
-   * \param npackets number of packets in the buffer
-   *
-   * Use getMsgHeader() to access the ROS message header containing
-   * time stamp, sequence number, and frame ID.
-   */
-  typedef void (*raw_callback_t)(const raw_packet_t *raw, size_t npackets);
-
   /** \brief Base Velodyne data class -- not used directly. */
   class Data
   {
@@ -205,13 +195,6 @@ namespace Velodyne
       uninitialized_ = true;
     }
 
-    /** \brief Subscribe to raw packets for a each revolution. */
-    void subscribeRaw(raw_callback_t rawCB)
-    {
-      ROS_INFO("raw callback defined");
-      rawCB_ = rawCB;
-    }
-
   protected:
 
     /** configuration parameters */
@@ -220,7 +203,6 @@ namespace Velodyne
 
     /** runtime state */
     FILE *ofp_;                         ///< output file descriptor
-    raw_callback_t rawCB_;              ///< raw data callback
     bool uninitialized_;                ///< false after successful setup()
 
     /** latest raw scan message received */
