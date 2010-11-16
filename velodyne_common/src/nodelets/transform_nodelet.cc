@@ -17,8 +17,21 @@
 #include <sensor_msgs/PointCloud.h>
 #include <tf/transform_listener.h>
 
+#include <velodyne/ring_sequence.h>
 #include <velodyne/data_xyz.h>
-using namespace Velodyne;
+using namespace Velodyne;               // use new data class interface
+
+// channels to publish
+namespace
+{
+  static const unsigned NCHANNELS = 3;
+  static const std::string channel_name[NCHANNELS] =
+    {
+      "intensity",
+      "ring",
+      "heading"
+    };
+}
 
 class TransformNodelet: public nodelet::Nodelet
 {
@@ -104,9 +117,12 @@ void TransformNodelet::onInit()
 void TransformNodelet::allocPacketMsg(sensor_msgs::PointCloud &msg)
 {
   msg.points.resize(SCANS_PER_PACKET);
-  msg.channels.resize(1);
-  msg.channels[0].name = "intensity";
-  msg.channels[0].values.resize(SCANS_PER_PACKET);
+  msg.channels.resize(NCHANNELS);
+  for (unsigned ch = 0; ch < msg.channels.size(); ++ch)
+    {
+      msg.channels[ch].name = channel_name[ch];
+      msg.channels[ch].values.resize(SCANS_PER_PACKET);
+    }
 }
 
 /** \brief allocate space for shared PointCloud message
@@ -121,13 +137,12 @@ void TransformNodelet::allocSharedMsg()
 
   // allocate the anticipated amount of space for the point cloud
   outPtr_->points.reserve(config_.npackets*SCANS_PER_PACKET);
-  outPtr_->channels.resize(1);
-  outPtr_->channels[0].name = "intensity";
-  outPtr_->channels[0].values.reserve(config_.npackets*SCANS_PER_PACKET);
-
-  // clear the contents (should already be done by constructor)
-  outPtr_->points.clear();
-  outPtr_->channels[0].values.clear();
+  outPtr_->channels.resize(NCHANNELS);
+  for (unsigned ch = 0; ch < outPtr_->channels.size(); ++ch)
+    {
+      outPtr_->channels[ch].name = channel_name[ch];
+      outPtr_->channels[ch].values.reserve(config_.npackets*SCANS_PER_PACKET);
+    }
 }
 
 /** \brief callback for packets in XYZ format
@@ -148,13 +163,18 @@ void TransformNodelet::processXYZ(const std::vector<laserscan_xyz_t> &scan,
   inMsg_.header.stamp = stamp;
   inMsg_.header.frame_id = frame_id;
   inMsg_.points.resize(scan.size());
-  inMsg_.channels[0].values.resize(scan.size());
+  for (unsigned ch = 0; ch < inMsg_.channels.size(); ++ch)
+    {
+      inMsg_.channels[ch].values.resize(scan.size());
+    }
   for (unsigned i = 0; i < scan.size(); ++i)
     {
       inMsg_.points[i].x = scan[i].x;
       inMsg_.points[i].y = scan[i].y;
       inMsg_.points[i].z = scan[i].z;
       inMsg_.channels[0].values[i] = (float) scan[i].intensity;
+      inMsg_.channels[1].values[i] = (float) velodyne::LASER_RING[scan[i].laser_number];
+      inMsg_.channels[2].values[i] = scan[i].heading;
     }
 
   // transform the packet point cloud into the target frame
@@ -167,7 +187,8 @@ void TransformNodelet::processXYZ(const std::vector<laserscan_xyz_t> &scan,
     }
   catch (tf::TransformException ex)
     {
-      ROS_ERROR_THROTTLE(5, "%s", ex.what());
+      // only log error once every 20 times
+      ROS_ERROR_THROTTLE(20, "%s", ex.what());
       return;                           // skip this packet
     }
 
@@ -175,9 +196,12 @@ void TransformNodelet::processXYZ(const std::vector<laserscan_xyz_t> &scan,
   outPtr_->points.insert(outPtr_->points.end(),
                          tfMsg_.points.begin(),
                          tfMsg_.points.end());
-  outPtr_->channels[0].values.insert(outPtr_->channels[0].values.end(),
-                                     tfMsg_.channels[0].values.begin(),
-                                     tfMsg_.channels[0].values.end());
+  for (unsigned ch = 0; ch < inMsg_.channels.size(); ++ch)
+    {
+      outPtr_->channels[ch].values.insert(outPtr_->channels[ch].values.end(),
+                                          tfMsg_.channels[ch].values.begin(),
+                                          tfMsg_.channels[ch].values.end());
+    }
 
   if (++packetCount_ >= config_.npackets)
     {
