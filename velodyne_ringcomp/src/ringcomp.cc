@@ -311,8 +311,11 @@ sensor_msgs::PointCloud pc;
 
 void ringMeasure(velodyne::laserscan_xyz_t vect[][64]){
   int pcindex = 0;
+#define DEBUG_TO_FILE 0
+#if DEBUG_TO_FILE
   std::ofstream fout;
   fout.open("velodyne_ringcomp_output.txt");
+#endif
   velodyne::laserscan_xyz_t p;
   pc.points.resize(100000);
   for(int i = 0; i < 360; i++){
@@ -325,10 +328,11 @@ void ringMeasure(velodyne::laserscan_xyz_t vect[][64]){
 	    pc.points[pcindex].y = p.y;
             pc.points[pcindex].z = p.z;
 	    ++pcindex;
-	    //fout << p.x << ',' << p.y << ',' << p.z << ',';
-	    //fout << 255 << ',' << 0 << ',' << 0;
-	    //fout << '\n';
-	 
+#if DEBUG_TO_FILE
+	    fout << p.x << ',' << p.y << ',' << p.z << ',';
+	    fout << 255 << ',' << 0 << ',' << 0;
+	    fout << '\n';
+#endif	 
 	  }
 	}
       }
@@ -339,9 +343,11 @@ void ringMeasure(velodyne::laserscan_xyz_t vect[][64]){
 	  pc.points[pcindex].y = p.y;
           pc.points[pcindex].z = p.z;
 	  ++pcindex;
-	  //fout << p.x << ',' << p.y << ',' << p.z << ',';
-	  //fout << 255 << ',' << 0 << ',' << 0;
-	  //fout << '\n';
+#if DEBUG_TO_FILE
+	  fout << p.x << ',' << p.y << ',' << p.z << ',';
+	  fout << 255 << ',' << 0 << ',' << 0;
+	  fout << '\n';
+#endif	 
 	}
       }
     }
