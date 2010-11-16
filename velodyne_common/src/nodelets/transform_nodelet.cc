@@ -12,8 +12,9 @@
 */
 
 #include <ros/ros.h>
-#include <pluginlib/class_list_macros.h>
+#include <geometry_msgs/Point32.h>
 #include <nodelet/nodelet.h>
+#include <pluginlib/class_list_macros.h>
 #include <sensor_msgs/PointCloud.h>
 #include <tf/transform_listener.h>
 
@@ -53,6 +54,19 @@ private:
   void allocPacketMsg(sensor_msgs::PointCloud &msg);
   void allocSharedMsg();
 
+  /** in-line test whether a point is in range */
+  bool pointInRange(geometry_msgs::Point32 &point)
+  {
+    float sum2 = (point.x * point.x 
+                  + point.y * point.y
+                  + point.z * point.z);
+    return (sum2 >= min_range2_ && sum2 <= max_range2_);
+  }
+
+  // store squares of minimum and maximum ranges for efficient comparison
+  float max_range2_;
+  float min_range2_;
+
   DataXYZ *data_;
   ros::Subscriber velodyne_scan_;
   ros::Publisher output_;
@@ -61,6 +75,8 @@ private:
   /// configuration parameters
   typedef struct {
     std::string frame_id;            ///< target tf frame ID
+    double max_range;                ///< maximum range to publish
+    double min_range;                ///< minimum range to publish
     int npackets;                    ///< number of packets to combine
   } Config;
   Config config_;
@@ -82,6 +98,16 @@ void TransformNodelet::onInit()
   std::string tf_prefix = tf::getPrefixParam(private_nh);
   config_.frame_id = tf::resolve(tf_prefix, config_.frame_id);
   NODELET_INFO_STREAM("target frame ID: " << config_.frame_id);
+
+  private_nh.param("max_range", config_.max_range,
+                   (double) Velodyne::DISTANCE_MAX);
+  private_nh.param("min_range", config_.min_range, 2.0);
+  NODELET_INFO_STREAM("data ranges to publish: ["
+                      << config_.min_range << ", "
+                      << config_.max_range << "]");
+  min_range2_ = config_.min_range * config_.min_range;
+  max_range2_ = config_.max_range * config_.max_range;
+
   private_nh.param("npackets", config_.npackets, PACKETS_PER_REV);
   NODELET_INFO_STREAM("number of packets to accumulate: " << config_.npackets);
 
@@ -116,12 +142,12 @@ void TransformNodelet::onInit()
  */
 void TransformNodelet::allocPacketMsg(sensor_msgs::PointCloud &msg)
 {
-  msg.points.resize(SCANS_PER_PACKET);
+  msg.points.reserve(SCANS_PER_PACKET);
   msg.channels.resize(NCHANNELS);
-  for (unsigned ch = 0; ch < msg.channels.size(); ++ch)
+  for (unsigned ch = 0; ch < NCHANNELS; ++ch)
     {
       msg.channels[ch].name = channel_name[ch];
-      msg.channels[ch].values.resize(SCANS_PER_PACKET);
+      msg.channels[ch].values.reserve(SCANS_PER_PACKET);
     }
 }
 
@@ -138,7 +164,7 @@ void TransformNodelet::allocSharedMsg()
   // allocate the anticipated amount of space for the point cloud
   outPtr_->points.reserve(config_.npackets*SCANS_PER_PACKET);
   outPtr_->channels.resize(NCHANNELS);
-  for (unsigned ch = 0; ch < outPtr_->channels.size(); ++ch)
+  for (unsigned ch = 0; ch < NCHANNELS; ++ch)
     {
       outPtr_->channels[ch].name = channel_name[ch];
       outPtr_->channels[ch].values.reserve(config_.npackets*SCANS_PER_PACKET);
@@ -159,22 +185,32 @@ void TransformNodelet::processXYZ(const std::vector<laserscan_xyz_t> &scan,
   if (output_.getNumSubscribers() == 0)         // no one listening?
     return;                                     // avoid much work
 
+  // Clear working copies for transforming this packet.  These are
+  // only class members to avoid reallocating them for every packet.
+  inMsg_.points.clear();
+  tfMsg_.points.clear();
+  for (unsigned ch = 0; ch < NCHANNELS; ++ch)
+    {
+      inMsg_.channels[ch].values.clear();
+      tfMsg_.channels[ch].values.clear();
+    }
+
   // convert Velodyne data for this packet into a point cloud
   inMsg_.header.stamp = stamp;
   inMsg_.header.frame_id = frame_id;
-  inMsg_.points.resize(scan.size());
-  for (unsigned ch = 0; ch < inMsg_.channels.size(); ++ch)
-    {
-      inMsg_.channels[ch].values.resize(scan.size());
-    }
   for (unsigned i = 0; i < scan.size(); ++i)
     {
-      inMsg_.points[i].x = scan[i].x;
-      inMsg_.points[i].y = scan[i].y;
-      inMsg_.points[i].z = scan[i].z;
-      inMsg_.channels[0].values[i] = (float) scan[i].intensity;
-      inMsg_.channels[1].values[i] = (float) velodyne::LASER_RING[scan[i].laser_number];
-      inMsg_.channels[2].values[i] = scan[i].heading;
+      geometry_msgs::Point32 p;
+      p.x = scan[i].x;
+      p.y = scan[i].y;
+      p.z = scan[i].z;
+      if (pointInRange(p))
+        {
+          inMsg_.points.push_back(p);
+          inMsg_.channels[0].values.push_back((float) scan[i].intensity);
+          inMsg_.channels[1].values.push_back((float) velodyne::LASER_RING[scan[i].laser_number]);
+          inMsg_.channels[2].values.push_back((float) scan[i].heading);
+        }
     }
 
   // transform the packet point cloud into the target frame
@@ -187,7 +223,7 @@ void TransformNodelet::processXYZ(const std::vector<laserscan_xyz_t> &scan,
     }
   catch (tf::TransformException ex)
     {
-      // only log error once every 20 times
+      // only log tf error once every 20 times
       ROS_ERROR_THROTTLE(20, "%s", ex.what());
       return;                           // skip this packet
     }
@@ -196,7 +232,7 @@ void TransformNodelet::processXYZ(const std::vector<laserscan_xyz_t> &scan,
   outPtr_->points.insert(outPtr_->points.end(),
                          tfMsg_.points.begin(),
                          tfMsg_.points.end());
-  for (unsigned ch = 0; ch < inMsg_.channels.size(); ++ch)
+  for (unsigned ch = 0; ch < NCHANNELS; ++ch)
     {
       outPtr_->channels[ch].values.insert(outPtr_->channels[ch].values.end(),
                                           tfMsg_.channels[ch].values.begin(),
