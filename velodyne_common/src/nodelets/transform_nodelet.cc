@@ -224,7 +224,7 @@ void TransformNodelet::processXYZ(const std::vector<laserscan_xyz_t> &scan,
   catch (tf::TransformException ex)
     {
       // only log tf error once every 20 times
-      ROS_ERROR_THROTTLE(20, "%s", ex.what());
+      ROS_WARN_THROTTLE(20, "%s", ex.what());
       return;                           // skip this packet
     }
 
