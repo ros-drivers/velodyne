@@ -13,8 +13,6 @@
 */
 
 #include <cmath>
-#include <fstream>
-#include <iostream>
 
 #include <ros/ros.h>
 #include <pluginlib/class_list_macros.h>
@@ -29,26 +27,24 @@ namespace ringcomp_nodelet
   class RingCompNodelet: public nodelet::Nodelet
   {
   public:
+
     RingCompNodelet() {}
     void onInit();
 
   private:
-    //helper functions for ringcomp
-    void processPointCloud(const sensor_msgs::PointCloudPtr &scan);
+
     void compInitialize();
+    bool findChannels(const sensor_msgs::PointCloudPtr &scan);
     void printmatrix(geometry_msgs::Point32 mat[][velodyne::N_LASERS]);
+    void processPointCloud(const sensor_msgs::PointCloudPtr &scan);
     int  radtodeg(float rad);
     void ringMeasure(sensor_msgs::PointCloud &pc,
                      geometry_msgs::Point32 vect[][velodyne::N_LASERS]);
 
     /** push a point onto a point cloud */
     inline void pushPoint(sensor_msgs::PointCloud &pc,
-                          const geometry_msgs::Point32 &p)
+                          const geometry_msgs::Point32 &pt)
     {
-      geometry_msgs::Point32 pt;
-      pt.x = p.x;
-      pt.y = p.y;
-      pt.z = p.z;
       pc.points.push_back(pt);
     }
 
@@ -63,17 +59,22 @@ namespace ringcomp_nodelet
 
     ros::Subscriber velodyne_scan_;
     ros::Publisher output_;
-    int   ring_;                      ///< ring number of current scan
-    float heading_;                   ///< heading of current scan
 
-    sensor_msgs::PointCloudPtr outPtr_;   ///< output message shared pointer
+
+    /// configuration parameters
+    typedef struct {
+      double min_obstacle;             ///< minimum obstacle height
+      double vel_height;               ///< Velodyne height above ground
+    } Config;
+    Config config_;
+
+    int   ring_;                      ///< ring number of current scan
+    int   ringChan_;                  ///< ring channel number
+    float heading_;                   ///< heading of current scan
+    int   headingChan_;               ///< heading channel number
   };
 
-  //height of the velodyne in meteres
-  const int VEL_HEIGHT = 2.2;
-
-  //definition of an obstacle
-  float MIN_OBST = .15;
+  const int N_ANGLES = 360;             ///< number of angles in ring matrix
 
   //contains laser angle with verticle by rank
   const float LAZ_ANG[velodyne::N_LASERS] = {
@@ -210,7 +211,7 @@ namespace ringcomp_nodelet
     12.66324881604};
 
   //after running rangeInitialize(), this list contains the max ground distance
-  //that will signify an obstacle for case 1 based on MIN_OBST
+  //that will signify an obstacle for case 1 based on min_obstacle
   float COMP_BASE[velodyne::N_LASERS-1];
   float CASE_1_RANGES[velodyne::N_LASERS];
 
@@ -220,11 +221,19 @@ namespace ringcomp_nodelet
   /** nodelet initialization */
   void RingCompNodelet::onInit()
   {
-    ros::NodeHandle node;
+    ros::NodeHandle private_nh = getPrivateNodeHandle();
+    private_nh.param("min_obstacle", config_.min_obstacle, 0.15);
+    NODELET_INFO_STREAM("minimum obstacle height: " << config_.min_obstacle);
 
-    // subscribe to velodyne input -- make sure queue depth is minimal,
+    /// @todo figure out where to get device height from without
+    ///       adding a vehicle-specific dependency
+    private_nh.param("vel_height", config_.vel_height, 2.4);
+    NODELET_INFO_STREAM("height of Velodyne above ground: " << config_.vel_height);
+
+    // Subscribe to Velodyne input -- make sure queue depth is minimal,
     // so any missed scans are discarded.  Otherwise latency gets out of
     // hand.  It's bad enough anyway.
+    ros::NodeHandle node = getNodeHandle();
     velodyne_scan_ = node.subscribe("velodyne/pointcloud", 1,
                                     &RingCompNodelet::processPointCloud, this,
                                     ros::TransportHints().tcpNoDelay(true));
@@ -240,7 +249,9 @@ namespace ringcomp_nodelet
   
     int i;
     for (i = 0; i < velodyne::N_LASERS; i++){
-      COMP_BASE[i] = FLAT_COMP[i] - (MIN_OBST * tan(LAZ_ANG[i+1] * (M_PI/180)));
+      COMP_BASE[i] =
+        (FLAT_COMP[i]
+         - (config_.min_obstacle * tan(LAZ_ANG[i+1] * (M_PI/180))));
     }
   
     i = 0;
@@ -253,10 +264,9 @@ namespace ringcomp_nodelet
     float tang;
     while (i < CASE_1_LIM){
       tang = tan(LAZ_ANG[i+1] * (M_PI/180));
-      CASE_1_RANGES[i] = tang * (VEL_HEIGHT - MIN_OBST);
+      CASE_1_RANGES[i] = tang * (config_.vel_height - config_.min_obstacle);
       i++;
     }
-
   }
 
   /** Converts radian input to integer degrees between 0 and 359 */
@@ -276,7 +286,7 @@ namespace ringcomp_nodelet
   
     //Convert negative angles to pos for indexing into the matrix
     if (deg < 0)
-      deg = deg + 360;
+      deg = deg + N_ANGLES;
     
     return deg;
   }
@@ -284,7 +294,7 @@ namespace ringcomp_nodelet
   void RingCompNodelet::ringMeasure(sensor_msgs::PointCloud &pc,
                                     geometry_msgs::Point32 vect[][velodyne::N_LASERS])
   {
-    for(int i = 0; i < 360; i++)
+    for(int i = 0; i < N_ANGLES; i++)
       {
         for(int j = 0; j < CASE_3_LIM; j++)
           {
@@ -308,7 +318,7 @@ namespace ringcomp_nodelet
 
   void RingCompNodelet::printmatrix(geometry_msgs::Point32 mat[][velodyne::N_LASERS])
   {
-    for(int i = 0; i < 360; i++)
+    for(int i = 0; i < N_ANGLES; i++)
       {
         for(int j = 0; j < velodyne::N_LASERS; j++)
           {
@@ -317,46 +327,63 @@ namespace ringcomp_nodelet
       } 
   }
 
+  /** find input channels
+   *
+   *  @returns true if successful
+   *  @post Sets ringChan_, headingChan_ to agree with current scan.
+   */
+  bool RingCompNodelet::findChannels(const sensor_msgs::PointCloudPtr &scan)
+  {
+    ringChan_ = -1;
+    headingChan_ = -1;
+
+    // search the input channel names
+    for (unsigned ch = 0; ch < scan->channels.size(); ++ch)
+      {
+        if (scan->channels[ch].name == "ring")
+          ringChan_ = ch;
+        else if (scan->channels[ch].name == "heading")
+          headingChan_ = ch;
+      }
+
+    // successful if both ring and heading channels were found
+    return (ringChan_ >= 0 && headingChan_ >= 0);
+  }
+
   /** \brief callback for XYZ point cloud */
   void RingCompNodelet::processPointCloud(const sensor_msgs::PointCloudPtr &scan)
   {
-    // allocate a new shared output pointer for zero-copy sharing with other nodelets
-    sensor_msgs::PointCloudPtr outPtr(new sensor_msgs::PointCloud);
+    if (output_.getNumSubscribers() == 0)
+      return;                           // nothing to do
 
-#if 0
-    outPtr->channels.resize(scan->channels.size());
-    for (unsigned ch = 0; ch < scan->channels.size(); ++ch)
+    if (!findChannels(scan))
       {
-        outPtr->channels[ch].name = scan->channels[ch].name;
-      }
-#else
-    if (scan->channels.size() < 3)
-      {
-        ROS_FATAL_THROTTLE(10, "ring compression requires heading and ring channels");
+        ROS_ERROR_THROTTLE(10, "ring compression requires heading and ring channels");
         return;
       }
-#endif
 
-    // pass along original time stamp and frame of reference
+    // allocate a new shared output pointer for zero-copy sharing with other nodelets
+    sensor_msgs::PointCloudPtr outPtr(new sensor_msgs::PointCloud);
     outPtr->header.stamp = scan->header.stamp;
     outPtr->header.frame_id = scan->header.frame_id;
   
     // matrix of points to process
-    geometry_msgs::Point32 data_mat[360][velodyne::N_LASERS];
+    geometry_msgs::Point32 data_mat[N_ANGLES][velodyne::N_LASERS];
 
-    //holds one point waiting to be put into the matrix
+    // for each input scan point
     for (unsigned i = 0; i < scan->points.size(); ++i)
       {
-        // put points from the scan into the matrix
+        // store points in the matrix
         geometry_msgs::Point32 pt = scan->points[i];
-        // @todo check for the right channels dynamically
-        ring_ = (int) rint(scan->channels[1].values[i]);
-        heading_ = scan->channels[2].values[i];
+        ring_ = (int) rint(scan->channels[ringChan_].values[i]);
+        heading_ = scan->channels[headingChan_].values[i];
 	data_mat[radtodeg(heading_)][ring_] = pt;
       }
 
+    // run the ring compression algorithm
     ringMeasure(*outPtr, data_mat);
-    
+
+    // publish the results
     output_.publish(outPtr);
   }
 
