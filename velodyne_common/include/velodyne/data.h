@@ -175,6 +175,20 @@ namespace velodyne
     }
 #endif
 
+    /** \brief Get time stamp and frame from latest ROS message header.
+     *
+     *  This will always reflect the current message while any
+     *  callback function is running.
+     */
+    void getMsgHeaderFields(ros::Time &stamp, std::string &frame_id) const
+    {
+      if (rawScan_)
+        {
+          stamp = rawScan_->header.stamp;
+          frame_id = rawScan_->header.frame_id;
+        }
+    }
+
     /** \brief Get ROS parameters.
      *
      *  ROS parameter settings override constructor options

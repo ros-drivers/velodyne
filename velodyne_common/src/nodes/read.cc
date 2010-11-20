@@ -18,6 +18,7 @@
 
 #include <velodyne/input.h>
 #include <velodyne_common/RawScan.h>
+#include <velodyne_msgs/VelodyneScan.h>
 
 #define NODE "velodyne_read"
 
@@ -113,46 +114,62 @@ int main(int argc, char** argv)
       return 2;
     }
 
-  ros::Publisher output = node.advertise<RawScan>("velodyne/rawscan", qDepth);
+  ros::Publisher output =
+    node.advertise<velodyne_msgs::VelodyneScan>("velodyne/packets", qDepth);
+  ros::Publisher raw_output =
+    node.advertise<velodyne_common::RawScan>("velodyne/rawscan", qDepth);
 
-  ROS_INFO(NODE ": starting main loop");
-
-  RawScan rawscan;
   int npackets = RawScan::PACKETS_PER_REVOLUTION;
-  rawscan.data.resize(npackets * RawScan::PACKET_SIZE);
-  rawscan.header.frame_id = "/velodyne";
 
   // Loop until shut down.
   while(ros::ok())
     {
-      double time;
+      // Allocate a new shared pointer for zero-copy sharing with other nodelets.
+      velodyne_msgs::VelodyneScanPtr scan(new velodyne_msgs::VelodyneScan);
+      scan->packets.resize(npackets);
 
       // Since the velodyne delivers data at a very high rate, keep
       // reading and publishing scans as fast as possible.
-      int packets_left = input->getPackets(&rawscan.data[0], npackets, &time);
-
-      if (packets_left != 0)            // incomplete scan received?
+      for (int i = 0; i < npackets; ++i)
         {
-          if (packets_left < 0)         // end of file reached?
-            break;
-
-          if (packets_left < npackets)  // partial scan read?
-            ROS_WARN("Incomplete Velodyne scan: %d packets missing",
-                     packets_left);
+          while (true)
+            {
+              // keep reading until full packet received
+              int rc = input->getPacket(&scan->packets[i]);
+              if (rc == 0)              // got a full packet?
+                break;
+              if (rc < 0)               // end of file reached?
+                goto terminate;
+            }
         }
-      else
+
+      // publish message using time of last packet read
+      ROS_DEBUG("Publishing a full Velodyne scan.");
+      scan->header.stamp = ros::Time(scan->packets[npackets - 1].stamp);
+      scan->header.frame_id = "/velodyne";
+
+      if (output.getNumSubscribers() > 0) // anyone subscribed?
         {
-          ROS_DEBUG("Publishing a full Velodyne scan.");
-          rawscan.header.stamp = ros::Time(time);
-          output.publish(rawscan);
+          output.publish(scan);
+        }
+
+      if (raw_output.getNumSubscribers() > 0) // anyone subscribed?
+        {
+          // allocate a new RawScan message and copy the data
+          velodyne_common::RawScanPtr raw(new velodyne_common::RawScan);
+          size_t psize = velodyne_common::RawScan::PACKET_SIZE;
+          raw->data.resize(npackets * psize);
+          raw->header = scan->header;
+          for (int i = 0; i < npackets; ++i)
+            {
+              memcpy(&raw->data[i*psize], &scan->packets[i].data[0], psize);
+            }
+          raw_output.publish(raw);
         }
     }
 
-  ROS_INFO(NODE ": exiting main loop");
-
+ terminate:
   input->vclose();
-
   delete input;
-
   return 0;
 }
