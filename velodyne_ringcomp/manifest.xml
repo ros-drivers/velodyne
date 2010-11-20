@@ -12,6 +12,7 @@
 
   <depend package="nodelet"/>
   <depend package="roscpp"/>
+  <depend package="rostest"/>
   <depend package="sensor_msgs"/>
   <depend package="velodyne_common"/>
   <depend package="velodyne_msgs"/>

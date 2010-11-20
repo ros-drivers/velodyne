@@ -1,0 +1,12 @@
+<!-- -*- mode: XML -*- -->
+<!-- look for obstacles in Velodyne data
+-->
+
+<launch>
+
+  <include file="$(find velodyne_common)/launch/transform.launch" />
+
+  <node pkg="nodelet" type="nodelet" name="ringcomp_nodelet"
+        args="load velodyne_ringcomp/RingCompNodelet velodyne_nodelet_manager" />
+
+</launch>

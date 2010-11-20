@@ -18,3 +18,4 @@ set(LIBRARY_OUTPUT_PATH ${PROJECT_SOURCE_DIR}/lib)
 
 rosbuild_add_executable(ringcomp src/ringcomp.cc)
 rosbuild_add_library(ringcomp_nodelet src/ringcomp_nodelet.cc)
+rosbuild_add_rostest(tests/ringcomp_hertz.test)
