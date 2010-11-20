@@ -123,22 +123,6 @@ namespace Velodyne
 
     virtual ~Data() {}
 
-    /** \brief Get latest ROS message header.
-     *
-     * \returns NULL, if no message available;
-     *          pointer to latest RawScan message header, otherwise.
-     *
-     *  This will always reflect the current message while any
-     *  callback function is running.
-     */
-    virtual const roslib::Header *getMsgHeader(void) const
-    {
-      if (rawScan_)
-        return &rawScan_->header;
-      else
-        return NULL;
-    }
-
     /** \brief Get ROS parameters.
      *
      *  ROS parameter settings override constructor options

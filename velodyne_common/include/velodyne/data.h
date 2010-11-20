@@ -155,6 +155,7 @@ namespace velodyne
 
     virtual ~Data() {}
 
+#if !ROS_VERSION_MINIMUM(1, 3, 0)
     /** \brief Get latest ROS message header.
      *
      * \returns NULL, if no message available;
@@ -162,6 +163,8 @@ namespace velodyne
      *
      *  This will always reflect the current message while any
      *  callback function is running.
+     *
+     *  \deprecated This interface not supported after cturtle.
      */
     virtual const roslib::Header *getMsgHeader(void) const
     {
@@ -170,6 +173,7 @@ namespace velodyne
       else
         return NULL;
     }
+#endif
 
     /** \brief Get ROS parameters.
      *

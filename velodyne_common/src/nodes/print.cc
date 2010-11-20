@@ -17,7 +17,6 @@
 #include <ros/ros.h>
 
 #include <velodyne/data.h>
-#include <velodyne/running_stats.hh>
 
 #define NODE "velodyne_print"
 
@@ -29,44 +28,7 @@ static std::string ofile = "";
 static int qDepth = 1;                  // ROS topic queue size
 
 // local static data
-static RunningStats latency;
 static velodyne::Data *data = NULL;
-static uint32_t droppedMsgs = 0;
-
-/** \brief accumulate and log message latency, dropped messages */
-void checkLatency()
-{
-  static bool firstMsg = true;          // have we seen any yet?
-  static uint32_t nextSeq = 0;          // next sequence number expected
-
-  // accumulate latency mean and variance
-  const roslib::Header *hdr = data->getMsgHeader();
-  double timeDelay = ros::Time::now().toSec() - hdr->stamp.toSec();
-  latency.addSample(timeDelay);
-  ROS_DEBUG("message %u received, latency: %.3f seconds",
-            hdr->seq, timeDelay);
-
-  // check for lost messages
-  if (firstMsg)
-    {
-      firstMsg = false;
-    }
-  else if (nextSeq < hdr->seq)
-    {
-      // If the publisher terminates and then restarts, the sequence
-      // numbers apparently reset.  We don't count that as a dropped
-      // message.
-      uint32_t missed = hdr->seq - nextSeq;
-      if (droppedMsgs == 0)
-        // only log INFO message the first time
-        ROS_INFO("%u Velodyne messages dropped", missed);
-      else
-        // log DEBUG message for any remaining losses
-        ROS_DEBUG("%u more Velodyne messages dropped", missed);
-      droppedMsgs += missed;
-    }
-  nextSeq = hdr->seq + 1;
-}
 
 /** \brief print Velodyne data points using data class */
 void printPoints(size_t npackets)
@@ -87,14 +49,12 @@ void printPoints(size_t npackets)
 /** \brief callback for laser scans */
 void processScans(const std::vector<velodyne::laserscan_t> &scan)
 {
-  checkLatency();
   printPoints(scan.size() / velodyne::SCANS_PER_PACKET);
 }
 
 /** \brief callback for XYZ points */
 void processXYZ(const std::vector<velodyne::laserscan_xyz_t> &scan)
 {
-  checkLatency();
   printPoints(scan.size() / velodyne::SCANS_PER_PACKET);
 }
 
@@ -213,17 +173,7 @@ int main(int argc, char *argv[])
                    &velodyne::Data::processRawScan, data,
                    ros::TransportHints().tcpNoDelay(true));
 
-  ROS_INFO(NODE ": starting main loop");
-
   ros::spin();                          // handle incoming data
-
-  ROS_INFO(NODE ": exiting main loop");
-  ROS_INFO("message latency: %.3f +/- %.3f",
-           latency.getMean(), latency.getStandardDeviation());
-  if (droppedMsgs)
-    ROS_INFO("total of %u Velodyne messages dropped", droppedMsgs);
-  else
-    ROS_INFO("no Velodyne messages dropped");
 
   data->shutdown();
   delete data;
