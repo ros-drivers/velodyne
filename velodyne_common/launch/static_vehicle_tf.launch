@@ -1,8 +1,5 @@
 <!-- -*- mode: XML -*- -->
-<!-- look for obstacles in a Velodyne PCAP file
-
-     environment: $PCAP = full path name of PCAP file.
--->
+<!-- define transforms for static vehicle sensors -->
 
 <launch>
 
