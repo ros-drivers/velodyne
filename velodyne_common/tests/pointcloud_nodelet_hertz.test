@@ -13,6 +13,7 @@
          value="$(find velodyne_common)/tests/class.pcap"/>
 
   <!-- start nodelet manager, driver and pointcloud nodelets -->
+  <include file="$(find velodyne_common)/launch/nodelet_manager.launch" />
   <include file="$(find velodyne_common)/launch/pointcloud_nodelet.launch" />
 
   <!-- verify PointCloud publication rate -->

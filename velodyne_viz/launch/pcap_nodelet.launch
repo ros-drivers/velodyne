@@ -5,14 +5,13 @@
 -->
 
 <launch>
-  <node pkg="nodelet" type="nodelet" name="velodyne_nodelet_manager"
-        args="manager" />
-  <node pkg="nodelet" type="nodelet" name="pointcloud_nodelet"
-        args="load velodyne_common/PointCloudNodelet velodyne_nodelet_manager" />
-  <node pkg="nodelet" type="nodelet" name="driver_nodelet"
-        args="load velodyne_common/DriverNodelet velodyne_nodelet_manager" >
-    <param name="pcap" value="$(env PCAP)" />
-  </node>
+
+  <param name="driver_nodelet/pcap" value="$(env PCAP)" />
+
+  <!-- start nodelet manager, driver and pointcloud nodelets -->
+  <include file="$(find velodyne_common)/launch/nodelet_manager.launch" />
+  <include file="$(find velodyne_common)/launch/pointcloud_nodelet.launch" />
 
   <node pkg="rviz" type="rviz" name="rviz" />
+
 </launch>
