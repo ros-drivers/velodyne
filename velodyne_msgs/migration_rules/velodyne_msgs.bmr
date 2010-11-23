@@ -1,0 +1,89 @@
+class update__velodyne_common_RawScan__a36da642742ddd79774fbc755f9c5cdd(MessageUpdateRule):
+	old_type = "velodyne_common/RawScan"
+	old_full_text = """
+# Raw Velodyne LIDAR input.
+
+uint32 PACKET_SIZE = 1206
+uint32 PACKETS_PER_REVOLUTION = 260
+
+Header  header          # standard ROS message header
+uint8[] data            # data array
+
+
+================================================================================
+MSG: roslib/Header
+# Standard metadata for higher-level stamped data types.
+# This is generally used to communicate timestamped data 
+# in a particular coordinate frame.
+# 
+# sequence ID: consecutively increasing ID 
+uint32 seq
+#Two-integer timestamp that is expressed as:
+# * stamp.secs: seconds (stamp_secs) since epoch
+# * stamp.nsecs: nanoseconds since stamp_secs
+# time-handling sugar is provided by the client library
+time stamp
+#Frame this data is associated with
+# 0: no frame
+# 1: global frame
+string frame_id
+
+
+"""
+	new_type = "velodyne_msgs/VelodyneScan"
+	new_full_text = """
+# Velodyne LIDAR scan packets.
+
+uint32 PACKETS_PER_REVOLUTION = 260
+
+Header           header         # standard ROS message header
+VelodynePacket[] packets        # vector of raw packets
+
+================================================================================
+MSG: roslib/Header
+# Standard metadata for higher-level stamped data types.
+# This is generally used to communicate timestamped data 
+# in a particular coordinate frame.
+# 
+# sequence ID: consecutively increasing ID 
+uint32 seq
+#Two-integer timestamp that is expressed as:
+# * stamp.secs: seconds (stamp_secs) since epoch
+# * stamp.nsecs: nanoseconds since stamp_secs
+# time-handling sugar is provided by the client library
+time stamp
+#Frame this data is associated with
+# 0: no frame
+# 1: global frame
+string frame_id
+
+================================================================================
+MSG: velodyne_msgs/VelodynePacket
+# Raw Velodyne LIDAR packet.
+
+time stamp              # packet timestamp
+uint8[1206] data        # packet contents
+
+
+
+
+"""
+	order = 0
+	migrated_types = []
+
+	valid = True
+
+	def update(self, old_msg, new_msg):
+            new_msg.header = old_msg.header
+            nbytes = len.old_msg.data
+            packet_size = old_msg.PACKET_SIZE
+            npackets = nbytes / packet_size
+            print nbytes, npackets
+            next = 0
+            for pkt in range(npackets):
+                new_packet = velodyne_msgs.VelodynePacket
+                new_packet.stamp = old_msg.header.stamp
+                for i in range(packet_size):
+                    new_packet.data[i] = old_msg.data[next]
+                    next += 1
+                new_msg.packets.append(new_packet)
