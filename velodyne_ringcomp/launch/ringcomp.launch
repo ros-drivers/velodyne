@@ -4,10 +4,6 @@
 
 <launch>
 
-  <!-- launch nodelet manager, driver and transform -->
-  <include file="$(find velodyne_common)/launch/nodelet_manager.launch" />
-  <include file="$(find velodyne_common)/launch/transform.launch" />
-
   <node pkg="nodelet" type="nodelet" name="ringcomp_nodelet"
         args="load velodyne_ringcomp/RingCompNodelet velodyne_nodelet_manager" />
 
