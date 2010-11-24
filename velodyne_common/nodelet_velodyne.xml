@@ -1,3 +1,13 @@
+<library path="lib/libconvert_rawscan">
+  <class name="velodyne_common/ConvertRawScan"
+         type="ConvertRawScan"
+         base_class_type="nodelet::Nodelet">
+    <description> 
+      Convert old RawScan messages to VelodyneScan.
+    </description>
+  </class>
+</library>
+
 <library path="lib/libdriver_nodelet">
   <class name="velodyne_common/DriverNodelet"
          type="DriverNodelet"

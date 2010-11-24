@@ -1,4 +1,6 @@
 
+rosbuild_add_library(convert_rawscan convert_rawscan.cc)
+
 rosbuild_add_library(driver_nodelet driver_nodelet.cc)
 include_directories(driver_nodelet ${PROJECT_NAME}/include)
 link_directories(driver_nodelet ${PROJECT_NAME}/lib)
