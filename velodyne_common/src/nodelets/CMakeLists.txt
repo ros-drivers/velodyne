@@ -1,4 +1,5 @@
 
+rosbuild_add_library(convert_back convert_back.cc)
 rosbuild_add_library(convert_rawscan convert_rawscan.cc)
 
 rosbuild_add_library(driver_nodelet driver_nodelet.cc)

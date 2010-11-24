@@ -1,3 +1,13 @@
+<library path="lib/libconvert_back">
+  <class name="velodyne_common/ConvertBack"
+         type="ConvertBack"
+         base_class_type="nodelet::Nodelet">
+    <description> 
+      Convert VelodyneScan messages back to old RawScan format.
+    </description>
+  </class>
+</library>
+
 <library path="lib/libconvert_rawscan">
   <class name="velodyne_common/ConvertRawScan"
          type="ConvertRawScan"

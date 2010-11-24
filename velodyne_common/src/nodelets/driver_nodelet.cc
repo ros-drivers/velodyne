@@ -21,7 +21,6 @@
 #include <tf/transform_listener.h>
 
 #include <velodyne/input.h>
-#include <velodyne_common/RawScan.h>
 #include <velodyne_msgs/VelodyneScan.h>
 
 class DriverNodelet: public nodelet::Nodelet
@@ -60,7 +59,6 @@ private:
   std::string frame_id_;                ///< tf frame ID
   velodyne::Input *input_;
   ros::Publisher output_;
-  ros::Publisher raw_output_;
   boost::shared_ptr<boost::thread> deviceThread_;
 };
 
@@ -74,8 +72,8 @@ void DriverNodelet::onInit()
   ROS_DEBUG_STREAM("tf_prefix: " << tf_prefix);
   frame_id_ = tf::resolve(tf_prefix, frame_id_);
 
-  private_nh.param("npackets", npackets_,
-                   (int) velodyne_common::RawScan::PACKETS_PER_REVOLUTION);
+  private_nh.param("npackets", npackets_, (int)
+                   velodyne_msgs::VelodyneScan::PACKETS_PER_REVOLUTION);
 
   std::string dump_file;
   private_nh.param("pcap", dump_file, std::string(""));
@@ -102,7 +100,6 @@ void DriverNodelet::onInit()
     }
 
   output_ = node.advertise<velodyne_msgs::VelodyneScan>("velodyne/packets", 10);
-  raw_output_ = node.advertise<velodyne_common::RawScan>("velodyne/rawscan", 10);
 
   // spawn device thread
   running_ = true;
@@ -136,25 +133,7 @@ void DriverNodelet::devicePoll()
       NODELET_DEBUG("Publishing a full Velodyne scan.");
       scan->header.stamp = ros::Time(scan->packets[npackets_ - 1].stamp);
       scan->header.frame_id = frame_id_;
-
-      if (output_.getNumSubscribers() > 0) // anyone subscribed?
-        {
-          output_.publish(scan);
-        }
-
-      if (raw_output_.getNumSubscribers() > 0) // anyone subscribed?
-        {
-          // allocate a new RawScan message and copy the data
-          velodyne_common::RawScanPtr raw(new velodyne_common::RawScan);
-          size_t psize = velodyne_common::RawScan::PACKET_SIZE;
-          raw->data.resize(npackets_ * psize);
-          raw->header = scan->header;
-          for (int i = 0; i < npackets_; ++i)
-            {
-              memcpy(&raw->data[i*psize], &scan->packets[i].data[0], psize);
-            }
-          raw_output_.publish(raw);
-        }
+      output_.publish(scan);
     }
 }
 
