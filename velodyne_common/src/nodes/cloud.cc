@@ -16,83 +16,99 @@
 #include <ros/ros.h>
 #include <sensor_msgs/PointCloud.h>
 
-#include <velodyne/data_xyz.h>
-using namespace Velodyne;
+#include <velodyne/data.h>
 
 #define NODE "velodyne_cloud"
+
+using namespace velodyne_common;
 
 // command options
 static int qDepth = 1;                  // ROS topic queue size
 
 // local static data
-static ros::Publisher output_;
+static velodyne::DataXYZ *data = NULL;
+static ros::Publisher output;
 
-// point cloud buffer for a complete revolution
-sensor_msgs::PointCloudPtr pc_;
-unsigned pc_next_;
+sensor_msgs::PointCloud pc;             // outgoing PointCloud message
 
-
-/** \brief allocate space for shared PointCloud message
- *
- *  \post pc_ -> to message with enough space for one revolution
- *            of the device
- *        pc_next = 0
- */
-void allocSharedMsg()
-{
-  // allocate a new shared pointer for zero-copy sharing with other nodelets
-  pc_ = sensor_msgs::PointCloudPtr(new sensor_msgs::PointCloud);
-
-  // allocate the anticipated amount of space for the point cloud
-  pc_->points.resize(SCANS_PER_REV);
-  pc_->channels.resize(1);
-  pc_->channels[0].name = "intensity";
-  pc_->channels[0].values.resize(SCANS_PER_REV);
-
-  // set the exact point cloud size
-  pc_->points.resize(SCANS_PER_REV);
-  pc_->channels[0].values.resize(SCANS_PER_REV);
-  pc_next_= 0;
-}
 
 /** \brief callback for XYZ points
  *
  * publishes Velodyne data points as a point cloud
  */
-void processXYZ(const std::vector<laserscan_xyz_t> &scan,
-                ros::Time stamp,
-                const std::string &frame_id)
+void processXYZ(const std::vector<velodyne::laserscan_xyz_t> &scan)
 {
+  // pass along original time stamp and frame ID
+  data->getMsgHeaderFields(pc.header.stamp, pc.header.frame_id);
 
-  // guard against vector indexing overflow
-  ROS_ASSERT(pc_next_ + scan.size() <= pc_->points.size());
+  // set the exact point cloud size -- the vectors should already have
+  // enough space
+  size_t npoints = scan.size();
+  pc.points.resize(npoints);
+  pc.channels[0].values.resize(npoints);
 
-  for (unsigned i = 0; i < scan.size(); ++i)
+  for (unsigned i = 0; i < npoints; ++i)
     {
-      pc_->points[pc_next_].x = scan[i].x;
-      pc_->points[pc_next_].y = scan[i].y;
-      pc_->points[pc_next_].z = scan[i].z;
-      pc_->channels[0].values[pc_next_] = (float) scan[i].intensity;
-      ++pc_next_;
+      pc.points[i].x = scan[i].x;
+      pc.points[i].y = scan[i].y;
+      pc.points[i].z = scan[i].z;
+      pc.channels[0].values[i] = (float) scan[i].intensity;
     }
 
-  if (pc_next_ == pc_->points.size())
+  ROS_DEBUG_STREAM("Publishing " << npoints << " Velodyne points.");
+  output.publish(pc);
+}
+
+void displayHelp() 
+{
+  std::cerr << "format raw Velodyne data and republish as a PointCloud\n"
+            << std::endl
+            << "Usage: rosrun velodyne_file cloud <options>\n"
+            << std::endl
+            << "Options:\n"
+            << "\t -h, -?       print usage message\n"
+            << "\t -q <integer> set ROS topic queue depth (default: 1)\n"
+            << std::endl
+            << "Example:\n"
+            << "  rosrun velodyne_file cloud -q2\n"
+            << std::endl;
+}
+
+
+/** get command line and ROS parameters
+ *
+ * \returns 0 if successful
+ */
+int getParameters(int argc, char *argv[])
+{
+  // use getopt to parse the flags
+  char ch;
+  const char* optflags = "hq:?";
+  while(-1 != (ch = getopt(argc, argv, optflags)))
     {
-      // buffer is full, publish it
-      ROS_DEBUG_STREAM("Publishing " << pc_->points.size()
-                       << " Velodyne points.");
-
-      // set time stamp and frame ID based on last packet received
-      pc_->header.stamp = stamp;
-      pc_->header.frame_id = frame_id;
-
-      ROS_DEBUG_STREAM("Publishing " << pc_next_ << " Velodyne points.");
-      output_.publish(pc_);
-
-      // nodelet sharing requires pc_ not to be modified after
-      // publish(), so allocate a new message
-      allocSharedMsg();
+      switch(ch)
+        {
+        case 'q':
+          qDepth = atoi(optarg);
+          if (qDepth < 1)
+            qDepth = 1;
+          break;
+        default:                        // unknown
+          ROS_WARN("unknown parameter: %c", ch);
+          // fall through to display help...
+        case 'h':                       // help
+        case '?':
+          displayHelp();
+          return 1;
+        }
     }
+
+  ROS_INFO("topic queue depth = %d", qDepth);
+
+  data = new velodyne::DataXYZ();
+  data->getParams();
+
+  return 0;
 }
 
 int main(int argc, char *argv[])
@@ -100,11 +116,8 @@ int main(int argc, char *argv[])
   ros::init(argc, argv, NODE);
   ros::NodeHandle node;
 
-  // allocate space for the first PointCloud message
-  allocSharedMsg();
-
-  static DataXYZ *data = new DataXYZ();
-  data->getParams();
+  if (0 != getParameters(argc, argv))
+    return 9;
 
   if (0 != data->setup())
     return 2;
@@ -113,14 +126,24 @@ int main(int argc, char *argv[])
   // so any missed scans are discarded.  Otherwise latency gets out of
   // hand.  It's bad enough anyway.
   ros::Subscriber velodyne_scan =
-    data->subscribe(node, "velodyne/packets", 1,
-                     boost::bind(&processXYZ, _1, _2, _3),
-                     ros::TransportHints().tcpNoDelay(true));
+    data->subscribe(node, "velodyne/rawscan", qDepth,
+                    boost::bind(&processXYZ, _1),
+                    ros::TransportHints().tcpNoDelay(true));
 
-  output_ = node.advertise<sensor_msgs::PointCloud>("velodyne/pointcloud",
+  output = node.advertise<sensor_msgs::PointCloud>("velodyne/pointcloud",
                                                    qDepth);
 
+  // preallocate the anticipated amount of space for the point cloud
+  pc.points.resize(velodyne::SCANS_PER_REV);
+  pc.channels.resize(1);
+  pc.channels[0].name = "intensity";
+  pc.channels[0].values.resize(velodyne::SCANS_PER_REV);
+
+  ROS_DEBUG(NODE ": starting main loop");
+
   ros::spin();                          // handle incoming data
+
+  ROS_DEBUG(NODE ": exiting main loop");
 
   data->shutdown();
   delete data;
