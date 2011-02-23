@@ -18,5 +18,18 @@ set(LIBRARY_OUTPUT_PATH ${PROJECT_SOURCE_DIR}/lib)
 
 rosbuild_add_executable(ringcomp src/ringcomp.cc)
 rosbuild_add_library(ringcomp_nodelet src/ringcomp_nodelet.cc)
-rosbuild_add_rostest(tests/ringcomp_hertz.test)
-rosbuild_add_rostest(tests/multi_ringcomp_hertz.test)
+
+# driver unit tests
+#
+# $ROS_BUILD_TEST_LABEL controls which label "make test" runs
+#
+#  * if unset, all tests run
+#
+#  * tests labelled "realtime" use a downloaded pcap, but may not work
+#    on heavily-loaded build machines
+#
+#  * only unlabelled tests or those labelled "hudson" automatically
+#    run on the ROS build machines
+#
+rosbuild_add_rostest_labeled(realtime tests/ringcomp_hertz.test)
+rosbuild_add_rostest_labeled(realtime tests/multi_ringcomp_hertz.test)
