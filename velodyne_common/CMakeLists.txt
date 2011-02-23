@@ -33,8 +33,19 @@ add_subdirectory(src/lib)
 add_subdirectory(src/nodes)
 add_subdirectory(src/nodelets)
 
-# testing
+# driver unit tests
+#
+# $ROS_BUILD_TEST_LABEL controls which label "make test" runs
+#
+#  * if unset, all tests run
+#
+#  * tests labelled "realtime" use a downloaded pcap, but may not work
+#    on heavily-loaded build machines
+#
+#  * only unlabelled tests or those labelled "hudson" automatically
+#    run on the ROS build machines
+#
 add_subdirectory(tests)
-rosbuild_add_rostest(tests/pcap_hertz.test)
-rosbuild_add_rostest(tests/pointcloud_nodelet_hertz.test)
-rosbuild_add_rostest(tests/transform_hertz.test)
+rosbuild_add_rostest_labeled(realtime tests/pcap_hertz.test)
+rosbuild_add_rostest_labeled(realtime tests/pointcloud_nodelet_hertz.test)
+rosbuild_add_rostest_labeled(realtime tests/transform_hertz.test)
