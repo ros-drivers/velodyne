@@ -8,11 +8,11 @@
   <license>BSD</license>  
   <review status="experimental" notes=""/>
   <url>http://ros.org/wiki/velodyne</url>
-
   <depend stack="common" /> <!-- nodelet -->
   <depend stack="common_msgs" /> <!-- sensor_msgs -->
   <depend stack="geometry" /> <!-- tf, angles -->
-  <depend stack="ros" /> <!-- rostest, rosbag, roscpp -->
+  <depend stack="ros" />
+  <depend stack="ros_comm" /> <!-- rostest, rosbag, roscpp -->
   <depend stack="visualization" /> <!-- rviz -->
 
 </stack>
