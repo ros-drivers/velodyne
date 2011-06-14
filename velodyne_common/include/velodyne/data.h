@@ -124,6 +124,7 @@ namespace velodyne
     float rotational;
     float vertical;
     float offset1, offset2, offset3;
+    float horzCorr, vertCorr;
     int   enabled;
   };
 
@@ -303,6 +304,8 @@ namespace velodyne
     float range;                        ///< in meters
     float heading;                      ///< in radians
     float pitch;                        ///< in radians
+    float horzCorr;                     ///< in meters
+    float vertCorr;                     ///< in meters
     uint16_t revolution;
     uint8_t  laser_number;
     uint8_t  intensity;

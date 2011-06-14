@@ -21,6 +21,8 @@
  *
  *  \author Patrick Beeson
  *  \author Jack O'Quin
+ *
+ *  HDL-64E S2 calibration support provided by Nick Hillier
  */
 
 #include <fstream>
@@ -135,26 +137,35 @@ namespace Velodyne
     float rotational = 0;
     float vertical = 0;
     int enabled = 0;
-    float offset1=0;
-    float offset2=0;
-    float offset3=0;
+    float offset1 = 0;
+    float offset2 = 0;
+    float offset3 = 0;
+    float horzCorr = 0;
+    float vertCorr = 0;
   
     correction_angles * angles = 0;
   
     char buffer[256];
     while(config.getline(buffer, sizeof(buffer)))
       {
-        if (buffer[0] == '#') continue;
+        if (buffer[0] == '#') 
+          continue;
         else if (strcmp(buffer, "upper") == 0)
           continue;
-        else if(strcmp(buffer, "lower") == 0) 
+        else if (strcmp(buffer, "lower") == 0) 
           continue;
-        else if(sscanf(buffer,"%d %f %f %f %f %f %d", &index, &rotational,
-                       &vertical, &offset1, &offset2, &offset3, &enabled) == 7)
+        else if ((sscanf(buffer,"%d %f %f %f %f %f %d", &index, &rotational,
+                         &vertical, &offset1, &offset2,
+                         &offset3, &enabled) == 7)
+                 || (sscanf(buffer,"%d %f %f %f %f %f %f %f %d", &index,
+                            &rotational, &vertical, &offset1, &offset2,
+                            &offset3, &vertCorr, &horzCorr, &enabled) == 9))
           {
             int ind=index;
-            if (index < 32) 
-              angles=&lower_[0];
+            if (index < 32)
+              {
+                angles=&lower_[0];
+              }
             else
               {
                 angles=&upper_[0];
@@ -165,16 +176,22 @@ namespace Velodyne
             angles[ind].offset1 = offset1;
             angles[ind].offset2 = offset2;
             angles[ind].offset3 = offset3;
+            angles[ind].horzCorr = horzCorr;
+            angles[ind].vertCorr = vertCorr;
             angles[ind].enabled = enabled;
 
-//#define DEBUG_ANGLES 1
+// Nodes start with log level INFO by default, so it is hard to catch 
+// this when using a ROS_DEBUG message, hence the #define DEBUG_ANGLES
+//#define DEBUG_ANGLES 1    
 #ifdef DEBUG_ANGLES
-            ROS_DEBUG(stderr, "%d %.2f %.6f %.f %.f %.2f %d",
-                      index, rotational, vertical,
-                      angles[ind].offset1,
-                      angles[ind].offset2,
-                      angles[ind].offset3,
-                      angles[ind].enabled);
+            ROS_INFO("%d %.2f %.6f %.f %.f %.2f %.3f %.3f %d",
+                     index, rotational, vertical,
+                     angles[ind].offset1,
+                     angles[ind].offset2,
+                     angles[ind].offset3,
+                     angles[ind].horzCorr,
+                     angles[ind].vertCorr,
+                     angles[ind].enabled);
 #endif
           }
       }
