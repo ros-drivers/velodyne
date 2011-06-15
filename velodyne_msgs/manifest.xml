@@ -1,7 +1,7 @@
 <package>
   <description brief="Velodyne HDL-64E 3D LIDAR messages">
 
-     ROS message definitions for Velodyne HDL-64E 3D LIDAR.
+     ROS message definitions for Velodyne HDL-64E and HDL-64E S2 3D LIDARs.
 
   </description>
   <author>Jack O'Quin</author>
