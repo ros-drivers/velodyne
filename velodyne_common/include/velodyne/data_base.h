@@ -112,6 +112,7 @@ namespace Velodyne
     float rotational;
     float vertical;
     float offset1, offset2, offset3;
+    float horzCorr, vertCorr;
     int   enabled;
   };
 

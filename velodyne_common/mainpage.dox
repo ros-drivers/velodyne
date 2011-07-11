@@ -4,7 +4,7 @@
 \htmlinclude manifest.html
 
 The velodyne_common ROS package contains includes, messages, libraries
-and utilities for the Velodyne HDL-64E 3D LIDAR.
+and utilities for the Velodyne HDL-64E and HDL-64E S2 3D LIDARs.
 
 
 \section codeapi Programming API
@@ -38,8 +38,8 @@ ROS parameters are relative to the calling node's name space:
 
 \section read Velodyne read device driver
 
-ROS device driver node that captures Velodyne HDL-64E 3D LIDAR data
-and publishes it to the \b velodyne/rawscan topic.
+ROS device driver node that captures Velodyne HDL-64E or HDL-64E S2 3D
+LIDAR data and publishes it to the \b velodyne/rawscan topic.
 
 \subsection read_usage Usage
 

@@ -4,7 +4,7 @@
 #rosbuild_add_gtest_build_flags(unit_test)
 
 rosbuild_download_test_data(
-  http://www.cs.utexas.edu/users/joq/velodyne/class.pcap
+  http://pr.willowgarage.com/data/velodyne/class.pcap
   tests/class.pcap
   65808d25772101358a3719b451b3d015
   )
