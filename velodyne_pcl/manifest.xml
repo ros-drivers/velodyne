@@ -18,11 +18,9 @@
   <depend package="velodyne_common"/>
   <depend package="velodyne_msgs"/>
 
-  <!--
-  <depend package="pcl_visualization"/>
-  <depend package="eigen"/>
-  <depend package="stereo_msgs"/>
-  -->
+  <export>
+    <nodelet plugin="${prefix}/nodelets.xml"/>
+  </export>
 
 </package>
 

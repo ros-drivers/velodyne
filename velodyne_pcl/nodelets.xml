@@ -1,0 +1,9 @@
+<library path="lib/cloud2_nodelet">
+  <class name="velodyne_pcl/Cloud2Nodelet"
+         type="Cloud2Nodelet"
+         base_class_type="nodelet::Nodelet">
+    <description>
+      Aggregates points from multiple scans, publishing PointCloud2.
+    </description>
+  </class>
+</library>
