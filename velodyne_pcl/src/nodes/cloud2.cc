@@ -1,5 +1,6 @@
 /*
  *  Copyright (C) 2009 Austin Robot Technology, Jack O'Quin
+ *  Copyright (C) 2011 Jesse Vera
  * 
  *  License: Modified BSD Software License Agreement
  *
