@@ -1,0 +1,29 @@
+<package>
+  <description brief="Velodyne PCL interfaces">
+
+     ROS Point Cloud Library interfaces for Velodyne high-definition
+     LIDARs.
+
+  </description>
+  <author>Jack O'Quin, Jesse Vera</author>
+  <license>BSD</license>
+  <review status="experimental" notes=""/>
+  <url>http://ros.org/wiki/velodyne_pcl</url>
+
+  <depend package="nodelet"/>
+  <depend package="pcl"/>
+  <depend package="pcl_ros"/>
+  <depend package="sensor_msgs"/>
+  <depend package="tf"/>
+  <depend package="velodyne_common"/>
+  <depend package="velodyne_msgs"/>
+
+  <!--
+  <depend package="pcl_visualization"/>
+  <depend package="eigen"/>
+  <depend package="stereo_msgs"/>
+  -->
+
+</package>
+
+

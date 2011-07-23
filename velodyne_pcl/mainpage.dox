@@ -1,0 +1,8 @@
+/**
+\mainpage
+\htmlinclude manifest.html
+
+Nodes and nodelets for providing Velodyne LIDAR data to Point Cloud
+Library clients.
+
+*/
