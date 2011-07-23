@@ -173,10 +173,11 @@ void TransformNodelet::allocSharedMsg()
 
 /** \brief callback for packets in XYZ format
  *
- *  converts Velodyne data for a single packet into a point cloud
- *  transforms the packet point cloud into the target frame
- *  collects transformed packets into a larger message (generally a full revolution)
- *  periodically publishes those collected transformed data as a point cloud
+ *  Converts Velodyne data for a single packet into a point cloud.
+ *  Transforms the packet point cloud into the target frame, and
+ *  collects transformed packets into a larger message (generally a
+ *  full revolution).  Periodically publishes those collected
+ *  transformed data as a PointCloud2
  */
 void TransformNodelet::processXYZ(const std::vector<laserscan_xyz_t> &scan,
                                    ros::Time stamp,
