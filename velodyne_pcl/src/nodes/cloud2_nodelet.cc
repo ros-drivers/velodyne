@@ -29,15 +29,13 @@
 namespace velodyne_pcl
 {
 
-using namespace Velodyne;
-
 class Cloud2Nodelet: public nodelet::Nodelet
 {
 public:
 
   Cloud2Nodelet()
   {
-    data_ = new DataXYZ();
+    data_ = new Velodyne::DataXYZ();
   }
   ~Cloud2Nodelet()
   {
@@ -47,7 +45,7 @@ public:
 private:
 
   virtual void onInit();
-  void processXYZ(const std::vector<laserscan_xyz_t> &scan,
+  void processXYZ(const std::vector<Velodyne::laserscan_xyz_t> &scan,
                   ros::Time stamp,
                   const std::string &frame_id);
   void allocSharedMsg();
@@ -65,7 +63,7 @@ private:
   float max_range2_;
   float min_range2_;
 
-  DataXYZ *data_;                       /// @todo use boost::shared_ptr
+  Velodyne::DataXYZ *data_;            /// @todo use boost::shared_ptr
   ros::Subscriber velodyne_scan_;
   ros::Publisher output_;
   tf::TransformListener listener_;
@@ -103,8 +101,8 @@ private:
 #endif
 
   // point cloud buffers for collecting points over time
-  sensor_msgs::PointCloud2    cloud2_;
-  sensor_msgs::PointCloud2Ptr outPtr_;
+  pcl::PointCloud<pcl::PointXYZI>::PointCloud pc_;
+  sensor_msgs::PointCloud2Ptr outPtr_;  // ROS output message
   //unsigned pc_next_;
 };
 
@@ -126,7 +124,7 @@ void Cloud2Nodelet::onInit()
   min_range2_ = config_.min_range * config_.min_range;
   max_range2_ = config_.max_range * config_.max_range;
 
-  private_nh.param("npackets", config_.npackets, PACKETS_PER_REV);
+  private_nh.param("npackets", config_.npackets, Velodyne::PACKETS_PER_REV);
   NODELET_INFO_STREAM("number of packets to accumulate: " << config_.npackets);
 
 
@@ -195,9 +193,10 @@ void Cloud2Nodelet::allocSharedMsg()
  *  full revolution).  Periodically publishes those collected
  *  transformed data as a PointCloud2
  */
-void Cloud2Nodelet::processXYZ(const std::vector<laserscan_xyz_t> &scan,
-                                   ros::Time stamp,
-                                   const std::string &frame_id)
+void
+  Cloud2Nodelet::processXYZ(const std::vector<Velodyne::laserscan_xyz_t> &scan,
+                            ros::Time stamp,
+                            const std::string &frame_id)
 {
   if (output_.getNumSubscribers() == 0)         // no one listening?
     return;                                     // avoid much work
@@ -207,47 +206,28 @@ void Cloud2Nodelet::processXYZ(const std::vector<laserscan_xyz_t> &scan,
 
   // set the exact point cloud size
   size_t npoints = scan.size();
-  cloud2_.width = npoints;
-  cloud2_.height = 1;
-#if USE_NATIVE_POINT_TYPE
-  cloud2_.fields.resize(4);
-#else
-  cloud2_.fields.resize(5);
-  cloud2_.fields[4].name = "ring";
-#endif
-  cloud2_.fields[0].name = "x";
-  cloud2_.fields[1].name = "y";
-  cloud2_.fields[2].name = "z";
-  cloud2_.fields[3].name = "intensity";
+  pc_.points.resize(npoints);
 
-  // Set all the fields types accordingly
-  int offset = 0;
-  for (size_t s = 0; s < cloud2_.fields.size (); ++s, offset += 4)
+  // (Maybe) organize values into rows by ring number?  May not work,
+  // because some rings have more data than others (I think).
+  pc_.width = npoints;
+  pc_.height = 1;
+  pc_.is_dense = true;
+
+  // fill in point values
+  for (size_t i = 0; i < npoints; ++i)
   {
-    cloud2_.fields[s].offset   = offset;
-    cloud2_.fields[s].count    = 1;
-    cloud2_.fields[s].datatype = sensor_msgs::PointField::FLOAT32;
-  }
+    pc_.points[i].x = scan[i].x;
+    pc_.points[i].y = scan[i].y;
+    pc_.points[i].z = scan[i].z;
+    pc_.points[i].intensity = scan[i].intensity;
 
-  cloud2_.point_step = offset;
-  cloud2_.row_step   = cloud2_.point_step * cloud2_.width;
-  cloud2_.data.resize (cloud2_.row_step   * cloud2_.height);
-  cloud2_.is_dense = true;
-
-#if 0
-  for (int i = 0; i < npoints; ++i)
-  {
-    cloud2_.x[i] = scan[i].x;
-    cloud->points[i].y = scan[i].y;
-    cloud->points[i].z = scan[i].z;
-    cloud->points[i].intensity = scan[i].intensity;
 #if USE_NATIVE_POINT_TYPE
-    cloud->points[i].ring = velodyne::LASER_RING[scan[i].laser_number];
+    pc_[i].ring = velodyne::LASER_RING[scan[i].laser_number];
 #endif
   }
   
-  pcl::toROSMsg(cloud2_, *outPtr_);
-#endif
+  pcl::toROSMsg(pc_, *outPtr_);
  
   // set time stamp and frame ID based on last packet received
   outPtr_->header.stamp = stamp;
@@ -257,7 +237,8 @@ void Cloud2Nodelet::processXYZ(const std::vector<laserscan_xyz_t> &scan,
   // nodelet sharing requires outPtr_ not to be modified after
   // publish(), so allocate a new message
   allocSharedMsg();
-/*
+
+#if 0
   if (pc_next_ == outPtr_->points.size())
     {
       // buffer is full, publish it
@@ -274,7 +255,7 @@ void Cloud2Nodelet::processXYZ(const std::vector<laserscan_xyz_t> &scan,
       // publish(), so allocate a new message
       allocSharedMsg();
     }
-*/
+#endif
 }
 
 } // namespace velodyne_pcl
