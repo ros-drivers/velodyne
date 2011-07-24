@@ -33,14 +33,8 @@ class Cloud2Nodelet: public nodelet::Nodelet
 {
 public:
 
-  Cloud2Nodelet()
-  {
-    data_ = new Velodyne::DataXYZ();
-  }
-  ~Cloud2Nodelet()
-  {
-    delete data_;
-  }
+  Cloud2Nodelet() {}
+  ~Cloud2Nodelet() {}
 
 private:
 
@@ -63,7 +57,7 @@ private:
   float max_range2_;
   float min_range2_;
 
-  Velodyne::DataXYZ *data_;            /// @todo use boost::shared_ptr
+  boost::shared_ptr<Velodyne::DataXYZ> data_;
   ros::Subscriber velodyne_scan_;
   ros::Publisher output_;
   tf::TransformListener listener_;
@@ -101,13 +95,15 @@ private:
 #endif
 
   // point cloud buffers for collecting points over time
-  pcl::PointCloud<pcl::PointXYZI>::PointCloud pc_;
-  sensor_msgs::PointCloud2Ptr outPtr_;  // ROS output message
+  pcl::PointCloud<pcl::PointXYZI> pc_;
+  sensor_msgs::PointCloud2Ptr outPtr_;  // ROS output message pointer
   //unsigned pc_next_;
 };
 
 void Cloud2Nodelet::onInit()
 {
+  data_.reset(new Velodyne::DataXYZ());
+
   // use private node handle to get parameters
   ros::NodeHandle private_nh = getPrivateNodeHandle();
   private_nh.param("frame_id", config_.frame_id, std::string("odom"));
@@ -127,18 +123,15 @@ void Cloud2Nodelet::onInit()
   private_nh.param("npackets", config_.npackets, Velodyne::PACKETS_PER_REV);
   NODELET_INFO_STREAM("number of packets to accumulate: " << config_.npackets);
 
-
-  // allocate space for the first PointCloud message
-  allocSharedMsg();
-
   data_->getParams();
 
   if (0 != data_->setup())
     return;
 
-#if 0
-  // allocate space for the first PointCloud message
+  // allocate space for the first PointCloud2 message
   allocSharedMsg();
+
+#if 0
   packetCount_ = 0;
 
   // allocate exact sizes for inMsg_ and tfMsg_ (single packet)
@@ -159,7 +152,6 @@ void Cloud2Nodelet::onInit()
                      ros::TransportHints().tcpNoDelay(true));
 }
 
-#if 0
 /** \brief allocate space for shared PointCloud message
  *
  *  \post outPtr_ -> to message with enough space for one revolution
@@ -169,7 +161,8 @@ void Cloud2Nodelet::onInit()
 void Cloud2Nodelet::allocSharedMsg()
 {  
   // allocate a new shared pointer for zero-copy sharing with other nodelets
-  outPtr_ = sensor_msgs::PointCloud2Ptr(new sensor_msgs::PointCloud2);
+  outPtr_.reset(new sensor_msgs::PointCloud2());
+
 /*
   // allocate the anticipated amount of space for the point cloud
   outPtr_->points.resize(SCANS_PER_REV);
@@ -181,9 +174,8 @@ void Cloud2Nodelet::allocSharedMsg()
   outPtr_->points.resize(SCANS_PER_REV);
   outPtr_->channels[0].values.resize(SCANS_PER_REV);
   pc_next_= 0;
-  */
+*/
 }
-#endif
 
 /** \brief callback for XYZ points
  *
@@ -233,12 +225,12 @@ void
   outPtr_->header.stamp = stamp;
   outPtr_->header.frame_id = frame_id;
   
+#if 1 // not yet accumulating multiple packets
   output_.publish(outPtr_);
   // nodelet sharing requires outPtr_ not to be modified after
   // publish(), so allocate a new message
   allocSharedMsg();
-
-#if 0
+#else // accumulate multiple packets
   if (pc_next_ == outPtr_->points.size())
     {
       // buffer is full, publish it
