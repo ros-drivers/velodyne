@@ -21,23 +21,15 @@
 #include <tf/transform_listener.h>
 #include <sensor_msgs/PointCloud2.h>
 
+#include <velodyne/ring_sequence.h>
+#include <velodyne_pcl/point_types.h>
+
 #include <pcl/io/pcd_io.h>
-#include <pcl/point_types.h>
 #include <pcl/point_cloud.h>
 #include <pcl_ros/transforms.h>
 
 namespace velodyne_pcl
 {
-
-  //PointType def
-  struct VelodynePoint
-  {
-    PCL_ADD_POINT4D;          // preferred way of adding a XYZ+padding
-    uint8_t intensity;
-    uint8_t ring;
-    EIGEN_MAKE_ALIGNED_OPERATOR_NEW   // make sure our new allocators are aligned
-  } EIGEN_ALIGN16;                    // enforce SSE padding for correct memory alignment
-
   class Cloud2Nodelet: public nodelet::Nodelet
   {
   public:
@@ -81,7 +73,7 @@ namespace velodyne_pcl
     Config config_;
 
     // point cloud buffers for collecting points over time
-    pcl::PointCloud<pcl::PointXYZI> pc_;
+    pcl::PointCloud<velodyne_pcl::PointXYZIR> pc_;
     sensor_msgs::PointCloud2Ptr outPtr_;  // ROS output message pointer
     //unsigned pc_next_;
   };
@@ -204,10 +196,7 @@ namespace velodyne_pcl
       pc_.points[i].y = scan[i].y;
       pc_.points[i].z = scan[i].z;
       pc_.points[i].intensity = scan[i].intensity;
-
-#if USE_NATIVE_POINT_TYPE
-      pc_[i].ring = velodyne::LASER_RING[scan[i].laser_number];
-#endif
+      pc_.points[i].ring = velodyne::LASER_RING[scan[i].laser_number];
     }
     
     pcl::toROSMsg(pc_, *outPtr_);
@@ -243,13 +232,6 @@ namespace velodyne_pcl
 
 } // namespace velodyne_pcl
 
-POINT_CLOUD_REGISTER_POINT_STRUCT(velodyne_pcl::VelodynePoint,
-                                  (float, x, x)
-                                  (float, y, y)
-                                  (float, z, z)
-                                  (uint8_t, intensity, intensity)
-                                  (uint8_t, ring, ring)
-)
 
 // Register this plugin with pluginlib.  Names must match nodelet_velodyne.xml.
 //
