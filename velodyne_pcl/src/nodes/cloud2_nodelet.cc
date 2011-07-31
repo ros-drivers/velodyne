@@ -33,7 +33,6 @@ namespace velodyne_pcl
   struct VelodynePoint
   {
     PCL_ADD_POINT4D;          // preferred way of adding a XYZ+padding
-    double time_stamp;
     uint8_t intensity;
     uint8_t ring;
     EIGEN_MAKE_ALIGNED_OPERATOR_NEW   // make sure our new allocators are aligned
@@ -89,6 +88,8 @@ namespace velodyne_pcl
 
   void Cloud2Nodelet::onInit()
   {
+    std::cerr << "Cloud2Nodelet::onInit() called" << std::endl;
+
     data_.reset(new Velodyne::DataXYZ());
 
     // use private node handle to get parameters
@@ -108,7 +109,8 @@ namespace velodyne_pcl
     max_range2_ = config_.max_range * config_.max_range;
 
     private_nh.param("npackets", config_.npackets, Velodyne::PACKETS_PER_REV);
-    NODELET_INFO_STREAM("number of packets to accumulate: " << config_.npackets);
+    NODELET_INFO_STREAM("number of packets to accumulate: "
+                        << config_.npackets);
 
     data_->getParams();
 
@@ -177,6 +179,8 @@ namespace velodyne_pcl
                               ros::Time stamp,
                               const std::string &frame_id)
   {
+    std::cerr << "Cloud2Nodelet::processXYZ() called" << std::endl;
+
     if (output_.getNumSubscribers() == 0)         // no one listening?
       return;                                     // avoid much work
     

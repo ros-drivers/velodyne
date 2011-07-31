@@ -19,6 +19,7 @@
   <depend package="velodyne_msgs"/>
 
   <export>
+    <cpp cflags="-I${prefix}/include" />
     <nodelet plugin="${prefix}/nodelets.xml"/>
   </export>
 

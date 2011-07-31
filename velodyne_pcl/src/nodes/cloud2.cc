@@ -15,17 +15,17 @@
 */
 
 #include <ros/ros.h>
+#include <tf/transform_listener.h>
 #include <sensor_msgs/PointCloud2.h>
 #include <velodyne/data.h>
+#include <velodyne/ring_sequence.h>
 
-#include <pcl/point_types.h>
+#include <velodyne_pcl/point_types.h>
+
 #include <pcl/io/pcd_io.h>
-#include <pcl_ros/transforms.h>
-#include <tf/transform_listener.h>
+//#include <pcl_ros/transforms.h>
 
 #define NODE "velodyne_cloud2"
-
-using namespace velodyne_common;
 
 // command options
 static int qDepth = 1;                  // ROS topic queue size
@@ -34,7 +34,7 @@ static int qDepth = 1;                  // ROS topic queue size
 static velodyne::DataXYZ *data = NULL;
 static ros::Publisher output;
 
-pcl::PointCloud<pcl::PointXYZI>::Ptr cloud;
+pcl::PointCloud<velodyne_pcl::PointXYZIR>::Ptr cloud;
 sensor_msgs::PointCloud2 pc2_;         // outgoing PointCloud2 message
 
 
@@ -54,14 +54,12 @@ void processXYZ(const std::vector<velodyne::laserscan_xyz_t> &scan)
     cloud->points[i].y = scan[i].y;
     cloud->points[i].z = scan[i].z;
     cloud->points[i].intensity = (float) scan[i].intensity;
+    cloud->points[i].ring = velodyne::LASER_RING[scan[i].laser_number];
   }
 
   // copy data to a ROS PointCloud2 message
   sensor_msgs::PointCloud2 pc2;
   pcl::toROSMsg(*cloud, pc2);
-
-  /// @todo Format data directly into the PointCloud2 message, instead
-  ///       of converting it from a PointCloud.
   
   // pass along original time stamp and frame ID
   data->getMsgHeaderFields(pc2.header.stamp, pc2.header.frame_id);
@@ -173,7 +171,7 @@ int main(int argc, char *argv[])
                                                    qDepth);
 
   // preallocate space for PointXYZI data
-  cloud.reset(new pcl::PointCloud<pcl::PointXYZI>);
+  cloud.reset(new pcl::PointCloud<velodyne_pcl::PointXYZIR>);
 
   ROS_DEBUG(NODE ": starting main loop");
 
