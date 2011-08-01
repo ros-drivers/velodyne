@@ -19,16 +19,6 @@ set(LIBRARY_OUTPUT_PATH ${PROJECT_SOURCE_DIR}/lib)
 add_subdirectory(src/nodes)
 
 # unit tests
-#
-# $ROS_BUILD_TEST_LABEL controls which label "make test" runs
-#
-#  * if unset, all tests run
-#
-#  * tests labelled "broken" do not work, hence not run automatically
-#
-#  * only unlabelled tests or those labelled "hudson" automatically
-#    run on the ROS build machines
-#
 add_subdirectory(tests)
 rosbuild_add_rostest(tests/cloud2_node_hz.test)
-rosbuild_add_rostest_labeled(broken tests/cloud2_nodelet_hz.test)
+rosbuild_add_rostest(tests/cloud2_nodelet_hz.test)
