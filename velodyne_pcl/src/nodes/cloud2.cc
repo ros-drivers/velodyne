@@ -4,7 +4,7 @@
  * 
  *  License: Modified BSD Software License Agreement
  *
- *  $Id: cloud.cc 887 2010-12-07 01:28:50Z jack.oquin $
+ *  $Id$
  */
 
 /** \file

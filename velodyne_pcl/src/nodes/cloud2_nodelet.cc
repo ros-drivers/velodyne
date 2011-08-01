@@ -3,7 +3,7 @@
  *  Copyright (C) 2011 Jesse Vera
  *  License: Modified BSD Software License Agreement
  *
- *  $Id: base_cloud2_nodelet.cc 779 2010-11-13 19:41:40Z jesse.vera $
+ *  $Id$
  */
 
 /** \file
