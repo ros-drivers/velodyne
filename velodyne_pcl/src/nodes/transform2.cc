@@ -1,6 +1,5 @@
 /*
- *  Copyright (C) 2009, 2010 Austin Robot Technology, Jack O'Quin
- *  Copyright (C) 2011 Jesse Vera
+ *  Copyright (C) 2009, 2011 Austin Robot Technology
  *  License: Modified BSD Software License Agreement
  *
  *  $Id$
@@ -9,8 +8,10 @@
 /** \file
 
     This ROS nodelet converts raw Velodyne HDL-64E 3D LIDAR packets to
-    a PointCloud2.
+    a PointCloud2 in the /odom frame.
 
+    @author Jack O'Quin
+    @author Jesse Vera
 */
 
 #include <ros/ros.h>
@@ -18,6 +19,7 @@
 #include <nodelet/nodelet.h>
 
 #include <velodyne/data_xyz.h>
+#include <tf/transform_listener.h>
 #include <sensor_msgs/PointCloud2.h>
 
 #include <velodyne/ring_sequence.h>
@@ -25,15 +27,16 @@
 
 #include <pcl/io/pcd_io.h>
 #include <pcl/point_cloud.h>
+#include <pcl_ros/transforms.h>
 
 namespace velodyne_pcl
 {
-  class Cloud2Nodelet: public nodelet::Nodelet
+  class Transform2: public nodelet::Nodelet
   {
   public:
 
-    Cloud2Nodelet() {}
-    ~Cloud2Nodelet() {}
+    Transform2() {}
+    ~Transform2() {}
 
   private:
 
@@ -58,9 +61,11 @@ namespace velodyne_pcl
     boost::shared_ptr<Velodyne::DataXYZ> data_;
     ros::Subscriber velodyne_scan_;
     ros::Publisher output_;
+    tf::TransformListener listener_;
 
     /// configuration parameters
     typedef struct {
+      std::string frame_id;            ///< target tf frame ID
       double max_range;                ///< maximum range to publish
       double min_range;                ///< minimum range to publish
       int npackets;                    ///< number of packets to combine
@@ -74,12 +79,17 @@ namespace velodyne_pcl
   };
 
   /** @brief Nodelet initialization. */
-  void Cloud2Nodelet::onInit()
+  void Transform2::onInit()
   {
     data_.reset(new Velodyne::DataXYZ());
 
     // use private node handle to get parameters
     ros::NodeHandle private_nh = getPrivateNodeHandle();
+
+    private_nh.param("frame_id", config_.frame_id, std::string("odom"));
+    std::string tf_prefix = tf::getPrefixParam(private_nh);
+    config_.frame_id = tf::resolve(tf_prefix, config_.frame_id);
+    NODELET_INFO_STREAM("target frame ID: " << config_.frame_id);
 
     private_nh.param("max_range", config_.max_range,
                      (double) Velodyne::DISTANCE_MAX);
@@ -115,7 +125,7 @@ namespace velodyne_pcl
     // subscribe to Velodyne data
     velodyne_scan_ =
       data_->subscribe(node, "velodyne/packets", 10,
-                       boost::bind(&Cloud2Nodelet::processXYZ,
+                       boost::bind(&Transform2::processXYZ,
                                    this, _1, _2, _3),
                        ros::TransportHints().tcpNoDelay(true));
   }
@@ -123,11 +133,16 @@ namespace velodyne_pcl
   /** \brief Callback for XYZ points.
    *
    *  Converts Velodyne data for a single packet into a point cloud.
-   *  Collects packets into a larger message (generally a full
-   *  revolution).  Periodically publishes collected data as a
-   *  PointCloud2 message.
+   *  Transforms the packet point cloud into the target frame, and
+   *  collects transformed packets into a larger message (generally a
+   *  full revolution).  Periodically publishes those collected
+   *  transformed data as a PointCloud2
+   *
+   *  @todo Maybe organize values into rows by ring number?  May not
+   *        work, because some rings have more data than others (I
+   *        think).
    */
-  void Cloud2Nodelet::processXYZ(const Velodyne::xyz_scans_t &scan,
+  void Transform2::processXYZ(const Velodyne::xyz_scans_t &scan,
                                  ros::Time stamp,
                                  const std::string &frame_id)
   {
@@ -157,9 +172,10 @@ namespace velodyne_pcl
         sensor_msgs::PointCloud2Ptr outMsg(new sensor_msgs::PointCloud2());
         pcl::toROSMsg(pc_, *outMsg);
 
-        // publish the accumulated point cloud
+        // publish the accumulated, transformed point cloud
         outMsg->header.stamp = stamp;               // time of last packet
         outMsg->header.frame_id = frame_id;         // input frame ID
+        //outMsg->header.frame_id = config_.frame_id; // target frame ID
 
         NODELET_DEBUG_STREAM("Publishing " << outMsg->height * outMsg->width
                              << " Velodyne points.");
@@ -176,5 +192,5 @@ namespace velodyne_pcl
 // Register this plugin with pluginlib.  Names must match nodelet_velodyne.xml.
 //
 // parameters: package, class name, class type, base class type
-PLUGINLIB_DECLARE_CLASS(velodyne_pcl, Cloud2Nodelet,
-                        velodyne_pcl::Cloud2Nodelet, nodelet::Nodelet);
+PLUGINLIB_DECLARE_CLASS(velodyne_pcl, Transform2,
+                        velodyne_pcl::Transform2, nodelet::Nodelet);
