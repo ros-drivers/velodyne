@@ -9,7 +9,7 @@
 /** \file
 
     This ROS nodelet converts raw Velodyne HDL-64E 3D LIDAR packets to
-    a PointCloud2 in the /odom frame.
+    a PointCloud2.
 
 */
 
@@ -18,7 +18,6 @@
 #include <nodelet/nodelet.h>
 
 #include <velodyne/data_xyz.h>
-#include <tf/transform_listener.h>
 #include <sensor_msgs/PointCloud2.h>
 
 #include <velodyne/ring_sequence.h>
@@ -26,7 +25,6 @@
 
 #include <pcl/io/pcd_io.h>
 #include <pcl/point_cloud.h>
-#include <pcl_ros/transforms.h>
 
 namespace velodyne_pcl
 {
@@ -40,13 +38,12 @@ namespace velodyne_pcl
   private:
 
     virtual void onInit();
-    void processXYZ(const std::vector<Velodyne::laserscan_xyz_t> &scan,
+    void processXYZ(const Velodyne::xyz_scans_t &scan,
                     ros::Time stamp,
                     const std::string &frame_id);
-    void allocSharedMsg();
 
     /** in-line test whether a point is in range */
-    bool pointInRange(geometry_msgs::Point32 &point)
+    bool pointInRange(const velodyne_pcl::PointXYZIR &point)
     {
       float sum2 = (point.x * point.x 
                     + point.y * point.y
@@ -61,11 +58,9 @@ namespace velodyne_pcl
     boost::shared_ptr<Velodyne::DataXYZ> data_;
     ros::Subscriber velodyne_scan_;
     ros::Publisher output_;
-    tf::TransformListener listener_;
 
     /// configuration parameters
     typedef struct {
-      std::string frame_id;            ///< target tf frame ID
       double max_range;                ///< maximum range to publish
       double min_range;                ///< minimum range to publish
       int npackets;                    ///< number of packets to combine
@@ -73,9 +68,9 @@ namespace velodyne_pcl
     Config config_;
 
     // point cloud buffers for collecting points over time
+    // (class members to avoid allocation and deallocation overhead)
     pcl::PointCloud<velodyne_pcl::PointXYZIR> pc_;
-    sensor_msgs::PointCloud2Ptr outPtr_;  // ROS output message pointer
-    //unsigned pc_next_;
+    int packetCount_;           ///< count of output packets collected
   };
 
   void Cloud2Nodelet::onInit()
@@ -84,10 +79,6 @@ namespace velodyne_pcl
 
     // use private node handle to get parameters
     ros::NodeHandle private_nh = getPrivateNodeHandle();
-    private_nh.param("frame_id", config_.frame_id, std::string("odom"));
-    std::string tf_prefix = tf::getPrefixParam(private_nh);
-    config_.frame_id = tf::resolve(tf_prefix, config_.frame_id);
-    NODELET_INFO_STREAM("target frame ID: " << config_.frame_id);
 
     private_nh.param("max_range", config_.max_range,
                      (double) Velodyne::DISTANCE_MAX);
@@ -107,16 +98,15 @@ namespace velodyne_pcl
     if (0 != data_->setup())
       return;
 
-    // allocate space for the first PointCloud2 message
-    allocSharedMsg();
-
 #if 0
-    packetCount_ = 0;
-
+    // allocate space for the output point cloud
+    allocSharedMsg();
     // allocate exact sizes for inMsg_ and tfMsg_ (single packet)
     allocPacketMsg(inMsg_);
     allocPacketMsg(tfMsg_);
 #endif
+
+    packetCount_ = 0;
 
     // advertise output point cloud (before subscribing to input data)
     ros::NodeHandle node = getNodeHandle();
@@ -131,49 +121,20 @@ namespace velodyne_pcl
                        ros::TransportHints().tcpNoDelay(true));
   }
 
-  /** \brief allocate space for shared PointCloud message
-   *
-   *  \post outPtr_ -> to message with enough space for one revolution
-   *            of the device
-   *        pc_next = 0
-   */
-  void Cloud2Nodelet::allocSharedMsg()
-  {  
-    // allocate a new shared pointer for zero-copy sharing with other nodelets
-    outPtr_.reset(new sensor_msgs::PointCloud2());
-
-  /*
-    // allocate the anticipated amount of space for the point cloud
-    outPtr_->points.resize(SCANS_PER_REV);
-    outPtr_->channels.resize(1);
-    outPtr_->channels[0].name = "intensity";
-    outPtr_->channels[0].values.resize(SCANS_PER_REV);
-
-    // set the exact point cloud size
-    outPtr_->points.resize(SCANS_PER_REV);
-    outPtr_->channels[0].values.resize(SCANS_PER_REV);
-    pc_next_= 0;
-  */
-  }
-
   /** \brief callback for XYZ points
    *
    *  Converts Velodyne data for a single packet into a point cloud.
-   *  Transforms the packet point cloud into the target frame, and
-   *  collects transformed packets into a larger message (generally a
-   *  full revolution).  Periodically publishes those collected
-   *  transformed data as a PointCloud2
+   *  Collects packets into a larger message (generally a full
+   *  revolution).  Periodically publishes those data as a PointCloud2
    */
-  void
-    Cloud2Nodelet::processXYZ(const std::vector<Velodyne::laserscan_xyz_t> &scan,
-                              ros::Time stamp,
-                              const std::string &frame_id)
+  void Cloud2Nodelet::processXYZ(const Velodyne::xyz_scans_t &scan,
+                                 ros::Time stamp,
+                                 const std::string &frame_id)
   {
     if (output_.getNumSubscribers() == 0)         // no one listening?
       return;                                     // avoid much work
     
     // guard against vector indexing overflow
-    //ROS_ASSERT(pc_next_ + scan.size() <= outPtr_->points.size());
 
     // set the exact point cloud size
     size_t npoints = scan.size();
@@ -195,34 +156,33 @@ namespace velodyne_pcl
       pc_.points[i].ring = velodyne::LASER_RING[scan[i].laser_number];
     }
     
-    pcl::toROSMsg(pc_, *outPtr_);
-   
-    // set time stamp and frame ID based on last packet received
-    outPtr_->header.stamp = stamp;
-    outPtr_->header.frame_id = frame_id;
-    
 #if 1 // not yet accumulating multiple packets
-    output_.publish(outPtr_);
-    // nodelet sharing requires outPtr_ not to be modified after
-    // publish(), so allocate a new message
-    allocSharedMsg();
+
+    sensor_msgs::PointCloud2Ptr outMsg(new sensor_msgs::PointCloud2());
+    pcl::toROSMsg(pc_, *outMsg);
+   
+    outMsg->header.stamp = stamp;               // packet time stamp
+    outMsg->header.frame_id = frame_id;         // input frame ID
+    output_.publish(outMsg);
+
 #else // accumulate multiple packets
-    if (pc_next_ == outPtr_->points.size())
+
+    if (++packetCount_ >= config_.npackets)
       {
         // buffer is full, publish it
-        NODELET_DEBUG_STREAM("Publishing " << outPtr_->points.size()
+        sensor_msgs::PointCloud2Ptr outMsg(new sensor_msgs::PointCloud2());
+        pcl::toROSMsg(pc_, *outMsg);
+
+        // publish the accumulated point cloud
+        outMsg->header.stamp = stamp;               // time of last packet
+        outMsg->header.frame_id = frame_id;         // input frame ID
+
+        NODELET_DEBUG_STREAM("Publishing " << outMsg->points.size()
                              << " Velodyne points.");
-
-        // set time stamp and frame ID based on last packet received
-        outPtr_->header.stamp = stamp;
-        outPtr_->header.frame_id = frame_id;
-
-        output_.publish(outPtr_);
-
-        // nodelet sharing requires outPtr_ not to be modified after
-        // publish(), so allocate a new message
-        allocSharedMsg();
+        output_.publish(outMsg);
+        packetCount_ = 0;
       }
+
 #endif
   }
 

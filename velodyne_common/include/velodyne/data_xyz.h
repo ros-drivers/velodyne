@@ -40,13 +40,16 @@ namespace Velodyne
     uint8_t  intensity;
   } laserscan_xyz_t;
 
+  /** \brief vector of XYZ laser scans */
+  typedef std::vector<laserscan_xyz_t> xyz_scans_t;
+
   /** \brief type of callback function to receive XYZ laser scans
    *
    *  \param scan vector containing the XYZ scans for a single packet
    *  \param stamp ROS time stamp of packet
    *  \param frame_id ROS frame ID of packet
    */
-  typedef boost::function<void(const std::vector<laserscan_xyz_t> &scan,
+  typedef boost::function<void(const xyz_scans_t &scan,
                                ros::Time stamp,
                                const std::string &frame_id)> xyzCallback;
 
@@ -84,9 +87,7 @@ namespace Velodyne
 
   protected:
     void scan2xyz(const laserscan_t *scan, laserscan_xyz_t *point);
-
-    // derived class data
-    std::vector<laserscan_xyz_t> xyzScans_;
+    xyz_scans_t xyzScans_;              ///< vector of XYZ scans
 
   private:
     xyzCallback cb_;                    ///< XYZ packet callback

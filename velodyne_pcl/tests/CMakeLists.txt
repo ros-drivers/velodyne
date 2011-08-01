@@ -1,4 +1,4 @@
-# unit test uses gtest, but needs rostest to create a ROS environment
+# download example PCAP file
 
 rosbuild_download_test_data(
   http://pr.willowgarage.com/data/velodyne/class.pcap
