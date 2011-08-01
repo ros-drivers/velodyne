@@ -1,0 +1,28 @@
+<!-- -*- mode: XML -*- -->
+<!-- rostest of reading Velodyne PCAP files
+
+     Uses rostest, because a running roscore is required.
+
+     $Id: pcap_hertz.test 781 2010-11-14 15:47:40Z jack.oquin $
+  -->
+
+<launch>
+
+  <!-- start read with example PCAP file -->
+  <node pkg="velodyne_common" type="read" name="read">
+    <param name="pcap" value="$(find velodyne_pcl)/tests/class.pcap"/>
+  </node>
+
+  <!-- start cloud2 node -->
+  <node pkg="velodyne_pcl" type="cloud2" name="cloud2_node" />
+
+  <test test-name="cloud2_node_hz_test" pkg="rostest" type="hztest"
+        name="hztest1" >
+    <param name="hz" value="9.75" />
+    <param name="hzerror" value="0.75" />
+    <param name="test_duration" value="10.0" />    
+    <param name="topic" value="velodyne/pointcloud2" />  
+    <param name="wait_time" value="5.0" />  
+  </test>
+
+</launch>
