@@ -73,6 +73,7 @@ namespace velodyne_pcl
     int packetCount_;           ///< count of output packets collected
   };
 
+  /** @brief Nodelet initialization. */
   void Cloud2Nodelet::onInit()
   {
     data_.reset(new Velodyne::DataXYZ());
@@ -98,14 +99,12 @@ namespace velodyne_pcl
     if (0 != data_->setup())
       return;
 
-#if 0
-    // allocate space for the output point cloud
-    allocSharedMsg();
-    // allocate exact sizes for inMsg_ and tfMsg_ (single packet)
-    allocPacketMsg(inMsg_);
-    allocPacketMsg(tfMsg_);
-#endif
-
+    // allocate space for the output point cloud data
+    pc_.points.reserve(config_.npackets*Velodyne::SCANS_PER_PACKET);
+    pc_.points.clear();
+    pc_.width = 0;
+    pc_.height = 1;
+    pc_.is_dense = true;
     packetCount_ = 0;
 
     // advertise output point cloud (before subscribing to input data)
@@ -121,11 +120,16 @@ namespace velodyne_pcl
                        ros::TransportHints().tcpNoDelay(true));
   }
 
-  /** \brief callback for XYZ points
+  /** \brief Callback for XYZ points.
    *
    *  Converts Velodyne data for a single packet into a point cloud.
    *  Collects packets into a larger message (generally a full
-   *  revolution).  Periodically publishes those data as a PointCloud2
+   *  revolution).  Periodically publishes collected data as a
+   *  PointCloud2 message.
+   *
+   *  @todo Maybe organize values into rows by ring number?  May not
+   *        work, because some rings have more data than others (I
+   *        think).
    */
   void Cloud2Nodelet::processXYZ(const Velodyne::xyz_scans_t &scan,
                                  ros::Time stamp,
@@ -134,38 +138,22 @@ namespace velodyne_pcl
     if (output_.getNumSubscribers() == 0)         // no one listening?
       return;                                     // avoid much work
     
-    // guard against vector indexing overflow
-
-    // set the exact point cloud size
-    size_t npoints = scan.size();
-    pc_.points.resize(npoints);
-
-    // (Maybe) organize values into rows by ring number?  May not work,
-    // because some rings have more data than others (I think).
-    pc_.width = npoints;
-    pc_.height = 1;
-    pc_.is_dense = true;
-
     // fill in point values
+    size_t npoints = scan.size();
     for (size_t i = 0; i < npoints; ++i)
     {
-      pc_.points[i].x = scan[i].x;
-      pc_.points[i].y = scan[i].y;
-      pc_.points[i].z = scan[i].z;
-      pc_.points[i].intensity = scan[i].intensity;
-      pc_.points[i].ring = velodyne::LASER_RING[scan[i].laser_number];
+      velodyne_pcl::PointXYZIR p;
+      p.x = scan[i].x;
+      p.y = scan[i].y;
+      p.z = scan[i].z;
+      if (pointInRange(p))
+        {
+          p.intensity = scan[i].intensity;
+          p.ring = velodyne::LASER_RING[scan[i].laser_number];
+          pc_.points.push_back(p);
+          ++pc_.width;
+        }
     }
-    
-#if 1 // not yet accumulating multiple packets
-
-    sensor_msgs::PointCloud2Ptr outMsg(new sensor_msgs::PointCloud2());
-    pcl::toROSMsg(pc_, *outMsg);
-   
-    outMsg->header.stamp = stamp;               // packet time stamp
-    outMsg->header.frame_id = frame_id;         // input frame ID
-    output_.publish(outMsg);
-
-#else // accumulate multiple packets
 
     if (++packetCount_ >= config_.npackets)
       {
@@ -177,13 +165,13 @@ namespace velodyne_pcl
         outMsg->header.stamp = stamp;               // time of last packet
         outMsg->header.frame_id = frame_id;         // input frame ID
 
-        NODELET_DEBUG_STREAM("Publishing " << outMsg->points.size()
+        NODELET_DEBUG_STREAM("Publishing " << outMsg->height * outMsg->width
                              << " Velodyne points.");
         output_.publish(outMsg);
+        pc_.points.clear();
+        pc_.width = 0;
         packetCount_ = 0;
       }
-
-#endif
   }
 
 } // namespace velodyne_pcl
