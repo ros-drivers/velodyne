@@ -80,8 +80,6 @@ namespace velodyne_pcl
 
   void Cloud2Nodelet::onInit()
   {
-    std::cerr << "Cloud2Nodelet::onInit() called" << std::endl;
-
     data_.reset(new Velodyne::DataXYZ());
 
     // use private node handle to get parameters
@@ -171,8 +169,6 @@ namespace velodyne_pcl
                               ros::Time stamp,
                               const std::string &frame_id)
   {
-    std::cerr << "Cloud2Nodelet::processXYZ() called" << std::endl;
-
     if (output_.getNumSubscribers() == 0)         // no one listening?
       return;                                     // avoid much work
     
