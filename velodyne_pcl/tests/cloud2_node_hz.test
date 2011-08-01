@@ -3,7 +3,7 @@
 
      Uses rostest, because a running roscore is required.
 
-     $Id: pcap_hertz.test 781 2010-11-14 15:47:40Z jack.oquin $
+     $Id$
   -->
 
 <launch>

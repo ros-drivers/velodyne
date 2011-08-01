@@ -3,7 +3,7 @@
 
      Uses rostest, because a running roscore is required.
 
-     $Id: transform_hertz.test 838 2010-11-21 04:00:15Z jack.oquin $
+     $Id$
   -->
 
 <launch>
