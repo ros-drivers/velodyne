@@ -3,7 +3,18 @@
          type="velodyne_pcl::Cloud2Nodelet"
          base_class_type="nodelet::Nodelet">
     <description>
-      Aggregates points from multiple scans, publishing PointCloud2.
+      Aggregates points from multiple packets, publishing PointCloud2.
+    </description>
+  </class>
+</library>
+
+<library path="lib/libtransform2">
+  <class name="velodyne_pcl/Transform2"
+         type="velodyne_pcl::Transform2"
+         base_class_type="nodelet::Nodelet">
+    <description>
+      Transforms packets into /odom frame, publishing multiple packets
+      as PointCloud2.
     </description>
   </class>
 </library>
