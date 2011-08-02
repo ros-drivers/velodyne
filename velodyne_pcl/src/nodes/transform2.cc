@@ -14,12 +14,12 @@
     @author Jesse Vera
 */
 
+/// @todo make sure all these includes are really necessary
 #include <ros/ros.h>
 #include <pluginlib/class_list_macros.h>
 #include <nodelet/nodelet.h>
 
 #include <velodyne/data_xyz.h>
-#include <tf/transform_listener.h>
 #include <sensor_msgs/PointCloud2.h>
 
 #include <velodyne/ring_sequence.h>
@@ -27,10 +27,27 @@
 
 #include <pcl/io/pcd_io.h>
 #include <pcl/point_cloud.h>
-#include <pcl_ros/transforms.h>
+
+// include template implementations to transform a custom point cloud
+#include <pcl_ros/impl/transforms.hpp>
+
+/** types of point and cloud to work with */
+typedef velodyne_pcl::PointXYZIR VPoint;
+typedef pcl::PointCloud<VPoint> VPointCloud;
+
+// instantiate template for transforming a VPointCloud
+template bool
+  pcl_ros::transformPointCloud<VPoint>(const std::string &,
+                                       const VPointCloud &,
+                                       VPointCloud &,
+                                       const tf::TransformListener &);
 
 namespace velodyne_pcl
 {
+  /** types of point and cloud to work with */
+  typedef PointXYZIR VPoint;
+  typedef pcl::PointCloud<VPoint> VPointCloud;
+
   class Transform2: public nodelet::Nodelet
   {
   public:
@@ -38,9 +55,11 @@ namespace velodyne_pcl
     Transform2() {}
     ~Transform2() {}
 
+    virtual void onInit();
+
   private:
 
-    virtual void onInit();
+    void allocPCloud(VPointCloud &pc, size_t reservation);
     void processXYZ(const Velodyne::xyz_scans_t &scan,
                     ros::Time stamp,
                     const std::string &frame_id);
@@ -72,11 +91,24 @@ namespace velodyne_pcl
     } Config;
     Config config_;
 
-    // point cloud buffers for collecting points over time
-    // (class members to avoid allocation and deallocation overhead)
-    pcl::PointCloud<velodyne_pcl::PointXYZIR> pc_;
-    int packetCount_;           ///< count of output packets collected
+    // Point cloud buffers for collecting points over time.  The inPc_
+    // and tfPc_ are class members only to avoid allocation and
+    // deallocation overhead.
+    VPointCloud inPc_;              ///< input packet point cloud
+    VPointCloud tfPc_;              ///< transformed packet point cloud
+    VPointCloud outPc_;             ///< output point cloud
+    int packetCount_;              ///< count of packets collected
   };
+
+  /** @brief Allocate space in a point cloud. */
+  void Transform2::allocPCloud(VPointCloud &pc, size_t reservation)
+  {
+    pc.points.reserve(reservation);
+    pc.points.clear();
+    pc.width = 0;
+    pc.height = 1;
+    pc.is_dense = true;
+  }
 
   /** @brief Nodelet initialization. */
   void Transform2::onInit()
@@ -109,12 +141,10 @@ namespace velodyne_pcl
     if (0 != data_->setup())
       return;
 
-    // allocate space for the output point cloud data
-    pc_.points.reserve(config_.npackets*Velodyne::SCANS_PER_PACKET);
-    pc_.points.clear();
-    pc_.width = 0;
-    pc_.height = 1;
-    pc_.is_dense = true;
+    // allocate space in packet-handling point clouds
+    allocPCloud(inPc_, Velodyne::SCANS_PER_PACKET);
+    allocPCloud(tfPc_, Velodyne::SCANS_PER_PACKET);
+    allocPCloud(outPc_, Velodyne::SCANS_PER_PACKET*config_.npackets);
     packetCount_ = 0;
 
     // advertise output point cloud (before subscribing to input data)
@@ -148,7 +178,13 @@ namespace velodyne_pcl
   {
     if (output_.getNumSubscribers() == 0)         // no one listening?
       return;                                     // avoid much work
-    
+
+    // clear input point cloud to handle this packet
+    inPc_.points.clear();
+    inPc_.width = 0;
+    inPc_.header.stamp = stamp;
+    inPc_.header.frame_id = frame_id;
+
     // fill in point values
     size_t npoints = scan.size();
     for (size_t i = 0; i < npoints; ++i)
@@ -161,33 +197,57 @@ namespace velodyne_pcl
         {
           p.intensity = scan[i].intensity;
           p.ring = velodyne::LASER_RING[scan[i].laser_number];
-          pc_.points.push_back(p);
-          ++pc_.width;
+          inPc_.points.push_back(p);
+          ++inPc_.width;
         }
     }
 
+    // transform the packet point cloud into the target frame
+    try
+      {
+        tfPc_.points.clear();           // is this needed?
+        tfPc_.width = 0;
+        NODELET_DEBUG_STREAM("transforming from" << inPc_.header.frame_id
+                             << " to " << config_.frame_id);
+        /// @todo wait for transform to be available
+        pcl_ros::transformPointCloud(config_.frame_id, inPc_, tfPc_,
+                                     listener_);
+      }
+    catch (tf::TransformException ex)
+      {
+        // only log tf error once every 20 times
+        ROS_WARN_THROTTLE(20, "%s", ex.what());
+        return;                           // skip this packet
+      }
+
+    // append transformed packet data to end of output message
+    outPc_.points.insert(outPc_.points.end(),
+                         tfPc_.points.begin(),
+                         tfPc_.points.end());
+    outPc_.width += tfPc_.points.size();
+
     if (++packetCount_ >= config_.npackets)
       {
-        // buffer is full, publish it
+        // Output buffer full, allocate a new shared message pointer
+        // to publish it.  That eliminates further copying when
+        // nodelets in the same address space subscribe.
         sensor_msgs::PointCloud2Ptr outMsg(new sensor_msgs::PointCloud2());
-        pcl::toROSMsg(pc_, *outMsg);
+        pcl::toROSMsg(outPc_, *outMsg);
 
         // publish the accumulated, transformed point cloud
         outMsg->header.stamp = stamp;               // time of last packet
-        outMsg->header.frame_id = frame_id;         // input frame ID
-        //outMsg->header.frame_id = config_.frame_id; // target frame ID
+        outMsg->header.frame_id = config_.frame_id; // target frame ID
 
         NODELET_DEBUG_STREAM("Publishing " << outMsg->height * outMsg->width
                              << " Velodyne points.");
         output_.publish(outMsg);
-        pc_.points.clear();
-        pc_.width = 0;
+        outPc_.points.clear();
+        outPc_.width = 0;
         packetCount_ = 0;
       }
   }
 
 } // namespace velodyne_pcl
-
 
 // Register this plugin with pluginlib.  Names must match nodelet_velodyne.xml.
 //
