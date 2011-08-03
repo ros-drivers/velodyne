@@ -8,6 +8,16 @@
   </class>
 </library>
 
+<library path="lib/libring_colors">
+  <class name="velodyne_pcl/RingColors"
+         type="velodyne_pcl::RingColors"
+         base_class_type="nodelet::Nodelet">
+    <description>
+      Assigns colors to the Velodyne laser rings for visualization.
+    </description>
+  </class>
+</library>
+
 <library path="lib/libtransform2">
   <class name="velodyne_pcl/Transform2"
          type="velodyne_pcl::Transform2"
