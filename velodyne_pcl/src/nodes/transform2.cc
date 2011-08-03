@@ -44,10 +44,6 @@ template bool
 
 namespace velodyne_pcl
 {
-  /** types of point and cloud to work with */
-  typedef PointXYZIR VPoint;
-  typedef pcl::PointCloud<VPoint> VPointCloud;
-
   class Transform2: public nodelet::Nodelet
   {
   public:
