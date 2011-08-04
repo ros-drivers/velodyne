@@ -59,7 +59,7 @@ namespace velodyne_pcl
 
   private:
 
-    void convertPoints(const sensor_msgs::PointCloud2Ptr &inMsg);
+    void convertPoints(const sensor_msgs::PointCloud2ConstPtr &inMsg);
 
     ros::Subscriber input_;
     ros::Publisher output_;
@@ -112,7 +112,8 @@ namespace velodyne_pcl
    *        work, because some rings have more data than others (I
    *        think).
    */
-  void RingColors::convertPoints(const sensor_msgs::PointCloud2Ptr &inMsg)
+  void
+    RingColors::convertPoints(const sensor_msgs::PointCloud2ConstPtr &inMsg)
   {
     if (output_.getNumSubscribers() == 0)         // no one listening?
       return;                                     // do nothing
