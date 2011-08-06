@@ -206,6 +206,8 @@ namespace velodyne_pcl
         NODELET_DEBUG_STREAM("transforming from" << inPc_.header.frame_id
                              << " to " << config_.frame_id);
         /// @todo wait for transform to be available
+        listener_.waitForTransform(config_.frame_id, frame_id, stamp,
+                                   ros::Duration(0.2));
         pcl_ros::transformPointCloud(config_.frame_id, inPc_, tfPc_,
                                      listener_);
       }
