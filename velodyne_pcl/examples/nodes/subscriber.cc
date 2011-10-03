@@ -10,9 +10,9 @@ typedef pcl::PointCloud<VPoint> VPointCloud;
 
 void callback(const VPointCloud::ConstPtr& msg) {
   printf ("Cloud: width = %d, height = %d\n", msg->width, msg->height);
-  BOOST_FOREACH (const VPoint& pt, msg->points) {
-    printf ("\t(%f, %f, %f, %f, %i)\n", pt.x, pt.y, pt.z, pt.intensity, pt.ring);
-  }
+  //BOOST_FOREACH (const VPoint& pt, msg->points) {
+    //printf ("\t(%f, %f, %f, %f, %i)\n", pt.x, pt.y, pt.z, pt.intensity, pt.ring);
+  //}
 }
 
 int main(int argc, char** argv) {
