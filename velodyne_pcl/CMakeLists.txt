@@ -18,6 +18,7 @@ set(LIBRARY_OUTPUT_PATH ${PROJECT_SOURCE_DIR}/lib)
 
 add_subdirectory(src/nodes)
 add_subdirectory(examples/nodes)
+add_subdirectory(examples/nodelets)
 
 # unit tests
 add_subdirectory(tests)

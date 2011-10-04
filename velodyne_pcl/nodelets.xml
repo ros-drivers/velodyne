@@ -28,3 +28,27 @@
     </description>
   </class>
 </library>
+  
+<library path="lib/libexample_publisher_nodelet">
+  <class name="velodyne_pcl/ExamplePublisherNodelet"
+         type="velodyne_pcl::ExamplePublisherNodelet"
+         base_class_type="nodelet::Nodelet">
+    <description>
+      Example nodelet converting VelodyneScan to pcl::PointCloud.
+      Collects packets for 1 complete revolution and publishes a 
+      pcl::PointCloud using the pcl_ros bridge
+    </description>
+  </class>
+</library>
+
+<library path="lib/libexample_subscriber_nodelet">
+  <class name="velodyne_pcl/ExampleSubscriberNodelet"
+         type="velodyne_pcl::ExampleSubscriberNodelet"
+         base_class_type="nodelet::Nodelet">
+    <description>
+      Example nodelet subscribes to pcl::PointCloud using pcl_ros 
+      bridge. Performs euclidean cluster extraction on this 
+      pointcloud.
+    </description>
+  </class>
+</library>

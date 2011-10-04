@@ -15,7 +15,7 @@ namespace {
   VPointCloud::Ptr vpc_;
   ros::Publisher velodyne_pub_;
   ros::Subscriber velodyne_sub_;
-  uint16_t TOTAL_PACKETS = velodyne_msgs::VelodyneScan::PACKETS_PER_REVOLUTION;
+  uint16_t total_packets_ = velodyne_msgs::VelodyneScan::PACKETS_PER_REVOLUTION;
   uint16_t packet_count_ = 0;
 }
 
@@ -43,7 +43,7 @@ void processXYZ(const Velodyne::xyz_scans_t &scan,
 
   packet_count_++;
 
-  if (packet_count_ == TOTAL_PACKETS) {
+  if (packet_count_ == total_packets_) {
     ROS_INFO("Publishing %i packets", packet_count_);
     velodyne_pub_.publish(vpc_);
     vpc_->points.clear();
@@ -71,7 +71,7 @@ int main(int argc, char** argv) {
 
   vpc_.reset(new VPointCloud);
   vpc_->height = velodyne::N_LASERS;
-  vpc_->width = TOTAL_PACKETS * Velodyne::SCANS_PER_PACKET / vpc_->height;
+  vpc_->width = total_packets_ * Velodyne::SCANS_PER_PACKET / vpc_->height;
 
   ros::spin();
 
