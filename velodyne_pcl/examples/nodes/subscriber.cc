@@ -19,15 +19,11 @@ void callback(const VPointCloud::ConstPtr& msg) {
   ROS_INFO("Cloud: width = %d, height = %d", msg->width, msg->height);
 
   // Extracting clusters.
-  pcl::KdTree<VPoint>::Ptr tree (new pcl::KdTreeFLANN<VPoint>);
-  tree->setInputCloud (msg);
-
   std::vector<pcl::PointIndices> cluster_indices;
   pcl::EuclideanClusterExtraction<VPoint> ec;
   ec.setClusterTolerance(0.1); 
   ec.setMinClusterSize(100);
   ec.setMaxClusterSize(200);
-  ec.setSearchMethod(tree);
   ec.setInputCloud(msg);
   ec.extract(cluster_indices);
 

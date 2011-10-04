@@ -48,12 +48,12 @@ namespace velodyne_pcl {
                        boost::bind(&ExamplePublisherNodelet::processXYZ, this, _1, _2, _3),
                        ros::TransportHints().tcpNoDelay(true));
 
+    packet_count_ = 0;
+    total_packets_ = velodyne_msgs::VelodyneScan::PACKETS_PER_REVOLUTION;
+
     vpc_.reset(new VPointCloud);
     vpc_->height = velodyne::N_LASERS;
     vpc_->width = total_packets_ * Velodyne::SCANS_PER_PACKET / vpc_->height;
-    
-    packet_count_ = 0;
-    total_packets_ = velodyne_msgs::VelodyneScan::PACKETS_PER_REVOLUTION;
 
   }
 

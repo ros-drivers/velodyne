@@ -1,2 +1,2 @@
-rosbuild_add_library(example_publiser_nodelet publisher_nodelet.cc)
+rosbuild_add_library(example_publisher_nodelet publisher_nodelet.cc)
 rosbuild_add_library(example_subscriber_nodelet subscriber_nodelet.cc)
