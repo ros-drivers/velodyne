@@ -1,0 +1,9 @@
+<library path="lib/libheight_map_nodelet">
+  <class name="velodyne_height_map/HeightMapNodelet"
+         type="HeightMapNodelet"
+         base_class_type="nodelet::Nodelet">
+    <description> 
+      Publish Velodyne height map obstacles as PointCloud.
+    </description>
+  </class>
+</library>

@@ -1,0 +1,25 @@
+<package>
+  <description brief="velodyne_height_map">
+
+    Outputs a obstacle point cloud based on a height-map algorithm.
+
+  </description>
+  <author>David Claridge, Michael Quinlan</author>
+  <license>BSD</license>
+  <review status="experimental" notes=""/>
+  <url>http://ros.org/wiki/velodyne_height_map</url>
+
+  <depend package="angles"/>
+  <depend package="nodelet"/>
+  <depend package="roscpp"/>
+  <depend package="sensor_msgs"/>
+  <depend package="velodyne_common"/>
+  <depend package="velodyne_msgs"/>
+
+  <export>
+    <nodelet plugin="${prefix}/height_map_nodelet.xml"/>
+  </export>
+
+</package>
+
+
