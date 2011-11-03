@@ -17,6 +17,7 @@ set(EXECUTABLE_OUTPUT_PATH ${PROJECT_SOURCE_DIR}/bin)
 set(LIBRARY_OUTPUT_PATH ${PROJECT_SOURCE_DIR}/lib)
 
 add_subdirectory(src/nodes)
+add_subdirectory(src/nodelets)
 add_subdirectory(examples/nodes)
 add_subdirectory(examples/nodelets)
 

@@ -11,7 +11,7 @@
 
 namespace velodyne_pcl {
 
-  class ExamplePublisherNodelet: public nodelet::Nodelet {
+  class PublisherNodelet: public nodelet::Nodelet {
 
     typedef velodyne_pcl::PointXYZIR VPoint;
     typedef pcl::PointCloud<VPoint> VPointCloud;
@@ -32,7 +32,7 @@ namespace velodyne_pcl {
     uint16_t total_packets_;
   };
 
-  void ExamplePublisherNodelet::onInit() {
+  void PublisherNodelet::onInit() {
 
     ros::NodeHandle node = getNodeHandle();
 
@@ -45,7 +45,7 @@ namespace velodyne_pcl {
 
     velodyne_sub_ =
       data_->subscribe(node, "velodyne/packets", 1,
-                       boost::bind(&ExamplePublisherNodelet::processXYZ, this, _1, _2, _3),
+                       boost::bind(&PublisherNodelet::processXYZ, this, _1, _2, _3),
                        ros::TransportHints().tcpNoDelay(true));
 
     packet_count_ = 0;
@@ -57,7 +57,7 @@ namespace velodyne_pcl {
 
   }
 
-  void ExamplePublisherNodelet::processXYZ(const Velodyne::xyz_scans_t &scan,
+  void PublisherNodelet::processXYZ(const Velodyne::xyz_scans_t &scan,
                                  ros::Time stamp,
                                  const std::string &frame_id) {
 
@@ -93,5 +93,5 @@ namespace velodyne_pcl {
 
 // Register this plugin with pluginlib. Names must match nodelets.xml.
 // parameters: package, class name, class type, base class type
-PLUGINLIB_DECLARE_CLASS(velodyne_pcl, ExamplePublisherNodelet,
-                        velodyne_pcl::ExamplePublisherNodelet, nodelet::Nodelet);
+PLUGINLIB_DECLARE_CLASS(velodyne_pcl, PublisherNodelet,
+                        velodyne_pcl::PublisherNodelet, nodelet::Nodelet);

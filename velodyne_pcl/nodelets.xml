@@ -29,9 +29,9 @@
   </class>
 </library>
   
-<library path="lib/libexample_publisher_nodelet">
-  <class name="velodyne_pcl/ExamplePublisherNodelet"
-         type="velodyne_pcl::ExamplePublisherNodelet"
+<library path="lib/libpublisher_nodelet">
+  <class name="velodyne_pcl/PublisherNodelet"
+         type="velodyne_pcl::PublisherNodelet"
          base_class_type="nodelet::Nodelet">
     <description>
       Example nodelet converting VelodyneScan to pcl::PointCloud.
