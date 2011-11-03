@@ -31,7 +31,7 @@ namespace velodyne_pcl {
 
   void ExampleSubscriberNodelet::onInit() {
     ros::NodeHandle node = getNodeHandle();
-    sub_ = node.subscribe<VPointCloud>("velodyne/pcl_points2", 1, 
+    sub_ = node.subscribe<VPointCloud>("velodyne/pointcloud", 1, 
         boost::bind(&ExampleSubscriberNodelet::processPointCloud, this, _1));
   }
 

@@ -5,16 +5,15 @@
 #include <velodyne/data_xyz.h>
 #include <velodyne/ring_sequence.h>
 #include <velodyne/data_base.h>
-
-#include <pcl/point_types.h>
+#include <velodyne_pcl/point_types.h>
 
 #include <pcl_ros/point_cloud.h>
 
 namespace velodyne_pcl {
 
-  class PublisherNodelet: public nodelet::Nodelet {
+  class XYZIRPublisherNodelet: public nodelet::Nodelet {
 
-    typedef pcl::PointXYZI VPoint;
+    typedef velodyne_pcl::PointXYZIR VPoint;
     typedef pcl::PointCloud<VPoint> VPointCloud;
 
     private:
@@ -33,7 +32,7 @@ namespace velodyne_pcl {
     uint16_t total_packets_;
   };
 
-  void PublisherNodelet::onInit() {
+  void XYZIRPublisherNodelet::onInit() {
 
     ros::NodeHandle node = getNodeHandle();
 
@@ -46,7 +45,7 @@ namespace velodyne_pcl {
 
     velodyne_sub_ =
       data_->subscribe(node, "velodyne/packets", 1,
-                       boost::bind(&PublisherNodelet::processXYZ, this, _1, _2, _3),
+                       boost::bind(&XYZIRPublisherNodelet::processXYZ, this, _1, _2, _3),
                        ros::TransportHints().tcpNoDelay(true));
 
     packet_count_ = 0;
@@ -58,7 +57,7 @@ namespace velodyne_pcl {
 
   }
 
-  void PublisherNodelet::processXYZ(const Velodyne::xyz_scans_t &scan,
+  void XYZIRPublisherNodelet::processXYZ(const Velodyne::xyz_scans_t &scan,
                                  ros::Time stamp,
                                  const std::string &frame_id) {
 
@@ -76,6 +75,7 @@ namespace velodyne_pcl {
       p.y = scan[i].y;
       p.z = scan[i].z;
       p.intensity = scan[i].intensity;
+      p.ring = velodyne::LASER_RING[scan[i].laser_number];
       vpc_->points.push_back(p);
     }
 
@@ -93,5 +93,5 @@ namespace velodyne_pcl {
 
 // Register this plugin with pluginlib. Names must match nodelets.xml.
 // parameters: package, class name, class type, base class type
-PLUGINLIB_DECLARE_CLASS(velodyne_pcl, PublisherNodelet,
-                        velodyne_pcl::PublisherNodelet, nodelet::Nodelet);
+PLUGINLIB_DECLARE_CLASS(velodyne_pcl, XYZIRPublisherNodelet,
+                        velodyne_pcl::XYZIRPublisherNodelet, nodelet::Nodelet);

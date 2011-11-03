@@ -56,7 +56,7 @@ void callback(const VPointCloud::ConstPtr& msg) {
 int main(int argc, char** argv) {
   ros::init(argc, argv, "velodyne_example_sub");
   ros::NodeHandle nh;
-  ros::Subscriber sub = nh.subscribe<VPointCloud>("velodyne/pcl_points2", 1, callback);
+  ros::Subscriber sub = nh.subscribe<VPointCloud>("velodyne/pointcloud", 1, callback);
   ros::spin();
 }
 

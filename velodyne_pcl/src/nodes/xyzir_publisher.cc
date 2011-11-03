@@ -3,12 +3,11 @@
 #include <velodyne/data_xyz.h>
 #include <velodyne/ring_sequence.h>
 #include <velodyne/data_base.h>
-
-#include <pcl/point_types.h>
+#include <velodyne_pcl/point_types.h>
 
 #include <pcl_ros/point_cloud.h>
 
-typedef pcl::PointXYZI VPoint;
+typedef velodyne_pcl::PointXYZIR VPoint;
 typedef pcl::PointCloud<VPoint> VPointCloud;
 
 namespace {
@@ -38,6 +37,7 @@ void processXYZ(const Velodyne::xyz_scans_t &scan,
     p.y = scan[i].y;
     p.z = scan[i].z;
     p.intensity = scan[i].intensity;
+    p.ring = velodyne::LASER_RING[scan[i].laser_number];
     vpc_->points.push_back(p);
   }
 

@@ -29,6 +29,18 @@
   </class>
 </library>
   
+<library path="lib/libxyzir_publisher_nodelet">
+  <class name="velodyne_pcl/XYZIRPublisherNodelet"
+         type="velodyne_pcl::XYZIRPublisherNodelet"
+         base_class_type="nodelet::Nodelet">
+    <description>
+      Example nodelet converting VelodyneScan to pcl::PointCloud.
+      Collects packets for 1 complete revolution and publishes a 
+      pcl::PointCloud using the pcl_ros bridge
+    </description>
+  </class>
+</library>
+
 <library path="lib/libpublisher_nodelet">
   <class name="velodyne_pcl/PublisherNodelet"
          type="velodyne_pcl::PublisherNodelet"
