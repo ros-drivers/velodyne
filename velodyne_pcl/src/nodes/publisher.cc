@@ -44,7 +44,7 @@ void processXYZ(const Velodyne::xyz_scans_t &scan,
   packet_count_++;
 
   if (packet_count_ == total_packets_) {
-    ROS_INFO("Publishing %i packets", packet_count_);
+    ROS_DEBUG("Publishing %i packets", packet_count_);
     velodyne_pub_.publish(vpc_);
     vpc_->points.clear();
     packet_count_ = 0;
