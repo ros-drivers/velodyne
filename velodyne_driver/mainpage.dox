@@ -3,41 +3,12 @@
 
 \htmlinclude manifest.html
 
-ROS device driver for Velodyne 3D LIDARs.
-
-\section codeapi Programming API
-
-\subsection input_class Velodyne Input classes
-
-The <velodyne/input.h> classes provide raw Velodyne LIDAR input
-packets from either a live socket interface or a previously-saved PCAP
-dump file.
-
-ROS parameters are relative to the calling node's name space:
-
- - \b ~/input/read_once (bool): if true, read input file only once
-   (default false).
- - \b ~/input/read_fast (bool): if true, read input file as fast as
-   possible (default false).
- - \b ~/input/repeat_delay (double): number of seconds to delay before
-   repeating input file (default: 0.0).
-
+ROS device driver for Velodyne 3D LIDARs. 
 
 \section read Velodyne device driver
 
 ROS device driver node that captures Velodyne 3D LIDAR data and
 publishes it to the \b velodyne_msgs/VelodyneScan topic.
-
-\subsection read_usage Usage
-
-\verbatim
-  rosrun velodyne_driver read [options]
-
-Options:
-    -f <filename>  PCAP packet dump file name (default: use real device)
-    -h, -?         print help text
-    -q <integer>   set ROS topic queue depth (default: 1)
-\endverbatim
 
 \subsection read_examples Examples
 
@@ -62,14 +33,18 @@ $ rosrun velodyne_driver velodyne_node _pcap:=dump.pcap
 
 Node name: \b velodyne_node
 
-Publishes: \b velodyne/rawscan raw Velodyne data packets for one
+Publishes: \b velodyne/packets raw Velodyne data packets for one
 entire revolution of the device.
 
 Parameters:
 
- - \b ~/pcap (string): PCAP dump input file name; overrides the
-   \b -f command line parameter.
- - \b ~/input/* : parameters defined by <velodyne/input.h>
+ - \b ~pcap (string): PCAP dump input file name (default: use real device)
+ - \b ~input/read_once (bool): if true, read input file only once
+   (default false).
+ - \b ~input/read_fast (bool): if true, read input file as fast as
+   possible (default false).
+ - \b ~input/repeat_delay (double): number of seconds to delay before
+   repeating input file (default: 0.0).
 
 \section vdump_command Vdump Command
 
