@@ -1,0 +1,50 @@
+<library path="lib/libconvert_back">
+  <class name="velodyne_common/ConvertBack"
+         type="ConvertBack"
+         base_class_type="nodelet::Nodelet">
+    <description> 
+      Convert VelodyneScan messages back to old RawScan format.
+    </description>
+  </class>
+</library>
+
+<library path="lib/libconvert_rawscan">
+  <class name="velodyne_common/ConvertRawScan"
+         type="ConvertRawScan"
+         base_class_type="nodelet::Nodelet">
+    <description> 
+      Convert old RawScan messages to VelodyneScan.
+    </description>
+  </class>
+</library>
+
+<library path="lib/libdriver_nodelet">
+  <class name="velodyne_common/DriverNodelet"
+         type="DriverNodelet"
+         base_class_type="nodelet::Nodelet">
+    <description> 
+      Publish raw Velodyne data packets.
+    </description>
+  </class>
+</library>
+
+<library path="lib/libpointcloud_nodelet">
+  <class name="velodyne_common/PointCloudNodelet"
+         type="PointCloudNodelet"
+         base_class_type="nodelet::Nodelet">
+    <description> 
+      Republish raw Velodyne data as a PointCloud.
+    </description>
+  </class>
+</library>
+
+<library path="lib/libtransform_nodelet">
+  <class name="velodyne_common/TransformNodelet"
+         type="TransformNodelet"
+         base_class_type="nodelet::Nodelet">
+    <description>
+      Transform raw Velodyne data to a PointCloud in some frame of
+      reference, typically "/odom".
+    </description>
+  </class>
+</library>

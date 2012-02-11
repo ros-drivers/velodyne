@@ -1,0 +1,2 @@
+rosbuild_add_library(velodyne_input input.cc)
+target_link_libraries(velodyne_input pcap)

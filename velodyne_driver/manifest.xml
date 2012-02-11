@@ -1,0 +1,31 @@
+<package>
+  <description brief="ROS driver for Velodyne 3D LIDARs">
+
+     ROS device driver for Velodyne HDL-64E, HDL-64E S2, and HDL-32
+     LIDARs.
+
+  </description>
+  <author> Jack O'Quin, Patrick Beeson, Michael Quinlan, Yaxin Liu </author>
+  <license>BSD</license>
+  <review status="experimental" notes=""/>
+  <url>http://www.ros.org/wiki/velodyne_driver</url>
+
+  <depend package="angles"/>
+  <depend package="nodelet"/>
+  <depend package="roscpp"/>
+  <depend package="rostest"/>
+  <depend package="tf"/>
+  <depend package="velodyne_msgs"/>
+
+  <!-- declare build dependency on pcap library -->
+  <rosdep name="libpcap"/>
+
+  <!--
+  <export>
+    <cpp cflags="-I${prefix}/include"
+         lflags="-L${prefix}/lib -Wl,-rpath,${prefix}/lib -lvelodyne -lpcap"/>
+    <nodelet plugin="${prefix}/nodelet_velodyne.xml"/>
+  </export>
+  -->
+
+</package>
