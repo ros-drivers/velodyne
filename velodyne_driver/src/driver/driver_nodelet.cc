@@ -23,6 +23,8 @@
 #include <velodyne_driver/input.h>
 #include <velodyne_msgs/VelodyneScan.h>
 
+namespace velodyne_driver
+{
 class DriverNodelet: public nodelet::Nodelet
 {
 public:
@@ -55,7 +57,7 @@ private:
   // configuration parameters
   int npackets_;
 
-  bool running_;                        ///< device is running
+  volatile bool running_;               ///< device is running
   std::string frame_id_;                ///< tf frame ID
   velodyne_driver::Input *input_;
   ros::Publisher output_;
@@ -137,8 +139,10 @@ void DriverNodelet::devicePoll()
     }
 }
 
+} // namespace velodyne_driver
+
 // Register this plugin with pluginlib.  Names must match nodelet_velodyne.xml.
 //
 // parameters are: package, class name, class type, base class type
 PLUGINLIB_DECLARE_CLASS(velodyne_driver, DriverNodelet,
-                        DriverNodelet, nodelet::Nodelet);
+                        velodyne_driver::DriverNodelet, nodelet::Nodelet);
