@@ -1,0 +1,15 @@
+<!-- -*- mode: XML -*- -->
+<!-- start velodyne_driver/DriverNodelet in a nodelet manager
+
+     $Id$
+  -->
+
+<launch>
+
+  <!-- start nodelet manager and load driver nodelet -->
+  <node pkg="nodelet" type="nodelet" name="velodyne_nodelet_manager"
+        args="manager" />
+  <node pkg="nodelet" type="nodelet" name="driver_nodelet"
+        args="load velodyne_driver/DriverNodelet velodyne_nodelet_manager" />
+
+</launch>

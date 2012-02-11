@@ -10,7 +10,6 @@
   <review status="experimental" notes=""/>
   <url>http://www.ros.org/wiki/velodyne_driver</url>
 
-  <depend package="angles"/>
   <depend package="nodelet"/>
   <depend package="roscpp"/>
   <depend package="rostest"/>
@@ -20,12 +19,8 @@
   <!-- declare build dependency on pcap library -->
   <rosdep name="libpcap"/>
 
-  <!--
   <export>
-    <cpp cflags="-I${prefix}/include"
-         lflags="-L${prefix}/lib -Wl,-rpath,${prefix}/lib -lvelodyne -lpcap"/>
     <nodelet plugin="${prefix}/nodelet_velodyne.xml"/>
   </export>
-  -->
 
 </package>

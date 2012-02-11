@@ -15,9 +15,9 @@
 #include <string>
 #include <boost/thread.hpp>
 
+#include <ros/ros.h>
 #include <pluginlib/class_list_macros.h>
 #include <nodelet/nodelet.h>
-#include <ros/ros.h>
 #include <tf/transform_listener.h>
 
 #include <velodyne_driver/input.h>
@@ -81,12 +81,12 @@ void DriverNodelet::onInit()
   if (dump_file != "")
     {
       NODELET_INFO("reading data from file: %s", dump_file.c_str());
-      input_ = new velodyne::InputPCAP(dump_file);
+      input_ = new velodyne_driver::InputPCAP(dump_file);
     }
   else
     {
       NODELET_INFO("reading data from socket");
-      input_ = new velodyne::InputSocket();
+      input_ = new velodyne_driver::InputSocket();
     }
 
   ros::NodeHandle node = getNodeHandle();
@@ -140,5 +140,5 @@ void DriverNodelet::devicePoll()
 // Register this plugin with pluginlib.  Names must match nodelet_velodyne.xml.
 //
 // parameters are: package, class name, class type, base class type
-PLUGINLIB_DECLARE_CLASS(velodyne_common, DriverNodelet,
+PLUGINLIB_DECLARE_CLASS(velodyne_driver, DriverNodelet,
                         DriverNodelet, nodelet::Nodelet);

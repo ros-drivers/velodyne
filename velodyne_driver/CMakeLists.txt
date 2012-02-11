@@ -7,9 +7,12 @@ include($ENV{ROS_ROOT}/core/rosbuild/rosbuild.cmake)
 #  Release        : w/o debug symbols, w/ optimization
 #  RelWithDebInfo : w/ debug symbols, w/ optimization
 #  MinSizeRel     : w/o debug symbols, w/ optimization, stripped binaries
-#set(ROS_BUILD_TYPE RelWithDebInfo)
+set(ROS_BUILD_TYPE RelWithDebInfo)
 
 rosbuild_init()
+
+set(EXECUTABLE_OUTPUT_PATH ${PROJECT_SOURCE_DIR}/bin)
+set(LIBRARY_OUTPUT_PATH ${PROJECT_SOURCE_DIR}/lib)
 
 add_subdirectory(src/lib)
 add_subdirectory(src/driver)
@@ -20,13 +23,9 @@ add_subdirectory(src/driver)
 #
 #  * if unset, all tests run
 #
-#  * tests labelled "realtime" use a downloaded pcap, but may not work
-#    on heavily-loaded build machines
-#
 #  * only unlabelled tests or those labelled "hudson" automatically
 #    run on the ROS build machines
 #
-##add_subdirectory(tests)
-##rosbuild_add_rostest_labeled(realtime tests/pcap_hertz.test)
-##rosbuild_add_rostest_labeled(realtime tests/pointcloud_nodelet_hertz.test)
-##rosbuild_add_rostest_labeled(realtime tests/transform_hertz.test)
+add_subdirectory(tests)
+rosbuild_add_rostest(tests/pcap_node_hertz.test)
+rosbuild_add_rostest(tests/pcap_nodelet_hertz.test)
