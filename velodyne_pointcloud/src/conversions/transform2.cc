@@ -7,8 +7,8 @@
 
 /** \file
 
-    This ROS nodelet converts raw Velodyne HDL-64E 3D LIDAR packets to
-    a PointCloud2 in the /odom frame.
+    This ROS nodelet converts raw Velodyne 3D LIDAR packets to a
+    PointCloud2 in the /odom frame.
 
     @author Jack O'Quin
     @author Jesse Vera
@@ -22,7 +22,7 @@
 #include <velodyne/data_xyz.h>
 #include <sensor_msgs/PointCloud2.h>
 
-#include <velodyne/ring_sequence.h>
+#include <velodyne_pointcloud/ring_sequence.h>
 #include <velodyne_pointcloud/point_types.h>
 
 #include <pcl/io/pcd_io.h>

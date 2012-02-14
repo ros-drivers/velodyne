@@ -20,7 +20,7 @@
 #include <velodyne/data_xyz.h>
 #include <sensor_msgs/PointCloud2.h>
 
-#include <velodyne/ring_sequence.h>
+#include <velodyne_pointcloud/ring_sequence.h>
 #include <velodyne_pointcloud/point_types.h>
 
 #include <pcl/io/pcd_io.h>
