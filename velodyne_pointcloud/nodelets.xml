@@ -1,0 +1,66 @@
+<library path="lib/libcloud2_nodelet">
+  <class name="velodyne_pointcloud/Cloud2Nodelet"
+         type="velodyne_pointcloud::Cloud2Nodelet"
+         base_class_type="nodelet::Nodelet">
+    <description>
+      Aggregates points from multiple packets, publishing PointCloud2.
+    </description>
+  </class>
+</library>
+
+<library path="lib/libring_colors">
+  <class name="velodyne_pointcloud/RingColors"
+         type="velodyne_pointcloud::RingColors"
+         base_class_type="nodelet::Nodelet">
+    <description>
+      Assigns colors to the Velodyne laser rings for visualization.
+    </description>
+  </class>
+</library>
+
+<library path="lib/libtransform2">
+  <class name="velodyne_pointcloud/Transform2"
+         type="velodyne_pointcloud::Transform2"
+         base_class_type="nodelet::Nodelet">
+    <description>
+      Transforms packets into /odom frame, publishing multiple packets
+      as PointCloud2.
+    </description>
+  </class>
+</library>
+  
+<library path="lib/libxyzir_publisher_nodelet">
+  <class name="velodyne_pointcloud/XYZIRPublisherNodelet"
+         type="velodyne_pointcloud::XYZIRPublisherNodelet"
+         base_class_type="nodelet::Nodelet">
+    <description>
+      Example nodelet converting VelodyneScan to pcl::PointCloud.
+      Collects packets for 1 complete revolution and publishes a 
+      pcl::PointCloud using the pcl_ros bridge
+    </description>
+  </class>
+</library>
+
+<library path="lib/libpublisher_nodelet">
+  <class name="velodyne_pointcloud/PublisherNodelet"
+         type="velodyne_pointcloud::PublisherNodelet"
+         base_class_type="nodelet::Nodelet">
+    <description>
+      Example nodelet converting VelodyneScan to pcl::PointCloud.
+      Collects packets for 1 complete revolution and publishes a 
+      pcl::PointCloud using the pcl_ros bridge
+    </description>
+  </class>
+</library>
+
+<library path="lib/libexample_subscriber_nodelet">
+  <class name="velodyne_pointcloud/ExampleSubscriberNodelet"
+         type="velodyne_pointcloud::ExampleSubscriberNodelet"
+         base_class_type="nodelet::Nodelet">
+    <description>
+      Example nodelet subscribes to pcl::PointCloud using pcl_ros 
+      bridge. Performs euclidean cluster extraction on this 
+      pointcloud.
+    </description>
+  </class>
+</library>

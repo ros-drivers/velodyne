@@ -1,0 +1,10 @@
+<!-- -*- mode: XML -*- -->
+<!-- run velodyne_pointcloud/Transform2 in a nodelet manager
+
+     $Id$
+  -->
+
+<launch>
+  <node pkg="nodelet" type="nodelet" name="transform2"
+        args="load velodyne_pointcloud/Transform2 velodyne_nodelet_manager" />
+</launch>
