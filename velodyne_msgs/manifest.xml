@@ -10,7 +10,6 @@
   <url>http://ros.org/wiki/velodyne_msgs</url>
 
   <!-- uncomment for bag migration (not yet)
-  <depend package="rosbagmigration"/>
   <export>
     <rosbagmigration rule_file="migration_rules/velodyne_msgs.bmr" />
   </export>
