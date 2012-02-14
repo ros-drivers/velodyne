@@ -1,8 +1,0 @@
-/**
-\mainpage
-\htmlinclude manifest.html
-
-This package reads raw data from the Velodyne, identifies obstacles
-and publishes them as a PointCloud.
-
-*/

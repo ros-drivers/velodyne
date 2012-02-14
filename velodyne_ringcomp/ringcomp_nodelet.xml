@@ -1,9 +1,0 @@
-<library path="lib/libringcomp_nodelet">
-  <class name="velodyne_ringcomp/RingCompNodelet"
-         type="ringcomp_nodelet::RingCompNodelet"
-         base_class_type="nodelet::Nodelet">
-    <description> 
-      Publish Velodyne obstacles as PointCloud.
-    </description>
-  </class>
-</library>
