@@ -19,7 +19,7 @@
   <include file="$(find velodyne_driver)/launch/nodelet_manager.launch" />
 
   <!-- start transform2 nodelet -->
-  <include file="$(find velodyne_pointcloud)/tests/transform2.launch" />
+  <include file="$(find velodyne_pointcloud)/launch/transform2.launch" />
 
   <!-- verify PointCloud2 publication rate -->
   <test test-name="transform2_hz_test" pkg="rostest"
