@@ -205,16 +205,21 @@ namespace velodyne_pointcloud
         tfPc_.width = 0;
         NODELET_DEBUG_STREAM("transforming from" << inPc_.header.frame_id
                              << " to " << config_.frame_id);
+#if 0 // waiting for transform causes delay problems
         /// @todo wait for transform to be available
         listener_.waitForTransform(config_.frame_id, frame_id, stamp,
                                    ros::Duration(0.2));
         pcl_ros::transformPointCloud(config_.frame_id, inPc_, tfPc_,
                                      listener_);
+#else // use the latest transform available, should usually work fine
+        pcl_ros::transformPointCloud(inPc_.header.frame_id, ros::Time(0), inPc_,
+                                     config_.frame_id, tfPc_, listener_);
+#endif
       }
     catch (tf::TransformException ex)
       {
-        // only log tf error once every 20 times
-        ROS_WARN_THROTTLE(20, "%s", ex.what());
+        // only log tf error once every 100 times
+        ROS_WARN_THROTTLE(100, "%s", ex.what());
         return;                           // skip this packet
       }
 
