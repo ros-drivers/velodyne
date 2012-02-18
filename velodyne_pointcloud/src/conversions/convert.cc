@@ -35,10 +35,7 @@ namespace velodyne_pointcloud
                      velodyne_pointcloud::PACKETS_PER_REV);
     ROS_INFO_STREAM("number of packets to accumulate: " << config_.npackets);
 
-    data_->getParams();
-
-    if (0 != data_->setup())
-      return;
+    data_->setup(private_nh);
 
     // allocate space for the output point cloud data
     pc_.points.reserve(config_.npackets*velodyne_pointcloud::SCANS_PER_PACKET);
@@ -52,13 +49,51 @@ namespace velodyne_pointcloud
     output_ =
       node.advertise<sensor_msgs::PointCloud2>("velodyne/pointcloud2", 10);
 
-    // subscribe to Velodyne data
+#ifdef DATA_SUBSCRIBE
+    // subscribe via RawData method
     velodyne_scan_ =
       data_->subscribe(node, "velodyne/packets", 10,
                        boost::bind(&Convert::processXYZ,
                                    this, _1, _2, _3),
                        ros::TransportHints().tcpNoDelay(true));
+#else // DATA_SUBSCRIBE
+    // subscribe directly to VelodyneScan
+    velodyne_scan_ =
+      node.subscribe("velodyne/packets", 10,
+                     &Convert::processScan, (Convert *) this,
+                     ros::TransportHints().tcpNoDelay(true));
+#endif // DATA_SUBSCRIBE
   }
+
+#ifndef DATA_SUBSCRIBE
+
+  /** @brief Callback for raw scan messages. */
+  void Convert::processScan(const velodyne_msgs::VelodyneScan::ConstPtr &scanMsg)
+  {
+    if (output_.getNumSubscribers() == 0)         // no one listening?
+      return;                                     // avoid much work
+
+    // publish an empty point cloud message (test scaffolding)
+    {
+      sensor_msgs::PointCloud2Ptr outMsg(new sensor_msgs::PointCloud2());
+      //pcl::toROSMsg(pc_, *outMsg);
+
+      // publish the point cloud with same time and frame ID as raw data
+      outMsg->header.stamp = scanMsg->header.stamp;
+      outMsg->header.frame_id = scanMsg->header.frame_id;
+
+      ROS_DEBUG_STREAM("Publishing " << outMsg->height * outMsg->width
+                       << " Velodyne points, time: "
+                       << outMsg->header.stamp);
+      output_.publish(outMsg);
+
+      //pc_.points.clear();
+      //pc_.width = 0;
+      //packetCount_ = 0;
+    }
+  }
+
+#else // DATA_SUBSCRIBE
 
   /** \brief Callback for XYZ points.
    *
@@ -66,6 +101,8 @@ namespace velodyne_pointcloud
    *  Collects packets into a larger message (generally a full
    *  revolution).  Periodically publishes collected data as a
    *  PointCloud2 message.
+   *
+   *  @deprecated
    */
   void Convert::processXYZ(const velodyne_pointcloud::xyz_scans_t &scan,
                                  ros::Time stamp,
@@ -109,5 +146,6 @@ namespace velodyne_pointcloud
         packetCount_ = 0;
       }
   }
+#endif // DATA_SUBSCRIBE
 
 } // namespace velodyne_pointcloud

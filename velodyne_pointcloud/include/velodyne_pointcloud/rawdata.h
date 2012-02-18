@@ -119,18 +119,9 @@ namespace velodyne_pointcloud
   class RawData
   {
   public:
-    RawData(std::string ofile="", std::string anglesFile="");
 
+    RawData();
     ~RawData() {}
-
-    /** \brief Get ROS parameters.
-     *
-     *  ROS parameter settings override constructor options
-     *
-     * \returns 0, if successful;
-     *          errno value, for failure
-     */
-    int getParams(void);
 
     /** \brief handle ROS topic message
      *
@@ -157,13 +148,13 @@ namespace velodyne_pointcloud
      *  Perform initializations needed before data processing can
      *  begin:
      *
-     *    - open output file (if any)
      *    - read device-specific correction angles
      *
-     *  \returns 0 if successful;
+     *  @param private_nh private node handle for ROS parameters
+     *  @returns 0 if successful;
      *           errno value for failure
      */
-    virtual int setup(void);
+    virtual int setup(ros::NodeHandle private_nh);
 
     /** \brief Shut down data processing. */
     virtual void shutdown(void)
@@ -175,11 +166,9 @@ namespace velodyne_pointcloud
   protected:
 
     /** configuration parameters */
-    std::string ofile_;                 ///< output file name for print()
     std::string anglesFile_;            ///< correction angles file name
 
     /** runtime state */
-    FILE *ofp_;                         ///< output file descriptor
     bool uninitialized_;                ///< false after successful setup()
 
     /** latest raw scan message received */
@@ -230,7 +219,7 @@ namespace velodyne_pointcloud
   {
   public:
 
-    RawDataScans(std::string ofile="", std::string anglesFile="");
+    RawDataScans();
     virtual void processPacket(const velodyne_msgs::VelodynePacket *pkt,
                                const std::string &frame_id);
 
@@ -302,7 +291,8 @@ namespace velodyne_pointcloud
   {
   public:
 
-    RawDataXYZ(std::string ofile="", std::string anglesFile="");
+    RawDataXYZ();
+
     virtual void processPacket(const velodyne_msgs::VelodynePacket *pkt,
                                const std::string &frame_id);
 

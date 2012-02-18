@@ -41,44 +41,10 @@ namespace velodyne_pointcloud
   //
   ////////////////////////////////////////////////////////////////////////
 
-  RawData::RawData(std::string ofile, std::string anglesFile)
+  RawData::RawData()
   {
-    ofile_ = ofile;
-    anglesFile_ = anglesFile;
-
-    ofp_ = NULL;
     memset(&upper_, 0, sizeof(upper_));
     memset(&lower_, 0, sizeof(lower_));
-    getParams();
-  }
-
-
-  /** get ROS parameters
-   *
-   *  ROS parameter settings override constructor options
-   *
-   *
-   * \returns 0, if successful;
-   *          errno value, for failure
-   */
-  int RawData::getParams()
-  {
-    // get parameters from "data" subordinate of private node handle
-    ros::NodeHandle private_nh("~/data");
-
-    private_nh.getParam("output", ofile_);
-
-    // get path to angles.config file for this device
-    if (!private_nh.getParam("angles", anglesFile_))
-      {
-        // use velodyne_common version as a default
-        std::string pkgPath = ros::package::getPath("velodyne_common");
-        anglesFile_ = pkgPath + "/etc/angles.config";
-      }
-
-    ROS_INFO_STREAM("correction angles: " << anglesFile_);
-
-    return 0;
   }
 
   /** handle raw scan ROS topic message */
@@ -99,30 +65,17 @@ namespace velodyne_pointcloud
   }
 
   /** Set up for on-line operation. */
-  int RawData::setup(void)
+  int RawData::setup(ros::NodeHandle private_nh)
   {
-    // open output file, if any
-    ofp_ = NULL;
-    if (ofile_ != "")
+    // get path to angles.config file for this device
+    if (!private_nh.getParam("angles", anglesFile_))
       {
-        if (ofile_ == "-")              // using stdout?
-          {
-            ROS_INFO("output to stdout");
-            ofp_ = stdout;
-          }
-        else                            // open named file
-          {
-            ROS_INFO("output file: %s", ofile_.c_str());
-            ofp_ = fopen(ofile_.c_str(), "w");
-            if (ofp_ == NULL)
-              {
-                int rc = errno;
-                ROS_ERROR("failed to open \"%s\" (%s)",
-                          ofile_.c_str(), strerror(rc));
-                return rc;
-              }
-          }
+        // use velodyne_common version as a default
+        std::string pkgPath = ros::package::getPath("velodyne_common");
+        anglesFile_ = pkgPath + "/etc/angles.config";
       }
+
+    ROS_INFO_STREAM("correction angles: " << anglesFile_);
 
     // read angles correction file for this specific unit
     std::ifstream config(anglesFile_.c_str());
@@ -207,8 +160,7 @@ namespace velodyne_pointcloud
   //
   ////////////////////////////////////////////////////////////////////////
 
-  RawDataScans::RawDataScans(std::string ofile, std::string anglesFile):
-    RawData(ofile, anglesFile)
+  RawDataScans::RawDataScans()
   {
     // reserve vector space before processing, we don't want to
     // reallocate in real time
@@ -288,14 +240,8 @@ namespace velodyne_pointcloud
   // RawDataXYZ class implementation
   //
   ////////////////////////////////////////////////////////////////////////
-  ////////////////////////////////////////////////////////////////////////
-  //
-  // RawDataXYZ class implementation
-  //
-  ////////////////////////////////////////////////////////////////////////
 
-  RawDataXYZ::RawDataXYZ(std::string ofile, std::string anglesFile):
-    RawDataScans(ofile, anglesFile)
+  RawDataXYZ::RawDataXYZ()
   {
     // reserve vector space before processing, we don't want to
     // reallocate in real time
@@ -303,7 +249,7 @@ namespace velodyne_pointcloud
   }
 
   inline void RawDataXYZ::scan2xyz(const laserscan_t *scan,
-                                laserscan_xyz_t *point)
+                                   laserscan_xyz_t *point)
   {
     float xy_projection = scan->range * cosf(scan->pitch);
     point->laser_number = scan->laser_number;
