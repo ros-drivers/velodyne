@@ -14,7 +14,7 @@
   </node>
 
   <!-- start cloud2 node -->
-  <node pkg="velodyne_pointcloud" type="cloud2" name="cloud2_node" />
+  <node pkg="velodyne_pointcloud" type="cloud2_node" name="cloud2_node" />
 
   <test test-name="cloud2_node_hz_test" pkg="rostest" type="hztest"
         name="hztest1" >
