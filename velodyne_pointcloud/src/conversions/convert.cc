@@ -20,10 +20,10 @@ namespace velodyne_pointcloud
 {
   /** @brief Constructor. */
   Convert::Convert(ros::NodeHandle node, ros::NodeHandle private_nh):
-    data_(new velodyne_pointcloud::RawDataXYZ())
+    data_(new velodyne_rawdata::RawDataXYZ())
   {
     private_nh.param("max_range", config_.max_range,
-                     (double) velodyne_pointcloud::DISTANCE_MAX);
+                     (double) velodyne_rawdata::DISTANCE_MAX);
     private_nh.param("min_range", config_.min_range, 2.0);
     ROS_INFO_STREAM("data ranges to publish: ["
                     << config_.min_range << ", "
@@ -32,13 +32,13 @@ namespace velodyne_pointcloud
     max_range2_ = config_.max_range * config_.max_range;
 
     private_nh.param("npackets", config_.npackets,
-                     velodyne_pointcloud::PACKETS_PER_REV);
+                     velodyne_rawdata::PACKETS_PER_REV);
     ROS_INFO_STREAM("number of packets to accumulate: " << config_.npackets);
 
     data_->setup(private_nh);
 
     // allocate space for the output point cloud data
-    pc_.points.reserve(config_.npackets*velodyne_pointcloud::SCANS_PER_PACKET);
+    pc_.points.reserve(config_.npackets*velodyne_rawdata::SCANS_PER_PACKET);
     pc_.points.clear();
     pc_.width = 0;
     pc_.height = 1;
@@ -104,7 +104,7 @@ namespace velodyne_pointcloud
    *
    *  @deprecated
    */
-  void Convert::processXYZ(const velodyne_pointcloud::xyz_scans_t &scan,
+  void Convert::processXYZ(const velodyne_rawdata::xyz_scans_t &scan,
                                  ros::Time stamp,
                                  const std::string &frame_id)
   {

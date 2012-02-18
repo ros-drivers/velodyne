@@ -33,7 +33,7 @@
 
 #include <velodyne_pointcloud/rawdata.h>
 
-namespace velodyne_pointcloud
+namespace velodyne_rawdata
 {
   ////////////////////////////////////////////////////////////////////////
   //
@@ -52,14 +52,9 @@ namespace velodyne_pointcloud
   {
     rawScan_ = scanMsg;              // save pointer to entire message
 
-    if (uninitialized_)
-      return;
-
     // invoke callback for each packet
     for (unsigned i = 0; i < rawScan_->packets.size(); ++i)
       {
-        if (!ros::ok())                 // node shutting down?
-          break;
         processPacket(&rawScan_->packets[i], rawScan_->header.frame_id);
       }
   }
@@ -152,7 +147,6 @@ namespace velodyne_pointcloud
       }
 
     config.close();
-    uninitialized_ = false;             // OK to start processing now
     return 0;
   }
 
@@ -223,14 +217,11 @@ namespace velodyne_pointcloud
 
   /** \brief Process Velodyne packet. */
   void RawDataScans::processPacket(const velodyne_msgs::VelodynePacket *pkt,
-                                const std::string &frame_id)
+                                   const std::string &frame_id)
   {
     // unpack scans from the raw packet
     scans_.resize(SCANS_PER_PACKET);
     packet2scans((raw_packet_t *) &pkt->data[0], &scans_[0]);
-
-    if (!ros::ok())                     // check for ROS shutdown
-      return;
 
     // invoke the subscribed scans callback, if any
     if (cb_)
@@ -265,7 +256,7 @@ namespace velodyne_pointcloud
 
   /** \brief Process a Velodyne packet message. */
   void RawDataXYZ::processPacket(const velodyne_msgs::VelodynePacket *pkt,
-                              const std::string &frame_id)
+                                 const std::string &frame_id)
   {
     // run the base class method
     RawDataScans::processPacket(pkt, frame_id);
@@ -276,9 +267,6 @@ namespace velodyne_pointcloud
       {
         scan2xyz(&scans_[i], &xyzScans_[i]);
       }
-
-    if (!ros::ok())                     // check for ROS shutdown
-      return;
 
     // invoke the subscribed XYZ callback, if any
     if (cb_)

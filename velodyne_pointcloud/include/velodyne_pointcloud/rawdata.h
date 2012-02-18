@@ -31,7 +31,7 @@
 #include <ros/ros.h>
 #include <velodyne_msgs/VelodyneScan.h>
 
-namespace velodyne_pointcloud
+namespace velodyne_rawdata
 {
 
   /**
@@ -156,20 +156,10 @@ namespace velodyne_pointcloud
      */
     virtual int setup(ros::NodeHandle private_nh);
 
-    /** \brief Shut down data processing. */
-    virtual void shutdown(void)
-    {
-      ros::shutdown();                  // break out of main ros::spin()
-      uninitialized_ = true;
-    }
-
   protected:
 
     /** configuration parameters */
     std::string anglesFile_;            ///< correction angles file name
-
-    /** runtime state */
-    bool uninitialized_;                ///< false after successful setup()
 
     /** latest raw scan message received */
     velodyne_msgs::VelodyneScan::ConstPtr rawScan_;

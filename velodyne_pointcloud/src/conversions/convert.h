@@ -42,7 +42,7 @@ namespace velodyne_pointcloud
 #ifndef DATA_SUBSCRIBE
     void processScan(const velodyne_msgs::VelodyneScan::ConstPtr &scanMsg);
 #else // subscribe via RawData method
-    void processXYZ(const velodyne_pointcloud::xyz_scans_t &scan,
+    void processXYZ(const velodyne_rawdata::xyz_scans_t &scan,
                     ros::Time stamp,
                     const std::string &frame_id);
 #endif // DATA_SUBSCRIBE
@@ -60,7 +60,7 @@ namespace velodyne_pointcloud
     float max_range2_;
     float min_range2_;
 
-    boost::shared_ptr<velodyne_pointcloud::RawDataXYZ> data_;
+    boost::shared_ptr<velodyne_rawdata::RawDataXYZ> data_;
     ros::Subscriber velodyne_scan_;
     ros::Publisher output_;
 
