@@ -8,20 +8,26 @@
  *  $Id$
  */
 
-/** \file
+/** @file
  *
  *  Velodyne 3D LIDAR raw data accessor classes.
  *
  *  Classes for unpacking raw Velodyne LIDAR packets into various
  *  useful formats.
  *
- *  \author Yaxin Liu
- *  \author Patrick Beeson
- *  \author Jack O'Quin
+ *  @note These interfaces are @b not exported from the @c
+ *        velodyne_pointcloud package, but if needed they could be.
+ *
+ *  @author Yaxin Liu
+ *  @author Patrick Beeson
+ *  @author Jack O'Quin
  */
 
 #ifndef __VELODYNE_RAWDATA_H
 #define __VELODYNE_RAWDATA_H
+
+#define DEPRECATED_RAWDATA 1      // define DEPRECATED methods & types
+//#undef DEPRECATED_RAWDATA         // do not define DEPRECATED methods & types
 
 #include <errno.h>
 #include <stdint.h>
@@ -123,6 +129,7 @@ namespace velodyne_rawdata
     RawData();
     ~RawData() {}
 
+#ifdef DEPRECATED_RAWDATA         // define DEPRECATED methods & types
     /** \brief handle ROS topic message
      *
      *  This is the main entry point for handling ROS messages from
@@ -142,6 +149,7 @@ namespace velodyne_rawdata
      */
     virtual void processPacket(const velodyne_msgs::VelodynePacket *pkt,
                                const std::string &frame_id) = 0;
+#endif // DEPRECATED_RAWDATA     // define DEPRECATED methods & types
 
     /** \brief Set up for data processing.
      *
@@ -210,6 +218,8 @@ namespace velodyne_rawdata
   public:
 
     RawDataScans();
+
+#ifdef DEPRECATED_RAWDATA         // define DEPRECATED methods & types
     virtual void processPacket(const velodyne_msgs::VelodynePacket *pkt,
                                const std::string &frame_id);
 
@@ -234,6 +244,7 @@ namespace velodyne_rawdata
                             &RawData::processScan, (RawData *) this,
                             transport_hints);
     }
+#endif // DEPRECATED_RAWDATA     // define DEPRECATED methods & types
 
   protected:
     void packet2scans(const raw_packet_t *raw, laserscan_t *scans);
@@ -283,6 +294,7 @@ namespace velodyne_rawdata
 
     RawDataXYZ();
 
+#ifdef DEPRECATED_RAWDATA         // define DEPRECATED methods & types
     virtual void processPacket(const velodyne_msgs::VelodynePacket *pkt,
                                const std::string &frame_id);
 
@@ -307,6 +319,7 @@ namespace velodyne_rawdata
                             &RawData::processScan, (RawData *) this,
                             transport_hints);
     }
+#endif // DEPRECATED_RAWDATA     // define DEPRECATED methods & types
 
   protected:
     void scan2xyz(const laserscan_t *scan, laserscan_xyz_t *point);

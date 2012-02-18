@@ -17,9 +17,6 @@
 #ifndef _VELODYNE_POINTCLOUD_CONVERT_H_
 #define _VELODYNE_POINTCLOUD_CONVERT_H_ 1
 
-#define DATA_SUBSCRIBE 1         // subscribe via RawData method
-//#undef DATA_SUBSCRIBE            // subscribe directly to VelodyneScan
-
 #include <ros/ros.h>
 #include <pcl/point_cloud.h>
 
@@ -39,13 +36,15 @@ namespace velodyne_pointcloud
 
   private:
 
-#ifndef DATA_SUBSCRIBE
-    void processScan(const velodyne_msgs::VelodyneScan::ConstPtr &scanMsg);
-#else // subscribe via RawData method
+#ifdef DEPRECATED_RAWDATA         // use DEPRECATED methods & types
     void processXYZ(const velodyne_rawdata::xyz_scans_t &scan,
                     ros::Time stamp,
                     const std::string &frame_id);
-#endif // DATA_SUBSCRIBE
+#else  // use new methods
+    void processScan(const velodyne_msgs::VelodyneScan::ConstPtr &scanMsg);
+    void processPacket(const velodyne_msgs::VelodynePacket::ConstPtr &pkt,
+                       const std::string &frame_id);
+#endif // DEPRECATED_RAWDATA     // define DEPRECATED methods & types
 
     /** in-line test whether a point is in range */
     bool pointInRange(const velodyne_pointcloud::PointXYZIR &point)

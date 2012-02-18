@@ -49,51 +49,23 @@ namespace velodyne_pointcloud
     output_ =
       node.advertise<sensor_msgs::PointCloud2>("velodyne/pointcloud2", 10);
 
-#ifdef DATA_SUBSCRIBE
+#ifdef DEPRECATED_RAWDATA         // use DEPRECATED methods & types
     // subscribe via RawData method
     velodyne_scan_ =
       data_->subscribe(node, "velodyne/packets", 10,
                        boost::bind(&Convert::processXYZ,
                                    this, _1, _2, _3),
                        ros::TransportHints().tcpNoDelay(true));
-#else // DATA_SUBSCRIBE
+#else  // use new methods
     // subscribe directly to VelodyneScan
     velodyne_scan_ =
       node.subscribe("velodyne/packets", 10,
                      &Convert::processScan, (Convert *) this,
                      ros::TransportHints().tcpNoDelay(true));
-#endif // DATA_SUBSCRIBE
+#endif // DEPRECATED_RAWDATA     // define DEPRECATED methods & types
   }
 
-#ifndef DATA_SUBSCRIBE
-
-  /** @brief Callback for raw scan messages. */
-  void Convert::processScan(const velodyne_msgs::VelodyneScan::ConstPtr &scanMsg)
-  {
-    if (output_.getNumSubscribers() == 0)         // no one listening?
-      return;                                     // avoid much work
-
-    // publish an empty point cloud message (test scaffolding)
-    {
-      sensor_msgs::PointCloud2Ptr outMsg(new sensor_msgs::PointCloud2());
-      //pcl::toROSMsg(pc_, *outMsg);
-
-      // publish the point cloud with same time and frame ID as raw data
-      outMsg->header.stamp = scanMsg->header.stamp;
-      outMsg->header.frame_id = scanMsg->header.frame_id;
-
-      ROS_DEBUG_STREAM("Publishing " << outMsg->height * outMsg->width
-                       << " Velodyne points, time: "
-                       << outMsg->header.stamp);
-      output_.publish(outMsg);
-
-      //pc_.points.clear();
-      //pc_.width = 0;
-      //packetCount_ = 0;
-    }
-  }
-
-#else // DATA_SUBSCRIBE
+#ifdef DEPRECATED_RAWDATA         // use DEPRECATED methods & types
 
   /** \brief Callback for XYZ points.
    *
@@ -146,6 +118,34 @@ namespace velodyne_pointcloud
         packetCount_ = 0;
       }
   }
-#endif // DATA_SUBSCRIBE
+
+#else  // use new methods
+
+  /** @brief Callback for raw scan messages. */
+  void Convert::processScan(const velodyne_msgs::VelodyneScan::ConstPtr &scanMsg)
+  {
+    if (output_.getNumSubscribers() == 0)         // no one listening?
+      return;                                     // avoid much work
+
+    // publish an empty point cloud message (test scaffolding)
+    {
+      sensor_msgs::PointCloud2Ptr outMsg(new sensor_msgs::PointCloud2());
+      //pcl::toROSMsg(pc_, *outMsg);
+
+      // publish the point cloud with same time and frame ID as raw data
+      outMsg->header.stamp = scanMsg->header.stamp;
+      outMsg->header.frame_id = scanMsg->header.frame_id;
+
+      ROS_DEBUG_STREAM("Publishing " << outMsg->height * outMsg->width
+                       << " Velodyne points, time: "
+                       << outMsg->header.stamp);
+      output_.publish(outMsg);
+
+      //pc_.points.clear();
+      //pc_.width = 0;
+      //packetCount_ = 0;
+    }
+  }
+#endif // DEPRECATED_RAWDATA     // define DEPRECATED methods & types
 
 } // namespace velodyne_pointcloud

@@ -10,7 +10,7 @@
 /**
  *  \file
  *
- *  Velodyne HDL-64E 3D LIDAR data accessor base class.
+ *  Velodyne 3D LIDAR data accessor base class.
  *
  *  Base class for unpacking raw Velodyne LIDAR packets into various
  *  useful formats.
@@ -47,6 +47,7 @@ namespace velodyne_rawdata
     memset(&lower_, 0, sizeof(lower_));
   }
 
+#ifdef DEPRECATED_RAWDATA         // define DEPRECATED methods & types
   /** handle raw scan ROS topic message */
   void RawData::processScan(const velodyne_msgs::VelodyneScan::ConstPtr &scanMsg)
   {
@@ -58,6 +59,7 @@ namespace velodyne_rawdata
         processPacket(&rawScan_->packets[i], rawScan_->header.frame_id);
       }
   }
+#endif // DEPRECATED_RAWDATA     // define DEPRECATED methods & types
 
   /** Set up for on-line operation. */
   int RawData::setup(ros::NodeHandle private_nh)
@@ -215,6 +217,7 @@ namespace velodyne_rawdata
     ROS_ASSERT(index == SCANS_PER_PACKET);
   }
 
+#ifdef DEPRECATED_RAWDATA         // define DEPRECATED methods & types
   /** \brief Process Velodyne packet. */
   void RawDataScans::processPacket(const velodyne_msgs::VelodynePacket *pkt,
                                    const std::string &frame_id)
@@ -227,6 +230,7 @@ namespace velodyne_rawdata
     if (cb_)
       cb_(scans_, pkt->stamp, frame_id);
   }
+#endif // DEPRECATED_RAWDATA     // define DEPRECATED methods & types
 
   ////////////////////////////////////////////////////////////////////////
   //
@@ -254,6 +258,7 @@ namespace velodyne_rawdata
     point->intensity = scan->intensity;
   }
 
+#ifdef DEPRECATED_RAWDATA         // define DEPRECATED methods & types
   /** \brief Process a Velodyne packet message. */
   void RawDataXYZ::processPacket(const velodyne_msgs::VelodynePacket *pkt,
                                  const std::string &frame_id)
@@ -272,6 +277,6 @@ namespace velodyne_rawdata
     if (cb_)
       cb_(xyzScans_, pkt->stamp, frame_id);
   }
-
+#endif // DEPRECATED_RAWDATA     // define DEPRECATED methods & types
 
 } // namespace velodyne_pointcloud
