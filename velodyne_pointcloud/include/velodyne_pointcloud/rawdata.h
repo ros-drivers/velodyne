@@ -35,6 +35,7 @@
 
 #include <ros/ros.h>
 #include <velodyne_msgs/VelodyneScan.h>
+#include <velodyne_pointcloud/point_types.h>
 
 namespace velodyne_rawdata
 {
@@ -185,6 +186,7 @@ namespace velodyne_rawdata
   // RawDataScans derived class
   ////////////////////////////////////////////////////////////////////
 
+#ifdef DEPRECATED_RAWDATA         // define DEPRECATED methods & types
   /** \brief A single laser scan in Velodyne's frame of reference.
    *
    *   pitch is relative to the plane of the unit (in its frame of
@@ -213,7 +215,15 @@ namespace velodyne_rawdata
                                ros::Time time,
                                const std::string &frame_id)> scanCallback;
 
-  /** \brief Convert Velodyne raw input to laserscans format */
+#else // not DEPRECATED_RAWDATA     // define new methods & types
+
+  // Shorthand typedefs for polar and Euclidean coordinate representations
+  typedef velodyne_pointcloud::PointPolarIR VPolar;
+  typedef velodyne_pointcloud::PointXYZIR VPoint;
+
+#endif // DEPRECATED_RAWDATA     // define DEPRECATED methods & types
+
+  /** \brief Convert Velodyne raw input to Polar format */
   class RawDataScans: public RawData
   {
   public:
@@ -246,16 +256,21 @@ namespace velodyne_rawdata
                             transport_hints);
     }
 
+  private:
+    scanCallback cb_;                   ///< scan data callback
+
   protected:
     // derived class data
     std::vector<laserscan_t> scans_;
 
-  private:
-    scanCallback cb_;                   ///< scan data callback
-#endif // DEPRECATED_RAWDATA     // define DEPRECATED methods & types
+    void packet2scans(const raw_packet_t *raw, laserscan_t *scans);
+
+#else // not DEPRECATED_RAWDATA     // define new methods & types
 
   protected:
-    void packet2scans(const raw_packet_t *raw, laserscan_t *scans);
+    void packet2scans(const raw_packet_t &raw, VPolar &scans);
+
+#endif // DEPRECATED_RAWDATA     // define DEPRECATED methods & types
   };
 
 
@@ -263,6 +278,7 @@ namespace velodyne_rawdata
   // RawDataXYZ derived class
   ////////////////////////////////////////////////////////////////////
 
+#ifdef DEPRECATED_RAWDATA         // define DEPRECATED methods & types
   /** \brief a single laser scan in XYZ format
    *
    *  Data are in the Velodyne's frame of reference.
@@ -288,6 +304,7 @@ namespace velodyne_rawdata
   typedef boost::function<void(const xyz_scans_t &scan,
                                ros::Time stamp,
                                const std::string &frame_id)> xyzCallback;
+#endif // DEPRECATED_RAWDATA     // define DEPRECATED methods & types
 
   /** \brief Convert Velodyne raw input to XYZ format */
   class RawDataXYZ: public RawDataScans
@@ -325,12 +342,17 @@ namespace velodyne_rawdata
   protected:
     xyz_scans_t xyzScans_;              ///< vector of XYZ scans
 
+    void scan2xyz(const laserscan_t *scan, laserscan_xyz_t *point);
+
   private:
     xyzCallback cb_;                    ///< XYZ packet callback
-#endif // DEPRECATED_RAWDATA     // define DEPRECATED methods & types
+
+#else  // not DEPRECATED_RAWDATA     // define new methods & types
 
   protected:
-    void scan2xyz(const laserscan_t *scan, laserscan_xyz_t *point);
+    void polar2xyz(const VPolar &scan, VPoint &point);
+
+#endif // DEPRECATED_RAWDATA     // define DEPRECATED methods & types
   };
 
 } // namespace velodyne_pointcloud

@@ -167,6 +167,7 @@ namespace velodyne_rawdata
 #endif // DEPRECATED_RAWDATA     // define DEPRECATED methods & types
   }
 
+#ifdef DEPRECATED_RAWDATA         // define DEPRECATED methods & types
   /** \brief convert raw packet to laserscan format */
   void RawDataScans::packet2scans(const raw_packet_t *raw, laserscan_t *scans)
   {
@@ -219,7 +220,6 @@ namespace velodyne_rawdata
     ROS_ASSERT(index == SCANS_PER_PACKET);
   }
 
-#ifdef DEPRECATED_RAWDATA         // define DEPRECATED methods & types
   /** \brief Process Velodyne packet. */
   void RawDataScans::processPacket(const velodyne_msgs::VelodynePacket *pkt,
                                    const std::string &frame_id)
@@ -249,6 +249,7 @@ namespace velodyne_rawdata
 #endif // DEPRECATED_RAWDATA     // define DEPRECATED methods & types
   }
 
+#ifdef DEPRECATED_RAWDATA         // define DEPRECATED methods & types
   inline void RawDataXYZ::scan2xyz(const laserscan_t *scan,
                                    laserscan_xyz_t *point)
   {
@@ -262,7 +263,6 @@ namespace velodyne_rawdata
     point->intensity = scan->intensity;
   }
 
-#ifdef DEPRECATED_RAWDATA         // define DEPRECATED methods & types
   /** \brief Process a Velodyne packet message. */
   void RawDataXYZ::processPacket(const velodyne_msgs::VelodynePacket *pkt,
                                  const std::string &frame_id)

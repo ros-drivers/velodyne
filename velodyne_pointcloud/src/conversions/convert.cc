@@ -14,10 +14,12 @@
 */
 
 #include "convert.h"
-#include <pcl/io/pcd_io.h>
 
-typedef pcl::PointXYZI VPoint;
-typedef pcl::PointCloud<VPoint> VPointCloud;
+#ifdef DEPRECATED_RAWDATA         // use DEPRECATED methods & types
+#include <pcl/io/pcd_io.h>
+#else  // use new methods
+typedef pcl::PointCloud<velodyne_rawdata::VPoint> VPointCloud;
+#endif // DEPRECATED_RAWDATA     // define DEPRECATED methods & types
 
 namespace velodyne_pointcloud
 {
@@ -157,7 +159,7 @@ namespace velodyne_pointcloud
 
     // convert polar to XYZ
 
-#if 0    
+#if 0 // just copied for reference...
     // fill in point values
     size_t npoints = scan.size();
     for (size_t i = 0; i < npoints; ++i)
