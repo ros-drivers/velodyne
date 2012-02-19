@@ -16,6 +16,9 @@
 #include "convert.h"
 #include <pcl/io/pcd_io.h>
 
+typedef pcl::PointXYZI VPoint;
+typedef pcl::PointCloud<VPoint> VPointCloud;
+
 namespace velodyne_pointcloud
 {
   /** @brief Constructor. */
@@ -127,25 +130,53 @@ namespace velodyne_pointcloud
     if (output_.getNumSubscribers() == 0)         // no one listening?
       return;                                     // avoid much work
 
+    // allocate a point cloud with same time and frame ID as raw data
+    VPointCloud::Ptr outMsg(new VPointCloud());
+    outMsg->header.stamp = scanMsg->header.stamp;
+    outMsg->header.frame_id = scanMsg->header.frame_id;
+
+    // process each packet provided by the driver
+    for (size_t i = 0; i < scanMsg->packets.size(); ++i)
+      {
+        processPacket(&scanMsg->packets[i], scanMsg->header.frame_id);
+      }
+
     // publish an empty point cloud message (test scaffolding)
-    {
-      sensor_msgs::PointCloud2Ptr outMsg(new sensor_msgs::PointCloud2());
-      //pcl::toROSMsg(pc_, *outMsg);
-
-      // publish the point cloud with same time and frame ID as raw data
-      outMsg->header.stamp = scanMsg->header.stamp;
-      outMsg->header.frame_id = scanMsg->header.frame_id;
-
-      ROS_DEBUG_STREAM("Publishing " << outMsg->height * outMsg->width
-                       << " Velodyne points, time: "
-                       << outMsg->header.stamp);
-      output_.publish(outMsg);
-
-      //pc_.points.clear();
-      //pc_.width = 0;
-      //packetCount_ = 0;
-    }
+    ROS_DEBUG_STREAM("Publishing " << outMsg->height * outMsg->width
+                     << " Velodyne points, time: " << outMsg->header.stamp);
+    output_.publish(outMsg);
   }
+
+  void Convert::processPacket(const velodyne_msgs::VelodynePacket *pkt,
+                              const std::string &frame_id)
+  {
+    ROS_DEBUG_STREAM("Received packet, time: " << pkt->stamp
+                     << " frame: " << frame_id);
+
+    // unpack raw scan to polar coordinates
+
+    // convert polar to XYZ
+
+#if 0    
+    // fill in point values
+    size_t npoints = scan.size();
+    for (size_t i = 0; i < npoints; ++i)
+    {
+      velodyne_pointcloud::PointXYZIR p;
+      p.x = scan[i].x;
+      p.y = scan[i].y;
+      p.z = scan[i].z;
+      if (pointInRange(p))
+        {
+          p.intensity = scan[i].intensity;
+          p.ring = velodyne::LASER_RING[scan[i].laser_number];
+          pc_.points.push_back(p);
+          ++pc_.width;
+        }
+    }
+#endif
+  }
+
 #endif // DEPRECATED_RAWDATA     // define DEPRECATED methods & types
 
 } // namespace velodyne_pointcloud

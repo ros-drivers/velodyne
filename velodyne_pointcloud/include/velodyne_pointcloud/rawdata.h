@@ -27,7 +27,6 @@
 #define __VELODYNE_RAWDATA_H
 
 #define DEPRECATED_RAWDATA 1      // define DEPRECATED methods & types
-//#undef DEPRECATED_RAWDATA         // do not define DEPRECATED methods & types
 
 #include <errno.h>
 #include <stdint.h>
@@ -156,21 +155,18 @@ namespace velodyne_rawdata
      *  Perform initializations needed before data processing can
      *  begin:
      *
-     *    - read device-specific correction angles
+     *    - read device-specific angles calibration
      *
      *  @param private_nh private node handle for ROS parameters
      *  @returns 0 if successful;
      *           errno value for failure
      */
-    virtual int setup(ros::NodeHandle private_nh);
+    int setup(ros::NodeHandle private_nh);
 
   protected:
 
     /** configuration parameters */
     std::string anglesFile_;            ///< correction angles file name
-
-    /** latest raw scan message received */
-    velodyne_msgs::VelodyneScan::ConstPtr rawScan_;
 
     /** correction angles indexed by laser within bank
      *
@@ -178,6 +174,11 @@ namespace velodyne_rawdata
      */
     correction_angles lower_[SCANS_PER_BLOCK];
     correction_angles upper_[SCANS_PER_BLOCK];
+
+#ifdef DEPRECATED_RAWDATA         // define DEPRECATED methods & types
+    /** latest raw scan message received */
+    velodyne_msgs::VelodyneScan::ConstPtr rawScan_;
+#endif // DEPRECATED_RAWDATA     // define DEPRECATED methods & types
   };
 
   ////////////////////////////////////////////////////////////////////
@@ -244,16 +245,17 @@ namespace velodyne_rawdata
                             &RawData::processScan, (RawData *) this,
                             transport_hints);
     }
-#endif // DEPRECATED_RAWDATA     // define DEPRECATED methods & types
 
   protected:
-    void packet2scans(const raw_packet_t *raw, laserscan_t *scans);
-
     // derived class data
     std::vector<laserscan_t> scans_;
 
   private:
     scanCallback cb_;                   ///< scan data callback
+#endif // DEPRECATED_RAWDATA     // define DEPRECATED methods & types
+
+  protected:
+    void packet2scans(const raw_packet_t *raw, laserscan_t *scans);
   };
 
 
@@ -319,14 +321,16 @@ namespace velodyne_rawdata
                             &RawData::processScan, (RawData *) this,
                             transport_hints);
     }
-#endif // DEPRECATED_RAWDATA     // define DEPRECATED methods & types
 
   protected:
-    void scan2xyz(const laserscan_t *scan, laserscan_xyz_t *point);
     xyz_scans_t xyzScans_;              ///< vector of XYZ scans
 
   private:
     xyzCallback cb_;                    ///< XYZ packet callback
+#endif // DEPRECATED_RAWDATA     // define DEPRECATED methods & types
+
+  protected:
+    void scan2xyz(const laserscan_t *scan, laserscan_xyz_t *point);
   };
 
 } // namespace velodyne_pointcloud

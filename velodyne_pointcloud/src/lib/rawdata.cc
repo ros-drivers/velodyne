@@ -160,9 +160,11 @@ namespace velodyne_rawdata
 
   RawDataScans::RawDataScans()
   {
+#ifdef DEPRECATED_RAWDATA         // define DEPRECATED methods & types
     // reserve vector space before processing, we don't want to
     // reallocate in real time
     scans_.reserve(SCANS_PER_REV);
+#endif // DEPRECATED_RAWDATA     // define DEPRECATED methods & types
   }
 
   /** \brief convert raw packet to laserscan format */
@@ -240,9 +242,11 @@ namespace velodyne_rawdata
 
   RawDataXYZ::RawDataXYZ()
   {
+#ifdef DEPRECATED_RAWDATA         // define DEPRECATED methods & types
     // reserve vector space before processing, we don't want to
     // reallocate in real time
     xyzScans_.reserve(SCANS_PER_REV);
+#endif // DEPRECATED_RAWDATA     // define DEPRECATED methods & types
   }
 
   inline void RawDataXYZ::scan2xyz(const laserscan_t *scan,

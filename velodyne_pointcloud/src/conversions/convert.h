@@ -18,7 +18,7 @@
 #define _VELODYNE_POINTCLOUD_CONVERT_H_ 1
 
 #include <ros/ros.h>
-#include <pcl/point_cloud.h>
+#include <pcl_ros/point_cloud.h>
 
 #include <sensor_msgs/PointCloud2.h>
 #include <velodyne_pointcloud/rawdata.h>
@@ -42,7 +42,7 @@ namespace velodyne_pointcloud
                     const std::string &frame_id);
 #else  // use new methods
     void processScan(const velodyne_msgs::VelodyneScan::ConstPtr &scanMsg);
-    void processPacket(const velodyne_msgs::VelodynePacket::ConstPtr &pkt,
+    void processPacket(const velodyne_msgs::VelodynePacket *pkt,
                        const std::string &frame_id);
 #endif // DEPRECATED_RAWDATA     // define DEPRECATED methods & types
 
