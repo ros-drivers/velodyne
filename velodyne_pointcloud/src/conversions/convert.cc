@@ -25,6 +25,7 @@ namespace velodyne_pointcloud
   Convert::Convert(ros::NodeHandle node, ros::NodeHandle private_nh):
     data_(new velodyne_rawdata::RawDataXYZ())
   {
+#ifdef DEPRECATED_RAWDATA         // use DEPRECATED methods & types
     private_nh.param("max_range", config_.max_range,
                      (double) velodyne_rawdata::DISTANCE_MAX);
     private_nh.param("min_range", config_.min_range, 2.0);
@@ -33,6 +34,7 @@ namespace velodyne_pointcloud
                     << config_.max_range << "]");
     min_range2_ = config_.min_range * config_.min_range;
     max_range2_ = config_.max_range * config_.max_range;
+#endif // DEPRECATED_RAWDATA     // define DEPRECATED methods & types
 
     private_nh.param("npackets", config_.npackets,
                      velodyne_rawdata::PACKETS_PER_REV);

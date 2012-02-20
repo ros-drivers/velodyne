@@ -174,12 +174,25 @@ namespace velodyne_rawdata
     /** configuration parameters */
     std::string anglesFile_;            ///< correction angles file name
 
+    typedef struct {
+      double max_range;                ///< maximum range to publish
+      double min_range;                ///< minimum range to publish
+    } Config;
+    Config config_;
+
     /** correction angles indexed by laser within bank
      *
      * \todo combine them into a single array, lower followed by upper
      */
     correction_angles lower_[SCANS_PER_BLOCK];
     correction_angles upper_[SCANS_PER_BLOCK];
+
+    /** in-line test whether a point is in range */
+    bool pointInRange(float range)
+    {
+      return (range >= config_.min_range
+              && range <= config_.max_range);
+    }
 
 #ifdef DEPRECATED_RAWDATA         // define DEPRECATED methods & types
     /** latest raw scan message received */
