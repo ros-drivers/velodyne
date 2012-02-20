@@ -26,7 +26,7 @@
 #ifndef __VELODYNE_RAWDATA_H
 #define __VELODYNE_RAWDATA_H
 
-#define DEPRECATED_RAWDATA 1      // define DEPRECATED methods & types
+//#define DEPRECATED_RAWDATA 1      // define DEPRECATED methods & types
 
 #include <errno.h>
 #include <stdint.h>

@@ -135,6 +135,7 @@ namespace velodyne_pointcloud
       outMsg(new velodyne_rawdata::VPointCloud());
     outMsg->header.stamp = scanMsg->header.stamp;
     outMsg->header.frame_id = scanMsg->header.frame_id;
+    outMsg->height = 1;
 
     // process each packet provided by the driver
     for (size_t i = 0; i < scanMsg->packets.size(); ++i)
