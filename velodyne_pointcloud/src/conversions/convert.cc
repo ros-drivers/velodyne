@@ -15,27 +15,12 @@
 
 #include "convert.h"
 
-#ifdef DEPRECATED_RAWDATA         // use DEPRECATED methods & types
-#include <pcl/io/pcd_io.h>
-#endif // DEPRECATED_RAWDATA     // define DEPRECATED methods & types
-
 namespace velodyne_pointcloud
 {
   /** @brief Constructor. */
   Convert::Convert(ros::NodeHandle node, ros::NodeHandle private_nh):
-    data_(new velodyne_rawdata::RawDataXYZ())
+    data_(new velodyne_rawdata::RawData())
   {
-#ifdef DEPRECATED_RAWDATA         // use DEPRECATED methods & types
-    private_nh.param("max_range", config_.max_range,
-                     (double) velodyne_rawdata::DISTANCE_MAX);
-    private_nh.param("min_range", config_.min_range, 2.0);
-    ROS_INFO_STREAM("data ranges to publish: ["
-                    << config_.min_range << ", "
-                    << config_.max_range << "]");
-    min_range2_ = config_.min_range * config_.min_range;
-    max_range2_ = config_.max_range * config_.max_range;
-#endif // DEPRECATED_RAWDATA     // define DEPRECATED methods & types
-
     private_nh.param("npackets", config_.npackets,
                      velodyne_rawdata::PACKETS_PER_REV);
     ROS_INFO_STREAM("number of packets to accumulate: " << config_.npackets);
@@ -54,77 +39,12 @@ namespace velodyne_pointcloud
     output_ =
       node.advertise<sensor_msgs::PointCloud2>("velodyne/pointcloud2", 10);
 
-#ifdef DEPRECATED_RAWDATA         // use DEPRECATED methods & types
-    // subscribe via RawData method
-    velodyne_scan_ =
-      data_->subscribe(node, "velodyne/packets", 10,
-                       boost::bind(&Convert::processXYZ,
-                                   this, _1, _2, _3),
-                       ros::TransportHints().tcpNoDelay(true));
-#else  // use new methods
-    // subscribe directly to VelodyneScan
+    // subscribe to VelodyneScan packets
     velodyne_scan_ =
       node.subscribe("velodyne/packets", 10,
                      &Convert::processScan, (Convert *) this,
                      ros::TransportHints().tcpNoDelay(true));
-#endif // DEPRECATED_RAWDATA     // define DEPRECATED methods & types
   }
-
-#ifdef DEPRECATED_RAWDATA         // use DEPRECATED methods & types
-
-  /** \brief Callback for XYZ points.
-   *
-   *  Converts Velodyne data for a single packet into a point cloud.
-   *  Collects packets into a larger message (generally a full
-   *  revolution).  Periodically publishes collected data as a
-   *  PointCloud2 message.
-   *
-   *  @deprecated
-   */
-  void Convert::processXYZ(const velodyne_rawdata::xyz_scans_t &scan,
-                                 ros::Time stamp,
-                                 const std::string &frame_id)
-  {
-    if (output_.getNumSubscribers() == 0)         // no one listening?
-      return;                                     // avoid much work
-    
-    // fill in point values
-    size_t npoints = scan.size();
-    for (size_t i = 0; i < npoints; ++i)
-    {
-      velodyne_pointcloud::PointXYZIR p;
-      p.x = scan[i].x;
-      p.y = scan[i].y;
-      p.z = scan[i].z;
-      if (pointInRange(p))
-        {
-          p.intensity = scan[i].intensity;
-          p.ring = velodyne_rawdata::LASER_RING[scan[i].laser_number];
-          pc_.points.push_back(p);
-          ++pc_.width;
-        }
-    }
-
-    if (++packetCount_ >= config_.npackets)
-      {
-        // buffer is full, publish it
-        sensor_msgs::PointCloud2Ptr outMsg(new sensor_msgs::PointCloud2());
-        pcl::toROSMsg(pc_, *outMsg);
-
-        // publish the accumulated point cloud
-        outMsg->header.stamp = stamp;               // time of last packet
-        outMsg->header.frame_id = frame_id;         // input frame ID
-
-        ROS_DEBUG_STREAM("Publishing " << outMsg->height * outMsg->width
-                         << " Velodyne points.");
-        output_.publish(outMsg);
-        pc_.points.clear();
-        pc_.width = 0;
-        packetCount_ = 0;
-      }
-  }
-
-#else  // use new methods
 
   /** @brief Callback for raw scan messages. */
   void Convert::processScan(const velodyne_msgs::VelodyneScan::ConstPtr &scanMsg)
@@ -150,7 +70,5 @@ namespace velodyne_pointcloud
                      << " Velodyne points, time: " << outMsg->header.stamp);
     output_.publish(outMsg);
   }
-
-#endif // DEPRECATED_RAWDATA     // define DEPRECATED methods & types
 
 } // namespace velodyne_pointcloud

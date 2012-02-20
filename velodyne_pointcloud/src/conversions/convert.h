@@ -35,40 +35,14 @@ namespace velodyne_pointcloud
 
   private:
 
-#ifdef DEPRECATED_RAWDATA         // use DEPRECATED methods & types
-    void processXYZ(const velodyne_rawdata::xyz_scans_t &scan,
-                    ros::Time stamp,
-                    const std::string &frame_id);
-
-    /** in-line test whether a point is in range */
-    bool pointInRange(const velodyne_pointcloud::PointXYZIR &point)
-    {
-      float sum2 = (point.x * point.x 
-                    + point.y * point.y
-                    + point.z * point.z);
-      return (sum2 >= min_range2_ && sum2 <= max_range2_);
-    }
-
-    // store squares of minimum and maximum ranges for efficient comparison
-    float max_range2_;
-    float min_range2_;
-
-#else  // use new methods
-
     void processScan(const velodyne_msgs::VelodyneScan::ConstPtr &scanMsg);
 
-#endif // DEPRECATED_RAWDATA     // define DEPRECATED methods & types
-
-    boost::shared_ptr<velodyne_rawdata::RawDataXYZ> data_;
+    boost::shared_ptr<velodyne_rawdata::RawData> data_;
     ros::Subscriber velodyne_scan_;
     ros::Publisher output_;
 
     /// configuration parameters
     typedef struct {
-#ifdef DEPRECATED_RAWDATA         // use DEPRECATED methods & types
-      double max_range;                ///< maximum range to publish
-      double min_range;                ///< minimum range to publish
-#endif // DEPRECATED_RAWDATA     // define DEPRECATED methods & types
       int npackets;                    ///< number of packets to combine
     } Config;
     Config config_;

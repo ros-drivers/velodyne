@@ -26,8 +26,6 @@
 #ifndef __VELODYNE_RAWDATA_H
 #define __VELODYNE_RAWDATA_H
 
-//#define DEPRECATED_RAWDATA 1      // define DEPRECATED methods & types
-
 #include <errno.h>
 #include <stdint.h>
 #include <string>
@@ -134,28 +132,6 @@ namespace velodyne_rawdata
     RawData();
     ~RawData() {}
 
-#ifdef DEPRECATED_RAWDATA         // define DEPRECATED methods & types
-    /** \brief handle ROS topic message
-     *
-     *  This is the main entry point for handling ROS messages from
-     *  the "velodyne/packets" topic, published by the driver nodelet.
-     *  This is \b not a virtual function; derived classes may replace
-     *  processPacket(), instead.
-     *
-     *  By default, the driver publishes packets for a complete
-     *  rotation of the device in each message, but that is not
-     *  guaranteed.
-     */
-    void processScan(const velodyne_msgs::VelodyneScan::ConstPtr &scanMsg);
-
-    /** \brief Process a Velodyne packet.
-     *
-     * \param pkt -> VelodynePacket message
-     */
-    virtual void processPacket(const velodyne_msgs::VelodynePacket *pkt,
-                               const std::string &frame_id) = 0;
-#endif // DEPRECATED_RAWDATA     // define DEPRECATED methods & types
-
     /** \brief Set up for data processing.
      *
      *  Perform initializations needed before data processing can
@@ -169,7 +145,9 @@ namespace velodyne_rawdata
      */
     int setup(ros::NodeHandle private_nh);
 
-  protected:
+    void unpack(const velodyne_msgs::VelodynePacket &pkt, VPointCloud::Ptr &pc);
+
+  private:
 
     /** configuration parameters */
     std::string anglesFile_;            ///< correction angles file name
@@ -193,180 +171,8 @@ namespace velodyne_rawdata
       return (range >= config_.min_range
               && range <= config_.max_range);
     }
-
-#ifdef DEPRECATED_RAWDATA         // define DEPRECATED methods & types
-    /** latest raw scan message received */
-    velodyne_msgs::VelodyneScan::ConstPtr rawScan_;
-#endif // DEPRECATED_RAWDATA     // define DEPRECATED methods & types
   };
 
-  ////////////////////////////////////////////////////////////////////
-  // RawDataScans derived class
-  ////////////////////////////////////////////////////////////////////
-
-#ifdef DEPRECATED_RAWDATA         // define DEPRECATED methods & types
-  /** \brief A single laser scan in Velodyne's frame of reference.
-   *
-   *   pitch is relative to the plane of the unit (in its frame of
-   *   reference): positive is above, negative is below
-   *
-   *   heading is relative to the front of the unit (the outlet is the back):
-   *   positive is clockwise  (yaw)
-   */
-  typedef struct laserscan
-  {
-    float range;                        ///< in meters
-    float heading;                      ///< in radians
-    float pitch;                        ///< in radians
-    uint16_t revolution;
-    uint8_t  laser_number;
-    uint8_t  intensity;
-  } laserscan_t;
-
-  /** \brief type of callback function to receive laser scans
-   *
-   *  \param scan vector containing the laser scans for a single packet
-   *  \param time ROS time stamp of packet
-   *  \param frame_id ROS frame ID of packet
-   */
-  typedef boost::function<void(const std::vector<laserscan_t> &scan,
-                               ros::Time time,
-                               const std::string &frame_id)> scanCallback;
-
-#endif // DEPRECATED_RAWDATA     // define DEPRECATED methods & types
-
-  /** \brief Convert Velodyne raw input to Polar format */
-  class RawDataScans: public RawData
-  {
-  public:
-
-    RawDataScans();
-
-#ifdef DEPRECATED_RAWDATA         // define DEPRECATED methods & types
-    virtual void processPacket(const velodyne_msgs::VelodynePacket *pkt,
-                               const std::string &frame_id);
-
-    /** \brief Subscribe to laser scans.
-     *
-     * \param node the ros::NodeHandle to use to subscribe.
-     * \param base_topic the topic to subscribe to.
-     * \param queue_size the subscription queue size
-     * \param callback function or method to receive scan data
-     * \param transport_hints optional transport hints for this subscription
-     */
-    ros::Subscriber subscribe(ros::NodeHandle node,
-                              const std::string &topic,
-                              uint32_t queue_size,
-                              const scanCallback callback,
-                              const ros::TransportHints &transport_hints
-                                      = ros::TransportHints())
-    {
-      ROS_INFO("generic scan callback defined");
-      cb_ = callback;
-      return node.subscribe(topic, queue_size,
-                            &RawData::processScan, (RawData *) this,
-                            transport_hints);
-    }
-
-  private:
-    scanCallback cb_;                   ///< scan data callback
-
-  protected:
-    // derived class data
-    std::vector<laserscan_t> scans_;
-
-    void packet2scans(const raw_packet_t *raw, laserscan_t *scans);
-
-#else // not DEPRECATED_RAWDATA     // define new methods & types
-
-  protected:
-    void packet2scans(const raw_packet_t &raw, VPolar &scans);
-
-#endif // DEPRECATED_RAWDATA     // define DEPRECATED methods & types
-  };
-
-
-  ////////////////////////////////////////////////////////////////////
-  // RawDataXYZ derived class
-  ////////////////////////////////////////////////////////////////////
-
-#ifdef DEPRECATED_RAWDATA         // define DEPRECATED methods & types
-  /** \brief a single laser scan in XYZ format
-   *
-   *  Data are in the Velodyne's frame of reference.
-   */
-  typedef struct laserscan_xyz
-  {
-    float x, y, z;
-    float heading;
-    uint16_t revolution;
-    uint8_t  laser_number;
-    uint8_t  intensity;
-  } laserscan_xyz_t;
-
-  /** \brief vector of XYZ laser scans */
-  typedef std::vector<laserscan_xyz_t> xyz_scans_t;
-
-  /** \brief type of callback function to receive XYZ laser scans
-   *
-   *  \param scan vector containing the XYZ scans for a single packet
-   *  \param stamp ROS time stamp of packet
-   *  \param frame_id ROS frame ID of packet
-   */
-  typedef boost::function<void(const xyz_scans_t &scan,
-                               ros::Time stamp,
-                               const std::string &frame_id)> xyzCallback;
-#endif // DEPRECATED_RAWDATA     // define DEPRECATED methods & types
-
-  /** \brief Convert Velodyne raw input to XYZ format */
-  class RawDataXYZ: public RawDataScans
-  {
-  public:
-
-    RawDataXYZ();
-
-#ifdef DEPRECATED_RAWDATA         // define DEPRECATED methods & types
-    virtual void processPacket(const velodyne_msgs::VelodynePacket *pkt,
-                               const std::string &frame_id);
-
-    /** \brief Subscribe to XYZ laser scans.
-     *
-     * \param node the ros::NodeHandle to use to subscribe.
-     * \param base_topic the topic to subscribe to.
-     * \param queue_size the subscription queue size
-     * \param callback function or method to receive XYZ data
-     * \param transport_hints optional transport hints for this subscription
-     */
-    ros::Subscriber subscribe(ros::NodeHandle node,
-                              const std::string &topic,
-                              uint32_t queue_size,
-                              const xyzCallback callback,
-                              const ros::TransportHints &transport_hints
-                                      = ros::TransportHints())
-    {
-      ROS_INFO("XYZ callback subscribed");
-      cb_ = callback;
-      return node.subscribe(topic, queue_size,
-                            &RawData::processScan, (RawData *) this,
-                            transport_hints);
-    }
-
-  protected:
-    xyz_scans_t xyzScans_;              ///< vector of XYZ scans
-
-    void scan2xyz(const laserscan_t *scan, laserscan_xyz_t *point);
-
-  private:
-    xyzCallback cb_;                    ///< XYZ packet callback
-
-#else  // not DEPRECATED_RAWDATA     // define new methods & types
-
-  public:
-    void unpack(const velodyne_msgs::VelodynePacket &pkt, VPointCloud::Ptr &pc);
-
-#endif // DEPRECATED_RAWDATA     // define DEPRECATED methods & types
-  };
-
-} // namespace velodyne_pointcloud
+} // namespace velodyne_rawdata
 
 #endif // __VELODYNE_RAWDATA_H
