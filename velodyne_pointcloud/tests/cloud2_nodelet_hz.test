@@ -15,8 +15,11 @@
   <!-- start nodelet manager and driver nodelets -->
   <include file="$(find velodyne_driver)/launch/nodelet_manager.launch" />
 
-  <!-- start cloud2 nodelet -->
-  <include file="$(find velodyne_pointcloud)/launch/cloud2_nodelet.launch" />
+  <!-- start cloud2 nodelet using test calibration file -->
+  <include file="$(find velodyne_pointcloud)/launch/cloud2_nodelet.launch">
+    <arg name="calibration"
+         value="$(find velodyne_pointcloud)/tests/angles.config"/>
+  </include>
 
   <!-- verify PointCloud2 publication rate -->
   <test test-name="cloud2_nodelet_hz_test" pkg="rostest"
