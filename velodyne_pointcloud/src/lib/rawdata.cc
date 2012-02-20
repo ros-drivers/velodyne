@@ -71,12 +71,6 @@ namespace velodyne_rawdata
     ROS_INFO_STREAM("data ranges to publish: ["
                     << config_.min_range << ", "
                     << config_.max_range << "]");
-    private_nh.param("max_range", config_.max_range,
-                     (double) velodyne_rawdata::DISTANCE_MAX);
-    private_nh.param("min_range", config_.min_range, 2.0);
-    ROS_INFO_STREAM("data ranges to publish: ["
-                    << config_.min_range << ", "
-                    << config_.max_range << "]");
 
     // get path to angles.config file for this device
     if (!private_nh.getParam("angles", anglesFile_))
