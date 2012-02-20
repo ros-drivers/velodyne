@@ -32,6 +32,7 @@
 #include <angles/angles.h>
 
 #include <velodyne_pointcloud/rawdata.h>
+#include <velodyne_pointcloud/ring_sequence.h>
 
 namespace velodyne_rawdata
 {
@@ -250,6 +251,7 @@ namespace velodyne_rawdata
   }
 
 #ifdef DEPRECATED_RAWDATA         // define DEPRECATED methods & types
+
   inline void RawDataXYZ::scan2xyz(const laserscan_t *scan,
                                    laserscan_xyz_t *point)
   {
@@ -281,6 +283,84 @@ namespace velodyne_rawdata
     if (cb_)
       cb_(xyzScans_, pkt->stamp, frame_id);
   }
+
+#else  // new raw data methods
+
+  /** @brief convert raw packet to point cloud
+   *
+   *  @param pkt raw packet to unpack
+   *  @param pc shared pointer to point cloud (points are appended)
+   */
+  void RawDataXYZ::unpack(const velodyne_msgs::VelodynePacket &pkt,
+                          VPointCloud::Ptr &pc)
+  {
+    ROS_DEBUG_STREAM("Received packet, time: " << pkt.stamp);
+
+    const raw_packet_t *raw = (const raw_packet_t *) &pkt.data[0];
+
+    for (int i = 0; i < BLOCKS_PER_PACKET; i++)
+      {
+        int bank_origin = 32;
+        correction_angles *corrections = upper_;
+        if (raw->blocks[i].header == LOWER_BANK)
+          {
+            bank_origin = 0;
+            corrections = lower_;
+          }
+
+        float rotation = angles::from_degrees(raw->blocks[i].rotation
+                                              * ROTATION_RESOLUTION);
+
+        for (int j = 0, k = 0; j < SCANS_PER_BLOCK; j++, k += RAW_SCAN_SIZE)
+          {
+            float range;                ///< in meters
+            float heading;              ///< in radians
+            float pitch;                ///< in radians
+            uint8_t  laser_number;
+            uint8_t  intensity;
+
+            laser_number = j + bank_origin;
+
+            //if(!corrections[j].enabled) 
+            //  do what???
+
+            // beware: the Velodyne turns clockwise
+            heading = 
+              angles::normalize_angle(-(rotation - corrections[j].rotational));
+            pitch   = corrections[j].vertical;
+      
+            union two_bytes tmp;
+            tmp.bytes[0] = raw->blocks[i].data[k];
+            tmp.bytes[1] = raw->blocks[i].data[k+1];
+
+            // convert range to meters and apply quadratic correction
+            range = tmp.uint * DISTANCE_RESOLUTION;
+            range =
+              (corrections[j].offset1 * range * range
+               + corrections[j].offset2 * range
+               + corrections[j].offset3);
+      
+            intensity = raw->blocks[i].data[k+2];
+
+            //if (pointInRange(range))
+              {
+                // convert polar coordinates to Euclidean XYZ
+                VPoint point;
+                float xy_projection = range * cosf(pitch);
+                point.ring = velodyne_rawdata::LASER_RING[laser_number];
+                point.x = xy_projection * cosf(heading);
+                point.y = xy_projection * sinf(heading);
+                point.z = range * sinf(pitch);
+                point.intensity = intensity;
+
+                // append this point to the cloud
+                pc->points.push_back(point);
+                ++pc->width;
+              }
+          }
+      }
+  }  
+
 #endif // DEPRECATED_RAWDATA     // define DEPRECATED methods & types
 
 } // namespace velodyne_pointcloud

@@ -1,1 +1,1 @@
-rosbuild_add_library(velodyne_data rawdata.cc)
+rosbuild_add_library(velodyne_rawdata rawdata.cc)

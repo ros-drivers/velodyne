@@ -192,7 +192,7 @@ namespace velodyne_pointcloud
       if (pointInRange(p))
         {
           p.intensity = scan[i].intensity;
-          p.ring = velodyne::LASER_RING[scan[i].laser_number];
+          p.ring = velodyne_rawdata::LASER_RING[scan[i].laser_number];
           inPc_.points.push_back(p);
           ++inPc_.width;
         }

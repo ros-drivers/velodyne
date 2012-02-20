@@ -34,11 +34,16 @@
 #include <boost/format.hpp>
 
 #include <ros/ros.h>
+#include <pcl_ros/point_cloud.h>
 #include <velodyne_msgs/VelodyneScan.h>
 #include <velodyne_pointcloud/point_types.h>
 
 namespace velodyne_rawdata
 {
+  // Shorthand typedefs for point cloud representations
+  typedef velodyne_pointcloud::PointPolarIR VPolar;
+  typedef velodyne_pointcloud::PointXYZIR VPoint;
+  typedef pcl::PointCloud<VPoint> VPointCloud;
 
   /**
    * Raw Velodyne packet constants and structures.
@@ -215,12 +220,6 @@ namespace velodyne_rawdata
                                ros::Time time,
                                const std::string &frame_id)> scanCallback;
 
-#else // not DEPRECATED_RAWDATA     // define new methods & types
-
-  // Shorthand typedefs for polar and Euclidean coordinate representations
-  typedef velodyne_pointcloud::PointPolarIR VPolar;
-  typedef velodyne_pointcloud::PointXYZIR VPoint;
-
 #endif // DEPRECATED_RAWDATA     // define DEPRECATED methods & types
 
   /** \brief Convert Velodyne raw input to Polar format */
@@ -349,8 +348,8 @@ namespace velodyne_rawdata
 
 #else  // not DEPRECATED_RAWDATA     // define new methods & types
 
-  protected:
-    void polar2xyz(const VPolar &scan, VPoint &point);
+  public:
+    void unpack(const velodyne_msgs::VelodynePacket &pkt, VPointCloud::Ptr &pc);
 
 #endif // DEPRECATED_RAWDATA     // define DEPRECATED methods & types
   };

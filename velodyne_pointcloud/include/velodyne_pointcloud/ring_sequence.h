@@ -18,7 +18,7 @@
 #ifndef __VELODYNE_RING_SEQUENCE_H
 #define __VELODYNE_RING_SEQUENCE_H
 
-namespace velodyne
+namespace velodyne_rawdata
 {
   /// number of lasers
   const int N_LASERS = 64;

@@ -17,8 +17,6 @@
 
 #ifdef DEPRECATED_RAWDATA         // use DEPRECATED methods & types
 #include <pcl/io/pcd_io.h>
-#else  // use new methods
-typedef pcl::PointCloud<velodyne_rawdata::VPoint> VPointCloud;
 #endif // DEPRECATED_RAWDATA     // define DEPRECATED methods & types
 
 namespace velodyne_pointcloud
@@ -99,7 +97,7 @@ namespace velodyne_pointcloud
       if (pointInRange(p))
         {
           p.intensity = scan[i].intensity;
-          p.ring = velodyne::LASER_RING[scan[i].laser_number];
+          p.ring = velodyne_rawdata::LASER_RING[scan[i].laser_number];
           pc_.points.push_back(p);
           ++pc_.width;
         }
@@ -133,50 +131,21 @@ namespace velodyne_pointcloud
       return;                                     // avoid much work
 
     // allocate a point cloud with same time and frame ID as raw data
-    VPointCloud::Ptr outMsg(new VPointCloud());
+    velodyne_rawdata::VPointCloud::Ptr
+      outMsg(new velodyne_rawdata::VPointCloud());
     outMsg->header.stamp = scanMsg->header.stamp;
     outMsg->header.frame_id = scanMsg->header.frame_id;
 
     // process each packet provided by the driver
     for (size_t i = 0; i < scanMsg->packets.size(); ++i)
       {
-        processPacket(&scanMsg->packets[i], scanMsg->header.frame_id);
+        data_->unpack(scanMsg->packets[i], outMsg);
       }
 
     // publish an empty point cloud message (test scaffolding)
     ROS_DEBUG_STREAM("Publishing " << outMsg->height * outMsg->width
                      << " Velodyne points, time: " << outMsg->header.stamp);
     output_.publish(outMsg);
-  }
-
-  void Convert::processPacket(const velodyne_msgs::VelodynePacket *pkt,
-                              const std::string &frame_id)
-  {
-    ROS_DEBUG_STREAM("Received packet, time: " << pkt->stamp
-                     << " frame: " << frame_id);
-
-    // unpack raw scan to polar coordinates
-
-    // convert polar to XYZ
-
-#if 0 // just copied for reference...
-    // fill in point values
-    size_t npoints = scan.size();
-    for (size_t i = 0; i < npoints; ++i)
-    {
-      velodyne_pointcloud::PointXYZIR p;
-      p.x = scan[i].x;
-      p.y = scan[i].y;
-      p.z = scan[i].z;
-      if (pointInRange(p))
-        {
-          p.intensity = scan[i].intensity;
-          p.ring = velodyne::LASER_RING[scan[i].laser_number];
-          pc_.points.push_back(p);
-          ++pc_.width;
-        }
-    }
-#endif
   }
 
 #endif // DEPRECATED_RAWDATA     // define DEPRECATED methods & types
