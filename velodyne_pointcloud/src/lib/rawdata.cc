@@ -173,11 +173,21 @@ namespace velodyne_rawdata
 
         for (int j = 0, k = 0; j < SCANS_PER_BLOCK; j++, k += RAW_SCAN_SIZE)
           {
+            /*   Unpack a single (polar) laser scan in device frame.
+             *
+             *   pitch is relative to the plane of the unit (in its
+             *     frame of reference): positive is above, negative is
+             *     below.
+             *
+             *   heading is relative to the front of the unit (the
+             *     outlet is the back): positive is clockwise, because
+             *     the device rotates that direction about its Z axis.
+             */
             float range;                ///< in meters
             float heading;              ///< in radians
             float pitch;                ///< in radians
-            uint8_t  laser_number;
-            uint8_t  intensity;
+            uint8_t laser_number;       ///< hardware laser number
+            uint8_t intensity;          ///< unit-less intensity value
 
             laser_number = j + bank_origin;
 
