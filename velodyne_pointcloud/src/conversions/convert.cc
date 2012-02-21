@@ -50,10 +50,10 @@ namespace velodyne_pointcloud
     // process each packet provided by the driver
     for (size_t i = 0; i < scanMsg->packets.size(); ++i)
       {
-        data_->unpack(scanMsg->packets[i], outMsg);
+        data_->unpack(scanMsg->packets[i], *outMsg);
       }
 
-    // publish an empty point cloud message (test scaffolding)
+    // publish the accumulated cloud message
     ROS_DEBUG_STREAM("Publishing " << outMsg->height * outMsg->width
                      << " Velodyne points, time: " << outMsg->header.stamp);
     output_.publish(outMsg);

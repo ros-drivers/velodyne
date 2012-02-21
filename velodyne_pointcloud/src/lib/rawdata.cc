@@ -151,8 +151,7 @@ namespace velodyne_rawdata
    *  @param pkt raw packet to unpack
    *  @param pc shared pointer to point cloud (points are appended)
    */
-  void RawData::unpack(const velodyne_msgs::VelodynePacket &pkt,
-                       VPointCloud::Ptr &pc)
+  void RawData::unpack(const velodyne_msgs::VelodynePacket &pkt, VPointCloud &pc)
   {
     ROS_DEBUG_STREAM("Received packet, time: " << pkt.stamp);
 
@@ -224,8 +223,8 @@ namespace velodyne_rawdata
                 point.intensity = intensity;
 
                 // append this point to the cloud
-                pc->points.push_back(point);
-                ++pc->width;
+                pc.points.push_back(point);
+                ++pc.width;
               }
           }
       }

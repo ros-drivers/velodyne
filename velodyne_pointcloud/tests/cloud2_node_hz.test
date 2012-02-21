@@ -8,7 +8,7 @@
 
 <launch>
 
-  <!-- start read with example PCAP file -->
+  <!-- start driver with example PCAP file -->
   <node pkg="velodyne_driver" type="velodyne_node" name="velodyne_node">
     <param name="pcap" value="$(find velodyne_pointcloud)/tests/class.pcap"/>
   </node>
