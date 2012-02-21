@@ -17,14 +17,14 @@
            value="$(find velodyne_pointcloud)/tests/class.pcap"/>
   </include>
 
-  <!-- start transform2 nodelet -->
-  <include file="$(find velodyne_pointcloud)/launch/transform2_nodelet.launch">
+  <!-- start transform nodelet -->
+  <include file="$(find velodyne_pointcloud)/launch/transform_nodelet.launch">
     <arg name="calibration"
          value="$(find velodyne_pointcloud)/tests/angles.config"/>
   </include>
 
   <!-- verify PointCloud2 publication rate -->
-  <test test-name="transform2_nodelet_hz_test" pkg="rostest"
+  <test test-name="transform_nodelet_hz_test" pkg="rostest"
         type="hztest" name="hztest1" >
     <param name="hz" value="9.75" />
     <param name="hzerror" value="0.75" />

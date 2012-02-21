@@ -20,12 +20,12 @@
 
 namespace velodyne_pointcloud
 {
-  class Transform2Nodelet: public nodelet::Nodelet
+  class TransformNodelet: public nodelet::Nodelet
   {
   public:
 
-    Transform2Nodelet() {}
-    ~Transform2Nodelet() {}
+    TransformNodelet() {}
+    ~TransformNodelet() {}
 
   private:
 
@@ -34,7 +34,7 @@ namespace velodyne_pointcloud
   };
 
   /** @brief Nodelet initialization. */
-  void Transform2Nodelet::onInit()
+  void TransformNodelet::onInit()
   {
     tf_.reset(new Transform(getNodeHandle(), getPrivateNodeHandle()));
   }
@@ -45,6 +45,6 @@ namespace velodyne_pointcloud
 // Register this plugin with pluginlib.  Names must match nodelet_velodyne.xml.
 //
 // parameters: package, class name, class type, base class type
-PLUGINLIB_DECLARE_CLASS(velodyne_pointcloud, Transform2Nodelet,
-                        velodyne_pointcloud::Transform2Nodelet,
+PLUGINLIB_DECLARE_CLASS(velodyne_pointcloud, TransformNodelet,
+                        velodyne_pointcloud::TransformNodelet,
                         nodelet::Nodelet);
