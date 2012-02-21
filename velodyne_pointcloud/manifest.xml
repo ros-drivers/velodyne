@@ -14,11 +14,12 @@
   <depend package="sensor_msgs"/>
   <depend package="tf"/>
   <depend package="velodyne_common"/> <!-- deprecated -->
-  <depend package="velodyne_driver"/> <!-- launch files -->
+  <depend package="velodyne_driver"/> <!-- launch files for testing -->
   <depend package="velodyne_msgs"/>
 
   <export>
-    <cpp cflags="-I${prefix}/include" />
+    <cpp cflags="-I${prefix}/include"
+         lflags="-L${prefix}/lib -Wl,-rpath,${prefix}/lib -lvelodyne_rawdata"/>
     <nodelet plugin="${prefix}/nodelets.xml"/>
   </export>
 
