@@ -8,9 +8,9 @@
   </class>
 </library>
 
-<library path="lib/libtransform2">
-  <class name="velodyne_pointcloud/Transform2"
-         type="velodyne_pointcloud::Transform2"
+<library path="lib/libtransform2_nodelet">
+  <class name="velodyne_pointcloud/Transform2Nodelet"
+         type="velodyne_pointcloud::Transform2Nodelet"
          base_class_type="nodelet::Nodelet">
     <description>
       Transforms packets into /odom frame, publishing multiple packets

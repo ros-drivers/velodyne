@@ -8,4 +8,5 @@ target_link_libraries(cloud2_nodelet velodyne_rawdata)
 rosbuild_add_executable(transform2_node transform2_node.cc transform.cc)
 target_link_libraries(transform2_node velodyne_rawdata)
 
-rosbuild_add_library(transform2 transform2_nodelet.cc)
+rosbuild_add_library(transform2_nodelet transform2_nodelet.cc transform.cc)
+target_link_libraries(transform2_nodelet velodyne_rawdata)

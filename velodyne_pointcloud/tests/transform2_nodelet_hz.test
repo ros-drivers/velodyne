@@ -18,7 +18,10 @@
   </include>
 
   <!-- start transform2 nodelet -->
-  <include file="$(find velodyne_pointcloud)/launch/transform2_nodelet.launch"/>
+  <include file="$(find velodyne_pointcloud)/launch/transform2_nodelet.launch">
+    <arg name="calibration"
+         value="$(find velodyne_pointcloud)/tests/angles.config"/>
+  </include>
 
   <!-- verify PointCloud2 publication rate -->
   <test test-name="transform2_nodelet_hz_test" pkg="rostest"

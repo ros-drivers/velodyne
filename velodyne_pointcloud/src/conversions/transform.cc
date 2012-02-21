@@ -12,6 +12,9 @@
     This class transforms raw Velodyne 3D LIDAR packets to PointCloud2
     in the /odom frame of reference.
 
+    @author Jack O'Quin
+    @author Jesse Vera
+
 */
 
 #include "transform.h"

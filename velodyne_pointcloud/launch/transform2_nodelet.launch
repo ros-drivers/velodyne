@@ -9,7 +9,7 @@
 <launch>
   <arg name="calibration" default="" />
   <node pkg="nodelet" type="nodelet" name="transform2_nodelet"
-        args="load velodyne_pointcloud/Transform2 velodyne_nodelet_manager" >
-    <param name="angles" value="$(arg calibration)"/>
+        args="load velodyne_pointcloud/Transform2Nodelet velodyne_nodelet_manager" >
+    <param name="calibration" value="$(arg calibration)"/>
   </node>
 </launch>
