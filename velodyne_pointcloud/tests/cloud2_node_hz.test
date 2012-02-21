@@ -15,7 +15,8 @@
 
   <!-- start cloud2 node with test calibration file -->
   <node pkg="velodyne_pointcloud" type="cloud2_node" name="cloud2_node">
-    <param name="angles" value="$(find velodyne_pointcloud)/tests/angles.config"/>
+    <param name="calibration"
+           value="$(find velodyne_pointcloud)/tests/angles.config"/>
   </node>
 
   <test test-name="cloud2_node_hz_test" pkg="rostest" type="hztest"

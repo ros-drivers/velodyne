@@ -18,7 +18,8 @@
 
   <!-- start cloud2 node with test calibration file -->
   <node pkg="velodyne_pointcloud" type="transform2_node" name="transform2_node">
-    <param name="angles" value="$(find velodyne_pointcloud)/tests/angles.config"/>
+    <param name="calibration"
+           value="$(find velodyne_pointcloud)/tests/angles.config"/>
   </node>
 
   <!-- verify PointCloud2 publication rate -->

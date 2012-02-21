@@ -150,9 +150,8 @@ namespace velodyne_rawdata
   private:
 
     /** configuration parameters */
-    std::string anglesFile_;            ///< correction angles file name
-
     typedef struct {
+      std::string calibrationFile;     ///< calibration file name
       double max_range;                ///< maximum range to publish
       double min_range;                ///< minimum range to publish
     } Config;

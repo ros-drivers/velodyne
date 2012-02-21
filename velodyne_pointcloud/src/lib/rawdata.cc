@@ -59,23 +59,23 @@ namespace velodyne_rawdata
                     << config_.max_range << "]");
 
     // get path to angles.config file for this device
-    if (!private_nh.getParam("angles", anglesFile_))
+    if (!private_nh.getParam("calibration", config_.calibrationFile))
       {
         ROS_ERROR_STREAM("No calibration angles specified! (using test values)");
 
-        // use velodyne_pointcloud test version as a default
+        // have to use something: grab unit test version as a default
         std::string pkgPath = ros::package::getPath("velodyne_pointcloud");
-        anglesFile_ = pkgPath + "/tests/angles.config";
+        config_.calibrationFile = pkgPath + "/tests/angles.config";
       }
 
-    ROS_INFO_STREAM("correction angles: " << anglesFile_);
+    ROS_INFO_STREAM("correction angles: " << config_.calibrationFile);
 
     // read angles correction file for this specific unit
-    std::ifstream config(anglesFile_.c_str());
+    std::ifstream config(config_.calibrationFile.c_str());
     if (!config)
       {
-        ROS_ERROR_STREAM("Failure opening Velodyne angles correction file: " 
-                         << anglesFile_);
+        ROS_ERROR_STREAM("Failure opening Velodyne calibration file: " 
+                         << config_.calibrationFile);
         return -1;
       }
   
