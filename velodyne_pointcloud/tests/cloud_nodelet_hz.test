@@ -14,14 +14,14 @@
            value="$(find velodyne_pointcloud)/tests/class.pcap"/>
   </include>
 
-  <!-- start cloud2 nodelet using test calibration file -->
-  <include file="$(find velodyne_pointcloud)/launch/cloud2_nodelet.launch">
+  <!-- start cloud nodelet using test calibration file -->
+  <include file="$(find velodyne_pointcloud)/launch/cloud_nodelet.launch">
     <arg name="calibration"
          value="$(find velodyne_pointcloud)/tests/angles.config"/>
   </include>
 
   <!-- verify PointCloud2 publication rate -->
-  <test test-name="cloud2_nodelet_hz_test" pkg="rostest"
+  <test test-name="cloud_nodelet_hz_test" pkg="rostest"
         type="hztest" name="hztest1" >
     <param name="hz" value="9.75" />
     <param name="hzerror" value="0.75" />

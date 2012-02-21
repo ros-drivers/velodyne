@@ -1,5 +1,5 @@
 <!-- -*- mode: XML -*- -->
-<!-- run velodyne_pointcloud/Cloud2Nodelet in a nodelet manager
+<!-- run velodyne_pointcloud/CloudNodelet in a nodelet manager
 
      arg: calibration = path to calibration file
 
@@ -8,8 +8,8 @@
 
 <launch>
   <arg name="calibration" default="" />
-  <node pkg="nodelet" type="nodelet" name="cloud2_nodelet"
-        args="load velodyne_pointcloud/Cloud2Nodelet velodyne_nodelet_manager">
+  <node pkg="nodelet" type="nodelet" name="cloud_nodelet"
+        args="load velodyne_pointcloud/CloudNodelet velodyne_nodelet_manager">
     <param name="calibration" value="$(arg calibration)"/>
   </node>
 </launch>

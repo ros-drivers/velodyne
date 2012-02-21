@@ -13,13 +13,14 @@
     <param name="pcap" value="$(find velodyne_pointcloud)/tests/class.pcap"/>
   </node>
 
-  <!-- start cloud2 node with test calibration file -->
-  <node pkg="velodyne_pointcloud" type="cloud2_node" name="cloud2_node">
+  <!-- start cloud node with test calibration file -->
+  <node pkg="velodyne_pointcloud" type="cloud_node" name="cloud_node">
     <param name="calibration"
            value="$(find velodyne_pointcloud)/tests/angles.config"/>
   </node>
 
-  <test test-name="cloud2_node_hz_test" pkg="rostest" type="hztest"
+  <!-- verify PointCloud2 publication rate -->
+  <test test-name="cloud_node_hz_test" pkg="rostest" type="hztest"
         name="hztest1" >
     <param name="hz" value="9.75" />
     <param name="hzerror" value="0.75" />

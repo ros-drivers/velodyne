@@ -1,6 +1,6 @@
-<library path="lib/libcloud2_nodelet">
-  <class name="velodyne_pointcloud/Cloud2Nodelet"
-         type="velodyne_pointcloud::Cloud2Nodelet"
+<library path="lib/libcloud_nodelet">
+  <class name="velodyne_pointcloud/CloudNodelet"
+         type="velodyne_pointcloud::CloudNodelet"
          base_class_type="nodelet::Nodelet">
     <description>
       Aggregates points from multiple packets, publishing PointCloud2.
