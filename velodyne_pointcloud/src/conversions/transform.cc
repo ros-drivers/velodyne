@@ -54,28 +54,32 @@ namespace velodyne_pointcloud
     outMsg->header.frame_id = config_.frame_id;
     outMsg->height = 1;
 
-    // clear input point cloud to handle this packet
-    inPc_.points.clear();
-    inPc_.width = 0;
-    inPc_.height = 1;
-    inPc_.header.stamp = scanMsg->header.stamp;
-    inPc_.header.frame_id = scanMsg->header.frame_id;
-
     // process each packet provided by the driver
     for (size_t next = 0; next < scanMsg->packets.size(); ++next)
       {
+        // clear input point cloud to handle this packet
+        inPc_.points.clear();
+        inPc_.width = 0;
+        inPc_.height = 1;
+        inPc_.header.frame_id = scanMsg->header.frame_id;
+        inPc_.header.stamp = scanMsg->packets[next].stamp;
+
         // unpack the raw data
         data_->unpack(scanMsg->packets[next], inPc_);
+
+        // clear transform point cloud for this packet
+        tfPc_.points.clear();           // is this needed?
+        tfPc_.width = 0;
+        tfPc_.height = 1;
+        tfPc_.header.stamp = scanMsg->packets[next].stamp;
+        tfPc_.header.frame_id = config_.frame_id;
 
         // transform the packet point cloud into the target frame
         try
           {
-            tfPc_.points.clear();           // is this needed?
-            tfPc_.width = 0;
             ROS_DEBUG_STREAM("transforming from" << inPc_.header.frame_id
                              << " to " << config_.frame_id);
 #if 0 // waiting for transform causes delay problems
-            /// @todo wait for transform to be available
             listener_.waitForTransform(config_.frame_id, frame_id, stamp,
                                        ros::Duration(0.2));
             pcl_ros::transformPointCloud(config_.frame_id, inPc_, tfPc_,
