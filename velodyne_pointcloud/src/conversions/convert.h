@@ -46,11 +46,6 @@ namespace velodyne_pointcloud
       int npackets;                    ///< number of packets to combine
     } Config;
     Config config_;
-
-    // point cloud buffers for collecting points over time
-    // (class members to avoid allocation and deallocation overhead)
-    pcl::PointCloud<velodyne_pointcloud::PointXYZIR> pc_;
-    int packetCount_;           ///< count of output packets collected
   };
 
 } // namespace velodyne_pointcloud

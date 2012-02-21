@@ -21,19 +21,7 @@ namespace velodyne_pointcloud
   Convert::Convert(ros::NodeHandle node, ros::NodeHandle private_nh):
     data_(new velodyne_rawdata::RawData())
   {
-    private_nh.param("npackets", config_.npackets,
-                     velodyne_rawdata::PACKETS_PER_REV);
-    ROS_INFO_STREAM("number of packets to accumulate: " << config_.npackets);
-
     data_->setup(private_nh);
-
-    // allocate space for the output point cloud data
-    pc_.points.reserve(config_.npackets*velodyne_rawdata::SCANS_PER_PACKET);
-    pc_.points.clear();
-    pc_.width = 0;
-    pc_.height = 1;
-    pc_.is_dense = true;
-    packetCount_ = 0;
 
     // advertise output point cloud (before subscribing to input data)
     output_ =

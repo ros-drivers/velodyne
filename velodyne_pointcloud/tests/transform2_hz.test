@@ -8,15 +8,14 @@
 
 <launch>
 
-  <!-- set PCAP file name for driver nodelet -->
-  <param name="driver_nodelet/pcap"
-         value="$(find velodyne_pointcloud)/tests/class.pcap"/>
-
   <!-- define transforms for static vehicle -->
   <include file="$(find velodyne_pointcloud)/tests/static_vehicle_tf.launch" />
 
   <!-- start nodelet manager and driver nodelets -->
-  <include file="$(find velodyne_driver)/launch/nodelet_manager.launch" />
+  <include file="$(find velodyne_driver)/launch/nodelet_manager.launch">
+    <arg name="pcap"
+           value="$(find velodyne_pointcloud)/tests/class.pcap"/>
+  </include>
 
   <!-- start transform2 nodelet -->
   <include file="$(find velodyne_pointcloud)/launch/transform2.launch" />
