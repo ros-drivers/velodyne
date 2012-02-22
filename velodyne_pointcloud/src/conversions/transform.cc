@@ -36,15 +36,20 @@ namespace velodyne_pointcloud
     output_ =
       node.advertise<sensor_msgs::PointCloud2>("velodyne/pointcloud2", 10);
 
-    // subscribe to VelodyneScan packets
-    ///  @todo use tf filter subscription instead
-    velodyne_scan_ =
-      node.subscribe("velodyne/packets", 10,
-                     &Transform::processScan, (Transform *) this,
-                     ros::TransportHints().tcpNoDelay(true));
+    // subscribe to VelodyneScan packets using transform filter
+    velodyne_scan_.subscribe(node, "velodyne/packets", 10);
+    tf_filter_ =
+      new tf::MessageFilter<velodyne_msgs::VelodyneScan>(velodyne_scan_,
+                                                         listener_,
+                                                         config_.frame_id, 10);
+    tf_filter_->registerCallback(boost::bind(&Transform::processScan, this, _1));
   }
 
-  /** @brief Callback for raw scan messages. */
+  /** @brief Callback for raw scan messages.
+   *
+   *  @pre TF message filter has already waited until the transform to
+   *       the configured @c frame_id can succeed.
+   */
   void
     Transform::processScan(const velodyne_msgs::VelodyneScan::ConstPtr &scanMsg)
   {
@@ -82,12 +87,9 @@ namespace velodyne_pointcloud
           {
             ROS_DEBUG_STREAM("transforming from" << inPc_.header.frame_id
                              << " to " << config_.frame_id);
-#if 0 // waiting for transform causes delay problems
-            listener_.waitForTransform(config_.frame_id, frame_id, stamp,
-                                       ros::Duration(0.2));
             pcl_ros::transformPointCloud(config_.frame_id, inPc_, tfPc_,
                                          listener_);
-#else // use the latest transform available, should usually work fine
+#if 0       // use the latest transform available, should usually work fine
             pcl_ros::transformPointCloud(inPc_.header.frame_id,
                                          ros::Time(0), inPc_,
                                          config_.frame_id,

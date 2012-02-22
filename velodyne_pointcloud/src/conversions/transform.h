@@ -19,8 +19,10 @@
 #define _VELODYNE_POINTCLOUD_TRANSFORM_H_ 1
 
 #include <ros/ros.h>
-
+#include "tf/message_filter.h"
+#include "message_filters/subscriber.h"
 #include <sensor_msgs/PointCloud2.h>
+
 #include <velodyne_pointcloud/rawdata.h>
 #include <velodyne_pointcloud/ring_sequence.h>
 #include <velodyne_pointcloud/point_types.h>
@@ -53,7 +55,8 @@ namespace velodyne_pointcloud
     void processScan(const velodyne_msgs::VelodyneScan::ConstPtr &scanMsg);
 
     boost::shared_ptr<velodyne_rawdata::RawData> data_;
-    ros::Subscriber velodyne_scan_;
+    message_filters::Subscriber<velodyne_msgs::VelodyneScan> velodyne_scan_;
+    tf::MessageFilter<velodyne_msgs::VelodyneScan> *tf_filter_;
     ros::Publisher output_;
     tf::TransformListener listener_;
 
@@ -63,9 +66,9 @@ namespace velodyne_pointcloud
     } Config;
     Config config_;
 
-    // Point cloud buffers for collecting points over time.  The inPc_
-    // and tfPc_ are class members only to avoid allocation and
-    // deallocation overhead.
+    // Point cloud buffers for collecting points within a packet.  The
+    // inPc_ and tfPc_ are class members only to avoid reallocation on
+    // every message.
     VPointCloud inPc_;              ///< input packet point cloud
     VPointCloud tfPc_;              ///< transformed packet point cloud
   };
