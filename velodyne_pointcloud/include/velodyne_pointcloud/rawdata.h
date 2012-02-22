@@ -10,13 +10,7 @@
 
 /** @file
  *
- *  Velodyne 3D LIDAR raw data accessor classes.
- *
- *  Classes for unpacking raw Velodyne LIDAR packets into various
- *  useful formats.
- *
- *  @note These interfaces are @b not exported from the @c
- *        velodyne_pointcloud package, but if needed they could be.
+ *  @brief Interfaces for interpreting raw packets from the Velodyne 3D LIDAR.
  *
  *  @author Yaxin Liu
  *  @author Patrick Beeson

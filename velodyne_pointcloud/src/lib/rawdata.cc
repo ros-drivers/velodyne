@@ -179,14 +179,13 @@ namespace velodyne_rawdata
              *     below.
              *
              *   heading is relative to the front of the unit (the
-             *     outlet is the back): positive is clockwise, because
-             *     the device rotates that direction about its Z axis.
+             *     outlet is in the back).
              */
-            float range;                ///< in meters
-            float heading;              ///< in radians
-            float pitch;                ///< in radians
-            uint8_t laser_number;       ///< hardware laser number
-            uint8_t intensity;          ///< unit-less intensity value
+            float range;                // in meters
+            float heading;              // in radians
+            float pitch;                // in radians
+            uint8_t laser_number;       // hardware laser number
+            uint8_t intensity;          // unit-less intensity value
 
             laser_number = j + bank_origin;
 
