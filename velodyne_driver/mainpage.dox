@@ -33,7 +33,7 @@ $ rosrun velodyne_driver velodyne_node _pcap:=dump.pcap
 
 Node name: \b velodyne_node
 
-Publishes: \b velodyne/packets raw Velodyne data packets for one
+Publishes: \b velodyne_packets raw Velodyne data packets for one
 entire revolution of the device.
 
 Parameters:

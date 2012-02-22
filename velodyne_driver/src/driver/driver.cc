@@ -62,7 +62,7 @@ void VelodyneDriver::startup(ros::NodeHandle node,
       return;
     }
 
-  output_ = node.advertise<velodyne_msgs::VelodyneScan>("velodyne/packets", 10);
+  output_ = node.advertise<velodyne_msgs::VelodyneScan>("velodyne_packets", 10);
 }
 
 /** poll the device

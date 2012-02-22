@@ -34,10 +34,10 @@ namespace velodyne_pointcloud
 
     // advertise output point cloud (before subscribing to input data)
     output_ =
-      node.advertise<sensor_msgs::PointCloud2>("velodyne/pointcloud2", 10);
+      node.advertise<sensor_msgs::PointCloud2>("velodyne_points", 10);
 
     // subscribe to VelodyneScan packets using transform filter
-    velodyne_scan_.subscribe(node, "velodyne/packets", 10);
+    velodyne_scan_.subscribe(node, "velodyne_packets", 10);
     tf_filter_ =
       new tf::MessageFilter<velodyne_msgs::VelodyneScan>(velodyne_scan_,
                                                          listener_,
