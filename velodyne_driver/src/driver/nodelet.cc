@@ -65,13 +65,17 @@ void DriverNodelet::onInit()
     (new boost::thread(boost::bind(&DriverNodelet::devicePoll, this)));
 }
 
+/** @brief Device poll thread main loop. */
 void DriverNodelet::devicePoll()
 {
-  while(running_)
+  while(ros::ok())
     {
       // poll device until end of file
       running_ = dvr_.poll();
+      if (!running_)
+        break;
     }
+  running_ = false;
 }
 
 } // namespace velodyne_driver
