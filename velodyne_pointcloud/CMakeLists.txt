@@ -25,3 +25,6 @@ rosbuild_add_rostest(tests/cloud_node_hz.test)
 rosbuild_add_rostest(tests/cloud_nodelet_hz.test)
 rosbuild_add_rostest(tests/transform_node_hz.test)
 rosbuild_add_rostest(tests/transform_nodelet_hz.test)
+
+# parse check all the launch/*.launch files
+rosbuild_add_roslaunch_check(launch)

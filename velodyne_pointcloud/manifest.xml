@@ -11,6 +11,7 @@
 
   <depend package="nodelet"/>
   <depend package="pcl_ros"/>
+  <depend package="rostest"/>
   <depend package="sensor_msgs"/>
   <depend package="tf"/>
   <depend package="velodyne_driver"/> <!-- launch files for testing -->
