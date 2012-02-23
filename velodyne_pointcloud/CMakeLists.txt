@@ -19,7 +19,7 @@ set(LIBRARY_OUTPUT_PATH ${PROJECT_SOURCE_DIR}/lib)
 add_subdirectory(src/lib)
 add_subdirectory(src/conversions)
 
-# unit tests (not ported yet)
+# unit tests
 add_subdirectory(tests)
 rosbuild_add_rostest(tests/cloud_node_hz.test)
 rosbuild_add_rostest(tests/cloud_nodelet_hz.test)
