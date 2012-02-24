@@ -5,8 +5,12 @@ target_link_libraries(cloud_node velodyne_rawdata)
 rosbuild_add_library(cloud_nodelet cloud_nodelet.cc convert.cc)
 target_link_libraries(cloud_nodelet velodyne_rawdata)
 
+rosbuild_add_boost_directories()
 rosbuild_add_executable(transform_node transform_node.cc transform.cc)
 target_link_libraries(transform_node velodyne_rawdata)
+rosbuild_link_boost(transform_node signals)
 
+rosbuild_add_boost_directories()
 rosbuild_add_library(transform_nodelet transform_nodelet.cc transform.cc)
 target_link_libraries(transform_nodelet velodyne_rawdata)
+rosbuild_link_boost(transform_node signals)
