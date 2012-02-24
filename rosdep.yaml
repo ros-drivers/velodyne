@@ -1,6 +1,16 @@
 libpcap:
-  ubuntu: libpcap0.8-dev
-  debian: libpcap0.8-dev
-  fedora: libpcap-devel
-  macports: libpcap
-  arch: libpcap
+  ubuntu:
+    apt:
+      packages: [libpcap0.8-dev]
+  debian:
+    apt:
+      packages: [libpcap0.8-dev]
+  fedora:
+    yum:
+      packages: [libpcap-devel]
+  osx:
+    macports:
+      packages: [libpcap]
+  arch:
+    pacman:
+      packages: [libpcap]
