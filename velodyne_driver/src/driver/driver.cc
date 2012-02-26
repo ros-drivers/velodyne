@@ -32,13 +32,15 @@ void VelodyneDriver::startup(ros::NodeHandle node,
                              ros::NodeHandle private_nh)
 {
   // use private node handle to get parameters
-  private_nh.param("frame_id", frame_id_, std::string("velodyne"));
+  private_nh.param("frame_id", config_.frame_id, std::string("velodyne"));
   std::string tf_prefix = tf::getPrefixParam(private_nh);
   ROS_DEBUG_STREAM("tf_prefix: " << tf_prefix);
-  frame_id_ = tf::resolve(tf_prefix, frame_id_);
+  config_.frame_id = tf::resolve(tf_prefix, config_.frame_id);
 
-  private_nh.param("npackets", npackets_, (int)
+  private_nh.param("npackets", config_.npackets, (int)
                    velodyne_msgs::VelodyneScan::PACKETS_PER_REVOLUTION);
+  private_nh.param("rpm", config_.rpm, 600.0);
+  ROS_INFO_STREAM("Velodyne rotating at " << config_.rpm << " RPM");
 
   std::string dump_file;
   private_nh.param("pcap", dump_file, std::string(""));
@@ -54,6 +56,21 @@ void VelodyneDriver::startup(ros::NodeHandle node,
       input_.reset(new velodyne_driver::InputSocket());
     }
 
+  // initialize diagnostics
+  diagnostics_.setHardwareID("Velodyne HDL");  // TODO: get serial number
+  double frequency = (config_.rpm / 60.0);     // nominal Hz rate
+  double epsilon = frequency * 0.1;            // 10% error margin
+  diag_max_freq_ = frequency + epsilon;
+  diag_min_freq_ = frequency - epsilon;
+  ROS_INFO("frequency range: [%.3f, %.3f] Hz", diag_min_freq_, diag_max_freq_);
+
+  using namespace diagnostic_updater;
+  diag_topic_.reset(new TopicDiagnostic("velodyne_packets", diagnostics_,
+                                        FrequencyStatusParam(&diag_min_freq_,
+                                                             &diag_max_freq_,
+                                                             0.1, 10),
+                                        TimeStampStatusParam()));
+
   // open Velodyne input device or file
   if(input_->vopen() != 0)
     {
@@ -62,6 +79,7 @@ void VelodyneDriver::startup(ros::NodeHandle node,
       return;
     }
 
+  // raw data output topic
   output_ = node.advertise<velodyne_msgs::VelodyneScan>("velodyne_packets", 10);
 }
 
@@ -73,11 +91,11 @@ bool VelodyneDriver::poll(void)
 {
   // Allocate a new shared pointer for zero-copy sharing with other nodelets.
   velodyne_msgs::VelodyneScanPtr scan(new velodyne_msgs::VelodyneScan);
-  scan->packets.resize(npackets_);
+  scan->packets.resize(config_.npackets);
 
   // Since the velodyne delivers data at a very high rate, keep
   // reading and publishing scans as fast as possible.
-  for (int i = 0; i < npackets_; ++i)
+  for (int i = 0; i < config_.npackets; ++i)
     {
       while (true)
         {
@@ -90,9 +108,14 @@ bool VelodyneDriver::poll(void)
 
   // publish message using time of last packet read
   ROS_DEBUG("Publishing a full Velodyne scan.");
-  scan->header.stamp = ros::Time(scan->packets[npackets_ - 1].stamp);
-  scan->header.frame_id = frame_id_;
+  scan->header.stamp = ros::Time(scan->packets[config_.npackets - 1].stamp);
+  scan->header.frame_id = config_.frame_id;
   output_.publish(scan);
+
+  // notify diagnostics that a message has been published, updating
+  // its status
+  diag_topic_->tick(scan->header.stamp);
+  diagnostics_.update();
 
   return true;
 }

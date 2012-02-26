@@ -10,6 +10,7 @@
   <url>http://ros.org/wiki/velodyne</url>
 
   <depend stack="common_msgs" /> <!-- sensor_msgs -->
+  <depend stack="diagnostics" /> <!-- diagnostic_updater -->
   <depend stack="geometry" /> <!-- tf, angles -->
   <depend stack="nodelet_core" /> <!-- nodelet -->
   <depend stack="perception_pcl" /> <!-- pcl, pcl_ros -->

@@ -10,6 +10,7 @@
   <review status="experimental" notes=""/>
   <url>http://www.ros.org/wiki/velodyne_driver</url>
 
+  <depend package="diagnostic_updater"/>
   <depend package="nodelet"/>
   <depend package="roscpp"/>
   <depend package="rostest"/>
