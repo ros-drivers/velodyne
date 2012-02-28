@@ -1,0 +1,15 @@
+<!-- -*- mode: XML -*- -->
+<!-- run velodyne_pointcloud/TransformNodelet in a nodelet manager
+
+     arg: calibration = path to calibration file
+
+     $Id$
+  -->
+
+<launch>
+  <arg name="calibration" default="" />
+  <node pkg="nodelet" type="nodelet" name="transform_nodelet"
+        args="load velodyne_pointcloud/TransformNodelet velodyne_nodelet_manager" >
+    <param name="calibration" value="$(arg calibration)"/>
+  </node>
+</launch>

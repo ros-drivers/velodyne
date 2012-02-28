@@ -1,0 +1,30 @@
+<package>
+  <description brief="Velodyne point cloud conversions">
+
+     Point cloud conversions for Velodyne 3D LIDARs.
+
+  </description>
+  <author>Jack O'Quin, Piyush Khandelwal, Jesse Vera</author>
+  <license>BSD</license>
+  <review status="experimental" notes=""/>
+  <url>http://ros.org/wiki/velodyne_pointcloud</url>
+
+  <depend package="nodelet"/>
+  <depend package="pcl_ros"/>
+  <depend package="rostest"/>
+  <depend package="sensor_msgs"/>
+  <depend package="tf"/>
+  <depend package="velodyne_driver"/> <!-- launch files for testing -->
+  <depend package="velodyne_msgs"/>
+
+  <rosdep name="yaml-cpp"/>
+
+  <export>
+    <cpp cflags="-I${prefix}/include"
+         lflags="-L${prefix}/lib -Wl,-rpath,${prefix}/lib -lvelodyne_rawdata"/>
+    <nodelet plugin="${prefix}/nodelets.xml"/>
+  </export>
+
+</package>
+
+
