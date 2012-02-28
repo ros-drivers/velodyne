@@ -1,5 +1,0 @@
-rosbuild_add_library(velodyne_calibration calibration.cc)
-target_link_libraries(velodyne_calibration yaml-cpp)
-
-rosbuild_add_library(velodyne_rawdata rawdata.cc)
-target_link_libraries(velodyne_rawdata velodyne_calibration)
