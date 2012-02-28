@@ -17,7 +17,7 @@
   <!-- start cloud nodelet using test calibration file -->
   <include file="$(find velodyne_pointcloud)/launch/cloud_nodelet.launch">
     <arg name="calibration"
-         value="$(find velodyne_pointcloud)/tests/angles.config"/>
+         value="$(find velodyne_pointcloud)/tests/angles.yaml"/>
   </include>
 
   <!-- verify PointCloud2 publication rate -->

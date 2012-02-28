@@ -29,6 +29,7 @@
 #include <pcl_ros/point_cloud.h>
 #include <velodyne_msgs/VelodyneScan.h>
 #include <velodyne_pointcloud/point_types.h>
+#include <velodyne_pointcloud/calibration.h>
 
 namespace velodyne_rawdata
 {
@@ -45,7 +46,7 @@ namespace velodyne_rawdata
   static const int BLOCK_DATA_SIZE = (SCANS_PER_BLOCK * RAW_SCAN_SIZE);
 
   static const float ROTATION_RESOLUTION = 0.01f; /**< degrees */
-  static const float ROTATION_MAX_UNITS = 36000; /**< hundredths of degrees */
+  static const uint16_t ROTATION_MAX_UNITS = 36000; /**< hundredths of degrees */
 
   /** According to Bruce Hall DISTANCE_MAX is 65.0, but we noticed
    *  valid packets with readings up to 130.0. */
@@ -107,17 +108,7 @@ namespace velodyne_rawdata
     uint8_t status[PACKET_STATUS_SIZE]; 
   } raw_packet_t;
 
-  /** \brief Correction angles for a specific HDL-64E device. */
-  struct correction_angles
-  {
-    float rotational;
-    float vertical;
-    float offset1, offset2, offset3;
-    float horzCorr, vertCorr;
-    int   enabled;
-  };
-
-  /** \brief Base Velodyne data class -- not used directly. */
+  /** \brief Velodyne data conversion class */
   class RawData
   {
   public:
@@ -150,12 +141,12 @@ namespace velodyne_rawdata
     } Config;
     Config config_;
 
-    /** correction angles indexed by laser within bank
-     *
-     * \todo combine them into a single array, lower followed by upper
+    /** 
+     * Calibration file
      */
-    correction_angles lower_[SCANS_PER_BLOCK];
-    correction_angles upper_[SCANS_PER_BLOCK];
+    velodyne_pointcloud::Calibration calibration_;
+    float sin_rot_table_[ROTATION_MAX_UNITS];
+    float cos_rot_table_[ROTATION_MAX_UNITS];
 
     /** in-line test whether a point is in range */
     bool pointInRange(float range)
