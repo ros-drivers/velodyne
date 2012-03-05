@@ -57,7 +57,7 @@ namespace velodyne_rawdata
     // get path to angles.config file for this device
     if (!private_nh.getParam("calibration", config_.calibrationFile))
       {
-        ROS_ERROR_STREAM("No calibration angles specified! (using test values)");
+        ROS_ERROR_STREAM("No calibration angles specified! Using test values!");
 
         // have to use something: grab unit test version as a default
         std::string pkgPath = ros::package::getPath("velodyne_pointcloud");
@@ -67,8 +67,9 @@ namespace velodyne_rawdata
     ROS_INFO_STREAM("correction angles: " << config_.calibrationFile);
 
     calibration_.read(config_.calibrationFile);
-    if (!calibration_.isInitialized()) {
-      ROS_ERROR_STREAM("Unable to open calibration file: " << config_.calibrationFile);
+    if (!calibration_.initialized) {
+      ROS_ERROR_STREAM("Unable to open calibration file: " << 
+          config_.calibrationFile);
       return -1;
     }
 
@@ -106,7 +107,8 @@ namespace velodyne_rawdata
         uint8_t laser_number;       ///< hardware laser number
 
         laser_number = j + bank_origin;
-        velodyne_pointcloud::LaserCorrection &corrections = calibration_.laser_corrections[laser_number];
+        velodyne_pointcloud::LaserCorrection &corrections = 
+          calibration_.laser_corrections[laser_number];
 
         /** Position Calculation */
 
@@ -124,15 +126,17 @@ namespace velodyne_rawdata
 
         // cos(a-b) = cos(a)*cos(b) + sin(a)*sin(b)
         // sin(a-b) = sin(a)*cos(b) - cos(a)*sin(b)
-        float cos_rot_angle = cos_rot_table_[raw->blocks[i].rotation] * cos_rot_correction + 
-                              sin_rot_table_[raw->blocks[i].rotation] * sin_rot_correction;
-        float sin_rot_angle = sin_rot_table_[raw->blocks[i].rotation] * cos_rot_correction - 
-                              cos_rot_table_[raw->blocks[i].rotation] * sin_rot_correction;
+        float cos_rot_angle = 
+          cos_rot_table_[raw->blocks[i].rotation] * cos_rot_correction + 
+          sin_rot_table_[raw->blocks[i].rotation] * sin_rot_correction;
+        float sin_rot_angle = 
+          sin_rot_table_[raw->blocks[i].rotation] * cos_rot_correction - 
+          cos_rot_table_[raw->blocks[i].rotation] * sin_rot_correction;
 
         float horiz_offset = corrections.horiz_offset_correction;
         float vert_offset = corrections.vert_offset_correction;
 
-        // Compute the distance in the xy plane (without accounting for rotation)
+        // Compute the distance in the xy plane (w/o accounting for rotation)
         float xy_distance = distance * cos_vert_angle;
 
         // Calculate temporal X, use absolute value.
@@ -143,17 +147,19 @@ namespace velodyne_rawdata
         if (yy < 0) yy=-yy;
   
         // Get 2points calibration values,Linear interpolation to get distance
-        // correction for X and Y, that means distance correction use different value at
-        // different distance
+        // correction for X and Y, that means distance correction use different
+        // value at different distance
         float distance_corr_x = 0;
         float distance_corr_y = 0;
         if (corrections.two_pt_correction_available) {
-          distance_corr_x = (corrections.dist_correction - corrections.dist_correction_x) * 
-                                  (xx - 2.4) / (25.04 - 2.4) 
-                              + corrections.dist_correction_x;
-          distance_corr_y = (corrections.dist_correction - corrections.dist_correction_y) *
-                                  (yy - 1.93) / (25.04 - 1.93)
-                              + corrections.dist_correction_y;
+          distance_corr_x = 
+            (corrections.dist_correction - corrections.dist_correction_x)
+              * (xx - 2.4) / (25.04 - 2.4) 
+            + corrections.dist_correction_x;
+          distance_corr_y = 
+            (corrections.dist_correction - corrections.dist_correction_y)
+              * (yy - 1.93) / (25.04 - 1.93)
+            + corrections.dist_correction_y;
         }
 
         float distance_x = distance + distance_corr_x;
@@ -166,6 +172,25 @@ namespace velodyne_rawdata
 
         z = distance * sin_vert_angle + vert_offset;
 
+        /** Use our coordinate system */
+        float x_coord = y;
+        float y_coord = -x;
+        float z_coord = z;
+
+        /** Account for sensor pitch */
+        float z_pitch = z_coord * calibration_.cos_pitch - 
+                        x_coord * calibration_.sin_pitch;
+        float x_pitch = z_coord * calibration_.sin_pitch +
+                        x_coord * calibration_.cos_pitch;
+        float y_pitch = y_coord;
+
+        /** Now account for sensor roll */
+        float y_pitch_roll = y_pitch * calibration_.cos_roll - 
+                             z_pitch * calibration_.sin_roll;
+        float z_pitch_roll = y_pitch * calibration_.sin_roll +
+                             z_pitch * calibration_.cos_roll;
+        float x_pitch_roll = x_pitch;
+
         /** Intensity Calculation */
 
         float min_intensity = corrections.min_intensity;
@@ -177,17 +202,19 @@ namespace velodyne_rawdata
                            * (1 - corrections.focal_distance / 13100) 
                            * (1 - corrections.focal_distance / 13100);
         float focal_slope = corrections.focal_slope;
-        intensity += focal_slope * (abs(focal_offset - 256 * (1 - tmp.uint / 65535) * (1 - tmp.uint / 65535)));
+        intensity += focal_slope * 
+          (abs(focal_offset - 256 * (1 - tmp.uint/65535)*(1 - tmp.uint/65535)));
         intensity = (intensity < min_intensity) ? min_intensity : intensity;
         intensity = (intensity > max_intensity) ? max_intensity : intensity;
 
         if (pointInRange(distance)) {
+
           // convert polar coordinates to Euclidean XYZ
           VPoint point;
           point.ring = velodyne_rawdata::LASER_RING[laser_number];
-          point.x = y;
-          point.y = -x;
-          point.z = z;
+          point.x = x_pitch_roll;
+          point.y = y_pitch_roll;
+          point.z = z_pitch_roll;
           point.intensity = (uint8_t) intensity;
 
           // append this point to the cloud

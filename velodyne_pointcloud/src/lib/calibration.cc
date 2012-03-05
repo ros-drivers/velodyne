@@ -72,6 +72,12 @@ namespace velodyne_pointcloud {
       lasers[i] >> correction;
       calibration.laser_corrections.insert(correction);     
     }
+
+    // Calculate cached values
+    calibration.cos_pitch = cosf(calibration.pitch);
+    calibration.sin_pitch = sinf(calibration.pitch);
+    calibration.cos_roll = cosf(calibration.roll);
+    calibration.sin_roll = sinf(calibration.roll);
   }
 
   YAML::Emitter& operator << (YAML::Emitter& out, const std::pair<int, LaserCorrection> correction) {
@@ -114,12 +120,17 @@ namespace velodyne_pointcloud {
       initialized = false;
       return;
     }
-    YAML::Parser parser(fin);
-    YAML::Node doc;
-    parser.GetNextDocument(doc);
-    doc >> *this;
-    fin.close();
     initialized = true;
+    try {
+      YAML::Parser parser(fin);
+      YAML::Node doc;
+      parser.GetNextDocument(doc);
+      doc >> *this;
+    } catch (YAML::Exception &e) {
+      std::cerr << "YAML Exception: " << e.what() << std::endl;
+      initialized = false;
+    }
+    fin.close();
   }
 
   void Calibration::write(const std::string& calibration_file) {

@@ -9,8 +9,8 @@
  * $ Id: 02/14/2012 11:25:34 AM piyushk $
  */
 
-#ifndef CALIBRATION_CQUVIJWI
-#define CALIBRATION_CQUVIJWI
+#ifndef __VELODYNE_CALIBRATION_H
+#define __VELODYNE_CALIBRATION_H
 
 #include <map>
 #include <string>
@@ -19,8 +19,8 @@ namespace velodyne_pointcloud {
 
   /** \brief correction values for a single laser
    *
-   * Correction values for a single laser (as provided by db.xml from veleodyne). Includes 
-   * parameters for Velodyne HDL-64E S2.1
+   * Correction values for a single laser (as provided by db.xml from veleodyne)
+   * Includes parameters for Velodyne HDL-64E S2.1 calibration.
    * http://velodynelidar.com/lidar/products/manual/63-HDL64E%20S2%20Manual_Rev%20D_2011_web.pdf
    **/
   struct LaserCorrection {
@@ -48,26 +48,34 @@ namespace velodyne_pointcloud {
 
   /** \brief Calibration class storing entire configuration for the Velodyne */
   class Calibration {
+
   public:
+
     float pitch;
     float roll;
     std::map<int, LaserCorrection> laser_corrections;
     bool initialized;
 
+    /** cached values calculated when the calibration file is read */
+    float cos_pitch;
+    float sin_pitch;
+    float cos_roll;
+    float sin_roll;
+
+  public:
+
     Calibration() : initialized(false) {}
     Calibration(const std::string& calibration_file) {
       read(calibration_file);
     }
+
     void read(const std::string& calibration_file);
     void write(const std::string& calibration_file);
-    bool isInitialized() {
-      return initialized;
-    }
   };
   
 } /* velodyne_pointcloud */
 
 
-#endif /* end of include guard: CALIBRATION_CQUVIJWI */
+#endif /* end of include guard: __VELODYNE_CALIBRATION_H */
 
 
