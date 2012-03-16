@@ -22,8 +22,8 @@
   <!-- verify PointCloud2 publication rate -->
   <test test-name="cloud_node_hz_test" pkg="rostest" type="hztest"
         name="hztest1" >
-    <param name="hz" value="9.75" />
-    <param name="hzerror" value="0.75" />
+    <param name="hz" value="10.0" />
+    <param name="hzerror" value="3.0" />
     <param name="test_duration" value="10.0" />    
     <param name="topic" value="velodyne_points" />  
     <param name="wait_time" value="2.0" />  
