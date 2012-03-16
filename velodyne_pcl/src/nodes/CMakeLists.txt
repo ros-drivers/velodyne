@@ -1,3 +1,0 @@
-rosbuild_add_executable(cloud2 cloud2.cc)
-rosbuild_add_executable(publisher publisher.cc)
-rosbuild_add_executable(xyzir_publisher xyzir_publisher.cc)

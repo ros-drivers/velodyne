@@ -1,1 +1,0 @@
-rosbuild_add_library(example_subscriber_nodelet subscriber_nodelet.cc)

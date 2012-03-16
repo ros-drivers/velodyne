@@ -1,5 +1,0 @@
-rosbuild_add_library(cloud2_nodelet cloud2_nodelet.cc)
-rosbuild_add_library(transform2 transform2.cc)
-rosbuild_add_library(ring_colors ring_colors.cc)
-rosbuild_add_library(publisher_nodelet publisher.cc)
-rosbuild_add_library(xyzir_publisher_nodelet xyzir_publisher.cc)
