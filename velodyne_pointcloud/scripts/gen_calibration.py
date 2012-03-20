@@ -58,56 +58,62 @@ except IOError:
     print('failed to read' + xmlFile)
     sys.exit(9)
 
-# create a dictionary to hold all the calibration values of each of the lasers
-calibration = {'lasers': {}}
+# create a dictionary to hold all relevant calibration values
+calibration = {'num_lasers': 0, 'lasers': {}, 'pitch': 0.0, 'roll': 0.0}
 
-# this dictionary holds all the calibration values of each laser
-# TODO: add to calibration.lasers[index]
-numLasers = 64
-lasers = [{} for i in range(numLasers)]
-
+# add minimum laser intensities
 index = 0
 for el in db.find('DB/minIntensity_'):
-    if el.tag == 'item':
-        lasers[index]['min_intensity'] = el.text
+    if el.tag == 'count':
+        calibration['num_lasers'] = el.text
+    elif el.tag == 'item':
+        calibration['lasers'][index] = {'min_intensity': el.text}
         index += 1
 
+# add maximum laser intensities
 index = 0
 for el in db.find('DB/maxIntensity_'):
-    if el.tag == 'item':
-        lasers[index]['max_intensity'] = el.text
-        index += 1
-
-for el in db.find('DB/points_'):
     if el.tag == 'count':
-        if numLasers != int(el.text):
+        # check count matches expected number of lasers
+        if calibration['num_lasers'] != el.text:
             print('invalid number of lasers: ' + el.text)
             parseError = True
+    elif el.tag == 'item':
+        calibration['lasers'][index]['max_intensity'] = el.text
+        index += 1
+
+# add calibration information for each laser
+for el in db.find('DB/points_'):
+    if el.tag == 'count':
+        # check count matches expected number of lasers
+        if calibration['num_lasers'] != el.text:
+            print('invalid number of lasers: ' + el.text)
+            parseError = True
+        calibration['num_lasers'] = el.text
     elif el.tag == 'item':
         for px in el:
             for field in px:
                 if field.tag == 'id_':
                     index = int(field.text)
-                    lasers[index]['laser_id'] = field.text
+                    calibration['lasers'][index]['laser_id'] = index
                 elif field.tag == 'rotCorrection_':
-                    lasers[index]['rot_correction'] = field.text
+                    calibration['lasers'][index]['rot_correction'] = float(field.text)
                 elif field.tag == 'vertCorrection_':
-                    lasers[index]['vert_correction'] = field.text
+                    calibration['lasers'][index]['vert_correction'] = float(field.text)
                 elif field.tag == 'distCorrection_':
-                    lasers[index]['dist_correction'] = field.text
+                    calibration['lasers'][index]['dist_correction'] = float(field.text)
                 elif field.tag == 'distCorrectionX_':
-                    lasers[index]['dist_correction_x'] = field.text
+                    calibration['lasers'][index]['dist_correction_x'] = float(field.text)
                 elif field.tag == 'distCorrectionY_':
-                    lasers[index]['dist_correction_y'] = field.text
+                    calibration['lasers'][index]['dist_correction_y'] = float(field.text)
                 elif field.tag == 'vertOffsetCorrection_':
-                    lasers[index]['vert_offset_correction'] = field.text
+                    calibration['lasers'][index]['vert_offset_correction'] = float(field.text)
                 elif field.tag == 'horizOffsetCorrection_':
-                    lasers[index]['horiz_offset_correction'] = field.text
+                    calibration['lasers'][index]['horiz_offset_correction'] = float(field.text)
                 elif field.tag == 'focalDistance_':
-                    lasers[index]['focal_distance'] = field.text
+                    calibration['lasers'][index]['focal_distance'] = float(field.text)
                 elif field.tag == 'focalSlope_':
-                    lasers[index]['focal_slope'] = field.text
+                    calibration['lasers'][index]['focal_slope'] = float(field.text)
 
-#for item in lasers:
-#    for field in item:
-#        print(field + ': ' + item[field])
+# debug dump of accumulated calibration data
+print(calibration)
