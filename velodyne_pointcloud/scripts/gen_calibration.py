@@ -38,14 +38,13 @@
 Generate YAML calibration file from Velodyne db.xml.
 """
 
-# this is still under construction...
-
 from __future__ import print_function
 
 import optparse
 import os
 import sys
 from xml.etree import ElementTree
+import yaml
 
 # parse the command line
 usage = """usage: %prog infile.xml [outfile.yaml]
@@ -153,6 +152,14 @@ if calibration['num_lasers'] <= 0:
 elif calibration['num_lasers'] != len(calibration['lasers']):
     xmlError('inconsistent number of lasers defined')
 
+# TODO: make sure all required fields are present.
+# (Which ones are required?)
+
 if calibrationGood:
-    # debug dump of accumulated calibration data
-    print(calibration)
+
+    # write calibration data to YAML file
+    f = open(yamlFile, 'w')
+    try:
+        yaml.dump(calibration, f)
+    finally:
+        f.close()

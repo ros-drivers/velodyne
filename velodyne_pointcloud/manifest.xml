@@ -18,6 +18,7 @@
   <depend package="velodyne_msgs"/>
 
   <rosdep name="yaml-cpp"/>
+  <rosdep name="python-yaml"/>
 
   <export>
     <cpp cflags="-I${prefix}/include"
