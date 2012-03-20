@@ -43,12 +43,22 @@ namespace velodyne_pointcloud {
     node[ROT_CORRECTION] >> correction.second.rot_correction;
     node[VERT_CORRECTION] >> correction.second.vert_correction;
     node[DIST_CORRECTION] >> correction.second.dist_correction;
-    node[TWO_PT_CORRECTION_AVAILABLE] >> correction.second.two_pt_correction_available;
+    if (const YAML::Node *pName = node.FindValue(TWO_PT_CORRECTION_AVAILABLE))
+      *pName >> correction.second.two_pt_correction_available;
+    else
+      correction.second.two_pt_correction_available = false;
     node[DIST_CORRECTION_X] >> correction.second.dist_correction_x;
     node[DIST_CORRECTION_Y] >> correction.second.dist_correction_y;
     node[VERT_OFFSET_CORRECTION] >> correction.second.vert_offset_correction;
     node[HORIZ_OFFSET_CORRECTION] >> correction.second.horiz_offset_correction;
-    node[MAX_INTENSITY] >> correction.second.max_intensity;
+    if (const YAML::Node *pName = node.FindValue(MAX_INTENSITY))
+      *pName >> correction.second.max_intensity;
+    else
+      correction.second.max_intensity = 255;
+    if (const YAML::Node *pName = node.FindValue(MIN_INTENSITY))
+      *pName >> correction.second.min_intensity;
+    else
+      correction.second.min_intensity = 0;
     node[MIN_INTENSITY] >> correction.second.min_intensity;
     node[FOCAL_DISTANCE] >> correction.second.focal_distance;
     node[FOCAL_SLOPE] >> correction.second.focal_slope;
