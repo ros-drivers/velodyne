@@ -85,15 +85,15 @@ if not calibrationGood:
     sys.exit(2)
 
 # create a dictionary to hold all relevant calibration values
-calibration = {'num_lasers': 0, 'lasers': {}, 'pitch': 0.0, 'roll': 0.0}
+calibration = {'num_lasers': 0, 'pitch': 0.0, 'roll': 0.0, 'lasers': []}
 
 def addLaserCalibration(laser_num, key, val):
     'Define key and corresponding value for laser_num'
     global calibration
-    if index in calibration['lasers']:
+    if laser_num < len(calibration['lasers']):
         calibration['lasers'][laser_num][key] = val
     else:
-        calibration['lasers'][laser_num] = {key: val}
+        calibration['lasers'].append({key: val})
 
 # add minimum laser intensities
 minIntensities = db.find('DB/minIntensity_')
