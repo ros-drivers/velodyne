@@ -1,3 +1,4 @@
+#!/usr/bin/python
 # Software License Agreement (BSD License)
 #
 # Copyright (C) 2012, Austin Robot Technology
@@ -41,22 +42,40 @@ Generate YAML calibration file from Velodyne db.xml.
 
 from __future__ import print_function
 
+import optparse
+import os
 import sys
 from xml.etree import ElementTree
 
-# TODO: parse the command line
-xmlFile = '../tests/HDL-32-db.xml'
-yamlFile = '../tests/HDL-32-db.yaml'
+# parse the command line
+usage = """usage: %prog infile.xml [outfile.yaml]
+
+       Default output file is input file with .yaml suffix."""
+parser = optparse.OptionParser(usage=usage)
+options, args = parser.parse_args()
+
+if len(args) < 1:
+    parser.error('XML file name missing')
+    sys.exit(9)
+
+xmlFile = args[0]
+if len(args) >= 2:
+    yamlFile = args[1]
+else:
+    yamlFile, ext = os.path.splitext(xmlFile)
+    yamlFile += '.yaml'
+
+print('converting "' + xmlFile + '" to "' + yamlFile + '"')
 
 db = None
 try:
     db = ElementTree.parse(xmlFile)
     if db is None:
         print('failed to parse ' + xmlFile)
-        sys.exit(9)
+        sys.exit(2)
 except IOError:
     print('failed to read' + xmlFile)
-    sys.exit(9)
+    sys.exit(3)
 
 # create a dictionary to hold all relevant calibration values
 calibration = {'num_lasers': 0, 'lasers': {}, 'pitch': 0.0, 'roll': 0.0}
