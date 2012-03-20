@@ -67,72 +67,92 @@ else:
 
 print('converting "' + xmlFile + '" to "' + yamlFile + '"')
 
+calibrationGood = True
+def xmlError(msg):
+    'handle XML calibration error'
+    global calibrationGood
+    calibrationGood = False
+    print('gen_calibration.py: ' + msg)
+
 db = None
 try:
     db = ElementTree.parse(xmlFile)
-    if db is None:
-        print('failed to parse ' + xmlFile)
-        sys.exit(2)
 except IOError:
-    print('failed to read' + xmlFile)
-    sys.exit(3)
+    xmlError('unable to read ' + xmlFile)
+except ElementTree.ParseError:
+    xmlError('XML parse failed for ' + xmlFile)
+
+if not calibrationGood:
+    sys.exit(2)
 
 # create a dictionary to hold all relevant calibration values
 calibration = {'num_lasers': 0, 'lasers': {}, 'pitch': 0.0, 'roll': 0.0}
 
+def addLaserCalibration(laser_num, key, val):
+    'Define key and corresponding value for laser_num'
+    global calibration
+    if index in calibration['lasers']:
+        calibration['lasers'][laser_num][key] = val
+    else:
+        calibration['lasers'][laser_num] = {key: val}
+
 # add minimum laser intensities
-index = 0
-for el in db.find('DB/minIntensity_'):
-    if el.tag == 'count':
-        calibration['num_lasers'] = el.text
-    elif el.tag == 'item':
-        calibration['lasers'][index] = {'min_intensity': el.text}
-        index += 1
+minIntensities = db.find('DB/minIntensity_')
+if minIntensities != None:
+    index = 0
+    for el in minIntensities:
+        if el.tag == 'count':
+            calibration['num_lasers'] = int(el.text)
+        elif el.tag == 'item':
+            addLaserCalibration(index, 'min_intensity', float(el.text))
+            index += 1
 
 # add maximum laser intensities
-index = 0
-for el in db.find('DB/maxIntensity_'):
-    if el.tag == 'count':
-        # check count matches expected number of lasers
-        if calibration['num_lasers'] != el.text:
-            print('invalid number of lasers: ' + el.text)
-            parseError = True
-    elif el.tag == 'item':
-        calibration['lasers'][index]['max_intensity'] = el.text
-        index += 1
+maxIntensities = db.find('DB/maxIntensity_')
+if maxIntensities != None:
+    index = 0
+    for el in maxIntensities:
+        if el.tag == 'count':
+            calibration['num_lasers'] = int(el.text)
+        elif el.tag == 'item':
+            addLaserCalibration(index, 'max_intensity', float(el.text))
+            index += 1
 
 # add calibration information for each laser
 for el in db.find('DB/points_'):
     if el.tag == 'count':
-        # check count matches expected number of lasers
-        if calibration['num_lasers'] != el.text:
-            print('invalid number of lasers: ' + el.text)
-            parseError = True
-        calibration['num_lasers'] = el.text
+        calibration['num_lasers'] = int(el.text)
     elif el.tag == 'item':
         for px in el:
             for field in px:
                 if field.tag == 'id_':
                     index = int(field.text)
-                    calibration['lasers'][index]['laser_id'] = index
+                    addLaserCalibration(index, 'laser_id', index)
                 elif field.tag == 'rotCorrection_':
-                    calibration['lasers'][index]['rot_correction'] = float(field.text)
+                    addLaserCalibration(index, 'rot_correction', float(field.text))
                 elif field.tag == 'vertCorrection_':
-                    calibration['lasers'][index]['vert_correction'] = float(field.text)
+                    addLaserCalibration(index, 'vert_correction', float(field.text))
                 elif field.tag == 'distCorrection_':
-                    calibration['lasers'][index]['dist_correction'] = float(field.text)
+                    addLaserCalibration(index, 'dist_correction', float(field.text))
                 elif field.tag == 'distCorrectionX_':
-                    calibration['lasers'][index]['dist_correction_x'] = float(field.text)
+                    addLaserCalibration(index, 'dist_correction_x', float(field.text))
                 elif field.tag == 'distCorrectionY_':
-                    calibration['lasers'][index]['dist_correction_y'] = float(field.text)
+                    addLaserCalibration(index, 'dist_correction_y', float(field.text))
                 elif field.tag == 'vertOffsetCorrection_':
-                    calibration['lasers'][index]['vert_offset_correction'] = float(field.text)
+                    addLaserCalibration(index, 'vert_offset_correction', float(field.text))
                 elif field.tag == 'horizOffsetCorrection_':
-                    calibration['lasers'][index]['horiz_offset_correction'] = float(field.text)
+                    addLaserCalibration(index, 'horiz_offset_correction', float(field.text))
                 elif field.tag == 'focalDistance_':
-                    calibration['lasers'][index]['focal_distance'] = float(field.text)
+                    addLaserCalibration(index, 'focal_distance', float(field.text))
                 elif field.tag == 'focalSlope_':
-                    calibration['lasers'][index]['focal_slope'] = float(field.text)
+                    addLaserCalibration(index, 'focal_slope', float(field.text))
 
-# debug dump of accumulated calibration data
-print(calibration)
+# validate input data
+if calibration['num_lasers'] <= 0:
+    xmlError('no lasers defined')
+elif calibration['num_lasers'] != len(calibration['lasers']):
+    xmlError('inconsistent number of lasers defined')
+
+if calibrationGood:
+    # debug dump of accumulated calibration data
+    print(calibration)
