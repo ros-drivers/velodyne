@@ -36,10 +36,16 @@
 
 """
 Generate YAML calibration file from Velodyne db.xml.
+
+The input data provided by the manufacturer are in degrees and
+centimeters. The YAML file uses radians and meters, following ROS
+standards [REP-0103].
+
 """
 
 from __future__ import print_function
 
+import math
 import optparse
 import os
 import sys
@@ -86,6 +92,7 @@ if not calibrationGood:
 
 # create a dictionary to hold all relevant calibration values
 calibration = {'num_lasers': 0, 'pitch': 0.0, 'roll': 0.0, 'lasers': []}
+cm2meters = 0.01                       # convert centimeters to meters
 
 def addLaserCalibration(laser_num, key, val):
     'Define key and corresponding value for laser_num'
@@ -128,21 +135,29 @@ for el in db.find('DB/points_'):
                     index = int(field.text)
                     addLaserCalibration(index, 'laser_id', index)
                 elif field.tag == 'rotCorrection_':
-                    addLaserCalibration(index, 'rot_correction', float(field.text))
+                    addLaserCalibration(index, 'rot_correction',
+                                        math.radians(float(field.text)))
                 elif field.tag == 'vertCorrection_':
-                    addLaserCalibration(index, 'vert_correction', float(field.text))
+                    addLaserCalibration(index, 'vert_correction',
+                                        math.radians(float(field.text)))
                 elif field.tag == 'distCorrection_':
-                    addLaserCalibration(index, 'dist_correction', float(field.text))
+                    addLaserCalibration(index, 'dist_correction', 
+                                        float(field.text) * cm2meters)
                 elif field.tag == 'distCorrectionX_':
-                    addLaserCalibration(index, 'dist_correction_x', float(field.text))
+                    addLaserCalibration(index, 'dist_correction_x',
+                                        float(field.text) * cm2meters)
                 elif field.tag == 'distCorrectionY_':
-                    addLaserCalibration(index, 'dist_correction_y', float(field.text))
+                    addLaserCalibration(index, 'dist_correction_y',
+                                        float(field.text) * cm2meters)
                 elif field.tag == 'vertOffsetCorrection_':
-                    addLaserCalibration(index, 'vert_offset_correction', float(field.text))
+                    addLaserCalibration(index, 'vert_offset_correction',
+                                        float(field.text) * cm2meters)
                 elif field.tag == 'horizOffsetCorrection_':
-                    addLaserCalibration(index, 'horiz_offset_correction', float(field.text))
+                    addLaserCalibration(index, 'horiz_offset_correction',
+                                        float(field.text) * cm2meters)
                 elif field.tag == 'focalDistance_':
-                    addLaserCalibration(index, 'focal_distance', float(field.text))
+                    addLaserCalibration(index, 'focal_distance', 
+                                        float(field.text) * cm2meters)
                 elif field.tag == 'focalSlope_':
                     addLaserCalibration(index, 'focal_slope', float(field.text))
 
