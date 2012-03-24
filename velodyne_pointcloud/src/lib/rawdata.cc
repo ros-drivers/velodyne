@@ -95,9 +95,13 @@ namespace velodyne_rawdata
     const raw_packet_t *raw = (const raw_packet_t *) &pkt.data[0];
 
     for (int i = 0; i < BLOCKS_PER_PACKET; i++) {
-      int bank_origin = 32;
+
+      // upper bank lasers are numbered [0..31]
+      // NOTE: this is a change from the old velodyne_common implementation
+      int bank_origin = 0;
       if (raw->blocks[i].header == LOWER_BANK) {
-        bank_origin = 0;
+        // lower bank lasers are [32..63]
+        bank_origin = 32;
       }
 
       for (int j = 0, k = 0; j < SCANS_PER_BLOCK; j++, k += RAW_SCAN_SIZE) {
