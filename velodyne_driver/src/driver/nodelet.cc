@@ -40,8 +40,6 @@ public:
         deviceThread_->join();
         NODELET_INFO("driver thread stopped");
       }
-
-    dvr_.shutdown();
   }
 
 private:

@@ -24,14 +24,6 @@
 namespace velodyne_driver
 {
 
-void VelodyneDriver::shutdown(void)
-{
-  if (input_)
-    {
-      input_->vclose();
-    }
-}
-
 void VelodyneDriver::startup(ros::NodeHandle node,
                              ros::NodeHandle private_nh)
 {

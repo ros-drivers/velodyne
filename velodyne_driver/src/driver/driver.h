@@ -35,7 +35,6 @@ public:
   bool poll(void);
   void startup(ros::NodeHandle node,
                ros::NodeHandle private_nh);
-  void shutdown(void);
 
 private:
 

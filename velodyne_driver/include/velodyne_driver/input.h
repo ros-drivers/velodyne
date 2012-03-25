@@ -61,13 +61,6 @@ namespace velodyne_driver
      */
     int getPacket(velodyne_msgs::VelodynePacket *pkt);
 
-    /** \brief Close the data socket or file
-     *
-     * \returns 0, if successful
-     *          errno value, for failure
-     */
-    virtual int vclose(void) = 0;
-
     /** \brief Open the data socket or file
      *
      * \returns: 0, if successful;
@@ -99,11 +92,10 @@ namespace velodyne_driver
   public:
     InputSocket(ros::NodeHandle private_nh,
                 uint16_t udp_port = UDP_PORT_NUMBER);
-    ~InputSocket() {}
+    ~InputSocket();
 
   private:
     virtual int getPackets(uint8_t *buffer, int npacks, double *data_time);
-    virtual int vclose(void);
     virtual int vopen(void);
 
     uint16_t udp_port_;
@@ -125,11 +117,10 @@ namespace velodyne_driver
               bool read_once=false,
               bool read_fast=false,
               double repeat_delay=0.0);
-    ~InputPCAP() {}
+    ~InputPCAP();
 
   private:
     virtual int getPackets(uint8_t *buffer, int npacks, double *data_time);
-    virtual int vclose(void);
     virtual int vopen(void);
 
     std::string filename_;

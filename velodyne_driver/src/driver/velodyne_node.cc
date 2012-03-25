@@ -30,7 +30,5 @@ int main(int argc, char** argv)
       ros::spinOnce();
     }
 
-  // shut down the driver
-  dvr.shutdown();
   return 0;
 }

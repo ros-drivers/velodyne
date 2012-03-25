@@ -58,6 +58,12 @@ namespace velodyne_driver
     sockfd_ = -1;
   }
 
+  /** @brief destructor */
+  InputSocket::~InputSocket(void)
+  {
+    (void) close(sockfd_);
+  }
+
   /** @ brief Connect to Velodyne UDP port
    *
    * returns: socket file descriptor number >= 0, if successful
@@ -170,12 +176,6 @@ namespace velodyne_driver
     return result;
   }
 
-  int InputSocket::vclose(void)
-  {
-    int rc = close(sockfd_);
-    return rc;
-  }
-
   ////////////////////////////////////////////////////////////////////////
   // InputPCAP class implementation
   ////////////////////////////////////////////////////////////////////////
@@ -207,6 +207,12 @@ namespace velodyne_driver
     if (repeat_delay_ > 0.0)
       ROS_INFO("Delay %.3f seconds before repeating input file.",
                repeat_delay_);
+  }
+
+  /** destructor */
+  InputPCAP::~InputPCAP(void)
+  {
+    pcap_close(pcap_);
   }
 
   int InputPCAP::vopen(void) 
@@ -284,12 +290,6 @@ namespace velodyne_driver
       }
 
     return result;
-  }
-
-  int InputPCAP::vclose(void)
-  {
-    pcap_close(pcap_);
-    return 0;
   }
 
 } // velodyne namespace
