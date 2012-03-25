@@ -33,14 +33,11 @@ namespace velodyne_driver
 {
   static const size_t packet_size = sizeof(velodyne_msgs::VelodynePacket::data);
 
-  /* \brief Read velodyne packet.
-   *
-   * \param pkt[out] points to VelodynePacket message
-   *
-   * \returns 0 if successful,
-   *          -1 if end of file
-   *          > 0 if incomplete packet (is this possible?)
-   */
+  ////////////////////////////////////////////////////////////////////////
+  // Input class implementation
+  ////////////////////////////////////////////////////////////////////////
+
+  /** \brief Get one velodyne packet. */
   int Input::getPacket(velodyne_msgs::VelodynePacket *pkt)
   {
     double time = 0.0;
@@ -49,10 +46,23 @@ namespace velodyne_driver
     return rc;
   }
 
-  // Connect to Velodyne UDP port
-  //
-  // returns: socket file descriptor number >= 0, if successful
-  //          -1, for failure
+  ////////////////////////////////////////////////////////////////////////
+  // InputSocket class implementation
+  ////////////////////////////////////////////////////////////////////////
+
+  /** @brief constructor */
+  InputSocket::InputSocket(ros::NodeHandle private_nh, uint16_t udp_port):
+    Input(private_nh)
+  {
+    udp_port_ = udp_port;
+    sockfd_ = -1;
+  }
+
+  /** @ brief Connect to Velodyne UDP port
+   *
+   * returns: socket file descriptor number >= 0, if successful
+   *          -1, for failure
+   */
   int InputSocket::vopen(void)
   {
     ROS_INFO_STREAM("Opening UDP socket: port " << udp_port_);
@@ -81,15 +91,7 @@ namespace velodyne_driver
     return 0;
   }
 
-  // Read velodyne packets from socket.
-  //
-  // buffer = array to receive raw data packets
-  // npacks = number of packets to read
-  // data_time -> average time when data received
-  //
-  // returns: number of packets not read, if any
-  //          0 if successful
-  //
+  /** Read velodyne packets from socket. */
   int InputSocket::getPackets(uint8_t *buffer, int npacks,
                                       double *data_time)
   {
@@ -174,6 +176,38 @@ namespace velodyne_driver
     return rc;
   }
 
+  ////////////////////////////////////////////////////////////////////////
+  // InputPCAP class implementation
+  ////////////////////////////////////////////////////////////////////////
+
+  /** @brief constructor */
+  InputPCAP::InputPCAP(ros::NodeHandle private_nh,
+                       double packet_rate,
+                       std::string filename,
+                       bool read_once,
+                       bool read_fast,
+                       double repeat_delay):
+    Input(private_nh),
+    packet_rate_(packet_rate)
+  {
+    filename_ = filename;
+    fp_ = NULL;  
+    pcap_ = NULL;  
+    empty_ = true;
+
+    // get parameters from private node handle
+    private_nh_.param("read_once", read_once_, read_once);
+    private_nh_.param("read_fast", read_fast_, read_fast);
+    private_nh_.param("repeat_delay", repeat_delay_, repeat_delay);
+
+    if (read_once_)
+      ROS_INFO("Read input file only once.");
+    if (read_fast_)
+      ROS_INFO("Read input file as quickly as possible.");
+    if (repeat_delay_ > 0.0)
+      ROS_INFO("Delay %.3f seconds before repeating input file.",
+               repeat_delay_);
+  }
 
   int InputPCAP::vopen(void) 
   {
@@ -190,16 +224,7 @@ namespace velodyne_driver
   }
 
 
-  // Read velodyne packets from PCAP dump file.
-  //
-  // buffer = array to receive raw data packets
-  // npacks = number of packets to read
-  // data_time -> average time when data received
-  //
-  // returns: number of packets not read, if any
-  //          0 if successful,
-  //          -1 if end of file
-  //
+  /** @brief Read Velodyne packets from PCAP dump file. */
   int InputPCAP::getPackets(uint8_t *buffer, int npacks, double *data_time)
   {
     struct pcap_pkthdr *header;

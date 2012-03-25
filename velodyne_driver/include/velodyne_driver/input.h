@@ -8,11 +8,9 @@
  *  $Id$
  */
 
-/** \file
+/** @file
  *
- *  Velodyne HDL-64E 3D LIDAR data input classes
- *
- *  \ingroup velodyne
+ *  Velodyne 3D LIDAR data input classes
  *
  *    These classes provide raw Velodyne LIDAR input packets from
  *    either a live socket interface or a previously-saved PCAP dump
@@ -20,14 +18,14 @@
  *
  *  Classes:
  *
- *     velodyne::Input -- virtual base class than can be used to access
- *                      the data independently of its source
+ *     velodyne::Input -- base class to access the data independently
+ *                      of its source
  *
  *     velodyne::InputSocket -- derived class reads live data from the
  *                      device via a UDP socket
  *
  *     velodyne::InputPCAP -- derived class provides a similar interface
- *                      from a PCAP dump
+ *                      from a PCAP dump file
  */
 
 #ifndef __VELODYNE_INPUT_H
@@ -44,7 +42,7 @@ namespace velodyne_driver
 {
   static uint16_t UDP_PORT_NUMBER = 2368;
 
-  // Pure virtual base Velodyne input class -- not used directly
+  /** @brief Base Velodyne input class */
   class Input
   {
   public:
@@ -53,7 +51,7 @@ namespace velodyne_driver
       private_nh_ = private_nh;
     };
 
-    /** \brief Read velodyne packet.
+    /** \brief Read one Velodyne packet.
      *
      * \param pkt[out] points to VelodynePacket message
      *
@@ -61,21 +59,7 @@ namespace velodyne_driver
      *          -1 if end of file
      *          > 0 if incomplete packet (is this possible?)
      */
-    virtual int getPacket(velodyne_msgs::VelodynePacket *pkt);
-
-    /** \brief Read velodyne packets.
-     *
-     * \param buffer array to receive raw data packets
-     * \param npacks number of packets to read
-     * \param data_time[out] average time when data received
-     *
-     * \returns number of packets not read, if any
-     *          0 if successful,
-     *          -1 if end of file
-     *
-     * \deprecated Use getPacket() instead
-     */
-    virtual int getPackets(uint8_t *buffer, int npacks, double *data_time) = 0;
+    int getPacket(velodyne_msgs::VelodynePacket *pkt);
 
     /** \brief Close the data socket or file
      *
@@ -93,33 +77,41 @@ namespace velodyne_driver
     virtual int vopen(void) = 0;
 
   protected:
+
+    /** @brief Read Velodyne packets from PCAP dump file. 
+     *
+     * @param buffer = array to receive raw data packets
+     * @param npacks = number of packets to read
+     * @param data_time -> average time when data received
+     *
+     * returns: number of packets not read, if any
+     *          0 if successful,
+     *          -1 if end of file
+     */
+    virtual int getPackets(uint8_t *buffer, int npacks, double *data_time) = 0;
+
     ros::NodeHandle private_nh_;
   };
 
-  /** \brief Live Velodyne input from socket. */
+  /** @brief Live Velodyne input from socket. */
   class InputSocket: public Input
   {
   public:
     InputSocket(ros::NodeHandle private_nh,
-                uint16_t udp_port = UDP_PORT_NUMBER):
-      Input(private_nh)
-    {
-      udp_port_ = udp_port;
-      sockfd_ = -1;
-    }
+                uint16_t udp_port = UDP_PORT_NUMBER);
     ~InputSocket() {}
 
+  private:
     virtual int getPackets(uint8_t *buffer, int npacks, double *data_time);
     virtual int vclose(void);
     virtual int vopen(void);
 
-  private:
     uint16_t udp_port_;
     int sockfd_;
   };
 
 
-  /** \brief Velodyne input from PCAP dump file.
+  /** @brief Velodyne input from PCAP dump file.
    *
    * Dump files can be grabbed by libpcap, Velodyne's DSR software,
    * ethereal, wireshark, tcpdump, or the \ref vdump_command.
@@ -132,35 +124,14 @@ namespace velodyne_driver
               std::string filename="",
               bool read_once=false,
               bool read_fast=false,
-              double repeat_delay=0.0):
-      Input(private_nh),
-      packet_rate_(packet_rate)
-    {
-      filename_ = filename;
-      fp_ = NULL;  
-      pcap_ = NULL;  
-      empty_ = true;
-
-      // get parameters from private node handle
-      private_nh_.param("read_once", read_once_, read_once);
-      private_nh_.param("read_fast", read_fast_, read_fast);
-      private_nh_.param("repeat_delay", repeat_delay_, repeat_delay);
-
-      if (read_once_)
-        ROS_INFO("Read input file only once.");
-      if (read_fast_)
-        ROS_INFO("Read input file as quickly as possible.");
-      if (repeat_delay_ > 0.0)
-        ROS_INFO("Delay %.3f seconds before repeating input file.",
-                 repeat_delay_);
-    }
+              double repeat_delay=0.0);
     ~InputPCAP() {}
 
+  private:
     virtual int getPackets(uint8_t *buffer, int npacks, double *data_time);
     virtual int vclose(void);
     virtual int vopen(void);
 
-  private:
     std::string filename_;
     FILE *fp_;
     pcap_t *pcap_;
