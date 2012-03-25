@@ -50,51 +50,44 @@ namespace velodyne_driver
   // InputSocket class implementation
   ////////////////////////////////////////////////////////////////////////
 
-  /** @brief constructor */
+  /** @brief constructor
+   *
+   *  @param private_nh private node handle for driver
+   *  @param udp_port UDP port number to connect
+   */
   InputSocket::InputSocket(ros::NodeHandle private_nh, uint16_t udp_port):
-    Input(private_nh)
+    Input()
   {
-    udp_port_ = udp_port;
     sockfd_ = -1;
+
+    // connect to Velodyne UDP port
+    ROS_INFO_STREAM("Opening UDP socket: port " << udp_port);
+    sockfd_ = socket(PF_INET, SOCK_DGRAM, 0);
+    if (sockfd_ == -1)
+      {
+        perror("socket");               // TODO: ROS_ERROR errno
+        return;
+      }
+  
+    sockaddr_in my_addr;                     // my address information
+    memset(&my_addr, 0, sizeof(my_addr));    // initialize to zeros
+    my_addr.sin_family = AF_INET;            // host byte order
+    my_addr.sin_port = htons(udp_port);      // short, in network byte order
+    my_addr.sin_addr.s_addr = INADDR_ANY;    // automatically fill in my IP
+  
+    if (bind(sockfd_, (sockaddr *)&my_addr, sizeof(sockaddr)) == -1)
+      {
+        perror("bind");                 // TODO: ROS_ERROR errno
+        return;
+      }
+  
+    ROS_DEBUG("Velodyne socket fd is %d\n", sockfd_);
   }
 
   /** @brief destructor */
   InputSocket::~InputSocket(void)
   {
     (void) close(sockfd_);
-  }
-
-  /** @ brief Connect to Velodyne UDP port
-   *
-   * returns: socket file descriptor number >= 0, if successful
-   *          -1, for failure
-   */
-  int InputSocket::vopen(void)
-  {
-    ROS_INFO_STREAM("Opening UDP socket: port " << udp_port_);
-
-    sockfd_ = socket(PF_INET, SOCK_DGRAM, 0);
-    if (sockfd_ == -1)
-      {
-        perror("socket");               // TODO: ROS_ERROR errno
-        return -1;
-      }
-  
-    sockaddr_in my_addr;                     // my address information
-    memset(&my_addr, 0, sizeof(my_addr));    // initialize to zeros
-    my_addr.sin_family = AF_INET;            // host byte order
-    my_addr.sin_port = htons(udp_port_);     // short, in network byte order
-    my_addr.sin_addr.s_addr = INADDR_ANY;    // automatically fill in my IP
-  
-    if (bind(sockfd_, (sockaddr *)&my_addr, sizeof(sockaddr)) == -1)
-      {
-        perror("bind");                 // TODO: ROS_ERROR errno
-        return -1;
-      }
-  
-    ROS_DEBUG("Velodyne socket fd is %d\n", sockfd_);
-
-    return 0;
   }
 
   /** Read velodyne packets from socket. */
@@ -180,14 +173,22 @@ namespace velodyne_driver
   // InputPCAP class implementation
   ////////////////////////////////////////////////////////////////////////
 
-  /** @brief constructor */
+  /** @brief constructor
+   *
+   *  @param private_nh private node handle for driver
+   *  @param packet_rate expected device packet frequency (Hz)
+   *  @param filename PCAP dump file name
+   *  @param read_once read PCAP in a loop, unless false
+   *  @param read_fast read PCAP at device rate, unless false
+   *  @param repeat_delay time to wait before repeating PCAP data
+   */
   InputPCAP::InputPCAP(ros::NodeHandle private_nh,
                        double packet_rate,
                        std::string filename,
                        bool read_once,
                        bool read_fast,
                        double repeat_delay):
-    Input(private_nh),
+    Input(),
     packet_rate_(packet_rate)
   {
     filename_ = filename;
@@ -195,10 +196,10 @@ namespace velodyne_driver
     pcap_ = NULL;  
     empty_ = true;
 
-    // get parameters from private node handle
-    private_nh_.param("read_once", read_once_, read_once);
-    private_nh_.param("read_fast", read_fast_, read_fast);
-    private_nh_.param("repeat_delay", repeat_delay_, repeat_delay);
+    // get parameters using private node handle
+    private_nh.param("read_once", read_once_, read_once);
+    private_nh.param("read_fast", read_fast_, read_fast);
+    private_nh.param("repeat_delay", repeat_delay_, repeat_delay);
 
     if (read_once_)
       ROS_INFO("Read input file only once.");
@@ -207,26 +208,21 @@ namespace velodyne_driver
     if (repeat_delay_ > 0.0)
       ROS_INFO("Delay %.3f seconds before repeating input file.",
                repeat_delay_);
+
+    // Open the PCAP dump file
+    ROS_INFO("Opening PCAP file \"%s\"", filename_.c_str());
+    if ((pcap_ = pcap_open_offline(filename_.c_str(), errbuf_) ) == NULL)
+      {
+        ROS_FATAL("Error opening Velodyne socket dump file.");
+        return;
+      }
   }
+
 
   /** destructor */
   InputPCAP::~InputPCAP(void)
   {
     pcap_close(pcap_);
-  }
-
-  int InputPCAP::vopen(void) 
-  {
-    ROS_INFO("Opening PCAP file \"%s\"", filename_.c_str());
-  
-    /* Open the capture file */
-    if ((pcap_ = pcap_open_offline(filename_.c_str(), errbuf_) ) == NULL)
-      {
-        /// \todo print error message, if pcap open fails
-        ROS_FATAL("Error opening Velodyne socket dump file.");
-        return -1;
-      }
-    return 0;
   }
 
 

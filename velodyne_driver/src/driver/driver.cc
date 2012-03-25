@@ -89,13 +89,6 @@ VelodyneDriver::VelodyneDriver(ros::NodeHandle node,
       input_.reset(new velodyne_driver::InputSocket(private_nh));
     }
 
-  if(input_->vopen() != 0)
-    {
-      ROS_FATAL("Cannot open Velodyne input.");
-      // there should be an exception to throw here
-      return;
-    }
-
   // raw data output topic
   output_ = node.advertise<velodyne_msgs::VelodyneScan>("velodyne_packets", 10);
 }

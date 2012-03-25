@@ -46,10 +46,7 @@ namespace velodyne_driver
   class Input
   {
   public:
-    Input(ros::NodeHandle private_nh)
-    {
-      private_nh_ = private_nh;
-    };
+    Input() {}
 
     /** \brief Read one Velodyne packet.
      *
@@ -60,14 +57,6 @@ namespace velodyne_driver
      *          > 0 if incomplete packet (is this possible?)
      */
     int getPacket(velodyne_msgs::VelodynePacket *pkt);
-
-    /** \brief Open the data socket or file
-     *
-     * \returns: 0, if successful;
-     *           -1 for failure
-     * \todo return errno value for failure
-     */
-    virtual int vopen(void) = 0;
 
   protected:
 
@@ -82,8 +71,6 @@ namespace velodyne_driver
      *          -1 if end of file
      */
     virtual int getPackets(uint8_t *buffer, int npacks, double *data_time) = 0;
-
-    ros::NodeHandle private_nh_;
   };
 
   /** @brief Live Velodyne input from socket. */
@@ -96,9 +83,7 @@ namespace velodyne_driver
 
   private:
     virtual int getPackets(uint8_t *buffer, int npacks, double *data_time);
-    virtual int vopen(void);
 
-    uint16_t udp_port_;
     int sockfd_;
   };
 
@@ -121,7 +106,6 @@ namespace velodyne_driver
 
   private:
     virtual int getPackets(uint8_t *buffer, int npacks, double *data_time);
-    virtual int vopen(void);
 
     std::string filename_;
     FILE *fp_;
