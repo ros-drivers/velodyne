@@ -48,7 +48,10 @@ namespace velodyne_driver
   class Input
   {
   public:
-    Input() {};
+    Input(ros::NodeHandle private_nh)
+    {
+      private_nh_ = private_nh;
+    };
 
     /** \brief Read velodyne packet.
      *
@@ -88,14 +91,18 @@ namespace velodyne_driver
      * \todo return errno value for failure
      */
     virtual int vopen(void) = 0;
+
+  protected:
+    ros::NodeHandle private_nh_;
   };
 
   /** \brief Live Velodyne input from socket. */
   class InputSocket: public Input
   {
   public:
-    InputSocket(uint16_t udp_port = UDP_PORT_NUMBER):
-    Input()
+    InputSocket(ros::NodeHandle private_nh,
+                uint16_t udp_port = UDP_PORT_NUMBER):
+      Input(private_nh)
     {
       udp_port_ = udp_port;
       sockfd_ = -1;
@@ -120,22 +127,24 @@ namespace velodyne_driver
   class InputPCAP: public Input
   {
   public:
-    InputPCAP(std::string filename="",
+    InputPCAP(ros::NodeHandle private_nh,
+              double packet_rate,
+              std::string filename="",
               bool read_once=false,
               bool read_fast=false,
               double repeat_delay=0.0):
-      Input(), delay_(2600.0)
+      Input(private_nh),
+      packet_rate_(packet_rate)
     {
       filename_ = filename;
       fp_ = NULL;  
       pcap_ = NULL;  
       empty_ = true;
 
-      // get parameters from "input" subspace of private node handle
-      ros::NodeHandle private_nh("~/input");
-      private_nh.param("read_once", read_once_, read_once);
-      private_nh.param("read_fast", read_fast_, read_fast);
-      private_nh.param("repeat_delay", repeat_delay_, repeat_delay);
+      // get parameters from private node handle
+      private_nh_.param("read_once", read_once_, read_once);
+      private_nh_.param("read_fast", read_fast_, read_fast);
+      private_nh_.param("repeat_delay", repeat_delay_, repeat_delay);
 
       if (read_once_)
         ROS_INFO("Read input file only once.");
@@ -160,7 +169,7 @@ namespace velodyne_driver
     bool read_once_;
     bool read_fast_;
     double repeat_delay_;
-    ros::Rate delay_;
+    ros::Rate packet_rate_;
   };
 
 } // velodyne_driver namespace

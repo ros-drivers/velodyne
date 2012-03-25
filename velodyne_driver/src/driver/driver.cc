@@ -13,12 +13,16 @@
  */
 
 #include <string>
+#include <cmath>
 
 #include <ros/ros.h>
 #include <tf/transform_listener.h>
 #include <velodyne_msgs/VelodyneScan.h>
 
 #include "driver.h"
+
+namespace velodyne_driver
+{
 
 void VelodyneDriver::shutdown(void)
 {
@@ -37,32 +41,53 @@ void VelodyneDriver::startup(ros::NodeHandle node,
   ROS_DEBUG_STREAM("tf_prefix: " << tf_prefix);
   config_.frame_id = tf::resolve(tf_prefix, config_.frame_id);
 
-  private_nh.param("npackets", config_.npackets, (int)
-                   velodyne_msgs::VelodyneScan::PACKETS_PER_REVOLUTION);
+  // get model name, validate string, determine packet rate
+  private_nh.param("model", config_.model, std::string("64E"));
+  double packet_rate;                   // packet frequency (Hz)
+  if (config_.model == "64E")
+    {
+      packet_rate = 2600.0;
+    }
+  else if (config_.model == "32E")
+    {
+      packet_rate = 1808.0;
+    }
+  else
+    {
+      ROS_ERROR_STREAM("unknown Velodyne LIDAR model: " << config_.model);
+      packet_rate = 2600.0;
+    }
+  std::string deviceName("Velodyne HDL-" + config_.model);
+
   private_nh.param("rpm", config_.rpm, 600.0);
-  ROS_INFO_STREAM("Velodyne rotating at " << config_.rpm << " RPM");
+  ROS_INFO_STREAM(deviceName << " rotating at " << config_.rpm << " RPM");
+  double frequency = (config_.rpm / 60.0);     // expected Hz rate
+
+  // default number of packets for each scan is a single revolution
+  // (fractions rounded up)
+  config_.npackets = (int) ceil(packet_rate / frequency);
+  private_nh.getParam("npackets", config_.npackets);
+  ROS_INFO_STREAM("publishing " << config_.npackets << " packets per scan");
 
   std::string dump_file;
   private_nh.param("pcap", dump_file, std::string(""));
 
   if (dump_file != "")
     {
-      ROS_INFO("reading data from file: %s", dump_file.c_str());
-      input_.reset(new velodyne_driver::InputPCAP(dump_file));
+      input_.reset(new velodyne_driver::InputPCAP(private_nh,
+                                                  packet_rate,
+                                                  dump_file));
     }
   else
     {
-      ROS_INFO("reading data from socket");
-      input_.reset(new velodyne_driver::InputSocket());
+      input_.reset(new velodyne_driver::InputSocket(private_nh));
     }
 
   // initialize diagnostics
-  diagnostics_.setHardwareID("Velodyne HDL");  // TODO: get serial number
-  double frequency = (config_.rpm / 60.0);     // nominal Hz rate
-  double epsilon = frequency * 0.1;            // 10% error margin
-  diag_max_freq_ = frequency + epsilon;
-  diag_min_freq_ = frequency - epsilon;
-  ROS_INFO("frequency range: [%.3f, %.3f] Hz", diag_min_freq_, diag_max_freq_);
+  diagnostics_.setHardwareID(deviceName);
+  diag_max_freq_ = frequency;
+  diag_min_freq_ = frequency;
+  ROS_INFO("expected frequency: %.3f (Hz)", frequency);
 
   using namespace diagnostic_updater;
   diag_topic_.reset(new TopicDiagnostic("velodyne_packets", diagnostics_,
@@ -119,3 +144,5 @@ bool VelodyneDriver::poll(void)
 
   return true;
 }
+
+} // namespace velodyne_driver

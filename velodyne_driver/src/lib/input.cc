@@ -55,6 +55,8 @@ namespace velodyne_driver
   //          -1, for failure
   int InputSocket::vopen(void)
   {
+    ROS_INFO_STREAM("Opening UDP socket: port " << udp_port_);
+
     sockfd_ = socket(PF_INET, SOCK_DGRAM, 0);
     if (sockfd_ == -1)
       {
@@ -175,7 +177,7 @@ namespace velodyne_driver
 
   int InputPCAP::vopen(void) 
   {
-    ROS_INFO("Opening input file \"%s\"", filename_.c_str());
+    ROS_INFO("Opening PCAP file \"%s\"", filename_.c_str());
   
     /* Open the capture file */
     if ((pcap_ = pcap_open_offline(filename_.c_str(), errbuf_) ) == NULL)
@@ -209,11 +211,11 @@ namespace velodyne_driver
         int res;
         if ((res = pcap_next_ex(pcap_, &header, &pkt_data)) >= 0)
           {
-            // Keep the reader from blowing through the file.  The actual
-            // device generates about 2600 packets per second at 600 RPM,
-            // around 385 microseconds per packet.
+            // Keep the reader from blowing through the file.  The
+            // actual device generates either 2600 (64E) or 1808 (32E)
+            // packets per second at 600 RPM.
             if (read_fast_ == false)
-              delay_.sleep();
+              packet_rate_.sleep();
             
             memcpy(&buffer[i * packet_size], pkt_data+42, packet_size);
             *data_time = ros::Time::now().toSec();

@@ -19,7 +19,7 @@ int main(int argc, char** argv)
   ros::init(argc, argv, "velodyne_node");
   ros::NodeHandle node;
   ros::NodeHandle private_nh("~");
-  VelodyneDriver dvr;
+  velodyne_driver::VelodyneDriver dvr;
 
   // start the driver
   dvr.startup(node, private_nh);

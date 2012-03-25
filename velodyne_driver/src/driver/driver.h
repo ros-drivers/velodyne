@@ -12,12 +12,18 @@
  *  ROS driver interface for the Velodyne 3D LIDARs
  */
 
+#ifndef _VELODYNE_DRIVER_H_
+#define _VELODYNE_DRIVER_H_ 1
+
 #include <string>
 #include <ros/ros.h>
 #include <diagnostic_updater/diagnostic_updater.h>
 #include <diagnostic_updater/publisher.h>
 
 #include <velodyne_driver/input.h>
+
+namespace velodyne_driver
+{
 
 class VelodyneDriver
 {
@@ -37,11 +43,12 @@ private:
   struct
   {
     std::string frame_id;            ///< tf frame ID
+    std::string model;               ///< device model name
     int    npackets;                 ///< number of packets to collect
     double rpm;                      ///< device rotation rate (RPMs)
   } config_;
 
-  boost::shared_ptr<velodyne_driver::Input> input_;
+  boost::shared_ptr<Input> input_;
   ros::Publisher output_;
 
   /** diagnostics updater */
@@ -50,3 +57,7 @@ private:
   double diag_max_freq_;
   boost::shared_ptr<diagnostic_updater::TopicDiagnostic> diag_topic_;
 };
+
+} // namespace velodyne_driver
+
+#endif // _VELODYNE_DRIVER_H_
