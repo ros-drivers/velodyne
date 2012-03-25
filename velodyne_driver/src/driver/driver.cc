@@ -24,8 +24,8 @@
 namespace velodyne_driver
 {
 
-void VelodyneDriver::startup(ros::NodeHandle node,
-                             ros::NodeHandle private_nh)
+VelodyneDriver::VelodyneDriver(ros::NodeHandle node,
+                               ros::NodeHandle private_nh)
 {
   // use private node handle to get parameters
   private_nh.param("frame_id", config_.frame_id, std::string("velodyne"));
@@ -64,17 +64,6 @@ void VelodyneDriver::startup(ros::NodeHandle node,
   std::string dump_file;
   private_nh.param("pcap", dump_file, std::string(""));
 
-  if (dump_file != "")
-    {
-      input_.reset(new velodyne_driver::InputPCAP(private_nh,
-                                                  packet_rate,
-                                                  dump_file));
-    }
-  else
-    {
-      input_.reset(new velodyne_driver::InputSocket(private_nh));
-    }
-
   // initialize diagnostics
   diagnostics_.setHardwareID(deviceName);
   diag_max_freq_ = frequency;
@@ -89,6 +78,17 @@ void VelodyneDriver::startup(ros::NodeHandle node,
                                         TimeStampStatusParam()));
 
   // open Velodyne input device or file
+  if (dump_file != "")
+    {
+      input_.reset(new velodyne_driver::InputPCAP(private_nh,
+                                                  packet_rate,
+                                                  dump_file));
+    }
+  else
+    {
+      input_.reset(new velodyne_driver::InputSocket(private_nh));
+    }
+
   if(input_->vopen() != 0)
     {
       ROS_FATAL("Cannot open Velodyne input.");

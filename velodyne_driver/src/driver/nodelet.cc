@@ -50,14 +50,15 @@ private:
   volatile bool running_;               ///< device thread is running
   boost::shared_ptr<boost::thread> deviceThread_;
 
-  VelodyneDriver dvr_;                  ///< driver implementation class
+  boost::shared_ptr<VelodyneDriver> dvr_; ///< driver implementation class
 };
 
 void DriverNodelet::onInit()
 {
-  dvr_.startup(getNodeHandle(), getPrivateNodeHandle());
+  // start the driver
+  dvr_.reset(new VelodyneDriver(getNodeHandle(), getPrivateNodeHandle()));
 
-  // spawn device thread
+  // spawn device poll thread
   running_ = true;
   deviceThread_ = boost::shared_ptr< boost::thread >
     (new boost::thread(boost::bind(&DriverNodelet::devicePoll, this)));
@@ -69,7 +70,7 @@ void DriverNodelet::devicePoll()
   while(ros::ok())
     {
       // poll device until end of file
-      running_ = dvr_.poll();
+      running_ = dvr_->poll();
       if (!running_)
         break;
     }

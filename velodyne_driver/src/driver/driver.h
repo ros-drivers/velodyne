@@ -29,12 +29,11 @@ class VelodyneDriver
 {
 public:
 
-  VelodyneDriver() {}
+  VelodyneDriver(ros::NodeHandle node,
+                 ros::NodeHandle private_nh);
   ~VelodyneDriver() {}
 
   bool poll(void);
-  void startup(ros::NodeHandle node,
-               ros::NodeHandle private_nh);
 
 private:
 
