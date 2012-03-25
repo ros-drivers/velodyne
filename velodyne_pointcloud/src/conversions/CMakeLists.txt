@@ -5,6 +5,10 @@ target_link_libraries(cloud_node velodyne_rawdata)
 rosbuild_add_library(cloud_nodelet cloud_nodelet.cc convert.cc)
 target_link_libraries(cloud_nodelet velodyne_rawdata)
 
+rosbuild_add_executable(ringcolors_node ringcolors_node.cc colors.cc)
+
+rosbuild_add_library(ringcolors_nodelet ringcolors_nodelet.cc colors.cc)
+
 rosbuild_add_boost_directories()
 rosbuild_add_executable(transform_node transform_node.cc transform.cc)
 target_link_libraries(transform_node velodyne_rawdata)
