@@ -34,19 +34,6 @@ namespace velodyne_driver
   static const size_t packet_size = sizeof(velodyne_msgs::VelodynePacket::data);
 
   ////////////////////////////////////////////////////////////////////////
-  // Input class implementation
-  ////////////////////////////////////////////////////////////////////////
-
-  /** \brief Get one velodyne packet. */
-  int Input::getPacket(velodyne_msgs::VelodynePacket *pkt)
-  {
-    double time = 0.0;
-    int rc = getPackets(&pkt->data[0], 1, &time);
-    pkt->stamp = ros::Time(time);
-    return rc;
-  }
-
-  ////////////////////////////////////////////////////////////////////////
   // InputSocket class implementation
   ////////////////////////////////////////////////////////////////////////
 
@@ -90,7 +77,17 @@ namespace velodyne_driver
     (void) close(sockfd_);
   }
 
+  /** @brief Get one velodyne packet. */
+  int InputSocket::getPacket(velodyne_msgs::VelodynePacket *pkt)
+  {
+    double time = 0.0;
+    int rc = getPackets(&pkt->data[0], 1, &time);
+    pkt->stamp = ros::Time(time);
+    return rc;
+  }
+
   /** Read velodyne packets from socket. */
+  /** @todo replace this interface with getPacket() */
   int InputSocket::getPackets(uint8_t *buffer, int npacks,
                                       double *data_time)
   {
@@ -226,14 +223,13 @@ namespace velodyne_driver
   }
 
 
-  /** @brief Read Velodyne packets from PCAP dump file. */
-  int InputPCAP::getPackets(uint8_t *buffer, int npacks, double *data_time)
+  /** @brief Get one velodyne packet. */
+  int InputPCAP::getPacket(velodyne_msgs::VelodynePacket *pkt)
   {
     struct pcap_pkthdr *header;
     const u_char *pkt_data;
-    int result = npacks;
 
-    for (int i = 0; i < npacks; ++i)
+    while (true)
       {
         int res;
         if ((res = pcap_next_ex(pcap_, &header, &pkt_data)) >= 0)
@@ -244,48 +240,41 @@ namespace velodyne_driver
             if (read_fast_ == false)
               packet_rate_.sleep();
             
-            memcpy(&buffer[i * packet_size], pkt_data+42, packet_size);
-            *data_time = ros::Time::now().toSec();
+            memcpy(&pkt->data[0], pkt_data+42, packet_size);
+            pkt->stamp = ros::Time::now();
             empty_ = false;
-            --result;
-            //ROS_DEBUG("%d Velodyne packets read", i);
+            return 0;                   // success
           }
-        else
+
+        if (empty_)                 // no data in file?
           {
-            if (empty_)                 // no data in file?
-              {
-                ROS_WARN("Error %d reading Velodyne packet: %s", 
-                         res, pcap_geterr(pcap_));
-                return result;
-              }
-
-            if (read_once_)
-              {
-                ROS_INFO("end of file reached -- done reading.");
-                return -1;
-              }
-
-            if (repeat_delay_ > 0.0)
-              {
-                ROS_INFO("end of file reached -- delaying %.3f seconds.",
-                         repeat_delay_);
-                usleep(rint(repeat_delay_ * 1000000.0));
-              }
-
-            ROS_DEBUG("replaying Velodyne dump file");
-
-            // I can't figure out how to rewind the file, because it
-            // starts with some kind of header.  So, close the file
-            // and reopen it with pcap.
-            pcap_close(pcap_);
-            pcap_ = pcap_open_offline(filename_.c_str(), errbuf_);
-            empty_ = true;              // maybe the file disappeared?
-            i = -1;                     // restart the loop
-            result = npacks;
+            ROS_WARN("Error %d reading Velodyne packet: %s", 
+                     res, pcap_geterr(pcap_));
+            return -1;
           }
-      }
 
-    return result;
+        if (read_once_)
+          {
+            ROS_INFO("end of file reached -- done reading.");
+            return -1;
+          }
+        
+        if (repeat_delay_ > 0.0)
+          {
+            ROS_INFO("end of file reached -- delaying %.3f seconds.",
+                     repeat_delay_);
+            usleep(rint(repeat_delay_ * 1000000.0));
+          }
+
+        ROS_DEBUG("replaying Velodyne dump file");
+
+        // I can't figure out how to rewind the file, because it
+        // starts with some kind of header.  So, close the file
+        // and reopen it with pcap.
+        pcap_close(pcap_);
+        pcap_ = pcap_open_offline(filename_.c_str(), errbuf_);
+        empty_ = true;              // maybe the file disappeared?
+      } // loop back and try again
   }
 
 } // velodyne namespace

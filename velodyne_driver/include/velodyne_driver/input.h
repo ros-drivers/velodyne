@@ -18,8 +18,8 @@
  *
  *  Classes:
  *
- *     velodyne::Input -- base class to access the data independently
- *                      of its source
+ *     velodyne::Input -- pure virtual base class to access the data
+ *                      independently of its source
  *
  *     velodyne::InputSocket -- derived class reads live data from the
  *                      device via a UDP socket
@@ -42,35 +42,21 @@ namespace velodyne_driver
 {
   static uint16_t UDP_PORT_NUMBER = 2368;
 
-  /** @brief Base Velodyne input class */
+  /** @brief Pure virtual Velodyne input base class */
   class Input
   {
   public:
     Input() {}
 
-    /** \brief Read one Velodyne packet.
+    /** @brief Read one Velodyne packet.
      *
-     * \param pkt[out] points to VelodynePacket message
+     * @param pkt points to VelodynePacket message
      *
-     * \returns 0 if successful,
+     * @returns 0 if successful,
      *          -1 if end of file
      *          > 0 if incomplete packet (is this possible?)
      */
-    int getPacket(velodyne_msgs::VelodynePacket *pkt);
-
-  protected:
-
-    /** @brief Read Velodyne packets from PCAP dump file. 
-     *
-     * @param buffer = array to receive raw data packets
-     * @param npacks = number of packets to read
-     * @param data_time -> average time when data received
-     *
-     * returns: number of packets not read, if any
-     *          0 if successful,
-     *          -1 if end of file
-     */
-    virtual int getPackets(uint8_t *buffer, int npacks, double *data_time) = 0;
+    virtual int getPacket(velodyne_msgs::VelodynePacket *pkt) = 0;
   };
 
   /** @brief Live Velodyne input from socket. */
@@ -81,8 +67,11 @@ namespace velodyne_driver
                 uint16_t udp_port = UDP_PORT_NUMBER);
     ~InputSocket();
 
+    virtual int getPacket(velodyne_msgs::VelodynePacket *pkt);
+
   private:
-    virtual int getPackets(uint8_t *buffer, int npacks, double *data_time);
+
+    int getPackets(uint8_t *buffer, int npacks, double *data_time);
 
     int sockfd_;
   };
@@ -104,8 +93,9 @@ namespace velodyne_driver
               double repeat_delay=0.0);
     ~InputPCAP();
 
+    virtual int getPacket(velodyne_msgs::VelodynePacket *pkt);
+
   private:
-    virtual int getPackets(uint8_t *buffer, int npacks, double *data_time);
 
     std::string filename_;
     FILE *fp_;
