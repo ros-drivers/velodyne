@@ -91,7 +91,7 @@ if not calibrationGood:
     sys.exit(2)
 
 # create a dictionary to hold all relevant calibration values
-calibration = {'num_lasers': 0, 'pitch': 0.0, 'roll': 0.0, 'lasers': []}
+calibration = {'num_lasers': 0, 'lasers': []}
 cm2meters = 0.01                       # convert centimeters to meters
 
 def addLaserCalibration(laser_num, key, val):

@@ -176,24 +176,10 @@ namespace velodyne_rawdata
 
         z = distance * sin_vert_angle + vert_offset;
 
-        /** Use our coordinate system */
+        /** Use standard ROS coordinate system (right-hand rule) */
         float x_coord = y;
         float y_coord = -x;
         float z_coord = z;
-
-        /** Account for sensor pitch */
-        float z_pitch = z_coord * calibration_.cos_pitch - 
-                        x_coord * calibration_.sin_pitch;
-        float x_pitch = z_coord * calibration_.sin_pitch +
-                        x_coord * calibration_.cos_pitch;
-        float y_pitch = y_coord;
-
-        /** Now account for sensor roll */
-        float y_pitch_roll = y_pitch * calibration_.cos_roll - 
-                             z_pitch * calibration_.sin_roll;
-        float z_pitch_roll = y_pitch * calibration_.sin_roll +
-                             z_pitch * calibration_.cos_roll;
-        float x_pitch_roll = x_pitch;
 
         /** Intensity Calculation */
 
@@ -216,9 +202,9 @@ namespace velodyne_rawdata
           // convert polar coordinates to Euclidean XYZ
           VPoint point;
           point.ring = velodyne_rawdata::LASER_RING[laser_number];
-          point.x = x_pitch_roll;
-          point.y = y_pitch_roll;
-          point.z = z_pitch_roll;
+          point.x = x_coord;
+          point.y = y_coord;
+          point.z = z_coord;
           point.intensity = (uint8_t) intensity;
 
           // append this point to the cloud

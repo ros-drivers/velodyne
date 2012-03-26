@@ -51,16 +51,8 @@ namespace velodyne_pointcloud {
 
   public:
 
-    float pitch;
-    float roll;
     std::map<int, LaserCorrection> laser_corrections;
     bool initialized;
-
-    /** cached values calculated when the calibration file is read */
-    float cos_pitch;
-    float sin_pitch;
-    float cos_roll;
-    float sin_roll;
 
   public:
 
