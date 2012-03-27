@@ -24,7 +24,6 @@
 #include <sensor_msgs/PointCloud2.h>
 
 #include <velodyne_pointcloud/rawdata.h>
-#include <velodyne_pointcloud/ring_sequence.h>
 #include <velodyne_pointcloud/point_types.h>
 
 // include template implementations to transform a custom point cloud

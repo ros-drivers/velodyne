@@ -14,8 +14,10 @@
 #include <fstream>
 #include <string>
 #include <cmath>
+#include <limits>
 #include <yaml-cpp/yaml.h>
 
+#include <ros/ros.h>
 #include <velodyne_pointcloud/calibration.h>
 
 namespace velodyne_pointcloud {
@@ -66,6 +68,8 @@ namespace velodyne_pointcloud {
     correction.second.sin_rot_correction = sinf(correction.second.rot_correction);
     correction.second.cos_vert_correction = cosf(correction.second.vert_correction);
     correction.second.sin_vert_correction = sinf(correction.second.vert_correction);
+
+    correction.second.laser_ring = 0;   // clear initially (set later)
   }
 
   void operator >> (const YAML::Node& node, Calibration& calibration) {
@@ -76,7 +80,36 @@ namespace velodyne_pointcloud {
     for (int i = 0; i < num_lasers; i++) {
       std::pair<int, LaserCorrection> correction;
       lasers[i] >> correction;
-      calibration.laser_corrections.insert(correction);     
+      calibration.laser_corrections.insert(correction);
+    }
+
+    // For each laser ring, find the next-smallest vertical angle.
+    //
+    // This implementation is simple, but not efficient.  That is OK,
+    // since it only runs while starting up.
+    double next_angle = -std::numeric_limits<double>::infinity();
+    for (int ring = 0; ring < num_lasers; ++ring) {
+
+      // find minimum remaining vertical offset correction
+      double min_seen = std::numeric_limits<double>::infinity();
+      int next_index = num_lasers;
+      for (int j = 0; j < num_lasers; ++j) {
+
+        double angle = calibration.laser_corrections[j].vert_correction;
+        if (next_angle < angle && angle < min_seen) {
+          min_seen = angle;
+          next_index = j;
+        }
+      }
+
+      if (next_index < num_lasers) {    // anything found in this ring?
+
+        // store this ring number with its corresponding laser number
+        calibration.laser_corrections[next_index].laser_ring = ring;
+        next_angle = min_seen;
+        ROS_DEBUG_STREAM("laser_ring[" << next_index << "] = " << ring
+                         << ", angle = " << next_angle);
+      }
     }
   }
 

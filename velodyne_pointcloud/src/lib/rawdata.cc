@@ -32,7 +32,6 @@
 #include <angles/angles.h>
 
 #include <velodyne_pointcloud/rawdata.h>
-#include <velodyne_pointcloud/ring_sequence.h>
 
 namespace velodyne_rawdata
 {
@@ -201,7 +200,7 @@ namespace velodyne_rawdata
 
           // convert polar coordinates to Euclidean XYZ
           VPoint point;
-          point.ring = velodyne_rawdata::LASER_RING[laser_number];
+          point.ring = corrections.laser_ring;
           point.x = x_coord;
           point.y = y_coord;
           point.z = z_coord;

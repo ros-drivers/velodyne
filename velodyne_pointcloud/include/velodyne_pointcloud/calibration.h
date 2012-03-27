@@ -44,6 +44,8 @@ namespace velodyne_pointcloud {
     float sin_rot_correction;              ///< cached sine of rot_correction
     float cos_vert_correction;             ///< cached cosine of vert_correction
     float sin_vert_correction;             ///< cached sine of vert_correction
+
+    int laser_ring;                        ///< ring number for this laser
   };
 
   /** \brief Calibration class storing entire configuration for the Velodyne */
