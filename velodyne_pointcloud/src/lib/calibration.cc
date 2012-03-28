@@ -107,7 +107,7 @@ namespace velodyne_pointcloud {
         // store this ring number with its corresponding laser number
         calibration.laser_corrections[next_index].laser_ring = ring;
         next_angle = min_seen;
-        ROS_DEBUG_STREAM("laser_ring[" << next_index << "] = " << ring
+        ROS_INFO_STREAM("laser_ring[" << next_index << "] = " << ring
                          << ", angle = " << next_angle);
       }
     }

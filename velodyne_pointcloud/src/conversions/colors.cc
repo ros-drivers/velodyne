@@ -32,9 +32,8 @@ namespace
   const int color_violet =    0xff00ff;
 
   const int N_COLORS = 6;
-  int rainbow[N_COLORS] =
-    {color_red, color_orange, color_yellow,
-     color_green, color_blue, color_violet};
+  int rainbow[N_COLORS] = {color_red, color_orange, color_yellow,
+                           color_green, color_blue, color_violet};
 }
 
 namespace velodyne_pointcloud
