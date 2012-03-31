@@ -87,3 +87,84 @@ uint8[1206] data        # packet contents
                     new_packet.data[i] = old_msg.data[next]
                     next += 1
                 new_msg.packets.append(new_packet)
+
+class update_velodyne_msgs_VelodyneScan_9e3f252cfbc1351977f97c0549b33f49(MessageUpdateRule):
+	old_type = "velodyne_msgs/VelodyneScan"
+	old_full_text = """
+# Velodyne LIDAR scan packets.
+
+uint32 PACKETS_PER_REVOLUTION = 260
+
+Header           header         # standard ROS message header
+VelodynePacket[] packets        # vector of raw packets
+
+================================================================================
+MSG: std_msgs/Header
+# Standard metadata for higher-level stamped data types.
+# This is generally used to communicate timestamped data 
+# in a particular coordinate frame.
+# 
+# sequence ID: consecutively increasing ID 
+uint32 seq
+#Two-integer timestamp that is expressed as:
+# * stamp.secs: seconds (stamp_secs) since epoch
+# * stamp.nsecs: nanoseconds since stamp_secs
+# time-handling sugar is provided by the client library
+time stamp
+#Frame this data is associated with
+# 0: no frame
+# 1: global frame
+string frame_id
+
+================================================================================
+MSG: velodyne_msgs/VelodynePacket
+# Raw Velodyne LIDAR packet.
+
+time stamp              # packet timestamp
+uint8[1206] data        # packet contents
+"""
+
+	new_type = "velodyne_msgs/VelodyneScan"
+	new_full_text = """
+# Velodyne LIDAR scan packets.
+
+Header           header         # standard ROS message header
+VelodynePacket[] packets        # vector of raw packets
+
+================================================================================
+MSG: std_msgs/Header
+# Standard metadata for higher-level stamped data types.
+# This is generally used to communicate timestamped data 
+# in a particular coordinate frame.
+# 
+# sequence ID: consecutively increasing ID 
+uint32 seq
+#Two-integer timestamp that is expressed as:
+# * stamp.secs: seconds (stamp_secs) since epoch
+# * stamp.nsecs: nanoseconds since stamp_secs
+# time-handling sugar is provided by the client library
+time stamp
+#Frame this data is associated with
+# 0: no frame
+# 1: global frame
+string frame_id
+
+================================================================================
+MSG: velodyne_msgs/VelodynePacket
+# Raw Velodyne LIDAR packet.
+
+time stamp              # packet timestamp
+uint8[1206] data        # packet contents
+"""
+
+	order = 1
+	migrated_types = [
+		("Header","Header"),
+		("VelodynePacket","VelodynePacket"),]
+
+	valid = True
+
+	def update(self, old_msg, new_msg):
+		#Constant 'PACKETS_PER_REVOLUTION' has changed
+		self.migrate(old_msg.header, new_msg.header)
+		self.migrate_array(old_msg.packets, new_msg.packets, "velodyne_msgs/VelodynePacket")

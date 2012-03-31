@@ -9,12 +9,10 @@
   <review status="experimental" notes=""/>
   <url>http://ros.org/wiki/velodyne_msgs</url>
 
-  <!-- uncomment for bag migration (not yet)
+  <depend package="rosbag"/>
+
   <export>
-    <rosbagmigration rule_file="migration_rules/velodyne_msgs.bmr" />
+    <rosbag migration_rule_file="migration_rules/velodyne_msgs.bmr" />
   </export>
-  -->
 
 </package>
-
-
