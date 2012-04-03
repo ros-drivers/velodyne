@@ -6,7 +6,7 @@
   </description>
   <author>Maintained by Jack O'Quin</author>
   <license>BSD</license>  
-  <review status="experimental" notes=""/>
+  <review status="API reviewed" notes="2012-02-02"/>
   <url>http://ros.org/wiki/velodyne</url>
 
   <depend stack="common_msgs" /> <!-- sensor_msgs -->
