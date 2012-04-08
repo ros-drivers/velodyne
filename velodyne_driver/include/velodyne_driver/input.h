@@ -71,8 +71,6 @@ namespace velodyne_driver
 
   private:
 
-    int getPackets(uint8_t *buffer, int npacks, double *data_time);
-
     int sockfd_;
   };
 

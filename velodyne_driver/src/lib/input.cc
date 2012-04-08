@@ -80,18 +80,6 @@ namespace velodyne_driver
   /** @brief Get one velodyne packet. */
   int InputSocket::getPacket(velodyne_msgs::VelodynePacket *pkt)
   {
-    double time = 0.0;
-    int rc = getPackets(&pkt->data[0], 1, &time);
-    pkt->stamp = ros::Time(time);
-    return rc;
-  }
-
-  /** Read velodyne packets from socket. */
-  /** @todo replace this interface with getPacket() */
-  int InputSocket::getPackets(uint8_t *buffer, int npacks,
-                                      double *data_time)
-  {
-    int result = npacks;
     double time1 = ros::Time::now().toSec();
 
     struct pollfd fds[1];
@@ -99,7 +87,7 @@ namespace velodyne_driver
     fds[0].events = POLLIN;
     static const int POLL_TIMEOUT = 1000; // one second (in msec)
 
-    for (int i = 0; i < npacks; ++i)
+    while (true)
       {
         // Unfortunately, the Linux kernel recvfrom() implementation
         // uses a non-interruptible sleep() when waiting for data,
@@ -126,44 +114,42 @@ namespace velodyne_driver
               {
                 if (errno != EINTR)
                   ROS_ERROR("poll() error: %s", strerror(errno));
-                return result;
+                return 1;
               }
             if (retval == 0)            // poll() timeout?
               {
                 ROS_WARN("Velodyne poll() timeout");
-                return result;
+                return 1;
               }
             if ((fds[0].revents & POLLERR)
                 || (fds[0].revents & POLLHUP)
                 || (fds[0].revents & POLLNVAL)) // device error?
               {
                 ROS_ERROR("poll() reports Velodyne error");
-                return result;
+                return 1;
               }
           } while ((fds[0].revents & POLLIN) == 0);
 
-        // Read packets that should now be available from the socket.
-        ssize_t nbytes = recvfrom(sockfd_, &buffer[i * packet_size],
+        // Receive packets that should now be available from the
+        // socket using a blocking read.
+        ssize_t nbytes = recvfrom(sockfd_, &pkt->data[0],
                                   packet_size,  0, NULL, NULL);
         if ((size_t) nbytes == packet_size)
           {
-            --result;
+            // read successful, done now
+            break;
           }
-        else
-          {
-            ROS_DEBUG_STREAM("incomplete Velodyne packet read: "
-                             << nbytes << " bytes");
-            --i;                        // rerun this loop iteration
-          }
-      }
 
-    double time2 = ros::Time::now().toSec();
+        ROS_DEBUG_STREAM("incomplete Velodyne packet read: "
+                         << nbytes << " bytes");
+      }
 
     // Average the times at which we begin and end reading.  Use that to
     // estimate when the scan occurred.
-    *data_time = (time2 + time1) / 2.0;
+    double time2 = ros::Time::now().toSec();
+    pkt->stamp = ros::Time((time2 + time1) / 2.0);
 
-    return result;
+    return 0;
   }
 
   ////////////////////////////////////////////////////////////////////////
