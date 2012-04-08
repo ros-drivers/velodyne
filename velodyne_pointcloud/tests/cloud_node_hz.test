@@ -16,7 +16,7 @@
   <!-- start cloud node with test calibration file -->
   <node pkg="velodyne_pointcloud" type="cloud_node" name="cloud_node">
     <param name="calibration"
-           value="$(find velodyne_pointcloud)/tests/angles.yaml"/>
+           value="$(find velodyne_pointcloud)/params/64e_utexas.yaml"/>
   </node>
 
   <!-- verify PointCloud2 publication rate -->
