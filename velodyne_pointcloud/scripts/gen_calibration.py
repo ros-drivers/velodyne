@@ -102,15 +102,37 @@ def addLaserCalibration(laser_num, key, val):
     else:
         calibration['lasers'].append({key: val})
 
+# add enabled flags
+num_enabled = 0
+enabled_lasers = []
+enabled = db.find('DB/enabled_')
+if enabled == None:
+    print('no enabled tags found: assuming all 64 enabled')
+    num_enabled = 64
+    enabled_lasers = [True for i in xrange(num_enabled)]
+else:
+    index = 0
+    for el in enabled:
+        if el.tag == 'item':
+            this_enabled = int(el.text) != 0
+            enabled_lasers.append(this_enabled)
+            index += 1
+            if this_enabled:
+                num_enabled += 1
+
+calibration['num_lasers'] = num_enabled
+print(str(num_enabled) + ' lasers')
+
 # add minimum laser intensities
 minIntensities = db.find('DB/minIntensity_')
 if minIntensities != None:
     index = 0
     for el in minIntensities:
-        if el.tag == 'count':
-            calibration['num_lasers'] = int(el.text)
-        elif el.tag == 'item':
-            addLaserCalibration(index, 'min_intensity', float(el.text))
+        if el.tag == 'item':
+            if enabled_lasers[index]:
+                value = float(el.text)
+                if value != 0.0:
+                    addLaserCalibration(index, 'min_intensity', value)
             index += 1
 
 # add maximum laser intensities
@@ -118,23 +140,25 @@ maxIntensities = db.find('DB/maxIntensity_')
 if maxIntensities != None:
     index = 0
     for el in maxIntensities:
-        if el.tag == 'count':
-            calibration['num_lasers'] = int(el.text)
-        elif el.tag == 'item':
-            addLaserCalibration(index, 'max_intensity', float(el.text))
-            index += 1
+        if el.tag == 'item':
+            if enabled_lasers[index]:
+                value = float(el.text)
+                if value != 255.0:
+                    addLaserCalibration(index, 'max_intensity', float(el.text))
+                index += 1
 
 # add calibration information for each laser
 for el in db.find('DB/points_'):
-    if el.tag == 'count':
-        calibration['num_lasers'] = int(el.text)
-    elif el.tag == 'item':
+    if el.tag == 'item':
         for px in el:
             for field in px:
                 if field.tag == 'id_':
                     index = int(field.text)
+                    if not enabled_lasers[index]:
+                        break   # skip this laser, it is not enabled
                     addLaserCalibration(index, 'laser_id', index)
-                elif field.tag == 'rotCorrection_':
+
+                if field.tag == 'rotCorrection_':
                     addLaserCalibration(index, 'rot_correction',
                                         math.radians(float(field.text)))
                 elif field.tag == 'vertCorrection_':
@@ -164,7 +188,7 @@ for el in db.find('DB/points_'):
 # validate input data
 if calibration['num_lasers'] <= 0:
     xmlError('no lasers defined')
-elif calibration['num_lasers'] != len(calibration['lasers']):
+elif calibration['num_lasers'] != num_enabled:
     xmlError('inconsistent number of lasers defined')
 
 # TODO: make sure all required fields are present.

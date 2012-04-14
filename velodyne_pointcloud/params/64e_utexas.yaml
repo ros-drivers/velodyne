@@ -1,3 +1,4 @@
+# University of Texas HDL-64E calibration parameters
 lasers:
 - {dist_correction: 0.100000001490116, dist_correction_x: 0, dist_correction_y: 0,
   focal_distance: 0, focal_slope: 0, laser_id: 0, max_intensity: 255, min_intensity: 0,
