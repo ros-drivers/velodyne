@@ -26,7 +26,8 @@
 #include <arpa/inet.h>
 #include <poll.h>
 #include <errno.h>
-
+#include <fcntl.h>
+#include <sys/file.h>
 #include <velodyne_driver/input.h>
 
 namespace velodyne_driver
@@ -68,6 +69,12 @@ namespace velodyne_driver
         return;
       }
   
+    if (fcntl(sockfd_,F_SETFL, O_NONBLOCK|FASYNC) < 0)
+      {
+        perror("non-block");
+        return;
+      }
+
     ROS_DEBUG("Velodyne socket fd is %d\n", sockfd_);
   }
 
@@ -134,7 +141,17 @@ namespace velodyne_driver
         // socket using a blocking read.
         ssize_t nbytes = recvfrom(sockfd_, &pkt->data[0],
                                   packet_size,  0, NULL, NULL);
-        if ((size_t) nbytes == packet_size)
+
+	if (nbytes < 0)
+	  {
+            if (errno != EWOULDBLOCK)
+ 	      {
+                perror("recvfail");
+		ROS_INFO("recvfail");
+                return 1;
+	      }
+	  }
+	else if ((size_t) nbytes == packet_size)
           {
             // read successful, done now
             break;
