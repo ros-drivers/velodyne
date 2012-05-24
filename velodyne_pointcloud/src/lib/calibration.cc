@@ -59,7 +59,6 @@ namespace velodyne_pointcloud {
       *pName >> correction.second.min_intensity;
     else
       correction.second.min_intensity = 0;
-    node[MIN_INTENSITY] >> correction.second.min_intensity;
     node[FOCAL_DISTANCE] >> correction.second.focal_distance;
     node[FOCAL_SLOPE] >> correction.second.focal_slope;
 
