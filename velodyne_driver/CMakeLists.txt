@@ -30,6 +30,8 @@ add_subdirectory(src/driver)
 add_subdirectory(tests)
 rosbuild_add_rostest_labeled(pcap tests/pcap_node_hertz.test)
 rosbuild_add_rostest_labeled(pcap tests/pcap_nodelet_hertz.test)
+rosbuild_add_rostest_labeled(pcap tests/pcap_32e_node_hertz.test)
+rosbuild_add_rostest_labeled(pcap tests/pcap_32e_nodelet_hertz.test)
 
 # parse check all the launch/*.launch files
 rosbuild_add_roslaunch_check(launch)

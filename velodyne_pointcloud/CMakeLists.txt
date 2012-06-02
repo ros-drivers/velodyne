@@ -32,6 +32,8 @@ add_subdirectory(src/conversions)
 add_subdirectory(tests)
 rosbuild_add_rostest_labeled(pcap tests/cloud_node_hz.test)
 rosbuild_add_rostest_labeled(pcap tests/cloud_nodelet_hz.test)
+rosbuild_add_rostest_labeled(pcap tests/cloud_node_32e_hz.test)
+rosbuild_add_rostest_labeled(pcap tests/cloud_nodelet_32e_hz.test)
 rosbuild_add_rostest_labeled(pcap tests/transform_node_hz.test)
 rosbuild_add_rostest_labeled(pcap tests/transform_nodelet_hz.test)
 
