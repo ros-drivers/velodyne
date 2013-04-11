@@ -1,19 +1,30 @@
-cmake_minimum_required(VERSION 2.4.6)
-include($ENV{ROS_ROOT}/core/rosbuild/rosbuild.cmake)
+cmake_minimum_required(VERSION 2.8.3)
+project(velodyne_driver)
+find_package(catkin REQUIRED
+  COMPONENTS
+  diagnostic_updater
+  nodelet
+  roscpp
+  rostest
+  tf
+  velodyne_msgs
+)
 
-# Set the build type.  Options are:
-#  Coverage       : w/ debug symbols, w/o optimization, w/ code-coverage
-#  Debug          : w/ debug symbols, w/o optimization
-#  Release        : w/o debug symbols, w/ optimization
-#  RelWithDebInfo : w/ debug symbols, w/ optimization
-#  MinSizeRel     : w/o debug symbols, w/ optimization, stripped binaries
-set(ROS_BUILD_TYPE RelWithDebInfo)
+# This driver uses Boost threads
+find_package(Boost REQUIRED COMPONENTS thread)
 
-rosbuild_init()
+#find_package(libpcap REQUIRED)
+set(libpcap_LIBRARIES -lpcap)
 
-set(EXECUTABLE_OUTPUT_PATH ${PROJECT_SOURCE_DIR}/bin)
-set(LIBRARY_OUTPUT_PATH ${PROJECT_SOURCE_DIR}/lib)
+include_directories(include ${Boost_INCLUDE_DIR} ${catkin_INCLUDE_DIRS})
 
+# objects needed by other ROS packages that depend on this one
+catkin_package(
+  INCLUDE_DIRS include
+  LIBRARIES velodyne_input
+)
+
+# compile the driver and input library
 add_subdirectory(src/lib)
 add_subdirectory(src/driver)
 
@@ -27,11 +38,11 @@ add_subdirectory(src/driver)
 #  * only unlabelled tests or those labelled "hudson" automatically
 #    run on the ROS build machines
 #
-add_subdirectory(tests)
-rosbuild_add_rostest_labeled(pcap tests/pcap_node_hertz.test)
-rosbuild_add_rostest_labeled(pcap tests/pcap_nodelet_hertz.test)
-rosbuild_add_rostest_labeled(pcap tests/pcap_32e_node_hertz.test)
-rosbuild_add_rostest_labeled(pcap tests/pcap_32e_nodelet_hertz.test)
+#add_subdirectory(tests)
+#rosbuild_add_rostest_labeled(pcap tests/pcap_node_hertz.test)
+#rosbuild_add_rostest_labeled(pcap tests/pcap_nodelet_hertz.test)
+#rosbuild_add_rostest_labeled(pcap tests/pcap_32e_node_hertz.test)
+#rosbuild_add_rostest_labeled(pcap tests/pcap_32e_nodelet_hertz.test)
 
 # parse check all the launch/*.launch files
-rosbuild_add_roslaunch_check(launch)
+#rosbuild_add_roslaunch_check(launch)
