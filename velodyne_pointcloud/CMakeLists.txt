@@ -1,7 +1,7 @@
 cmake_minimum_required(VERSION 2.8.3)
 project(velodyne_pointcloud)
 
-set(velodyne_pointcloud_CATKIN_DEPS 
+set(${PROJECT}_CATKIN_DEPS 
     angles
     nodelet
     pcl_ros
@@ -12,7 +12,7 @@ set(velodyne_pointcloud_CATKIN_DEPS
     velodyne_driver
     velodyne_msgs)
 
-find_package(catkin REQUIRED COMPONENTS ${velodyne_pointcloud_CATKIN_DEPS} rostest)
+find_package(catkin REQUIRED COMPONENTS ${${PROJECT}_CATKIN_DEPS} rostest)
 find_package(Boost COMPONENTS signals)
 find_package(pcl)
 
@@ -33,7 +33,7 @@ add_subdirectory(src/lib)
 add_subdirectory(src/conversions)
 
 catkin_package(
-    CATKIN_DEPENDS ${velodyne_pointcloud_CATKIN_DEPS}
+    CATKIN_DEPENDS ${${PROJECT}_CATKIN_DEPS}
     DEPENDS yaml-cpp python-yaml
     INCLUDE_DIRS include
     LIBRARIES velodyne_rawdata)
