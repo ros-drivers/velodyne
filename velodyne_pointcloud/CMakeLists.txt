@@ -1,17 +1,18 @@
 cmake_minimum_required(VERSION 2.8.3)
 project(velodyne_pointcloud)
-find_package(catkin REQUIRED
-  COMPONENTS
-  nodelet
-  pcl_ros
-  roscpp
-  roslib
-  rostest
-  sensor_msgs
-  tf
-  velodyne_driver
-  velodyne_msgs
-)
+
+set(velodyne_pointcloud_CATKIN_DEPS 
+    angles
+    nodelet
+    pcl_ros
+    roscpp
+    roslib
+    sensor_msgs
+    tf
+    velodyne_driver
+    velodyne_msgs)
+
+find_package(catkin REQUIRED COMPONENTS ${velodyne_pointcloud_CATKIN_DEPS} rostest)
 find_package(Boost COMPONENTS signals)
 find_package(pcl)
 
@@ -20,13 +21,11 @@ find_package(pcl)
 find_package(PkgConfig REQUIRED)
 pkg_check_modules(YAML_CPP REQUIRED yaml-cpp)
 find_path(YAML_CPP_INCLUDE_DIR
-  NAMES yaml_cpp.h
-  PATHS ${YAML_CPP_INCLUDE_DIRS}
-)
+          NAMES yaml_cpp.h
+          PATHS ${YAML_CPP_INCLUDE_DIRS})
 find_library(YAML_CPP_LIBRARY
-  NAMES YAML_CPP
-  PATHS ${YAML_CPP_LIBRARY_DIRS}
-)
+             NAMES YAML_CPP
+             PATHS ${YAML_CPP_LIBRARY_DIRS})
 
 include_directories(include ${catkin_INCLUDE_DIRS})
 
@@ -34,11 +33,10 @@ add_subdirectory(src/lib)
 add_subdirectory(src/conversions)
 
 catkin_package(
-    CATKIN_DEPENDS nodelet pcl_ros roscpp roslib sensor_msgs tf velodyne_driver velodyne_msgs
+    CATKIN_DEPENDS ${velodyne_pointcloud_CATKIN_DEPS}
     DEPENDS yaml-cpp python-yaml
     INCLUDE_DIRS include
-    LIBRARIES velodyne_rawdata
-)
+    LIBRARIES velodyne_rawdata)
 
 ### install some launch scripts and parameter files
 
