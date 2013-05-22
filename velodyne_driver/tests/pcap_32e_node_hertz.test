@@ -9,7 +9,7 @@
 <launch>
 
   <!-- start read with example PCAP file -->
-`  <node pkg="velodyne_driver" type="velodyne_node" name="velodyne_node">
+  <node pkg="velodyne_driver" type="velodyne_node" name="velodyne_node">
     <param name="model" value="32E"/>
     <param name="pcap" value="$(find velodyne_driver)/tests/32e.pcap"/>
   </node>
