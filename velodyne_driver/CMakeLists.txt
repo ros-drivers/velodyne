@@ -28,21 +28,21 @@ catkin_package(
 add_subdirectory(src/lib)
 add_subdirectory(src/driver)
 
+# Download packet capture (PCAP) files containing test data.
+download_test_data(http://pr.willowgarage.com/data/velodyne/class.pcap
+                   tests/class.pcap
+                   65808d25772101358a3719b451b3d015)
+
+download_test_data(http://pr.willowgarage.com/data/velodyne/32e.pcap
+                   tests/32e.pcap
+                   e41d02aac34f0967c03a5597e1d554a9)
+
 # unit tests
-#
-# $ROS_BUILD_TEST_LABEL controls which label "make test" runs
-#
-#  * if unset, all tests run
-#  * tests labelled "pcap" require more processor time than the
-#    ROS build machines can reliably guarantee.
-#  * only unlabelled tests or those labelled "hudson" automatically
-#    run on the ROS build machines
-#
-#add_subdirectory(tests)
-#rosbuild_add_rostest_labeled(pcap tests/pcap_node_hertz.test)
-#rosbuild_add_rostest_labeled(pcap tests/pcap_nodelet_hertz.test)
-#rosbuild_add_rostest_labeled(pcap tests/pcap_32e_node_hertz.test)
-#rosbuild_add_rostest_labeled(pcap tests/pcap_32e_nodelet_hertz.test)
+# (not working yet: can't find the test data)
+#add_rostest(tests/pcap_node_hertz.test)
+#add_rostest(tests/pcap_nodelet_hertz.test)
+#add_rostest(tests/pcap_32e_node_hertz.test)
+#add_rostest(tests/pcap_32e_nodelet_hertz.test)
 
 # parse check all the launch/*.launch files
 #rosbuild_add_roslaunch_check(launch)
