@@ -29,6 +29,12 @@ add_subdirectory(src/lib)
 add_subdirectory(src/driver)
 
 # Download packet capture (PCAP) files containing test data.
+#
+# This appalling hack is to work around download_test_data(), which
+# insists on copying files to the build tree, where rostest cannot
+# find them.
+set(SAVE_PROJECT_BINARY_DIR ${PROJECT_BINARY_DIR})
+set(PROJECT_BINARY_DIR /tmp/velodyne_driver)
 download_test_data(http://pr.willowgarage.com/data/velodyne/class.pcap
                    tests/class.pcap
                    65808d25772101358a3719b451b3d015)
@@ -36,13 +42,14 @@ download_test_data(http://pr.willowgarage.com/data/velodyne/class.pcap
 download_test_data(http://pr.willowgarage.com/data/velodyne/32e.pcap
                    tests/32e.pcap
                    e41d02aac34f0967c03a5597e1d554a9)
+set(PROJECT_BINARY_DIR ${SAVE_PROJECT_BINARY_DIR})
 
 # unit tests
 # (not working yet: can't find the test data)
-#add_rostest(tests/pcap_node_hertz.test)
-#add_rostest(tests/pcap_nodelet_hertz.test)
-#add_rostest(tests/pcap_32e_node_hertz.test)
-#add_rostest(tests/pcap_32e_nodelet_hertz.test)
+add_rostest(tests/pcap_node_hertz.test)
+add_rostest(tests/pcap_nodelet_hertz.test)
+add_rostest(tests/pcap_32e_node_hertz.test)
+add_rostest(tests/pcap_32e_nodelet_hertz.test)
 
 # parse check all the launch/*.launch files
 #rosbuild_add_roslaunch_check(launch)

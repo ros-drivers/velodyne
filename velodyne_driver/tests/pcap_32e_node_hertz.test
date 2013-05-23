@@ -11,13 +11,13 @@
   <!-- start read with example PCAP file -->
   <node pkg="velodyne_driver" type="velodyne_node" name="velodyne_node">
     <param name="model" value="32E"/>
-    <param name="pcap" value="$(find velodyne_driver)/tests/32e.pcap"/>
+    <param name="pcap" value="/tmp/velodyne_driver/tests/32e.pcap"/>
   </node>
 
   <test test-name="pcap_hertz_test" pkg="rostest" type="hztest" name="hztest1" >
     <param name="hz" value="10.0" />
     <param name="hzerror" value="3.0" />
-    <param name="test_duration" value="10.0" />    
+    <param name="test_duration" value="5.0" />    
     <param name="topic" value="velodyne_packets" />  
     <param name="wait_time" value="2.0" />  
   </test>
@@ -26,7 +26,7 @@
         pkg="rostest" type="hztest" name="diag_test" >
     <param name="hz" value="1.0" />
     <param name="hzerror" value="0.5" />
-    <param name="test_duration" value="10.0" />    
+    <param name="test_duration" value="5.0" />    
     <param name="topic" value="diagnostics" />  
     <param name="wait_time" value="2.0" />  
   </test>
