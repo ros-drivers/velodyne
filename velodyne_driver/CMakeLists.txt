@@ -1,28 +1,27 @@
 cmake_minimum_required(VERSION 2.8.3)
 project(velodyne_driver)
-find_package(catkin REQUIRED
-  COMPONENTS
-  diagnostic_updater
-  nodelet
-  roscpp
-  rostest
-  tf
-  velodyne_msgs
-)
+
+set(${PROJECT}_CATKIN_DEPS 
+    diagnostic_updater
+    nodelet
+    roscpp
+    tf
+    velodyne_msgs)
+
+find_package(catkin REQUIRED COMPONENTS ${${PROJECT}_CATKIN_DEPS} rostest)
 
 # This driver uses Boost threads
 find_package(Boost REQUIRED COMPONENTS thread)
 
-#find_package(libpcap REQUIRED)
+# libpcap provides no pkg-config or find_package module:
 set(libpcap_LIBRARIES -lpcap)
 
 include_directories(include ${Boost_INCLUDE_DIR} ${catkin_INCLUDE_DIRS})
 
 # objects needed by other ROS packages that depend on this one
-catkin_package(
-  INCLUDE_DIRS include
-  LIBRARIES velodyne_input
-)
+catkin_package(CATKIN_DEPENDS ${${PROJECT}_CATKIN_DEPS}
+               INCLUDE_DIRS include
+               LIBRARIES velodyne_input)
 
 # compile the driver and input library
 add_subdirectory(src/lib)
