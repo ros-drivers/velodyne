@@ -1,7 +1,7 @@
 cmake_minimum_required(VERSION 2.8.3)
 project(velodyne_pointcloud)
 
-set(${PROJECT}_CATKIN_DEPS 
+set(${PROJECT_NAME}_CATKIN_DEPS 
     angles
     nodelet
     pcl_ros
@@ -12,7 +12,8 @@ set(${PROJECT}_CATKIN_DEPS
     velodyne_driver
     velodyne_msgs)
 
-find_package(catkin REQUIRED COMPONENTS ${${PROJECT}_CATKIN_DEPS} rostest)
+find_package(catkin REQUIRED COMPONENTS
+             ${${PROJECT_NAME}_CATKIN_DEPS} rostest)
 find_package(Boost COMPONENTS signals)
 find_package(pcl)
 
@@ -29,34 +30,42 @@ find_library(YAML_CPP_LIBRARY
 
 include_directories(include ${catkin_INCLUDE_DIRS})
 
-add_subdirectory(src/lib)
-add_subdirectory(src/conversions)
-
 catkin_package(
-    CATKIN_DEPENDS ${${PROJECT}_CATKIN_DEPS}
+    CATKIN_DEPENDS ${${PROJECT_NAME}_CATKIN_DEPS}
     DEPENDS yaml-cpp python-yaml
     INCLUDE_DIRS include
     LIBRARIES velodyne_rawdata)
 
-### install some launch scripts and parameter files
+add_subdirectory(src/lib)
+add_subdirectory(src/conversions)
+
+install(DIRECTORY include/
+        DESTINATION ${CATKIN_PACKAGE_INCLUDE_DESTINATION})
+
+### TODO install some launch scripts and parameter files
+
+# Download packet capture (PCAP) files containing test data.
+#
+# This package uses the same PCAP test files as velodyne_driver.
+# Catkin assigns them the same target names, so they cannot be
+# downloaded again in this package.  As long as both packages are
+# always built and tested together in the same repository, that works.
+#
+#download_test_data(http://pr.willowgarage.com/data/velodyne/class.pcap
+#                   tests/class.pcap
+#                   65808d25772101358a3719b451b3d015)
+#
+#download_test_data(http://pr.willowgarage.com/data/velodyne/32e.pcap
+#                   tests/32e.pcap
+#                   e41d02aac34f0967c03a5597e1d554a9)
 
 # unit tests
-#
-# $ROS_BUILD_TEST_LABEL controls which label "make test" runs
-#
-#  * if unset, all tests run
-#  * tests labelled "pcap" require more processor time than the
-#    ROS build machines can reliably guarantee.
-#  * only unlabelled tests or those labelled "hudson" automatically
-#    run on the ROS build machines
-#
-#add_subdirectory(tests)
-#rosbuild_add_rostest_labeled(pcap tests/cloud_node_hz.test)
-#rosbuild_add_rostest_labeled(pcap tests/cloud_nodelet_hz.test)
-#rosbuild_add_rostest_labeled(pcap tests/cloud_node_32e_hz.test)
-#rosbuild_add_rostest_labeled(pcap tests/cloud_nodelet_32e_hz.test)
-#rosbuild_add_rostest_labeled(pcap tests/transform_node_hz.test)
-#rosbuild_add_rostest_labeled(pcap tests/transform_nodelet_hz.test)
+add_rostest(tests/cloud_node_hz.test)
+add_rostest(tests/cloud_nodelet_hz.test)
+add_rostest(tests/cloud_node_32e_hz.test)
+add_rostest(tests/cloud_nodelet_32e_hz.test)
+add_rostest(tests/transform_node_hz.test)
+add_rostest(tests/transform_nodelet_hz.test)
 
 # parse check all the launch/*.launch files
 #rosbuild_add_roslaunch_check(launch)

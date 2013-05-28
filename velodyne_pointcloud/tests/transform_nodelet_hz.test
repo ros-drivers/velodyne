@@ -14,7 +14,7 @@
   <!-- start nodelet manager and driver nodelets -->
   <include file="$(find velodyne_driver)/launch/nodelet_manager.launch">
     <arg name="pcap"
-           value="$(find velodyne_pointcloud)/tests/class.pcap"/>
+           value="/tmp/velodyne_driver/tests/class.pcap"/>
   </include>
 
   <!-- start transform nodelet -->
@@ -28,7 +28,7 @@
         type="hztest" name="hztest1" >
     <param name="hz" value="10.0" />
     <param name="hzerror" value="3.0" />
-    <param name="test_duration" value="10.0" />    
+    <param name="test_duration" value="5.0" />    
     <param name="topic" value="velodyne_points" />  
     <param name="wait_time" value="2.0" />  
   </test>

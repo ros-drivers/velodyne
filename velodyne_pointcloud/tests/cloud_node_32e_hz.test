@@ -11,7 +11,7 @@
   <!-- start driver with example PCAP file -->
   <node pkg="velodyne_driver" type="velodyne_node" name="velodyne_node">
     <param name="model" value="32E"/>
-    <param name="pcap" value="$(find velodyne_pointcloud)/tests/32e.pcap"/>
+    <param name="pcap" value="/tmp/velodyne_driver/tests/32e.pcap"/>
   </node>
 
   <!-- start cloud node with test calibration file -->
@@ -25,7 +25,7 @@
         name="hztest1" >
     <param name="hz" value="10.0" />
     <param name="hzerror" value="3.0" />
-    <param name="test_duration" value="10.0" />    
+    <param name="test_duration" value="5.0" />    
     <param name="topic" value="velodyne_points" />  
     <param name="wait_time" value="2.0" />  
   </test>

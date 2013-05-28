@@ -27,13 +27,15 @@ catkin_package(CATKIN_DEPENDS ${${PROJECT}_CATKIN_DEPS}
 add_subdirectory(src/lib)
 add_subdirectory(src/driver)
 
+### TODO install some launch scripts and parameter files
+
 # Download packet capture (PCAP) files containing test data.
 #
 # This appalling hack is to work around download_test_data(), which
 # insists on copying files to the build tree, where rostest cannot
 # find them.
 set(SAVE_PROJECT_BINARY_DIR ${PROJECT_BINARY_DIR})
-set(PROJECT_BINARY_DIR /tmp/velodyne_driver)
+set(PROJECT_BINARY_DIR /tmp/${PROJECT_NAME})
 download_test_data(http://pr.willowgarage.com/data/velodyne/class.pcap
                    tests/class.pcap
                    65808d25772101358a3719b451b3d015)
@@ -44,7 +46,6 @@ download_test_data(http://pr.willowgarage.com/data/velodyne/32e.pcap
 set(PROJECT_BINARY_DIR ${SAVE_PROJECT_BINARY_DIR})
 
 # unit tests
-# (not working yet: can't find the test data)
 add_rostest(tests/pcap_node_hertz.test)
 add_rostest(tests/pcap_nodelet_hertz.test)
 add_rostest(tests/pcap_32e_node_hertz.test)
