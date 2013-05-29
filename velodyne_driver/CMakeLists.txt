@@ -27,6 +27,9 @@ catkin_package(CATKIN_DEPENDS ${${PROJECT}_CATKIN_DEPS}
 add_subdirectory(src/lib)
 add_subdirectory(src/driver)
 
+install(DIRECTORY include/${PROJECT_NAME}/
+        DESTINATION ${CATKIN_PACKAGE_INCLUDE_DESTINATION})
+
 ### TODO install some launch scripts and parameter files
 
 # Download packet capture (PCAP) files containing test data.

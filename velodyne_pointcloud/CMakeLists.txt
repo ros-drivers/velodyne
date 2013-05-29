@@ -39,7 +39,7 @@ catkin_package(
 add_subdirectory(src/lib)
 add_subdirectory(src/conversions)
 
-install(DIRECTORY include/
+install(DIRECTORY include/${PROJECT_NAME}/
         DESTINATION ${CATKIN_PACKAGE_INCLUDE_DESTINATION})
 
 ### TODO install some launch scripts and parameter files
