@@ -33,20 +33,17 @@ install(DIRECTORY include/${PROJECT_NAME}/
 ### TODO install some launch scripts and parameter files
 
 # Download packet capture (PCAP) files containing test data.
-#
-# This appalling hack is to work around download_test_data(), which
-# insists on copying files to the build tree, where rostest cannot
-# find them.
-set(SAVE_PROJECT_BINARY_DIR ${PROJECT_BINARY_DIR})
-set(PROJECT_BINARY_DIR /tmp/${PROJECT_NAME})
-download_test_data(http://pr.willowgarage.com/data/velodyne/class.pcap
-                   tests/class.pcap
-                   65808d25772101358a3719b451b3d015)
-
-download_test_data(http://pr.willowgarage.com/data/velodyne/32e.pcap
-                   tests/32e.pcap
-                   e41d02aac34f0967c03a5597e1d554a9)
-set(PROJECT_BINARY_DIR ${SAVE_PROJECT_BINARY_DIR})
+# Store them in devel-space, so rostest can easily find them.
+catkin_download_test_data(
+  ${PROJECT_NAME}_tests_class.pcap
+  http://pr.willowgarage.com/data/velodyne/class.pcap
+  DESTINATION ${CATKIN_DEVEL_PREFIX}/${CATKIN_PACKAGE_SHARE_DESTINATION}/tests
+  MD5 65808d25772101358a3719b451b3d015)
+catkin_download_test_data(
+  ${PROJECT_NAME}_tests_32e.pcap
+  http://pr.willowgarage.com/data/velodyne/32e.pcap
+  DESTINATION ${CATKIN_DEVEL_PREFIX}/${CATKIN_PACKAGE_SHARE_DESTINATION}/tests
+  MD5 e41d02aac34f0967c03a5597e1d554a9)
 
 # unit tests
 add_rostest(tests/pcap_node_hertz.test)

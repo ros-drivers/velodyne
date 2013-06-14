@@ -10,7 +10,7 @@
 
   <!-- start read with example PCAP file -->
   <node pkg="velodyne_driver" type="velodyne_node" name="velodyne_node">
-    <param name="pcap" value="/tmp/velodyne_driver/tests/class.pcap"/>
+    <param name="pcap" value="$(find velodyne_driver)/tests/class.pcap"/>
   </node>
 
   <test test-name="pcap_hertz_test" pkg="rostest" type="hztest" name="hztest1" >
