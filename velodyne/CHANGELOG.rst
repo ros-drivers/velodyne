@@ -1,9 +1,9 @@
 Change history
 ==============
 
-1.0.0 (forthcoming)
+1.0.0 (2013-06-14)
 
- * Convert to catkin.
+ * Convert to catkin (`#1`_).
  * Release to Hydro.
 
 0.9.1 (2012-06-05)
@@ -44,3 +44,5 @@ Change history
 ------------------
 
  * Initial release to ROS C-turtle.
+
+.. _`#1`: https://github.com/ros-drivers/velodyne/issues/1
