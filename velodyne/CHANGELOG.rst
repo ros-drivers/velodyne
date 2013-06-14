@@ -2,6 +2,7 @@ Change history
 ==============
 
 1.0.0 (2013-06-14)
+------------------
 
  * Convert to catkin (`#1`_).
  * Release to Hydro.
