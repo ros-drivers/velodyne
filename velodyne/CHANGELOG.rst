@@ -1,6 +1,11 @@
 Change history
 ==============
 
+1.0.1 (2013-06-15)
+------------------
+
+ * Declare explicit `pluginlib` dependency (`#4`_).
+
 1.0.0 (2013-06-14)
 ------------------
 
@@ -47,3 +52,4 @@ Change history
  * Initial release to ROS C-turtle.
 
 .. _`#1`: https://github.com/ros-drivers/velodyne/issues/1
+.. _`#4`: https://github.com/ros-drivers/velodyne/issues/4
