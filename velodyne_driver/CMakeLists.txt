@@ -1,14 +1,15 @@
 cmake_minimum_required(VERSION 2.8.3)
 project(velodyne_driver)
 
-set(${PROJECT}_CATKIN_DEPS 
+set(${PROJECT_NAME}_CATKIN_DEPS 
     diagnostic_updater
     nodelet
     roscpp
     tf
     velodyne_msgs)
 
-find_package(catkin REQUIRED COMPONENTS ${${PROJECT}_CATKIN_DEPS} rostest)
+find_package(catkin REQUIRED COMPONENTS
+             ${${PROJECT_NAME}_CATKIN_DEPS} roslaunch rostest)
 
 # This driver uses Boost threads
 find_package(Boost REQUIRED COMPONENTS thread)
@@ -19,7 +20,7 @@ set(libpcap_LIBRARIES -lpcap)
 include_directories(include ${Boost_INCLUDE_DIR} ${catkin_INCLUDE_DIRS})
 
 # objects needed by other ROS packages that depend on this one
-catkin_package(CATKIN_DEPENDS ${${PROJECT}_CATKIN_DEPS}
+catkin_package(CATKIN_DEPENDS ${${PROJECT_NAME}_CATKIN_DEPS}
                INCLUDE_DIRS include
                LIBRARIES velodyne_input)
 
@@ -52,4 +53,4 @@ add_rostest(tests/pcap_32e_node_hertz.test)
 add_rostest(tests/pcap_32e_nodelet_hertz.test)
 
 # parse check all the launch/*.launch files
-#rosbuild_add_roslaunch_check(launch)
+##roslaunch_add_file_check(launch)

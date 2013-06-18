@@ -13,7 +13,7 @@ set(${PROJECT_NAME}_CATKIN_DEPS
     velodyne_msgs)
 
 find_package(catkin REQUIRED COMPONENTS
-             ${${PROJECT_NAME}_CATKIN_DEPS} rostest)
+             ${${PROJECT_NAME}_CATKIN_DEPS} roslaunch rostest)
 find_package(Boost COMPONENTS signals)
 find_package(pcl)
 
@@ -69,4 +69,4 @@ add_rostest(tests/cloud_nodelet_32e_hz.test)
 #add_rostest(tests/transform_nodelet_hz.test)
 
 # parse check all the launch/*.launch files
-#rosbuild_add_roslaunch_check(launch)
+##roslaunch_add_file_check(launch)

@@ -23,6 +23,7 @@
   <build_depend>nodelet</build_depend>
   <build_depend>pluginlib</build_depend>
   <build_depend>roscpp</build_depend>
+  <build_depend>roslaunch</build_depend>
   <build_depend>rostest</build_depend>
   <build_depend>tf</build_depend>
   <build_depend>velodyne_msgs</build_depend>
