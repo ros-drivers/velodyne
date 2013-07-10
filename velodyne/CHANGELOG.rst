@@ -12,6 +12,11 @@ Change history
  * Convert to catkin (`#1`_).
  * Release to Hydro.
 
+0.9.2 (2013-07-08)
+------------------
+
+ * Fix Groovy build problem (`#7`_).
+
 0.9.1 (2012-06-05)
 ------------------
 
@@ -53,3 +58,4 @@ Change history
 
 .. _`#1`: https://github.com/ros-drivers/velodyne/issues/1
 .. _`#4`: https://github.com/ros-drivers/velodyne/issues/4
+.. _`#7`: https://github.com/ros-drivers/velodyne/issues/7
