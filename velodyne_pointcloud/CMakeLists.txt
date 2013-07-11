@@ -1,7 +1,7 @@
 cmake_minimum_required(VERSION 2.8.3)
 project(velodyne_pointcloud)
 
-set(${PROJECT_NAME}_CATKIN_DEPS 
+set(${PROJECT_NAME}_CATKIN_DEPS
     angles
     nodelet
     pcl_ros
