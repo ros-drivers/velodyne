@@ -13,7 +13,7 @@ set(${PROJECT_NAME}_CATKIN_DEPS
     velodyne_msgs)
 
 find_package(catkin REQUIRED COMPONENTS
-             ${${PROJECT_NAME}_CATKIN_DEPS} roslaunch rostest)
+             ${${PROJECT_NAME}_CATKIN_DEPS} pcl_conversions roslaunch rostest)
 find_package(Boost COMPONENTS signals)
 find_package(pcl)
 
