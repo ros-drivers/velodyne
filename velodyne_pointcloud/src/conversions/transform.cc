@@ -96,7 +96,7 @@ namespace velodyne_pointcloud
                                          tfPc_, listener_);
 #endif
           }
-        catch (tf::TransformException ex)
+        catch (tf::TransformException &ex)
           {
             // only log tf error once every 100 times
             ROS_WARN_THROTTLE(100, "%s", ex.what());
