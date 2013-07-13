@@ -19,6 +19,8 @@
 
 #include "transform.h"
 
+#include <pcl_conversions/pcl_conversions.h>
+
 namespace velodyne_pointcloud
 {
   /** @brief Constructor. */
@@ -58,7 +60,7 @@ namespace velodyne_pointcloud
 
     // allocate an output point cloud with same time as raw data
     VPointCloud::Ptr outMsg(new VPointCloud());
-    outMsg->header.stamp = scanMsg->header.stamp;
+    outMsg->header.stamp = pcl_conversions::toPCL(scanMsg->header).stamp;
     outMsg->header.frame_id = config_.frame_id;
     outMsg->height = 1;
 
@@ -70,7 +72,9 @@ namespace velodyne_pointcloud
         inPc_.width = 0;
         inPc_.height = 1;
         inPc_.header.frame_id = scanMsg->header.frame_id;
-        inPc_.header.stamp = scanMsg->packets[next].stamp;
+        std_msgs::Header header;
+        header.stamp = scanMsg->packets[next].stamp;
+        pcl_conversions::toPCL(header, inPc_.header);
 
         // unpack the raw data
         data_->unpack(scanMsg->packets[next], inPc_);
@@ -79,7 +83,8 @@ namespace velodyne_pointcloud
         tfPc_.points.clear();           // is this needed?
         tfPc_.width = 0;
         tfPc_.height = 1;
-        tfPc_.header.stamp = scanMsg->packets[next].stamp;
+        header.stamp = scanMsg->packets[next].stamp;
+        pcl_conversions::toPCL(header, tfPc_.header);
         tfPc_.header.frame_id = config_.frame_id;
 
         // transform the packet point cloud into the target frame
@@ -96,7 +101,7 @@ namespace velodyne_pointcloud
                                          tfPc_, listener_);
 #endif
           }
-        catch (tf::TransformException ex)
+        catch (tf::TransformException &ex)
           {
             // only log tf error once every 100 times
             ROS_WARN_THROTTLE(100, "%s", ex.what());

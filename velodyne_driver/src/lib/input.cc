@@ -10,7 +10,7 @@
 /** \file
  *
  *  Input classes for the Velodyne HDL-64E 3D LIDAR:
- * 
+ *
  *     Input -- virtual base class than can be used to access the data
  *              independently of its source
  *
@@ -32,7 +32,7 @@
 
 namespace velodyne_driver
 {
-  static const size_t packet_size = sizeof(velodyne_msgs::VelodynePacket::data);
+  static const size_t packet_size = sizeof(velodyne_msgs::VelodynePacket().data);
 
   ////////////////////////////////////////////////////////////////////////
   // InputSocket class implementation
