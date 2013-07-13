@@ -39,7 +39,7 @@ catkin_package(
 add_subdirectory(src/lib)
 add_subdirectory(src/conversions)
 
-Install(DIRECTORY include/${PROJECT_NAME}/
+install(DIRECTORY include/${PROJECT_NAME}/
         DESTINATION ${CATKIN_PACKAGE_INCLUDE_DESTINATION})
 install(FILES nodelets.xml
         DESTINATION ${CATKIN_PACKAGE_SHARE_DESTINATION})
