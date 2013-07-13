@@ -11,6 +11,7 @@ Change history
  * Fix errors with Mac OSX compiler (`#8`_).
  * Install `pluginlib` XML files (`#9`_).
  * Install some launch and parameter files.
+ * Enable unit tests when `CATKIN_ENABLE_TESTING` is set (`#10`_).
 
 1.0.1 (2013-06-15)
 ------------------
@@ -72,3 +73,4 @@ Change history
 .. _`#7`: https://github.com/ros-drivers/velodyne/issues/7
 .. _`#8`: https://github.com/ros-drivers/velodyne/pull/8
 .. _`#9`: https://github.com/ros-drivers/velodyne/issues/9
+.. _`#10`: https://github.com/ros-drivers/velodyne/issues/10

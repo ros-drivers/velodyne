@@ -35,24 +35,32 @@ install(FILES nodelet_velodyne.xml
 install(DIRECTORY launch/
         DESTINATION ${CATKIN_PACKAGE_SHARE_DESTINATION}/launch)
 
-# Download packet capture (PCAP) files containing test data.
-# Store them in devel-space, so rostest can easily find them.
-catkin_download_test_data(
-  ${PROJECT_NAME}_tests_class.pcap
-  http://pr.willowgarage.com/data/velodyne/class.pcap
-  DESTINATION ${CATKIN_DEVEL_PREFIX}/${CATKIN_PACKAGE_SHARE_DESTINATION}/tests
-  MD5 65808d25772101358a3719b451b3d015)
-catkin_download_test_data(
-  ${PROJECT_NAME}_tests_32e.pcap
-  http://pr.willowgarage.com/data/velodyne/32e.pcap
-  DESTINATION ${CATKIN_DEVEL_PREFIX}/${CATKIN_PACKAGE_SHARE_DESTINATION}/tests
-  MD5 e41d02aac34f0967c03a5597e1d554a9)
 
-# unit tests
-add_rostest(tests/pcap_node_hertz.test)
-add_rostest(tests/pcap_nodelet_hertz.test)
-add_rostest(tests/pcap_32e_node_hertz.test)
-add_rostest(tests/pcap_32e_nodelet_hertz.test)
+if (CATKIN_ENABLE_TESTING)
+  message("${PROJECT_NAME} unit testing enabled")
 
-# parse check all the launch/*.launch files
-##roslaunch_add_file_check(launch)
+  # Download packet capture (PCAP) files containing test data.
+  # Store them in devel-space, so rostest can easily find them.
+  catkin_download_test_data(
+    ${PROJECT_NAME}_tests_class.pcap
+    http://pr.willowgarage.com/data/velodyne/class.pcap
+    DESTINATION ${CATKIN_DEVEL_PREFIX}/${CATKIN_PACKAGE_SHARE_DESTINATION}/tests
+    MD5 65808d25772101358a3719b451b3d015)
+  catkin_download_test_data(
+    ${PROJECT_NAME}_tests_32e.pcap
+    http://pr.willowgarage.com/data/velodyne/32e.pcap
+    DESTINATION ${CATKIN_DEVEL_PREFIX}/${CATKIN_PACKAGE_SHARE_DESTINATION}/tests
+    MD5 e41d02aac34f0967c03a5597e1d554a9)
+  
+  # unit tests
+  add_rostest(tests/pcap_node_hertz.test)
+  add_rostest(tests/pcap_nodelet_hertz.test)
+  add_rostest(tests/pcap_32e_node_hertz.test)
+  add_rostest(tests/pcap_32e_nodelet_hertz.test)
+  
+  # parse check all the launch/*.launch files
+  ##roslaunch_add_file_check(launch)
+
+else ()
+  message("${PROJECT_NAME} unit testing disabled")
+endif (CATKIN_ENABLE_TESTING)
