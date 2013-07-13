@@ -30,6 +30,8 @@ add_subdirectory(src/driver)
 
 install(DIRECTORY include/${PROJECT_NAME}/
         DESTINATION ${CATKIN_PACKAGE_INCLUDE_DESTINATION})
+install(FILES nodelet_velodyne.xml
+        DESTINATION ${CATKIN_PACKAGE_SHARE_DESTINATION})
 
 ### TODO install some launch scripts and parameter files
 

@@ -1,6 +1,14 @@
 Change history
 ==============
 
+
+
+1.0.2 (forthcoming)
+------------------
+
+ * Fix build problems due to PCL 1.7 API incompatibilities (`#8`_).
+ * Install `pluginlib` XML files (`#9`_).
+
 1.0.1 (2013-06-15)
 ------------------
 
@@ -59,3 +67,5 @@ Change history
 .. _`#1`: https://github.com/ros-drivers/velodyne/issues/1
 .. _`#4`: https://github.com/ros-drivers/velodyne/issues/4
 .. _`#7`: https://github.com/ros-drivers/velodyne/issues/7
+.. _`#8`: https://github.com/ros-drivers/velodyne/pull/8
+.. _`#9`: https://github.com/ros-drivers/velodyne/issues/9

@@ -41,6 +41,8 @@ add_subdirectory(src/conversions)
 
 install(DIRECTORY include/${PROJECT_NAME}/
         DESTINATION ${CATKIN_PACKAGE_INCLUDE_DESTINATION})
+install(FILES nodelets.xml
+        DESTINATION ${CATKIN_PACKAGE_SHARE_DESTINATION})
 
 ### TODO install some launch scripts and parameter files
 
