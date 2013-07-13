@@ -2,12 +2,15 @@ Change history
 ==============
 
 
-
-1.0.2 (forthcoming)
+1.1.0 (forthcoming)
 ------------------
 
- * Fix build problems due to PCL 1.7 API incompatibilities (`#8`_).
+ * Fix build problems due to PCL 1.7 API incompatibilities (`#8`_),
+   thanks to William Woodall.  This version no longer works with
+   earlier PCL releases.
+ * Fix errors with Mac OSX compiler (`#8`_).
  * Install `pluginlib` XML files (`#9`_).
+ * Install some launch and parameter files.
 
 1.0.1 (2013-06-15)
 ------------------

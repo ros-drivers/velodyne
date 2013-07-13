@@ -43,8 +43,10 @@ install(DIRECTORY include/${PROJECT_NAME}/
         DESTINATION ${CATKIN_PACKAGE_INCLUDE_DESTINATION})
 install(FILES nodelets.xml
         DESTINATION ${CATKIN_PACKAGE_SHARE_DESTINATION})
-
-### TODO install some launch scripts and parameter files
+install(DIRECTORY launch/
+        DESTINATION ${CATKIN_PACKAGE_SHARE_DESTINATION}/launch)
+install(DIRECTORY params/
+        DESTINATION ${CATKIN_PACKAGE_SHARE_DESTINATION}/params)
 
 # Download packet capture (PCAP) files containing test data.
 # Store them in devel-space, so rostest can easily find them.
