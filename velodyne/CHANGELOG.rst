@@ -2,7 +2,7 @@ Change history
 ==============
 
 
-1.1.0 (forthcoming)
+1.1.0 (2013-07-16)
 ------------------
 
  * Fix build problems due to PCL 1.7 API incompatibilities (`#8`_),
