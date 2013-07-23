@@ -37,7 +37,7 @@ install(DIRECTORY launch/
 
 
 if (CATKIN_ENABLE_TESTING)
-  message("${PROJECT_NAME} unit testing enabled")
+  message("-- ${PROJECT_NAME} unit testing enabled")
 
   # Download packet capture (PCAP) files containing test data.
   # Store them in devel-space, so rostest can easily find them.
@@ -62,5 +62,5 @@ if (CATKIN_ENABLE_TESTING)
   ##roslaunch_add_file_check(launch)
 
 else ()
-  message("${PROJECT_NAME} unit testing disabled")
+  message("-- ${PROJECT_NAME} unit testing disabled")
 endif (CATKIN_ENABLE_TESTING)
