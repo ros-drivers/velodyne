@@ -36,9 +36,10 @@ VelodyneDriver::VelodyneDriver(ros::NodeHandle node,
   // get model name, validate string, determine packet rate
   private_nh.param("model", config_.model, std::string("64E"));
   double packet_rate;                   // packet frequency (Hz)
-  if (config_.model == "64E_S2.x") // generates 1333312 points per second
-    {                              // 1 packet holds 384 points
-      packet_rate = 3472.17;       // 1333312 / 384
+  if ((config_.model == "64E_S2") || 
+      (config_.model == "64E_S2.1"))    // generates 1333312 points per second
+    {                                   // 1 packet holds 384 points
+      packet_rate = 3472.17;            // 1333312 / 384
     }
   else if (config_.model == "64E")
     {
