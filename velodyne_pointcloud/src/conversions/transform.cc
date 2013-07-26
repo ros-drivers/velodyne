@@ -71,9 +71,9 @@ namespace velodyne_pointcloud
         inPc_.points.clear();
         inPc_.width = 0;
         inPc_.height = 1;
-        inPc_.header.frame_id = scanMsg->header.frame_id;
         std_msgs::Header header;
         header.stamp = scanMsg->packets[next].stamp;
+        header.frame_id = scanMsg->header.frame_id;
         pcl_conversions::toPCL(header, inPc_.header);
 
         // unpack the raw data
