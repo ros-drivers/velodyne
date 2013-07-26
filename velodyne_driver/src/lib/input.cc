@@ -237,9 +237,7 @@ namespace velodyne_driver
         int res;
         if ((res = pcap_next_ex(pcap_, &header, &pkt_data)) >= 0)
           {
-            // Keep the reader from blowing through the file.  The
-            // actual device generates either 2600 (64E) or 1808 (32E)
-            // packets per second at 600 RPM.
+            // Keep the reader from blowing through the file.
             if (read_fast_ == false)
               packet_rate_.sleep();
             

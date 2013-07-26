@@ -64,12 +64,25 @@ if (CATKIN_ENABLE_TESTING)
     DESTINATION ${CATKIN_DEVEL_PREFIX}/${CATKIN_PACKAGE_SHARE_DESTINATION}/tests
     MD5 e41d02aac34f0967c03a5597e1d554a9)
   
+if (USE_64E_S2.1)
+  catkin_download_test_data(
+    ${PROJECT_NAME}_tests_64e_s2.1-300-sztaki.pcap
+    https://dl.dropboxusercontent.com/u/107064156/64e_s2.1-300-sztaki.pcap
+    DESTINATION ${CATKIN_DEVEL_PREFIX}/${CATKIN_PACKAGE_SHARE_DESTINATION}/tests
+    MD5 176c900ffb698f9b948a13e281ffc1a2)
+endif (USE_64E_S2.1)  
+
   # unit tests
   add_rostest(tests/cloud_node_hz.test)
   add_rostest(tests/cloud_nodelet_hz.test)
   add_rostest(tests/cloud_node_32e_hz.test)
   add_rostest(tests/cloud_nodelet_32e_hz.test)
-  
+
+if (USE_64E_S2.1)
+  add_rostest(tests/cloud_node_64e_s2.1_hz.test)
+  add_rostest(tests/cloud_nodelet_64e_s2.1_hz.test)
+endif (USE_64E_S2.1)  
+
   ## These tests don't work well enough to be worth the effort of
   ## running them:
   #add_rostest(tests/transform_node_hz.test)
