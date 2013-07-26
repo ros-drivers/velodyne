@@ -2,21 +2,29 @@ Change history
 ==============
 
 
+1.1.1 (forthcoming)
+-------------------
+
+ * Fix lost frame_id transform problem caused by PCL 1.7 fix (`#13`_).
+ * Add support for HDL-64E S2 and S2.1 models, which were not working
+   before (`#11`_), thanks to Gabor Meszaros (`#12`_).
+
+
 1.1.0 (2013-07-16)
 ------------------
 
  * Fix build problems due to PCL 1.7 API incompatibilities (`#8`_),
-   thanks to William Woodall.  This version no longer works with
-   earlier PCL releases.
+   thanks to William Woodall.  This version also works with Groovy, as
+   long as the correct ``pcl_conversions`` is installed.
  * Fix errors with Mac OSX compiler (`#8`_).
- * Install `pluginlib` XML files (`#9`_).
+ * Install ``pluginlib`` XML files (`#9`_).
  * Install some launch and parameter files.
- * Enable unit tests when `CATKIN_ENABLE_TESTING` is set (`#10`_).
+ * Enable unit tests when ``CATKIN_ENABLE_TESTING`` is set (`#10`_).
 
 1.0.1 (2013-06-15)
 ------------------
 
- * Declare explicit `pluginlib` dependency (`#4`_).
+ * Declare explicit ``pluginlib`` dependency (`#4`_).
 
 1.0.0 (2013-06-14)
 ------------------
@@ -74,3 +82,6 @@ Change history
 .. _`#8`: https://github.com/ros-drivers/velodyne/pull/8
 .. _`#9`: https://github.com/ros-drivers/velodyne/issues/9
 .. _`#10`: https://github.com/ros-drivers/velodyne/issues/10
+.. _`#11`: https://github.com/ros-drivers/velodyne/issues/11
+.. _`#12`: https://github.com/ros-drivers/velodyne/pull/12
+.. _`#13`: https://github.com/ros-drivers/velodyne/issues/13
