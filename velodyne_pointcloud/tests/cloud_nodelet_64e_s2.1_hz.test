@@ -12,8 +12,8 @@
   <include file="$(find velodyne_driver)/launch/nodelet_manager.launch">
     <arg name="model" value="64E_S2.1"/>
     <arg name="pcap" value="$(find velodyne_pointcloud)/tests/64e_s2.1-300-sztaki.pcap"/>
+    <arg name="rpm" value="300"/>
   </include>
-  <param name="/driver_nodelet/rpm" value="300"/>
 
   <!-- start cloud nodelet using test calibration file -->
   <include file="$(find velodyne_pointcloud)/launch/cloud_nodelet.launch">
