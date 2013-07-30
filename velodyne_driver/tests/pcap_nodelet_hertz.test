@@ -1,10 +1,5 @@
 <!-- -*- mode: XML -*- -->
-<!-- rostest of publishing a PointCloud from PCAP data.
-
-     Uses rostest, because a running roscore is required.
-
-     $Id$
-  -->
+<!-- rostest of publishing a PointCloud from 64E PCAP data. -->
 
 <launch>
 
@@ -15,7 +10,7 @@
 
   <!-- verify PointCloud publication rate -->
   <test test-name="pcap_nodelet_hertz_test" pkg="rostest"
-        type="hztest" name="hztest2" >
+        type="hztest" name="hztest_packets_nodelet_64e" >
     <param name="hz" value="10.0" />
     <param name="hzerror" value="3.0" />
     <param name="test_duration" value="5.0" />    
@@ -24,7 +19,7 @@
   </test>
 
   <test test-name="nodelet_diagnostics_test"
-        pkg="rostest" type="hztest" name="diag_test" >
+        pkg="rostest" type="hztest" name="hztest_diag_nodelet_64e" >
     <param name="hz" value="1.0" />
     <param name="hzerror" value="0.5" />
     <param name="test_duration" value="5.0" />    

@@ -1,10 +1,5 @@
 <!-- -*- mode: XML -*- -->
-<!-- rostest of reading Velodyne 64E S2.1 PCAP files
-
-     Uses rostest, because a running roscore is required.
-
-     $Id$
-  -->
+<!-- rostest of reading Velodyne 64E S2.1 PCAP files -->
 
 <launch>
 
@@ -22,8 +17,8 @@
   </node>
 
   <!-- verify PointCloud2 publication rate -->
-  <test test-name="cloud_node_64e_s2_1_hz_test" pkg="rostest" type="hztest"
-        name="hztest1" >
+  <test test-name="cloud_node_64e_s21_hz_test" pkg="rostest"
+        type="hztest" name="hztest_cloud_node_64e_s21" >
     <param name="hz" value="5.0" />
     <param name="hzerror" value="1.0" />
     <param name="test_duration" value="5.0" />    

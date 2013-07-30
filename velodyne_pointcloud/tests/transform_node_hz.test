@@ -1,10 +1,5 @@
 <!-- -*- mode: XML -*- -->
-<!-- rostest of publishing a transformed PointCloud from PCAP data.
-
-     Uses rostest, because a running roscore is required.
-
-     $Id$
-  -->
+<!-- rostest of publishing a transformed PointCloud from PCAP data. -->
 
 <launch>
 
@@ -27,7 +22,7 @@
        waiting for the /velodyne to /odom transform to be available.
   -->
   <test test-name="transform_node_hz_test" pkg="rostest"
-        type="hztest" name="hztest1" >
+        type="hztest" name="hztest_transform_node_64e" >
     <param name="hz" value="10.0" />
     <param name="hzerror" value="7.0" />
     <param name="test_duration" value="5.0" />    

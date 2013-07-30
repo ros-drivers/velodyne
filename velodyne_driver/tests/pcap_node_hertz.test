@@ -1,10 +1,5 @@
 <!-- -*- mode: XML -*- -->
-<!-- rostest of reading Velodyne PCAP files
-
-     Uses rostest, because a running roscore is required.
-
-     $Id$
-  -->
+<!-- rostest of reading Velodyne 64E PCAP files -->
 
 <launch>
 
@@ -13,7 +8,8 @@
     <param name="pcap" value="$(find velodyne_driver)/tests/class.pcap"/>
   </node>
 
-  <test test-name="pcap_node_hertz_test" pkg="rostest" type="hztest" name="hztest1" >
+  <test test-name="pcap_node_hertz_test" pkg="rostest"
+        type="hztest" name="hztest_packets_node_64e" >
     <param name="hz" value="10.0" />
     <param name="hzerror" value="3.0" />
     <param name="test_duration" value="5.0" />    
@@ -22,7 +18,7 @@
   </test>
 
   <test test-name="node_diagnostics_test"
-        pkg="rostest" type="hztest" name="diag_test" >
+        pkg="rostest" type="hztest" name="hztest_diag_node_64e">
     <param name="hz" value="1.0" />
     <param name="hzerror" value="0.5" />
     <param name="test_duration" value="5.0" />    

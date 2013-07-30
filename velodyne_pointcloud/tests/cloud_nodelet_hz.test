@@ -21,7 +21,7 @@
 
   <!-- verify PointCloud2 publication rate -->
   <test test-name="cloud_nodelet_hz_test" pkg="rostest"
-        type="hztest" name="hztest1" >
+        type="hztest" name="hztest_cloud_nodelet_64e" >
     <param name="hz" value="10.0" />
     <param name="hzerror" value="3.0" />
     <param name="test_duration" value="5.0" />    
