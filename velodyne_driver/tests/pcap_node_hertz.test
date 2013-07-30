@@ -13,7 +13,7 @@
     <param name="pcap" value="$(find velodyne_driver)/tests/class.pcap"/>
   </node>
 
-  <test test-name="pcap_hertz_test" pkg="rostest" type="hztest" name="hztest1" >
+  <test test-name="pcap_node_hertz_test" pkg="rostest" type="hztest" name="hztest1" >
     <param name="hz" value="10.0" />
     <param name="hzerror" value="3.0" />
     <param name="test_duration" value="5.0" />    

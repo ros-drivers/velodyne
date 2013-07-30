@@ -15,7 +15,7 @@
   </include>
 
   <!-- verify PointCloud publication rate -->
-  <test test-name="pcap_nodelet_hertz_test" pkg="rostest"
+  <test test-name="pcap_32e_nodelet_hertz_test" pkg="rostest"
         type="hztest" name="hztest2" >
     <param name="hz" value="10.0" />
     <param name="hzerror" value="3.0" />
