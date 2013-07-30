@@ -2,8 +2,8 @@ Change history
 ==============
 
 
-1.1.1 (forthcoming)
--------------------
+1.1.1 (2013-07-30)
+------------------
 
  * Fix lost frame_id transform problem caused by PCL 1.7 fix (`#13`_).
  * Add support for HDL-64E S2 and S2.1 models, which were not working
