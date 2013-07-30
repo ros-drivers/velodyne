@@ -8,7 +8,7 @@ Change history
  * Fix lost frame_id transform problem caused by PCL 1.7 fix (`#13`_).
  * Add support for HDL-64E S2 and S2.1 models, which were not working
    before (`#11`_), thanks to Gabor Meszaros (`#12`_).
-
+ * Add additional parameters to launch files (`#14`_).
 
 1.1.0 (2013-07-16)
 ------------------
@@ -85,3 +85,4 @@ Change history
 .. _`#11`: https://github.com/ros-drivers/velodyne/issues/11
 .. _`#12`: https://github.com/ros-drivers/velodyne/pull/12
 .. _`#13`: https://github.com/ros-drivers/velodyne/issues/13
+.. _`#14`: https://github.com/ros-drivers/velodyne/pull/14
