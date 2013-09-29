@@ -1,6 +1,11 @@
 Change history
 ==============
 
+1.1.2 (forthcoming)
+-------------------
+
+ * Move unit test data to download.ros.org (`#18`_).
+ * velodyne_driver: Install missing vdump script (`#17`_).
 
 1.1.1 (2013-07-30)
 ------------------
@@ -86,3 +91,5 @@ Change history
 .. _`#12`: https://github.com/ros-drivers/velodyne/pull/12
 .. _`#13`: https://github.com/ros-drivers/velodyne/issues/13
 .. _`#14`: https://github.com/ros-drivers/velodyne/pull/14
+.. _`#17`: https://github.com/ros-drivers/velodyne/issues/17
+.. _`#18`: https://github.com/ros-drivers/velodyne/issues/18
