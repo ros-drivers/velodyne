@@ -22,14 +22,16 @@
   <build_depend>pcl_ros</build_depend>
   <build_depend>pluginlib</build_depend>
   <build_depend>roscpp</build_depend>
-  <build_depend>roslaunch</build_depend>
   <build_depend>roslib</build_depend>
-  <build_depend>rostest</build_depend>
   <build_depend>sensor_msgs</build_depend>
   <build_depend>tf</build_depend>
   <build_depend>velodyne_driver</build_depend>
   <build_depend>velodyne_msgs</build_depend>
   <build_depend>yaml-cpp</build_depend>
+
+  <!-- these build dependencies are only needed for unit testing -->
+  <build_depend>roslaunch</build_depend>
+  <build_depend>rostest</build_depend>
 
   <run_depend>angles</run_depend>
   <run_depend>nodelet</run_depend>

@@ -13,9 +13,8 @@ set(${PROJECT_NAME}_CATKIN_DEPS
     velodyne_msgs)
 
 find_package(catkin REQUIRED COMPONENTS
-             ${${PROJECT_NAME}_CATKIN_DEPS} pcl_conversions roslaunch rostest)
+             ${${PROJECT_NAME}_CATKIN_DEPS} pcl_conversions)
 find_package(Boost COMPONENTS signals)
-find_package(pcl)
 
 # Resolve system dependency on yaml-cpp, which apparently does not
 # provide a CMake find_package() module.
@@ -49,8 +48,11 @@ install(DIRECTORY params/
         DESTINATION ${CATKIN_PACKAGE_SHARE_DESTINATION}/params)
 
 if (CATKIN_ENABLE_TESTING)
-  message("-- ${PROJECT_NAME} unit testing enabled")
 
+  # these dependencies are only needed for unit testing
+  find_package(roslaunch REQUIRED)
+  find_package(rostest REQUIRED)
+ 
   # Download packet capture (PCAP) files containing test data.
   # Store them in devel-space, so rostest can easily find them.
   catkin_download_test_data(
@@ -83,8 +85,6 @@ if (CATKIN_ENABLE_TESTING)
   #add_rostest(tests/transform_nodelet_hz.test)
   
   # parse check all the launch/*.launch files
-  ##roslaunch_add_file_check(launch)
+  roslaunch_add_file_check(launch)
 
-else ()
-  message("-- ${PROJECT_NAME} unit testing disabled")
 endif (CATKIN_ENABLE_TESTING)

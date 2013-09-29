@@ -23,10 +23,12 @@
   <build_depend>nodelet</build_depend>
   <build_depend>pluginlib</build_depend>
   <build_depend>roscpp</build_depend>
-  <build_depend>roslaunch</build_depend>
-  <build_depend>rostest</build_depend>
   <build_depend>tf</build_depend>
   <build_depend>velodyne_msgs</build_depend>
+
+  <!-- these build dependencies are only needed for unit testing -->
+  <build_depend>roslaunch</build_depend>
+  <build_depend>rostest</build_depend>
 
   <run_depend>diagnostic_updater</run_depend>
   <run_depend>libpcap</run_depend>

@@ -8,8 +8,7 @@ set(${PROJECT_NAME}_CATKIN_DEPS
     tf
     velodyne_msgs)
 
-find_package(catkin REQUIRED COMPONENTS
-             ${${PROJECT_NAME}_CATKIN_DEPS} roslaunch rostest)
+find_package(catkin REQUIRED COMPONENTS ${${PROJECT_NAME}_CATKIN_DEPS})
 
 # This driver uses Boost threads
 find_package(Boost REQUIRED COMPONENTS thread)
@@ -38,7 +37,10 @@ install(PROGRAMS src/vdump
         DESTINATION ${CATKIN_PACKAGE_BIN_DESTINATION})
 
 if (CATKIN_ENABLE_TESTING)
-  message("-- ${PROJECT_NAME} unit testing enabled")
+
+  # these dependencies are only needed for unit testing
+  find_package(roslaunch REQUIRED)
+  find_package(rostest REQUIRED)
 
   # Download packet capture (PCAP) files containing test data.
   # Store them in devel-space, so rostest can easily find them.
@@ -60,8 +62,6 @@ if (CATKIN_ENABLE_TESTING)
   add_rostest(tests/pcap_32e_nodelet_hertz.test)
   
   # parse check all the launch/*.launch files
-  ##roslaunch_add_file_check(launch)
+  roslaunch_add_file_check(launch)
 
-else ()
-  message("-- ${PROJECT_NAME} unit testing disabled")
 endif (CATKIN_ENABLE_TESTING)
