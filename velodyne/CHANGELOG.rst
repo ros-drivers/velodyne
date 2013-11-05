@@ -1,7 +1,7 @@
 Change history
 ==============
 
-1.1.2 (forthcoming)
+1.1.2 (2013-11-05)
 -------------------
 
  * Move unit test data to download.ros.org (`#18`_).
