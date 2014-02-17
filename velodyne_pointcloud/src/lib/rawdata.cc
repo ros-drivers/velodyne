@@ -125,7 +125,8 @@ namespace velodyne_rawdata
         tmp.bytes[1] = raw->blocks[i].data[k+1];
         /*condition added to avoid calculating points which are not
           in the interesting defined area (min_angle < area < max_angle)*/
-        if (raw->blocks[i].rotation/100 >= config_.min_angle && raw->blocks[i].rotation/100 <= config_.max_angle){
+        if ((raw->blocks[i].rotation/100 >= config_.min_angle && raw->blocks[i].rotation/100 <= config_.max_angle && config_.min_angle < config_.max_angle)
+             ||(config_.min_angle > config_.max_angle && (raw->blocks[i].rotation/100 <= config_.max_angle || raw->blocks[i].rotation/100 >= config_.min_angle))){
           float distance = tmp.uint * DISTANCE_RESOLUTION;
           distance += corrections.dist_correction;
   
