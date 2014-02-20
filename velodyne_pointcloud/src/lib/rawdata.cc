@@ -50,7 +50,11 @@ namespace velodyne_rawdata
                      (double) velodyne_rawdata::DISTANCE_MAX);
     private_nh.param("min_range", config_.min_range, 2.0);
     private_nh.param("min_angle", config_.min_angle, 0.0);
-    private_nh.param("max_angle", config_.max_angle, 360.0);
+    private_nh.param("max_angle", config_.max_angle, 2.0 * M_PI);
+    //converting min_angle and max_angles in degrees
+    config_.min_angle = (2*M_PI - config_.max_angle) * 180 / M_PI;
+    config_.max_angle = (2*M_PI - config_.min_angle) * 180 / M_PI;
+    
     ROS_INFO_STREAM("data ranges to publish: ["
                     << config_.min_range << ", "
                     << config_.max_range << "]");
@@ -203,8 +207,8 @@ namespace velodyne_rawdata
                              * (1 - corrections.focal_distance / 13100) 
                              * (1 - corrections.focal_distance / 13100);
           float focal_slope = corrections.focal_slope;
-          intensity += focal_slope * 
-          (abs(focal_offset - 256 * (1 - tmp.uint/65535)*(1 - tmp.uint/65535)));
+          intensity += focal_slope * (abs(focal_offset - 256 * 
+            (1 - tmp.uint/65535)*(1 - tmp.uint/65535)));
           intensity = (intensity < min_intensity) ? min_intensity : intensity;
           intensity = (intensity > max_intensity) ? max_intensity : intensity;
   

@@ -14,7 +14,7 @@
   for instance, to look only in front of the velodyne
   choose min_angle=180.0 and max_angle=360.0 -->
   <arg name="min_angle" default="0.0" />
-  <arg name="max_angle" default="360.0" />
+  <arg name="max_angle" default="6,28318530717959" />
   <node pkg="nodelet" type="nodelet" name="cloud_nodelet"
         args="load velodyne_pointcloud/CloudNodelet velodyne_nodelet_manager">
     <param name="calibration" value="$(arg calibration)"/>
