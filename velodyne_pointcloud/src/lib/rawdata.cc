@@ -125,8 +125,12 @@ namespace velodyne_rawdata
         tmp.bytes[1] = raw->blocks[i].data[k+1];
         /*condition added to avoid calculating points which are not
           in the interesting defined area (min_angle < area < max_angle)*/
-        if ((raw->blocks[i].rotation/100 >= config_.min_angle && raw->blocks[i].rotation/100 <= config_.max_angle && config_.min_angle < config_.max_angle)
-             ||(config_.min_angle > config_.max_angle && (raw->blocks[i].rotation/100 <= config_.max_angle || raw->blocks[i].rotation/100 >= config_.min_angle))){
+        if ((raw->blocks[i].rotation/100 >= config_.min_angle 
+             && raw->blocks[i].rotation/100 <= config_.max_angle 
+             && config_.min_angle < config_.max_angle)
+             ||(config_.min_angle > config_.max_angle 
+             && (raw->blocks[i].rotation/100 <= config_.max_angle 
+             || raw->blocks[i].rotation/100 >= config_.min_angle))){
           float distance = tmp.uint * DISTANCE_RESOLUTION;
           distance += corrections.dist_correction;
   
@@ -158,8 +162,8 @@ namespace velodyne_rawdata
           if (yy < 0) yy=-yy;
     
           // Get 2points calibration values,Linear interpolation to get distance
-          // correction for X and Y, that means distance correction use different
-          // value at different distance
+          // correction for X and Y, that means distance correction use
+          // different value at different distance
           float distance_corr_x = 0;
           float distance_corr_y = 0;
           if (corrections.two_pt_correction_available) {
@@ -200,7 +204,7 @@ namespace velodyne_rawdata
                              * (1 - corrections.focal_distance / 13100);
           float focal_slope = corrections.focal_slope;
           intensity += focal_slope * 
-            (abs(focal_offset - 256 * (1 - tmp.uint/65535)*(1 - tmp.uint/65535)));
+          (abs(focal_offset - 256 * (1 - tmp.uint/65535)*(1 - tmp.uint/65535)));
           intensity = (intensity < min_intensity) ? min_intensity : intensity;
           intensity = (intensity > max_intensity) ? max_intensity : intensity;
   
