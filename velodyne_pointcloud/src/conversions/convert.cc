@@ -30,20 +30,12 @@ namespace velodyne_pointcloud
     output_ =
       node.advertise<sensor_msgs::PointCloud2>("velodyne_points", 10);
       
-    ROS_INFO("hello Convert");
     srv_ = boost::make_shared <dynamic_reconfigure::Server<velodyne_pointcloud::
       VelodyneConfigConfig> > (private_nh);
     dynamic_reconfigure::Server<velodyne_pointcloud::VelodyneConfigConfig>::
       CallbackType f;
     f = boost::bind (&Convert::callback, this, _1, _2);
     srv_->setCallback (f);
-    
-    
-    /*dynamic_reconfigure::Server<velodyne_pointcloud::VelodyneConfigConfig>::
-      CallbackType f;*/
-
-    /*f = boost::bind(&Convert::callback, this, _1, _2);
-    srv_.setCallback(f);*/
 
     // subscribe to VelodyneScan packets
     velodyne_scan_ =
@@ -55,11 +47,9 @@ namespace velodyne_pointcloud
   void Convert::callback(velodyne_pointcloud::VelodyneConfigConfig &config,
                 uint32_t level)
   {
-  ROS_INFO("Reconfigure Request: %d %f %s %s %d", 
-            config.int_param, config.double_param, 
-            config.str_param.c_str(), 
-            config.bool_param?"True":"False", 
-            config.size);
+  ROS_INFO("Reconfigure Request");
+  data_->setParameters(config.min_range, config.max_range, config.view_center,
+                       config.left_most_angle, config.right_most_angle);
   }
 
   /** @brief Callback for raw scan messages. */

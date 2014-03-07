@@ -42,11 +42,45 @@ namespace velodyne_rawdata
   ////////////////////////////////////////////////////////////////////////
 
   RawData::RawData() {}
+  
+  /** Uppdate parameters: conversions and update */
+  void RawData::setParameters(double min_range,
+                              double max_range,
+                              double view_center,
+                              double left_most_angle,
+                              double right_most_angle)
+  {
+  config_.min_range = min_range;
+  config_.max_range = max_range;
+
+  //putting left_most_angle and right_most_angle in the velodyne reference (rad)
+  config_.tmp_min_angle = view_center + left_most_angle;
+  config_.tmp_max_angle = view_center - right_most_angle;
+  
+  //computing positive modulo to keep theses angles into [0;2*M_PI]
+  config_.tmp_min_angle = fmod(fmod(config_.tmp_min_angle,2*M_PI) + 2*M_PI,2*M_PI);
+  config_.tmp_max_angle = fmod(fmod(config_.tmp_max_angle,2*M_PI) + 2*M_PI,2*M_PI);
+  
+  //converting into the hardware velodyne ref (negative yaml and degrees)
+  //adding 0.5 perfomrs a centered double to int conversion 
+  config_.min_angle = 100 * (2*M_PI - config_.tmp_min_angle) * 180 / M_PI + 0.5;
+  config_.max_angle = 100 * (2*M_PI - config_.tmp_max_angle) * 180 / M_PI + 0.5;
+  if (config_.min_angle == config_.max_angle)
+  {
+    config_.min_angle = 0;
+    config_.max_angle = 36000;
+  }
+  
+  ROS_INFO("M_PI value: %f", M_PI);
+  ROS_INFO("2M_PI value: %f", 2.0*M_PI);
+  ROS_INFO("min_angle into setParameters: %i",config_.min_angle);
+  ROS_INFO("max_angle into setParameters: %i",config_.max_angle);
+  }
 
   /** Set up for on-line operation. */
   int RawData::setup(ros::NodeHandle private_nh)
   {
-    private_nh.param("max_range", config_.max_range,
+    /*private_nh.param("max_range", config_.max_range,
                      (double) velodyne_rawdata::DISTANCE_MAX);
     private_nh.param("min_range", config_.min_range, 2.0);
     private_nh.param("min_angle", config_.min_angle, 0.0);
@@ -60,7 +94,7 @@ namespace velodyne_rawdata
                     << config_.max_range << "]");
     ROS_INFO_STREAM("data angles to publish: ["
                     << config_.min_angle << ", "
-                    << config_.max_angle << "]");
+                    << config_.max_angle << "]");*/
 
     // get path to angles.config file for this device
     if (!private_nh.getParam("calibration", config_.calibrationFile))
@@ -129,12 +163,12 @@ namespace velodyne_rawdata
         tmp.bytes[1] = raw->blocks[i].data[k+1];
         /*condition added to avoid calculating points which are not
           in the interesting defined area (min_angle < area < max_angle)*/
-        if ((raw->blocks[i].rotation/100 >= config_.min_angle 
-             && raw->blocks[i].rotation/100 <= config_.max_angle 
+        if ((raw->blocks[i].rotation >= config_.min_angle 
+             && raw->blocks[i].rotation <= config_.max_angle 
              && config_.min_angle < config_.max_angle)
              ||(config_.min_angle > config_.max_angle 
-             && (raw->blocks[i].rotation/100 <= config_.max_angle 
-             || raw->blocks[i].rotation/100 >= config_.min_angle))){
+             && (raw->blocks[i].rotation <= config_.max_angle 
+             || raw->blocks[i].rotation >= config_.min_angle))){
           float distance = tmp.uint * DISTANCE_RESOLUTION;
           distance += corrections.dist_correction;
   

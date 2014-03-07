@@ -24,6 +24,7 @@
 #include <stdint.h>
 #include <string>
 #include <boost/format.hpp>
+#include <math.h>
 
 #include <ros/ros.h>
 #include <pcl_ros/point_cloud.h>
@@ -130,6 +131,9 @@ namespace velodyne_rawdata
     int setup(ros::NodeHandle private_nh);
 
     void unpack(const velodyne_msgs::VelodynePacket &pkt, VPointCloud &pc);
+    
+    void setParameters(double min_range, double max_range, double view_center,
+                       double left_most_angle, double right_most_angle);
 
   private:
 
@@ -138,8 +142,11 @@ namespace velodyne_rawdata
       std::string calibrationFile;     ///< calibration file name
       double max_range;                ///< maximum range to publish
       double min_range;                ///< minimum range to publish
-      double min_angle;                ///< minimum angle to publish
-      double max_angle;                ///< maximum angle to publish
+      int min_angle;                ///< minimum angle to publish
+      int max_angle;                ///< maximum angle to publish
+      
+      double tmp_min_angle;
+      double tmp_max_angle;
     } Config;
     Config config_;
 
