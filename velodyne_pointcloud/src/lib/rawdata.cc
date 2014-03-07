@@ -67,14 +67,10 @@ namespace velodyne_rawdata
   config_.max_angle = 100 * (2*M_PI - config_.tmp_max_angle) * 180 / M_PI + 0.5;
   if (config_.min_angle == config_.max_angle)
   {
+    //avoid returning empty cloud if min_angle = max_angle
     config_.min_angle = 0;
     config_.max_angle = 36000;
   }
-  
-  ROS_INFO("M_PI value: %f", M_PI);
-  ROS_INFO("2M_PI value: %f", 2.0*M_PI);
-  ROS_INFO("min_angle into setParameters: %i",config_.min_angle);
-  ROS_INFO("max_angle into setParameters: %i",config_.max_angle);
   }
 
   /** Set up for on-line operation. */

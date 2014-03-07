@@ -142,8 +142,8 @@ namespace velodyne_rawdata
       std::string calibrationFile;     ///< calibration file name
       double max_range;                ///< maximum range to publish
       double min_range;                ///< minimum range to publish
-      int min_angle;                ///< minimum angle to publish
-      int max_angle;                ///< maximum angle to publish
+      int min_angle;                   ///< minimum angle to publish
+      int max_angle;                   ///< maximum angle to publish
       
       double tmp_min_angle;
       double tmp_max_angle;
