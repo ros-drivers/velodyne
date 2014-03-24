@@ -27,6 +27,10 @@ find_library(YAML_CPP_LIBRARY
              NAMES YAML_CPP
              PATHS ${YAML_CPP_LIBRARY_DIRS})
 
+if(NOT ${YAML_CPP_VERSION} VERSION_LESS "0.5")
+add_definitions(-DHAVE_NEW_YAMLCPP)
+endif(NOT ${YAML_CPP_VERSION} VERSION_LESS "0.5")
+
 include_directories(include ${catkin_INCLUDE_DIRS})
 
 catkin_package(
