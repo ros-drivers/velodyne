@@ -17,6 +17,18 @@
 #include <limits>
 #include <yaml-cpp/yaml.h>
 
+#ifdef HAVE_NEW_YAMLCPP
+namespace YAML {
+
+  // The >> operator disappeared in yaml-cpp 0.5, so this function is
+  // added to provide support for code written under the yaml-cpp 0.3 API.
+  template<typename T>
+  void operator >> (const YAML::Node& node, T& i) {
+    i = node.as<T>();
+  }
+} /* YAML */
+#endif
+
 #include <ros/ros.h>
 #include <velodyne_pointcloud/calibration.h>
 
@@ -43,20 +55,35 @@ namespace velodyne_pointcloud {
     node[ROT_CORRECTION] >> correction.second.rot_correction;
     node[VERT_CORRECTION] >> correction.second.vert_correction;
     node[DIST_CORRECTION] >> correction.second.dist_correction;
+#ifdef HAVE_NEW_YAMLCPP
+    if (node[TWO_PT_CORRECTION_AVAILABLE])
+      node[TWO_PT_CORRECTION_AVAILABLE] >> correction.second.two_pt_correction_available;
+#else
     if (const YAML::Node *pName = node.FindValue(TWO_PT_CORRECTION_AVAILABLE))
       *pName >> correction.second.two_pt_correction_available;
+#endif
     else
       correction.second.two_pt_correction_available = false;
     node[DIST_CORRECTION_X] >> correction.second.dist_correction_x;
     node[DIST_CORRECTION_Y] >> correction.second.dist_correction_y;
     node[VERT_OFFSET_CORRECTION] >> correction.second.vert_offset_correction;
     node[HORIZ_OFFSET_CORRECTION] >> correction.second.horiz_offset_correction;
+#ifdef HAVE_NEW_YAMLCPP
+    if (node[MAX_INTENSITY])
+      node[MAX_INTENSITY] >> correction.second.max_intensity;
+#else
     if (const YAML::Node *pName = node.FindValue(MAX_INTENSITY))
       *pName >> correction.second.max_intensity;
+#endif
     else
       correction.second.max_intensity = 255;
+#ifdef HAVE_NEW_YAMLCPP
+    if (node[MIN_INTENSITY])
+      node[MIN_INTENSITY] >> correction.second.min_intensity;
+#else
     if (const YAML::Node *pName = node.FindValue(MIN_INTENSITY))
       *pName >> correction.second.min_intensity;
+#endif
     else
       correction.second.min_intensity = 0;
     node[FOCAL_DISTANCE] >> correction.second.focal_distance;
@@ -152,9 +179,14 @@ namespace velodyne_pointcloud {
     }
     initialized = true;
     try {
-      YAML::Parser parser(fin);
       YAML::Node doc;
+#ifdef HAVE_NEW_YAMLCPP
+      fin.close();
+      doc = YAML::LoadFile(calibration_file);
+#else
+      YAML::Parser parser(fin);
       parser.GetNextDocument(doc);
+#endif
       doc >> *this;
     } catch (YAML::Exception &e) {
       std::cerr << "YAML Exception: " << e.what() << std::endl;
