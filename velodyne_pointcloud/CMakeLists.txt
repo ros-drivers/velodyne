@@ -30,6 +30,10 @@ find_library(YAML_CPP_LIBRARY
 generate_dynamic_reconfigure_options(
   cfg/VelodyneConfig.cfg)
 
+if(NOT ${YAML_CPP_VERSION} VERSION_LESS "0.5")
+add_definitions(-DHAVE_NEW_YAMLCPP)
+endif(NOT ${YAML_CPP_VERSION} VERSION_LESS "0.5")
+
 include_directories(include ${catkin_INCLUDE_DIRS})
 
 catkin_package(
