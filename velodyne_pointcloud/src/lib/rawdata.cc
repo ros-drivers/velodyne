@@ -46,16 +46,15 @@ namespace velodyne_rawdata
   /** Uppdate parameters: conversions and update */
   void RawData::setParameters(double min_range,
                               double max_range,
-                              double view_center,
-                              double left_most_angle,
-                              double right_most_angle)
+                              double view_direction,
+                              double view_width)
   {
   config_.min_range = min_range;
   config_.max_range = max_range;
 
   //putting left_most_angle and right_most_angle in the velodyne reference (rad)
-  config_.tmp_min_angle = view_center + left_most_angle;
-  config_.tmp_max_angle = view_center - right_most_angle;
+  config_.tmp_min_angle = view_direction + view_width/2;
+  config_.tmp_max_angle = view_direction - view_width/2;
   
   //computing positive modulo to keep theses angles into [0;2*M_PI]
   config_.tmp_min_angle = fmod(fmod(config_.tmp_min_angle,2*M_PI) + 2*M_PI,2*M_PI);

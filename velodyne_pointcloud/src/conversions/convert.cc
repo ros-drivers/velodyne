@@ -48,8 +48,8 @@ namespace velodyne_pointcloud
                 uint32_t level)
   {
   ROS_INFO("Reconfigure Request");
-  data_->setParameters(config.min_range, config.max_range, config.view_center,
-                       config.left_most_angle, config.right_most_angle);
+  data_->setParameters(config.min_range, config.max_range, config.view_direction,
+                       config.view_width);
   }
 
   /** @brief Callback for raw scan messages. */
