@@ -75,22 +75,6 @@ namespace velodyne_rawdata
   /** Set up for on-line operation. */
   int RawData::setup(ros::NodeHandle private_nh)
   {
-    /*private_nh.param("max_range", config_.max_range,
-                     (double) velodyne_rawdata::DISTANCE_MAX);
-    private_nh.param("min_range", config_.min_range, 2.0);
-    private_nh.param("min_angle", config_.min_angle, 0.0);
-    private_nh.param("max_angle", config_.max_angle, 2.0 * M_PI);
-    //converting min_angle and max_angles in degrees
-    config_.min_angle = (2*M_PI - config_.max_angle) * 180 / M_PI;
-    config_.max_angle = (2*M_PI - config_.min_angle) * 180 / M_PI;
-    
-    ROS_INFO_STREAM("data ranges to publish: ["
-                    << config_.min_range << ", "
-                    << config_.max_range << "]");
-    ROS_INFO_STREAM("data angles to publish: ["
-                    << config_.min_angle << ", "
-                    << config_.max_angle << "]");*/
-
     // get path to angles.config file for this device
     if (!private_nh.getParam("calibration", config_.calibrationFile))
       {
