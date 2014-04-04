@@ -10,19 +10,12 @@
   <arg name="calibration" default="" />
   <arg name="min_range" default="2.0" />
   <arg name="max_range" default="130.0" />
-  <!-- define min and max angles to restrict the pointcloud.
-  for instance, to look only in front of the velodyne
-  choose min_angle=180.0 and max_angle=360.0 -->
-  <arg name="min_angle" default="0.0" />
-  <arg name="max_angle" default="6,28318530717959" />
   <arg name="frame_id" default="odom" />
   <node pkg="nodelet" type="nodelet" name="transform_nodelet"
         args="load velodyne_pointcloud/TransformNodelet velodyne_nodelet_manager" >
     <param name="calibration" value="$(arg calibration)"/>
     <param name="min_range" value="$(arg min_range)"/>
     <param name="max_range" value="$(arg max_range)"/>
-    <param name="min_angle" value="$(arg min_angle)"/>
-    <param name="max_angle" value="$(arg max_angle)"/>
     <param name="frame_id" value="$(arg frame_id)"/>
   </node>
 </launch>
