@@ -26,6 +26,9 @@ find_path(YAML_CPP_INCLUDE_DIR
 find_library(YAML_CPP_LIBRARY
              NAMES YAML_CPP
              PATHS ${YAML_CPP_LIBRARY_DIRS})
+             
+generate_dynamic_reconfigure_options(
+  cfg/VelodyneConfig.cfg)
 
 if(NOT ${YAML_CPP_VERSION} VERSION_LESS "0.5")
 add_definitions(-DHAVE_NEW_YAMLCPP)
@@ -38,6 +41,11 @@ catkin_package(
     DEPENDS yaml-cpp python-yaml
     INCLUDE_DIRS include
     LIBRARIES velodyne_rawdata)
+    
+#add_executable(dynamic_reconfigure_node src/dynamic_reconfigure_node.cpp)
+#target_link_libraries(dynamic_reconfigure_node
+#   ${catkin_LIBRARIES}
+# )
 
 add_subdirectory(src/lib)
 add_subdirectory(src/conversions)
