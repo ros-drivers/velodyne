@@ -71,9 +71,10 @@ VelodyneDriver::VelodyneDriver(ros::NodeHandle node,
 
   // initialize diagnostics
   diagnostics_.setHardwareID(deviceName);
-  diag_max_freq_ = frequency;
-  diag_min_freq_ = frequency;
-  ROS_INFO("expected frequency: %.3f (Hz)", frequency);
+  const double diag_freq = packet_rate/config_.npackets;
+  diag_max_freq_ = diag_freq;
+  diag_min_freq_ = diag_freq;
+  ROS_INFO("expected frequency: %.3f (Hz)", diag_freq);
 
   using namespace diagnostic_updater;
   diag_topic_.reset(new TopicDiagnostic("velodyne_packets", diagnostics_,
