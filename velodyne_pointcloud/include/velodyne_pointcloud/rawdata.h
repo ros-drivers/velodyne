@@ -87,8 +87,6 @@ namespace velodyne_rawdata
   static const int BLOCKS_PER_PACKET = 12;
   static const int PACKET_STATUS_SIZE = 4;
   static const int SCANS_PER_PACKET = (SCANS_PER_BLOCK * BLOCKS_PER_PACKET);
-  static const int PACKETS_PER_REV = 260;
-  static const int SCANS_PER_REV = (SCANS_PER_PACKET * PACKETS_PER_REV);
 
   /** \brief Raw Velodyne packet.
    *
