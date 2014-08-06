@@ -28,12 +28,12 @@ Forthcoming
 0.9.1 (2012-06-05)
 ------------------
 
+ * Released to Electric, Fuerte and Groovy.
+
 0.9.0 (2012-04-03)
 ------------------
 
  * Completely revised API, anticipating a 1.0.0 release.
- * New velodyne_driver and velodyne_pointcloud packages.
- * Old velodyne_common and velodyne_pcl packages no longer included.
  * Released to Electric, Fuerte and Groovy.
 
 0.2.6 (2011-02-23)
@@ -43,6 +43,7 @@ Forthcoming
 ------------------
 
  * Initial implementation of new 0.3 interfaces.
+ * Support for ROS 1.3 `std_msgs::Header` changes.
 
 0.2.0 (2010-08-17)
 ------------------
