@@ -12,7 +12,7 @@ Change history
   <https://github.com/ros-drivers/velodyne/pull/23>`_).
 * Add dynamic_reconfigure feature.
 * Add angular limits to the output point cloud, useful for omitting
-  part of it. (`#23 <https://github.com/ros-drivers/velodyne/pull/23>`_).
+  part of it. (`#22 <https://github.com/ros-drivers/velodyne/pull/22>`_).
 * Contributors: Jack O'Quin, Scott K Logan, Thomas Solatges
 
 1.1.2 (2013-11-05)
