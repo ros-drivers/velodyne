@@ -95,6 +95,12 @@ VelodyneDriver::VelodyneDriver(ros::NodeHandle node,
       input_.reset(new velodyne_driver::InputSocket(private_nh));
     }
 
+  std::string devip;
+  private_nh.param("device_ip", devip, std::string(""));
+  if(!devip.empty())
+    ROS_INFO_STREAM("Set device ip to " << devip << ", only accepting packets from this address." );
+  input_->setDeviceIP(devip);
+
   // raw data output topic
   output_ = node.advertise<velodyne_msgs::VelodyneScan>("velodyne_packets", 10);
 }

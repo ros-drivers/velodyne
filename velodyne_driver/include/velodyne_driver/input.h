@@ -57,6 +57,15 @@ namespace velodyne_driver
      *          > 0 if incomplete packet (is this possible?)
      */
     virtual int getPacket(velodyne_msgs::VelodynePacket *pkt) = 0;
+
+
+    /** @brief Set source IP, from where packets are accepted
+     *
+     * @param ip IP of a Velodyne LIDAR e.g. 192.168.51.70
+     */
+    virtual void setDeviceIP( const std::string& ip ) { devip_str_ = ip; }
+  protected:
+    std::string devip_str_;
   };
 
   /** @brief Live Velodyne input from socket. */
@@ -68,10 +77,11 @@ namespace velodyne_driver
     ~InputSocket();
 
     virtual int getPacket(velodyne_msgs::VelodynePacket *pkt);
-
+    void setDeviceIP( const std::string& ip );
   private:
 
     int sockfd_;
+    in_addr devip_;
   };
 
 
@@ -92,6 +102,7 @@ namespace velodyne_driver
     ~InputPCAP();
 
     virtual int getPacket(velodyne_msgs::VelodynePacket *pkt);
+    void setDeviceIP( const std::string& ip );
 
   private:
 
@@ -104,6 +115,7 @@ namespace velodyne_driver
     bool read_fast_;
     double repeat_delay_;
     ros::Rate packet_rate_;
+    bpf_program velodyne_pointdata_filter_;
   };
 
 } // velodyne_driver namespace
