@@ -166,7 +166,6 @@ namespace velodyne_driver
             // read successful,
             // if packet is not from the lidar scanner we selected by IP,
             // continue otherwise we are done
-        std::cout << sender_address.sin_addr.s_addr << "  " << devip_.s_addr << std::endl;
             if( devip_str_ != "" && sender_address.sin_addr.s_addr != devip_.s_addr )
               continue;
             else
