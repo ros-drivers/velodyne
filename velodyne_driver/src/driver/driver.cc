@@ -69,6 +69,10 @@ VelodyneDriver::VelodyneDriver(ros::NodeHandle node,
   std::string dump_file;
   private_nh.param("pcap", dump_file, std::string(""));
 
+  double cut_angle;
+  private_nh.param("cut_angle", cut_angle, -0.01);
+  config_.cut_angle = int(cut_angle*100);
+
   // initialize diagnostics
   diagnostics_.setHardwareID(deviceName);
   const double diag_freq = packet_rate/config_.npackets;
@@ -107,11 +111,45 @@ bool VelodyneDriver::poll(void)
 {
   // Allocate a new shared pointer for zero-copy sharing with other nodelets.
   velodyne_msgs::VelodyneScanPtr scan(new velodyne_msgs::VelodyneScan);
-  scan->packets.resize(config_.npackets);
 
+  if( config_.cut_angle >= 0) //Cut at specific angle feature enabled
+  {
+    scan->packets.reserve(config_.npackets);
+    velodyne_msgs::VelodynePacket tmp_packet;
+    while(true)
+    {
+      while(true)
+      {
+        int rc = input_->getPacket(&tmp_packet);
+        if (rc == 0) break;       // got a full packet?
+        if (rc < 0) return false; // end of file reached?
+      }
+      scan->packets.push_back(tmp_packet);
+
+      static int last_base_rotation = -1;
+      // Extract base rotation of first block in packet
+      std::size_t rot_data_pos = 100*0+2;
+      int base_rotation = *( (u_int16_t*) (&tmp_packet.data[rot_data_pos]));
+      // Handle overflow 35999->0
+      if(base_rotation<last_base_rotation)
+        last_base_rotation-=36000;
+      // Check if currently passing cut angle
+      if(   last_base_rotation != -1
+         && last_base_rotation < config_.cut_angle
+         && base_rotation >= config_.cut_angle )
+      {
+        last_base_rotation = base_rotation;
+        break; // Cut angle passed, one full revolution collected
+      }
+      last_base_rotation = base_rotation;
+    }
+  }
+  else // standard behaviour
+  {
   // Since the velodyne delivers data at a very high rate, keep
   // reading and publishing scans as fast as possible.
-  for (int i = 0; i < config_.npackets; ++i)
+    scan->packets.resize(config_.npackets);
+    for (int i = 0; i < config_.npackets; ++i)
     {
       while (true)
         {
@@ -121,6 +159,7 @@ bool VelodyneDriver::poll(void)
           if (rc < 0) return false; // end of file reached?
         }
     }
+  }
 
   // publish message using time of last packet read
   ROS_DEBUG("Publishing a full Velodyne scan.");
