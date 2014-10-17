@@ -3,43 +3,51 @@
 #include <geometry_msgs/TwistStamped.h>
 #include <std_msgs/String.h>
 #include <std_msgs/Time.h>
+#include <sensor_msgs/Temperature.h>
 
-GpsImuDriver::GpsImuDriver()
+GpsImuDriver::GpsImuDriver():nh_("~")
 {
-  nmea_pub = nh_.advertise<std_msgs::String>("nmea_sentence",10);
-  imu_pub = nh_.advertise<geometry_msgs::TwistStamped>("imu_data",100);
-  gpstime_pub = nh_.advertise<std_msgs::Time>("gpstime",10);
-
+  // Initialize
   udp_socket_ = 0;
   is_connected_ = false;
 
-  const int udp_port = 8308;
+  // Advertise topics, read parameters
+  std::cout << "advertising topics" << std::endl;
+  nmea_pub = nh_.advertise<std_msgs::String>("nmea_sentence",10);
+  imu_pub = nh_.advertise<geometry_msgs::TwistStamped>("imu_data",100);
+  gpstime_pub = nh_.advertise<std_msgs::Time>("gpstime",10);
+  temperature_pub = nh_.advertise<sensor_msgs::Temperature>("temperature",10);
+  nh_.param("device_ip",devip_,std::string(""));
+  nh_.param("udpport",udpport_,8308);
+
+  // Start listening at UDP port
+  bind(udpport_);
+}
+
+//-----------------------------------------------------------------------------
+bool GpsImuDriver::bind(const int udp_port)
+{
+  if( isConnected() )
+    disconnect();
+
   try
   {
+    // Bind socket
       udp_socket_ = new boost::asio::ip::udp::socket(io_service_, boost::asio::ip::udp::v4());
       udp_socket_->bind(boost::asio::ip::udp::endpoint(boost::asio::ip::udp::v4(), 8308));
       // Start async reading
-      udp_socket_->async_receive_from(boost::asio::buffer(&udp_buffer_[0],udp_buffer_.size()), udp_endpoint_,
-                                      boost::bind(&GpsImuDriver::handleSocketRead, this,
-                                                  boost::asio::placeholders::error, boost::asio::placeholders::bytes_transferred));
+      asyncReceiveFrom();
       io_service_thread_ = boost::thread(boost::bind(&boost::asio::io_service::run, &io_service_));
       is_connected_ = true;
   }
   catch (std::exception& e)
   {
       std::cerr << "Exception: " <<  e.what() << std::endl;
+      return false;
   }
-  std::cout << "Receiving Velodyne IMU data at local UDP port " << udp_port << " ... ";
+  std::cout << "Receiving Velodyne IMU data at local UDP port " << udp_port << "." << std::endl;
 
-}
-
-//-----------------------------------------------------------------------------
-void GpsImuDriver::spin()
-{
-  while(true)
-  {
-    ros::spinOnce();
-  }
+  return true;
 }
 
 //-----------------------------------------------------------------------------
@@ -55,7 +63,7 @@ void GpsImuDriver::handleSocketRead(const boost::system::error_code &error, std:
 {
   if (!error )
   {
-    if( udp_endpoint_.address().to_string() != devip_ )
+    if( !devip_.empty() && udp_endpoint_.address().to_string() != devip_ )
     {
       asyncReceiveFrom();
       return;
@@ -70,9 +78,14 @@ void GpsImuDriver::handleSocketRead(const boost::system::error_code &error, std:
   else
   {
       if( error.value() != 995 )
-          std::cerr << "ERROR: " << "data connection error: " << error.message() << "(" << error.value() << ")" << std::endl;
-      //! @todo
-      //disconnect();
+      {
+        std::cerr << "ERROR: " << "data connection error: " << error.message() << "(" << error.value() << ")" << std::endl;
+        std::cout << "Trying to rebind socket" << std::endl;
+        if( bind(udpport_) )
+          std::cout << "Rebind sucessful" << std::endl;
+        else
+          std::cerr << "" << std::endl;
+       }
   }
   last_data_time_ = std::time(0);
 }
@@ -91,18 +104,20 @@ bool GpsImuDriver::handlePacket(velodyne_packet_structs::VelodynePositioningPack
 
   auto explode = [] (const std::string& text, const std::string& separators) -> std::vector<std::string>
   {
-          std::vector<std::string> words;
-          size_t n     = text.length ();
-          size_t start = text.find_first_not_of (separators);
+    std::vector<std::string> words;
+    size_t n     = text.length ();
+    size_t start = 0;
+    size_t stop = text.find_first_of (separators);
+    if (stop > n) stop = n;
 
-          while (start < n)
-          {
-                  size_t stop = text.find_first_of (separators, start);
-                  if (stop > n) stop = n;
-                  words.push_back (text.substr (start, stop-start));
-                  start = text.find_first_not_of (separators, stop+1);
-          };
-          return words;
+    while (start <= n)
+    {
+            words.push_back (text.substr (start, stop-start));
+            start = stop+1;
+            stop = text.find_first_of (separators, start);
+            if (stop > n) stop = n;
+    }
+    return words;
   };
 
 
@@ -170,6 +185,7 @@ bool GpsImuDriver::handlePacket(velodyne_packet_structs::VelodynePositioningPack
   nmea_pub.publish(nmea_sentence_msg);
 
   double nmeaUnixTime = nmeaToUnixTime(nmea_sentence);
+
   nmeaUnixTime += (vppr.gps_timestamp%1000000)/1000000.0;
   std_msgs::Time gpstime_msg;
   gpstime_msg.data = ros::Time(nmeaUnixTime);
@@ -186,6 +202,17 @@ bool GpsImuDriver::handlePacket(velodyne_packet_structs::VelodynePositioningPack
   imumsg.twist.angular.y = vpp.gyro_temp_accel_xyz[1].gyro;
   imumsg.twist.angular.z = vpp.gyro_temp_accel_xyz[2].gyro;
   imu_pub.publish(imumsg);
+
+  for( std::size_t i=0; i<3; i++ )
+  {
+    sensor_msgs::Temperature tmpmsg;
+    std::stringstream ss;
+    ss << "/velodyne:" << devip_ << i;
+    tmpmsg.header.frame_id = ss.str();
+    tmpmsg.header.stamp = ros::Time::now();
+    tmpmsg.temperature = vpp.gyro_temp_accel_xyz[i].temp;
+    temperature_pub.publish(tmpmsg);
+  }
 }
 
 //-----------------------------------------------------------------------------
@@ -218,6 +245,8 @@ GpsImuDriver::~GpsImuDriver()
 int main(int argc, char **argv)
 {
     ros::init(argc, argv, "velodyne_gpsimu_driver", ros::init_options::AnonymousName);
-    new GpsImuDriver();
+    GpsImuDriver* gid = new GpsImuDriver();
+    ros::spin();
+    delete gid;
     return 0;
 }
