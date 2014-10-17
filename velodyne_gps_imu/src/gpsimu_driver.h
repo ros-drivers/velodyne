@@ -60,11 +60,12 @@ public:
   //! Open UDP port 8308 and listen on it
   GpsImuDriver();
 
-  //! ROS Spin Thread
-  void spin();
-
   //! Disconnect cleanly
   ~GpsImuDriver();
+
+  //! Bind socket to UDP Port, init IO thread
+  //! @return true on success, false otherwise
+  bool bind(const int udp_port);
 
   //! Return connection status
   bool isConnected() const { return is_connected_; }
@@ -85,8 +86,14 @@ private:
   //! GPS time publisher
   ros::Publisher gpstime_pub;
 
+  //! GPS time publisher
+  ros::Publisher temperature_pub;
+
   //! IP of LIDAR, only packets from that address are accepted
   std::string devip_;
+
+  //! IP of LIDAR, only packets from that address are accepted
+  int udpport_;
 
   //! Asynchronous callback function, called if data has been reveived by the UDP socket
   void handleSocketRead(const boost::system::error_code& error, std::size_t bytes_transferred);
