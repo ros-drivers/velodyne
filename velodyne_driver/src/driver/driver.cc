@@ -49,6 +49,10 @@ VelodyneDriver::VelodyneDriver(ros::NodeHandle node,
     {
       packet_rate = 1808.0;
     }
+  else if (config_.model == "VLP16")    // generates ~300000 points per second
+    {                                   // 1 packet holds 384 points (12x32)
+      packet_rate = 781.25;             // 300000 / 384
+    }
   else
     {
       ROS_ERROR_STREAM("unknown Velodyne LIDAR model: " << config_.model);
