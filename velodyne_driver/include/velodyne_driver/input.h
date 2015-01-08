@@ -34,6 +34,7 @@
 #include <unistd.h>
 #include <stdio.h>
 #include <pcap.h>
+#include <netinet/in.h>
 
 #include <ros/ros.h>
 #include <velodyne_msgs/VelodynePacket.h>
