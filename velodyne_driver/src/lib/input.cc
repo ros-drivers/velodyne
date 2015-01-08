@@ -152,16 +152,16 @@ namespace velodyne_driver
                                   packet_size,  0,
                                   (sockaddr*) &sender_address, &sender_address_len);
 
-	if (nbytes < 0)
-	  {
+        if (nbytes < 0)
+          {
             if (errno != EWOULDBLOCK)
- 	      {
+              {
                 perror("recvfail");
-		ROS_INFO("recvfail");
+                ROS_INFO("recvfail");
                 return 1;
-	      }
-	  }
-	else if ((size_t) nbytes == packet_size)
+              }
+          }
+        else if ((size_t) nbytes == packet_size)
           {
             // read successful,
             // if packet is not from the lidar scanner we selected by IP,

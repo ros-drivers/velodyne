@@ -69,6 +69,9 @@ VelodyneDriver::VelodyneDriver(ros::NodeHandle node,
   std::string dump_file;
   private_nh.param("pcap", dump_file, std::string(""));
 
+  int udp_port;
+  private_nh.param("port", udp_port, (int)UDP_PORT_NUMBER);
+
   // initialize diagnostics
   diagnostics_.setHardwareID(deviceName);
   const double diag_freq = packet_rate/config_.npackets;
@@ -92,7 +95,7 @@ VelodyneDriver::VelodyneDriver(ros::NodeHandle node,
     }
   else
     {
-      input_.reset(new velodyne_driver::InputSocket(private_nh));
+      input_.reset(new velodyne_driver::InputSocket(private_nh, udp_port));
     }
 
   std::string devip;
