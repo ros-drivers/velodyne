@@ -44,6 +44,7 @@ private:
     std::string model;               ///< device model name
     int    npackets;                 ///< number of packets to collect
     double rpm;                      ///< device rotation rate (RPMs)
+    uint16_t udp_port;               ///< velodyne broadcast port
   } config_;
 
   boost::shared_ptr<Input> input_;

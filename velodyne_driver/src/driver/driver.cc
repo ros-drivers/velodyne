@@ -57,6 +57,9 @@ VelodyneDriver::VelodyneDriver(ros::NodeHandle node,
   std::string deviceName("Velodyne HDL-" + config_.model);
 
   private_nh.param("rpm", config_.rpm, 600.0);
+  int udp_port = 0;
+  private_nh.param("port", udp_port, static_cast<int>(UDP_PORT_NUMBER));
+  config_.udp_port = udp_port;
   ROS_INFO_STREAM(deviceName << " rotating at " << config_.rpm << " RPM");
   double frequency = (config_.rpm / 60.0);     // expected Hz rate
 
@@ -92,7 +95,8 @@ VelodyneDriver::VelodyneDriver(ros::NodeHandle node,
     }
   else
     {
-      input_.reset(new velodyne_driver::InputSocket(private_nh));
+      input_.reset(new velodyne_driver::InputSocket(private_nh,
+                                                    config_.udp_port));
     }
 
   // raw data output topic
