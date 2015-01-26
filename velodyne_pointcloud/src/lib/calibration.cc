@@ -44,7 +44,7 @@ namespace velodyne_pointcloud {
   const std::string DIST_CORRECTION_X = "dist_correction_x";
   const std::string DIST_CORRECTION_Y = "dist_correction_y";
   const std::string VERT_OFFSET_CORRECTION = "vert_offset_correction";
-  const std::string HORIZ_OFFSET_CORRECTION = "vert_offset_correction";
+  const std::string HORIZ_OFFSET_CORRECTION = "horiz_offset_correction";
   const std::string MAX_INTENSITY = "max_intensity";
   const std::string MIN_INTENSITY = "min_intensity";
   const std::string FOCAL_DISTANCE = "focal_distance";
