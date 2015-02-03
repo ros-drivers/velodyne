@@ -188,10 +188,12 @@ namespace velodyne_rawdata
               (corrections.dist_correction - corrections.dist_correction_x)
                 * (xx - 2.4) / (25.04 - 2.4) 
               + corrections.dist_correction_x;
+            distance_corr_x -= corrections.dist_correction;
             distance_corr_y = 
               (corrections.dist_correction - corrections.dist_correction_y)
                 * (yy - 1.93) / (25.04 - 1.93)
               + corrections.dist_correction_y;
+            distance_corr_y -= corrections.dist_correction;
           }
   
           float distance_x = distance + distance_corr_x;
@@ -202,7 +204,9 @@ namespace velodyne_rawdata
           xy_distance = distance_y * cos_vert_angle;
           y = xy_distance * cos_rot_angle + horiz_offset * sin_rot_angle;
   
-          z = distance * sin_vert_angle + vert_offset;
+          // Using distance_y is not symmetric, but the velodyne manual
+          // does this.
+          z = distance_y * sin_vert_angle + vert_offset;
   
           /** Use standard ROS coordinate system (right-hand rule) */
           float x_coord = y;
