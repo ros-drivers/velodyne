@@ -54,6 +54,7 @@ namespace velodyne_pointcloud {
   public:
 
     std::map<int, LaserCorrection> laser_corrections;
+    int num_lasers;
     bool initialized;
 
   public:
