@@ -85,6 +85,11 @@ if (CATKIN_ENABLE_TESTING)
     http://download.ros.org/data/velodyne/64e_s2.1-300-sztaki.pcap
     DESTINATION ${CATKIN_DEVEL_PREFIX}/${CATKIN_PACKAGE_SHARE_DESTINATION}/tests
     MD5 176c900ffb698f9b948a13e281ffc1a2)
+  catkin_download_test_data(
+    ${PROJECT_NAME}_tests_vlp16.pcap
+    http://download.ros.org/data/velodyne/vlp16.pcap
+    DESTINATION ${CATKIN_DEVEL_PREFIX}/${CATKIN_PACKAGE_SHARE_DESTINATION}/tests
+    MD5 f45c2bb1d7ee358274e423ea3b66fd73)
 
   # unit tests
   add_rostest(tests/cloud_node_hz.test)
@@ -93,6 +98,8 @@ if (CATKIN_ENABLE_TESTING)
   add_rostest(tests/cloud_nodelet_32e_hz.test)
   add_rostest(tests/cloud_node_64e_s2.1_hz.test)
   add_rostest(tests/cloud_nodelet_64e_s2.1_hz.test)
+  add_rostest(tests/cloud_node_vlp16_hz.test)
+  add_rostest(tests/cloud_nodelet_vlp16_hz.test)
 
   ## These tests don't work well enough to be worth the effort of
   ## running them:

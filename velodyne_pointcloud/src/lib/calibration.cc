@@ -103,6 +103,7 @@ namespace velodyne_pointcloud {
     node[NUM_LASERS] >> num_lasers;
     const YAML::Node& lasers = node[LASERS];
     calibration.laser_corrections.clear();
+    calibration.num_lasers = num_lasers;
     for (int i = 0; i < num_lasers; i++) {
       std::pair<int, LaserCorrection> correction;
       lasers[i] >> correction;
