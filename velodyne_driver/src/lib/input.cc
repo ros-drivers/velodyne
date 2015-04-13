@@ -240,10 +240,22 @@ namespace velodyne_driver
             // Keep the reader from blowing through the file.
             if (read_fast_ == false)
               packet_rate_.sleep();
-            
-            memcpy(&pkt->data[0], pkt_data+42, packet_size);
-            pkt->stamp = ros::Time::now();
-            empty_ = false;
+            if((header)->len - 42 == 1206)
+            {
+				memcpy(&pkt->data[0], pkt_data+42, packet_size);
+				pkt->stamp = ros::Time::now();
+				
+			}else if((header)->len-42 == 512)
+			{
+				ROS_INFO_ONCE("Position data ignored ");
+                return 1;
+			}else
+			{
+				ROS_WARN("Incorrect data length %d (1206 LIDAR data, 512 position data): ",
+                     (header)->len-42);
+                return 1;
+			}
+			empty_ = false;
             return 0;                   // success
           }
 
