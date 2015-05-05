@@ -19,28 +19,39 @@
 #ifndef __VELODYNE_POINTCLOUD_POINT_TYPES_H
 #define __VELODYNE_POINTCLOUD_POINT_TYPES_H
 
-#include <pcl/point_types.h>
+#include <sensor_msgs/PointCloud2.h>
+#include <sensor_msgs/point_cloud2_iterator.h>
 
 namespace velodyne_pointcloud
 {
   /** Euclidean Velodyne coordinate, including intensity and ring number. */
-  struct PointXYZIR
+/*  struct PointXYZIR
   {
     PCL_ADD_POINT4D;                    // quad-word XYZ
     float    intensity;                 ///< laser intensity reading
     uint16_t ring;                      ///< laser ring number
     EIGEN_MAKE_ALIGNED_OPERATOR_NEW     // ensure proper alignment
   } EIGEN_ALIGN16;
+*/
 
+  inline
+  void setVelodyneCloudFields(sensor_msgs::PointCloud2 &pc) {
+    sensor_msgs::PointCloud2Modifier modifier(pc);
+    modifier.setPointCloud2Fields(5, "x", 1, sensor_msgs::PointField::FLOAT32,
+                                  "y", 1, sensor_msgs::PointField::FLOAT32,
+                                  "z", 1, sensor_msgs::PointField::FLOAT32,
+                                  "intensity", 1, sensor_msgs::PointField::FLOAT32,
+                                  "ring", 1, sensor_msgs::PointField::UINT16);
+  }
+
+  inline
+  sensor_msgs::PointCloud2::Ptr createVelodyneCloud() {
+    sensor_msgs::PointCloud2::Ptr pc(new sensor_msgs::PointCloud2());
+    setVelodyneCloudFields(*pc);
+
+    return pc;
+  };
 }; // namespace velodyne_pointcloud
-
-
-POINT_CLOUD_REGISTER_POINT_STRUCT(velodyne_pointcloud::PointXYZIR,
-                                  (float, x, x)
-                                  (float, y, y)
-                                  (float, z, z)
-                                  (float, intensity, intensity)
-                                  (uint16_t, ring, ring))
 
 #endif // __VELODYNE_POINTCLOUD_POINT_TYPES_H
 

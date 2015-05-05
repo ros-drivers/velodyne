@@ -17,10 +17,6 @@
 #include "colors.h"
 #include <velodyne_pointcloud/point_types.h>
 
-/// @todo make sure these includes are really necessary
-#include <pcl/io/pcd_io.h>
-#include <pcl/point_cloud.h>
-
 namespace
 {
   // RGB color values
@@ -38,11 +34,6 @@ namespace
 
 namespace velodyne_pointcloud
 {
-
-  /** types of output point and cloud */
-  typedef pcl::PointXYZRGB RGBPoint;
-  typedef pcl::PointCloud<RGBPoint> RGBPointCloud;
-
   /** @brief Constructor. */
   RingColors::RingColors(ros::NodeHandle node, ros::NodeHandle private_nh)
   {
@@ -60,31 +51,46 @@ namespace velodyne_pointcloud
 
   /** @brief Callback for Velodyne PointXYZRI messages. */
   void
-    RingColors::convertPoints(const VPointCloud::ConstPtr &inMsg)
+  RingColors::convertPoints(const sensor_msgs::PointCloud2ConstPtr &inMsg)
   {
     if (output_.getNumSubscribers() == 0)         // no one listening?
       return;                                     // do nothing
 
     // allocate an PointXYZRGB message with same time and frame ID as
     // input data
-    RGBPointCloud::Ptr outMsg(new RGBPointCloud());
+    sensor_msgs::PointCloud2::Ptr outMsg(new sensor_msgs::PointCloud2());
+    sensor_msgs::PointCloud2Modifier modifier(*outMsg);
+    modifier.setPointCloud2FieldsByString(2, "xyz", "rgb");
+    modifier.resize(inMsg->height * inMsg->width);
+
     outMsg->header.stamp = inMsg->header.stamp;
     outMsg->header.frame_id = inMsg->header.frame_id;
     outMsg->height = 1;
 
-    for (size_t i = 0; i < inMsg->points.size(); ++i)
+    sensor_msgs::PointCloud2Iterator<float> out_x(*outMsg, "x");
+    sensor_msgs::PointCloud2Iterator<float> out_y(*outMsg, "y");
+    sensor_msgs::PointCloud2Iterator<float> out_z(*outMsg, "z");
+    sensor_msgs::PointCloud2Iterator<uint8_t> out_r(*outMsg, "r");
+    sensor_msgs::PointCloud2Iterator<uint8_t> out_g(*outMsg, "g");
+    sensor_msgs::PointCloud2Iterator<uint8_t> out_b(*outMsg, "b");
+
+    sensor_msgs::PointCloud2ConstIterator<float> in_x(*inMsg, "x");
+    sensor_msgs::PointCloud2ConstIterator<float> in_y(*inMsg, "y");
+    sensor_msgs::PointCloud2ConstIterator<float> in_z(*inMsg, "z");
+    sensor_msgs::PointCloud2ConstIterator<uint16_t> in_ring(*inMsg, "ring");
+
+    for (size_t i = 0; i < inMsg->height * inMsg->width; ++i, ++out_x, ++out_y, ++out_z, ++out_r, ++out_g, ++out_b,
+      ++in_x, ++in_y, ++in_z, ++in_ring)
       {
-        RGBPoint p;
-        p.x = inMsg->points[i].x;
-        p.y = inMsg->points[i].y;
-        p.z = inMsg->points[i].z;
+        *out_x = *in_x;
+        *out_y = *in_y;
+        *out_z = *in_z;
 
         // color lasers with the rainbow array
-        int color = inMsg->points[i].ring % N_COLORS;
-        p.rgb = *reinterpret_cast<float*>(&rainbow[color]);
-
-        outMsg->points.push_back(p);
-        ++outMsg->width;
+        int color = *in_ring % N_COLORS;
+        *out_r = (rainbow[color] >> 16) & 0x0000ff;
+        *out_g = (rainbow[color] >> 8) & 0x0000ff;
+        *out_b = rainbow[color] & 0x0000ff;
       }
 
     output_.publish(outMsg);
