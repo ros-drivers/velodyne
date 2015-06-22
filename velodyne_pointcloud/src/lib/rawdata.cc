@@ -179,7 +179,11 @@ namespace velodyne_rawdata
           float vert_offset = corrections.vert_offset_correction;
   
           // Compute the distance in the xy plane (w/o accounting for rotation)
-          float xy_distance = distance * cos_vert_angle;
+          /**the new term of 'vert_offset * sin_vert_angle'
+           * was added to the expression due to the mathemathical
+           * model we used.
+           */
+          float xy_distance = distance * cos_vert_angle + vert_offset * sin_vert_angle;
   
           // Calculate temporal X, use absolute value.
           float xx = xy_distance * sin_rot_angle - horiz_offset * cos_rot_angle;
@@ -207,16 +211,29 @@ namespace velodyne_rawdata
           }
   
           float distance_x = distance + distance_corr_x;
-          xy_distance = distance_x * cos_vert_angle;
-          x = xy_distance * sin_rot_angle + horiz_offset * cos_rot_angle;
+          /**the new term of 'vert_offset * sin_vert_angle'
+           * was added to the expression due to the mathemathical
+           * model we used.
+           */
+          xy_distance = distance_x * cos_vert_angle + vert_offset * sin_vert_angle ;
+          ///the expression wiht '-' is proved to be better than the one with '+'
+          x = xy_distance * sin_rot_angle - horiz_offset * cos_rot_angle;
   
           float distance_y = distance + distance_corr_y;
-          xy_distance = distance_y * cos_vert_angle;
+          xy_distance = distance_y * cos_vert_angle + vert_offset * sin_vert_angle ;
+          /**the new term of 'vert_offset * sin_vert_angle'
+           * was added to the expression due to the mathemathical
+           * model we used.
+           */
           y = xy_distance * cos_rot_angle + horiz_offset * sin_rot_angle;
   
           // Using distance_y is not symmetric, but the velodyne manual
           // does this.
-          z = distance_y * sin_vert_angle + vert_offset;
+          /**the new term of 'vert_offset * cos_vert_angle'
+           * was added to the expression due to the mathemathical
+           * model we used.
+           */
+          z = distance_y * sin_vert_angle + vert_offset*cos_vert_angle;
   
           /** Use standard ROS coordinate system (right-hand rule) */
           float x_coord = y;
@@ -330,7 +347,11 @@ namespace velodyne_rawdata
             float vert_offset = corrections.vert_offset_correction;
     
             // Compute the distance in the xy plane (w/o accounting for rotation)
-            float xy_distance = distance * cos_vert_angle;
+            /**the new term of 'vert_offset * sin_vert_angle'
+             * was added to the expression due to the mathemathical
+             * model we used.
+             */
+            float xy_distance = distance * cos_vert_angle + vert_offset * sin_vert_angle;
     
             // Calculate temporal X, use absolute value.
             float xx = xy_distance * sin_rot_angle - horiz_offset * cos_rot_angle;
@@ -358,16 +379,28 @@ namespace velodyne_rawdata
             }
     
             float distance_x = distance + distance_corr_x;
-            xy_distance = distance_x * cos_vert_angle;
-            x = xy_distance * sin_rot_angle + horiz_offset * cos_rot_angle;
+            /**the new term of 'vert_offset * sin_vert_angle'
+             * was added to the expression due to the mathemathical
+             * model we used.
+             */
+            xy_distance = distance_x * cos_vert_angle + vert_offset * sin_vert_angle ;
+            x = xy_distance * sin_rot_angle - horiz_offset * cos_rot_angle;
     
             float distance_y = distance + distance_corr_y;
-            xy_distance = distance_y * cos_vert_angle;
+            /**the new term of 'vert_offset * sin_vert_angle'
+             * was added to the expression due to the mathemathical
+             * model we used.
+             */
+            xy_distance = distance_y * cos_vert_angle + vert_offset * sin_vert_angle ;
             y = xy_distance * cos_rot_angle + horiz_offset * sin_rot_angle;
     
             // Using distance_y is not symmetric, but the velodyne manual
             // does this.
-            z = distance_y * sin_vert_angle + vert_offset;
+            /**the new term of 'vert_offset * cos_vert_angle'
+             * was added to the expression due to the mathemathical
+             * model we used.
+             */
+            z = distance_y * sin_vert_angle + vert_offset*cos_vert_angle;
   
     
             /** Use standard ROS coordinate system (right-hand rule) */
