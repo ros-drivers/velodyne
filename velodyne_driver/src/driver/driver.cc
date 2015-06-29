@@ -36,25 +36,34 @@ VelodyneDriver::VelodyneDriver(ros::NodeHandle node,
   // get model name, validate string, determine packet rate
   private_nh.param("model", config_.model, std::string("64E"));
   double packet_rate;                   // packet frequency (Hz)
+  std::string model_full_name;
   if ((config_.model == "64E_S2") || 
       (config_.model == "64E_S2.1"))    // generates 1333312 points per second
     {                                   // 1 packet holds 384 points
       packet_rate = 3472.17;            // 1333312 / 384
+      model_full_name = std::string("HDL-") + config_.model;
     }
   else if (config_.model == "64E")
     {
       packet_rate = 2600.0;
+      model_full_name = std::string("HDL-") + config_.model;
     }
   else if (config_.model == "32E")
     {
       packet_rate = 1808.0;
+      model_full_name = std::string("HDL-") + config_.model;
+    }
+  else if (config_.model == "VLP16")
+    {
+      packet_rate = 781.25;             // 300000 / 384
+      model_full_name = "VLP-16";
     }
   else
     {
       ROS_ERROR_STREAM("unknown Velodyne LIDAR model: " << config_.model);
       packet_rate = 2600.0;
     }
-  std::string deviceName("Velodyne HDL-" + config_.model);
+  std::string deviceName(std::string("Velodyne ") + model_full_name);
 
   private_nh.param("rpm", config_.rpm, 600.0);
   int udp_port = 0;

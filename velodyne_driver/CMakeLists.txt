@@ -54,12 +54,19 @@ if (CATKIN_ENABLE_TESTING)
     http://download.ros.org/data/velodyne/32e.pcap
     DESTINATION ${CATKIN_DEVEL_PREFIX}/${CATKIN_PACKAGE_SHARE_DESTINATION}/tests
     MD5 e41d02aac34f0967c03a5597e1d554a9)
+  catkin_download_test_data(
+    ${PROJECT_NAME}_tests_vlp16.pcap
+    http://download.ros.org/data/velodyne/vlp16.pcap
+    DESTINATION ${CATKIN_DEVEL_PREFIX}/${CATKIN_PACKAGE_SHARE_DESTINATION}/tests
+    MD5 f45c2bb1d7ee358274e423ea3b66fd73)
   
   # unit tests
   add_rostest(tests/pcap_node_hertz.test)
   add_rostest(tests/pcap_nodelet_hertz.test)
   add_rostest(tests/pcap_32e_node_hertz.test)
   add_rostest(tests/pcap_32e_nodelet_hertz.test)
+  add_rostest(tests/pcap_vlp16_node_hertz.test)
+  add_rostest(tests/pcap_vlp16_nodelet_hertz.test)
   
   # parse check all the launch/*.launch files
   roslaunch_add_file_check(launch)

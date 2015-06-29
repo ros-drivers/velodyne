@@ -57,6 +57,15 @@ namespace velodyne_rawdata
                                            / DISTANCE_RESOLUTION + 1.0);
   static const uint16_t UPPER_BANK = 0xeeff;
   static const uint16_t LOWER_BANK = 0xddff;
+  
+  
+  /** Special Defines for VLP16 support **/
+  static const int VLP16_FIRINGS_PER_BLOCK = 2;
+  static const int VLP16_SCANS_PER_FIRING = 16;
+  static const int VLP16_BLOCK_TDURATION = 110.592;
+  static const int VLP16_DSR_TOFFSET = 2.304;
+  static const int VLP16_FIRING_TOFFSET = 55.296;
+  
 
   /** \brief Raw Velodyne data block.
    *
@@ -154,6 +163,9 @@ namespace velodyne_rawdata
     velodyne_pointcloud::Calibration calibration_;
     float sin_rot_table_[ROTATION_MAX_UNITS];
     float cos_rot_table_[ROTATION_MAX_UNITS];
+    
+    /** add private function to handle the VLP16 **/ 
+    void unpack_vlp16(const velodyne_msgs::VelodynePacket &pkt, VPointCloud &pc);
 
     /** in-line test whether a point is in range */
     bool pointInRange(float range)

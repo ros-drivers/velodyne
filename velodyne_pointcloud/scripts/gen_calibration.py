@@ -130,8 +130,8 @@ if minIntensities != None:
     for el in minIntensities:
         if el.tag == 'item':
             if enabled_lasers[index]:
-                value = float(el.text)
-                if value != 0.0:
+                value = int(el.text)
+                if value != 0:
                     addLaserCalibration(index, 'min_intensity', value)
             index += 1
 
@@ -142,9 +142,9 @@ if maxIntensities != None:
     for el in maxIntensities:
         if el.tag == 'item':
             if enabled_lasers[index]:
-                value = float(el.text)
-                if value != 255.0:
-                    addLaserCalibration(index, 'max_intensity', float(el.text))
+                value = int(el.text)
+                if value != 255:
+                    addLaserCalibration(index, 'max_intensity', value)
                 index += 1
 
 # add calibration information for each laser
