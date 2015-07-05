@@ -86,7 +86,7 @@ private:
   //! GPS time publisher
   ros::Publisher gpstime_pub;
 
-  //! GPS time publisher
+  //! GPS temperature publisher
   ros::Publisher temperature_pub;
 
   //! IP of LIDAR, only packets from that address are accepted
@@ -121,8 +121,18 @@ private:
   //! Buffer of UDP receiver
   std::array< char, 65536 > udp_buffer_;
 
-  //! time in seconds since epoch, when last data was received
+  //! time in seconds since epoch, when last data was received from sensor
+  //! can be used as sensor data watchdog
   double last_data_time_;
+
+  //! time of the last gps timestamp in the raw packet message.
+  //! Used to detect hour rollover
+  uint32_t last_gps_timestamp_;
+
+  //! time in seconds since epoch of the top of the current hour
+  //! derived from NMEA string in raw packets, used to offset
+  //! time since hour gps_timestamp in raw packets.
+  time_t hour_time_;
 };
 
 #endif // IMUGPS_NODE_H

@@ -1,21 +1,25 @@
 #include "gpsimu_driver.h"
 
-#include <geometry_msgs/TwistStamped.h>
-#include <std_msgs/String.h>
-#include <std_msgs/Time.h>
+#include <sensor_msgs/Imu.h>
+#include <nmea_msgs/Sentence.h>
+#include <sensor_msgs/TimeReference.h>
 #include <sensor_msgs/Temperature.h>
+
+const double microseconds_to_seconds = 1.0E-6;
 
 GpsImuDriver::GpsImuDriver():nh_("~")
 {
   // Initialize
   udp_socket_ = 0;
   is_connected_ = false;
+  last_gps_timestamp_ = 0;
+  hour_time_ = 0;
 
   // Advertise topics, read parameters
   std::cout << "advertising topics" << std::endl;
-  nmea_pub = nh_.advertise<std_msgs::String>("nmea_sentence",10);
-  imu_pub = nh_.advertise<geometry_msgs::TwistStamped>("imu_data",100);
-  gpstime_pub = nh_.advertise<std_msgs::Time>("gpstime",10);
+  nmea_pub = nh_.advertise<nmea_msgs::Sentence>("nmea_sentence",10);
+  imu_pub = nh_.advertise<sensor_msgs::Imu>("imu_data",100);
+  gpstime_pub = nh_.advertise<sensor_msgs::TimeReference>("gpstime",10);
   temperature_pub = nh_.advertise<sensor_msgs::Temperature>("temperature",10);
   nh_.param("device_ip",devip_,std::string(""));
   nh_.param("udpport",udpport_,8308);
@@ -121,39 +125,35 @@ bool GpsImuDriver::handlePacket(velodyne_packet_structs::VelodynePositioningPack
   };
 
 
-  auto nmeaToUnixTime = [explode] (const std::string& nmea_sentence) -> u_int32_t
+  auto nmeaHourToUnixTime = [explode] (const std::string& nmea_sentence) -> u_int32_t
   {
       std::vector< std::string > words = explode(nmea_sentence,",");
       if(words.size() < 10 )
           return -1;
       uint32_t hour = atoi(words[1].substr(0,2).c_str());
-      uint32_t min = atoi(words[1].substr(2,2).c_str());
-      uint32_t sec = atoi(words[1].substr(4,2).c_str());
 
       uint32_t day = atoi(words[9].substr(0,2).c_str());
       uint32_t mon = atoi(words[9].substr(2,2).c_str());
       uint32_t year = atoi(words[9].substr(4,2).c_str());
 
-      time_t rawtime;
-      struct tm * timeinfo;
-      time ( &rawtime );
-      timeinfo = localtime ( &rawtime );
-      timeinfo->tm_year = year + 100;
-      timeinfo->tm_mon = mon - 1;
-      timeinfo->tm_mday = day;
-      mktime ( timeinfo );
-      int yday = timeinfo->tm_yday;
+      time_t hour_time;
+      tm time_info;
+      memset(&time_info, 0, sizeof(time_info));
+      // Assumes year is between 2000 and 2099
+      time_info.tm_year = year + 100;
+      time_info.tm_mon = mon - 1;
+      time_info.tm_mday = day;
+      time_info.tm_hour = hour;
+      hour_time = timegm(&time_info);
 
-      year += 100;
-      uint32_t unix_time = sec + min*60 + hour*3600 + yday*86400 + (year-70)*31536000 + ((year-69)/4)*86400 - ((year-1)/100)*86400 + ((year+299)/400)*86400;
-      return unix_time;
+      return hour_time;
   };
 
   velodyne_packet_structs::VelodynePositioningPacket vpp;
 
   for( int i=0; i<3; i++ )
   {
-      vpp.gyro_temp_accel[i].gyro = convert12bit2int16(vppr.gyro_temp_accel[i].gyro) * 0.09766;
+      vpp.gyro_temp_accel[i].gyro = convert12bit2int16(vppr.gyro_temp_accel[i].gyro) * 0.09766 * M_PI / 180.0;
       vpp.gyro_temp_accel[i].temp = convert12bit2int16(vppr.gyro_temp_accel[i].temp) * 0.1453+25;
       vpp.gyro_temp_accel[i].accel_x = convert12bit2int16(vppr.gyro_temp_accel[i].accel_x) * 0.001221;
       vpp.gyro_temp_accel[i].accel_y = convert12bit2int16(vppr.gyro_temp_accel[i].accel_y) * 0.001221;
@@ -161,7 +161,7 @@ bool GpsImuDriver::handlePacket(velodyne_packet_structs::VelodynePositioningPack
 
   const float earth_gravity = 9.80665;
 
-  vpp.gps_timestamp = vppr.gps_timestamp/1000000.0;
+  vpp.gps_timestamp = vppr.gps_timestamp * microseconds_to_seconds;
   vpp.gyro_temp_accel_xyz[0].gyro = vpp.gyro_temp_accel[1].gyro;
   vpp.gyro_temp_accel_xyz[0].temp = vpp.gyro_temp_accel[1].temp;
   vpp.gyro_temp_accel_xyz[0].accel_x = -vpp.gyro_temp_accel[0].accel_y * earth_gravity;
@@ -177,35 +177,66 @@ bool GpsImuDriver::handlePacket(velodyne_packet_structs::VelodynePositioningPack
   vpp.gyro_temp_accel_xyz[2].accel_x = vpp.gyro_temp_accel[0].accel_x * earth_gravity;
   vpp.gyro_temp_accel_xyz[2].accel_y = vpp.gyro_temp_accel[1].accel_x * earth_gravity;
 
-  std_msgs::String nmea_sentence_msg;
+  nmea_msgs::Sentence nmea_sentence_msg;
   std::string nmea_sentence(vppr.nmea_sentence);
 
-  nmea_sentence = nmea_sentence.substr(0,nmea_sentence.length()-2);
-  nmea_sentence_msg.data = nmea_sentence;
-  nmea_pub.publish(nmea_sentence_msg);
+  /* This section re-constructs the timestamp of the packet based on the
+   * GPS NMEA time and the packet's microsecond counter.  The microsecond counter
+   * contains the time from the beginning of the GPS hour, so to reconstruct the
+   * packet's scan time, the counter value needs to be added to the time of the 
+   * beginning of the hour.
+   */
+  // Find the current hour using the NMEA sentence from the Velodyne sensor message
+  double nmeaHourUnixTime = nmeaHourToUnixTime(nmea_sentence);
+  // If the time is un-initialized, or if the seconds counter in the counter is 
+  // greater than 2, set the hour time (the 2 second delay allows for the NMEA
+  // string to be updated as it is delayed by several hundred milliseconds
+  // from the GPS PPS event)
+  if (hour_time_ == 0 || vppr.gps_timestamp*microseconds_to_seconds > 2.0) {
+      hour_time_ = nmeaHourUnixTime;
+  }
+  // The seconds counter has rolled over - increment the hour. 
+  else if (vppr.gps_timestamp < last_gps_timestamp_) {
+      hour_time_ += 3600;
+  }
+  last_gps_timestamp_ = vppr.gps_timestamp;
 
-  double nmeaUnixTime = nmeaToUnixTime(nmea_sentence);
-
-  nmeaUnixTime += (vppr.gps_timestamp%1000000)/1000000.0;
-  std_msgs::Time gpstime_msg;
-  gpstime_msg.data = ros::Time(nmeaUnixTime);
+  // Publish all topics with the same ROS time stamp.
+  auto topic_publish_time = ros::Time::now();
+  // === Time Reference Message ===
+  // Set the TimeReference time_ref with the re-constructed sensor time
+  double sensor_scan_time = (double)hour_time_ + ((double)vppr.gps_timestamp * microseconds_to_seconds);
+  sensor_msgs::TimeReference gpstime_msg;
+  gpstime_msg.header.stamp = topic_publish_time;
+  gpstime_msg.time_ref = ros::Time(sensor_scan_time);
+  gpstime_msg.source = std::string("Sensor On-Board Clock");
   gpstime_pub.publish(gpstime_msg);
 
-  geometry_msgs::TwistStamped imumsg;
-  imumsg.header.frame_id="/velodyne:"+devip_;
-  imumsg.header.stamp = ros::Time::now();
+  // === NMEA Sentence ===
+  nmea_sentence = nmea_sentence.substr(0,nmea_sentence.length()-2);
+  nmea_sentence_msg.sentence = nmea_sentence;
+  nmea_sentence_msg.header.stamp = topic_publish_time;
+  nmea_pub.publish(nmea_sentence_msg);
 
-  imumsg.twist.linear.x = (vpp.gyro_temp_accel_xyz[0].accel_x+vpp.gyro_temp_accel_xyz[0].accel_y)/2.0;
-  imumsg.twist.linear.y = (vpp.gyro_temp_accel_xyz[1].accel_x+vpp.gyro_temp_accel_xyz[1].accel_y)/2.0;
-  imumsg.twist.linear.z = (vpp.gyro_temp_accel_xyz[2].accel_x+vpp.gyro_temp_accel_xyz[2].accel_y)/2.0;
-  imumsg.twist.angular.x = vpp.gyro_temp_accel_xyz[0].gyro;
-  imumsg.twist.angular.y = vpp.gyro_temp_accel_xyz[1].gyro;
-  imumsg.twist.angular.z = vpp.gyro_temp_accel_xyz[2].gyro;
+  // === IMU Message ===
+  sensor_msgs::Imu imumsg;
+  imumsg.header.frame_id="/velodyne:"+devip_;
+  imumsg.header.stamp = topic_publish_time;
+
+  imumsg.linear_acceleration.x = (vpp.gyro_temp_accel_xyz[0].accel_x+vpp.gyro_temp_accel_xyz[0].accel_y)/2.0;
+  imumsg.linear_acceleration.y = (vpp.gyro_temp_accel_xyz[1].accel_x+vpp.gyro_temp_accel_xyz[1].accel_y)/2.0;
+  imumsg.linear_acceleration.z = (vpp.gyro_temp_accel_xyz[2].accel_x+vpp.gyro_temp_accel_xyz[2].accel_y)/2.0;
+  imumsg.angular_velocity.x = vpp.gyro_temp_accel_xyz[0].gyro;
+  imumsg.angular_velocity.y = vpp.gyro_temp_accel_xyz[1].gyro;
+  imumsg.angular_velocity.z = vpp.gyro_temp_accel_xyz[2].gyro;
+  imumsg.orientation_covariance[0] = -1;
   imu_pub.publish(imumsg);
 
+  // === Temperature Messages ===
   for( std::size_t i=0; i<3; i++ )
   {
     sensor_msgs::Temperature tmpmsg;
+    tmpmsg.header.stamp = topic_publish_time;
     std::stringstream ss;
     ss << "/velodyne:" << devip_ << i;
     tmpmsg.header.frame_id = ss.str();

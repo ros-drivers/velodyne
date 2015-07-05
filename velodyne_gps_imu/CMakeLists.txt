@@ -4,8 +4,8 @@ project(velodyne_gps_imu)
 set (CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -std=c++0x") #or -std=c++11
 
 find_package(catkin REQUIRED COMPONENTS
-  geometry_msgs
   sensor_msgs
+  nmea_msgs
   roscpp
   std_msgs
 )
