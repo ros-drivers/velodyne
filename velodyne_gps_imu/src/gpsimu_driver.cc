@@ -167,15 +167,15 @@ bool GpsImuDriver::handlePacket(velodyne_packet_structs::VelodynePositioningPack
   vpp.gyro_temp_accel_xyz[0].accel_x = -vpp.gyro_temp_accel[0].accel_y * earth_gravity;
   vpp.gyro_temp_accel_xyz[0].accel_y = vpp.gyro_temp_accel[2].accel_x * earth_gravity;
 
-  vpp.gyro_temp_accel_xyz[1].gyro = vpp.gyro_temp_accel[0].gyro;
+  vpp.gyro_temp_accel_xyz[1].gyro = -vpp.gyro_temp_accel[0].gyro;
   vpp.gyro_temp_accel_xyz[1].temp = vpp.gyro_temp_accel[0].temp;
   vpp.gyro_temp_accel_xyz[1].accel_x = -vpp.gyro_temp_accel[1].accel_y * earth_gravity;
   vpp.gyro_temp_accel_xyz[1].accel_y = -vpp.gyro_temp_accel[2].accel_y * earth_gravity;
 
   vpp.gyro_temp_accel_xyz[2].gyro = -vpp.gyro_temp_accel[2].gyro;
   vpp.gyro_temp_accel_xyz[2].temp = vpp.gyro_temp_accel[2].temp;
-  vpp.gyro_temp_accel_xyz[2].accel_x = vpp.gyro_temp_accel[0].accel_x * earth_gravity;
-  vpp.gyro_temp_accel_xyz[2].accel_y = vpp.gyro_temp_accel[1].accel_x * earth_gravity;
+  vpp.gyro_temp_accel_xyz[2].accel_x = -vpp.gyro_temp_accel[0].accel_x * earth_gravity;
+  vpp.gyro_temp_accel_xyz[2].accel_y = -vpp.gyro_temp_accel[1].accel_x * earth_gravity;
 
   nmea_msgs::Sentence nmea_sentence_msg;
   std::string nmea_sentence(vppr.nmea_sentence);
@@ -192,7 +192,7 @@ bool GpsImuDriver::handlePacket(velodyne_packet_structs::VelodynePositioningPack
   // greater than 2, set the hour time (the 2 second delay allows for the NMEA
   // string to be updated as it is delayed by several hundred milliseconds
   // from the GPS PPS event)
-  if (hour_time_ == 0 || vppr.gps_timestamp*microseconds_to_seconds > 2.0) {
+  if (hour_time_ == 0 || vpp.gps_timestamp > 2.0) {
       hour_time_ = nmeaHourUnixTime;
   }
   // The seconds counter has rolled over - increment the hour. 
@@ -205,7 +205,7 @@ bool GpsImuDriver::handlePacket(velodyne_packet_structs::VelodynePositioningPack
   auto topic_publish_time = ros::Time::now();
   // === Time Reference Message ===
   // Set the TimeReference time_ref with the re-constructed sensor time
-  double sensor_scan_time = (double)hour_time_ + ((double)vppr.gps_timestamp * microseconds_to_seconds);
+  double sensor_scan_time = (double)hour_time_ + vpp.gps_timestamp ;
   sensor_msgs::TimeReference gpstime_msg;
   gpstime_msg.header.stamp = topic_publish_time;
   gpstime_msg.time_ref = ros::Time(sensor_scan_time);
