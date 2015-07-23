@@ -316,7 +316,7 @@ namespace velodyne_rawdata
           
           /** correct for the laser rotation as a function of timing during the firings **/
           azimuth_corrected_f = azimuth + (azimuth_diff * ((dsr*VLP16_DSR_TOFFSET) + (firing*VLP16_FIRING_TOFFSET)) / VLP16_BLOCK_TDURATION);
-          azimuth_corrected = (int)round(fmod(azimuth_corrected_f,36000.0));
+          azimuth_corrected = ((int)round(azimuth_corrected_f)) % 36000;
           
           /*condition added to avoid calculating points which are not
             in the interesting defined area (min_angle < area < max_angle)*/
