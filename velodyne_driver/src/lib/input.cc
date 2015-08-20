@@ -216,6 +216,7 @@ namespace velodyne_driver
         ROS_FATAL("Error opening Velodyne socket dump file.");
         return;
       }
+    pcap_compile(pcap_, &pcap_filter_, "udp port 2368", 1, PCAP_NETMASK_UNKNOWN);
   }
 
 
@@ -237,6 +238,9 @@ namespace velodyne_driver
         int res;
         if ((res = pcap_next_ex(pcap_, &header, &pkt_data)) >= 0)
           {
+            // if packet is not laser firing data, continue
+            if (pcap_offline_filter( &pcap_filter_, header, pkt_data ) == 0)
+              continue;
             // Keep the reader from blowing through the file.
             if (read_fast_ == false)
               packet_rate_.sleep();

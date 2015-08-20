@@ -104,6 +104,7 @@ namespace velodyne_driver
     bool read_fast_;
     double repeat_delay_;
     ros::Rate packet_rate_;
+    bpf_program pcap_filter_;
   };
 
 } // velodyne_driver namespace
