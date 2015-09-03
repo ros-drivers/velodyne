@@ -246,7 +246,7 @@ namespace velodyne_driver
               packet_rate_.sleep();
             
             memcpy(&pkt->data[0], pkt_data+42, packet_size);
-            pkt->stamp = ros::Time::now();
+            pkt->stamp = ros::Time(header->ts.tv_sec, header->ts.tv_usec * 1000);
             empty_ = false;
             return 0;                   // success
           }
