@@ -94,60 +94,60 @@ void GpsImuDriver::handleSocketRead(const boost::system::error_code &error, std:
   last_data_time_ = std::time(0);
 }
 
+int16_t convert12bit2int16(uint16_t v)
+{
+  v = v & 0x0fff;
+  int16_t r=v;
+  if(r>2047)
+      r=-((~(r--)) & 0x0fff);
+  return r;
+}
+
+std::vector<std::string> explode(const std::string& text, const std::string& separators)
+{
+  std::vector<std::string> words;
+  size_t n     = text.length ();
+  size_t start = 0;
+  size_t stop = text.find_first_of (separators);
+  if (stop > n) stop = n;
+
+  while (start <= n)
+  {
+    words.push_back (text.substr (start, stop-start));
+    start = stop+1;
+    stop = text.find_first_of (separators, start);
+    if (stop > n) stop = n;
+  }
+  return words;
+}
+
+uint32_t nmeaHourToUnixTime(const std::string& nmea_sentence)
+{
+  std::vector< std::string > words = explode(nmea_sentence,",");
+  if(words.size() < 10 )
+      return -1;
+  uint32_t hour = atoi(words[1].substr(0,2).c_str());
+
+  uint32_t day = atoi(words[9].substr(0,2).c_str());
+  uint32_t mon = atoi(words[9].substr(2,2).c_str());
+  uint32_t year = atoi(words[9].substr(4,2).c_str());
+
+  time_t hour_time;
+  tm time_info;
+  memset(&time_info, 0, sizeof(time_info));
+  // Assumes year is between 2000 and 2099
+  time_info.tm_year = year + 100;
+  time_info.tm_mon = mon - 1;
+  time_info.tm_mday = day;
+  time_info.tm_hour = hour;
+  hour_time = timegm(&time_info);
+
+  return hour_time;
+}
+
 //-----------------------------------------------------------------------------
 bool GpsImuDriver::handlePacket(velodyne_packet_structs::VelodynePositioningPacketRaw &vppr)
 {
-  auto convert12bit2int16 = [] (u_int16_t v) -> int16_t
-  {
-      v = v & 0x0fff;
-      int16_t r=v;
-      if(r>2047)
-          r=-((~(r--)) & 0x0fff);
-      return r;
-  };
-
-  auto explode = [] (const std::string& text, const std::string& separators) -> std::vector<std::string>
-  {
-    std::vector<std::string> words;
-    size_t n     = text.length ();
-    size_t start = 0;
-    size_t stop = text.find_first_of (separators);
-    if (stop > n) stop = n;
-
-    while (start <= n)
-    {
-            words.push_back (text.substr (start, stop-start));
-            start = stop+1;
-            stop = text.find_first_of (separators, start);
-            if (stop > n) stop = n;
-    }
-    return words;
-  };
-
-
-  auto nmeaHourToUnixTime = [explode] (const std::string& nmea_sentence) -> u_int32_t
-  {
-      std::vector< std::string > words = explode(nmea_sentence,",");
-      if(words.size() < 10 )
-          return -1;
-      uint32_t hour = atoi(words[1].substr(0,2).c_str());
-
-      uint32_t day = atoi(words[9].substr(0,2).c_str());
-      uint32_t mon = atoi(words[9].substr(2,2).c_str());
-      uint32_t year = atoi(words[9].substr(4,2).c_str());
-
-      time_t hour_time;
-      tm time_info;
-      memset(&time_info, 0, sizeof(time_info));
-      // Assumes year is between 2000 and 2099
-      time_info.tm_year = year + 100;
-      time_info.tm_mon = mon - 1;
-      time_info.tm_mday = day;
-      time_info.tm_hour = hour;
-      hour_time = timegm(&time_info);
-
-      return hour_time;
-  };
 
   velodyne_packet_structs::VelodynePositioningPacket vpp;
 
@@ -202,7 +202,7 @@ bool GpsImuDriver::handlePacket(velodyne_packet_structs::VelodynePositioningPack
   last_gps_timestamp_ = vppr.gps_timestamp;
 
   // Publish all topics with the same ROS time stamp.
-  auto topic_publish_time = ros::Time::now();
+  ros::Time topic_publish_time = ros::Time::now();
   // === Time Reference Message ===
   // Set the TimeReference time_ref with the re-constructed sensor time
   double sensor_scan_time = (double)hour_time_ + vpp.gps_timestamp ;
