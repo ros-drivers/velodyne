@@ -181,13 +181,15 @@ namespace velodyne_driver
    *  @param read_once read PCAP in a loop, unless false
    *  @param read_fast read PCAP at device rate, unless false
    *  @param repeat_delay time to wait before repeating PCAP data
+   *  @param use_pcap_time use PCAP time, unless false
    */
   InputPCAP::InputPCAP(ros::NodeHandle private_nh,
                        double packet_rate,
                        std::string filename,
                        bool read_once,
                        bool read_fast,
-                       double repeat_delay):
+                       double repeat_delay,
+                       bool use_pcap_time):
     Input(),
     packet_rate_(packet_rate)
   {
@@ -200,6 +202,7 @@ namespace velodyne_driver
     private_nh.param("read_once", read_once_, read_once);
     private_nh.param("read_fast", read_fast_, read_fast);
     private_nh.param("repeat_delay", repeat_delay_, repeat_delay);
+    private_nh.param("use_pcap_time", use_pcap_time_, use_pcap_time);
 
     if (read_once_)
       ROS_INFO("Read input file only once.");
@@ -246,7 +249,15 @@ namespace velodyne_driver
               packet_rate_.sleep();
             
             memcpy(&pkt->data[0], pkt_data+42, packet_size);
-            pkt->stamp = ros::Time(header->ts.tv_sec, header->ts.tv_usec * 1000);
+            if (use_pcap_time_)
+              {
+                pkt->stamp = ros::Time(header->ts.tv_sec,
+                                       header->ts.tv_usec * 1000);
+              }
+            else
+              {
+                pkt->stamp = ros::Time::now();
+              }
             empty_ = false;
             return 0;                   // success
           }

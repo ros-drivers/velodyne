@@ -45,6 +45,7 @@ Parameters:
    possible (default false).
  - \b ~input/repeat_delay (double): number of seconds to delay before
    repeating input file (default: 0.0).
+ - \b ~input/use_pcap_time (bool): if true, use PCAP time (default false).
 
 \section vdump_command Vdump Command
 

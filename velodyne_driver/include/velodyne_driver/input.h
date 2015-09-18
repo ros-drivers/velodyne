@@ -88,7 +88,8 @@ namespace velodyne_driver
               std::string filename="",
               bool read_once=false,
               bool read_fast=false,
-              double repeat_delay=0.0);
+              double repeat_delay=0.0,
+              bool use_pcap_time=false);
     ~InputPCAP();
 
     virtual int getPacket(velodyne_msgs::VelodynePacket *pkt);
@@ -103,6 +104,7 @@ namespace velodyne_driver
     bool read_once_;
     bool read_fast_;
     double repeat_delay_;
+    bool use_pcap_time_;
     ros::Rate packet_rate_;
     bpf_program pcap_filter_;
   };
