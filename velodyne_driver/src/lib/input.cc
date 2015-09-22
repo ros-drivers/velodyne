@@ -84,6 +84,12 @@ namespace velodyne_driver
     (void) close(sockfd_);
   }
 
+  void InputSocket::setDeviceIP(const std::string &ip)
+  {
+    devip_str_ = ip;
+    inet_aton(ip.c_str(),&devip_);
+  }
+
   /** @brief Get one velodyne packet. */
   int InputSocket::getPacket(velodyne_msgs::VelodynePacket *pkt)
   {
@@ -93,6 +99,9 @@ namespace velodyne_driver
     fds[0].fd = sockfd_;
     fds[0].events = POLLIN;
     static const int POLL_TIMEOUT = 1000; // one second (in msec)
+
+    sockaddr_in sender_address;
+    socklen_t sender_address_len = sizeof(sender_address);
 
     while (true)
       {
@@ -140,21 +149,27 @@ namespace velodyne_driver
         // Receive packets that should now be available from the
         // socket using a blocking read.
         ssize_t nbytes = recvfrom(sockfd_, &pkt->data[0],
-                                  packet_size,  0, NULL, NULL);
+                                  packet_size,  0,
+                                  (sockaddr*) &sender_address, &sender_address_len);
 
-	if (nbytes < 0)
-	  {
-            if (errno != EWOULDBLOCK)
- 	      {
-                perror("recvfail");
-		ROS_INFO("recvfail");
-                return 1;
-	      }
-	  }
-	else if ((size_t) nbytes == packet_size)
+        if (nbytes < 0)
           {
-            // read successful, done now
-            break;
+            if (errno != EWOULDBLOCK)
+              {
+                perror("recvfail");
+                ROS_INFO("recvfail");
+                return 1;
+              }
+          }
+        else if ((size_t) nbytes == packet_size)
+          {
+            // read successful,
+            // if packet is not from the lidar scanner we selected by IP,
+            // continue otherwise we are done
+            if( devip_str_ != "" && sender_address.sin_addr.s_addr != devip_.s_addr )
+              continue;
+            else
+              break; //done
           }
 
         ROS_DEBUG_STREAM("incomplete Velodyne packet read: "
@@ -225,6 +240,12 @@ namespace velodyne_driver
     pcap_close(pcap_);
   }
 
+  void InputPCAP::setDeviceIP(const std::string &ip)
+  {
+      std::string filter_str = "src host " + devip_str_ + " && udp src port 2368 && udp dst port 2368";
+      if( devip_str_ != "" )
+        pcap_compile(pcap_, &velodyne_pointdata_filter_, filter_str.c_str(), 1, PCAP_NETMASK_UNKNOWN);
+  }
 
   /** @brief Get one velodyne packet. */
   int InputPCAP::getPacket(velodyne_msgs::VelodynePacket *pkt)
@@ -237,6 +258,10 @@ namespace velodyne_driver
         int res;
         if ((res = pcap_next_ex(pcap_, &header, &pkt_data)) >= 0)
           {
+            // if packet is not from the lidar scanner we selected by IP, continue
+            if( !devip_str_.empty() && (pcap_offline_filter( &velodyne_pointdata_filter_, header, pkt_data ) == 0) )
+              continue;
+
             // Keep the reader from blowing through the file.
             if (read_fast_ == false)
               packet_rate_.sleep();
