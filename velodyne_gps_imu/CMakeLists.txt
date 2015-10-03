@@ -7,7 +7,6 @@ find_package(catkin REQUIRED COMPONENTS
   sensor_msgs
   nmea_msgs
   roscpp
-  std_msgs
 )
 
 

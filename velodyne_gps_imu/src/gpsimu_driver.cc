@@ -1,3 +1,12 @@
+/* -*- mode: C++ -*-
+ *
+ *  Copyright (C) 2015 Denis Dillenberger, Rich Mattes
+ *
+ *  License: Modified BSD Software License Agreement
+ *
+ *  $Id$
+ */
+
 #include "gpsimu_driver.h"
 
 #include <sensor_msgs/Imu.h>

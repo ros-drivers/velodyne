@@ -1,3 +1,13 @@
+/* -*- mode: C++ -*-
+ *
+ *  Copyright (C) 2015 Denis Dillenberger, Rich Mattes
+ *
+ *  License: Modified BSD Software License Agreement
+ *
+ *  $Id$
+ */
+
+
 #ifndef IMUGPS_NODE_H
 #define IMUGPS_NODE_H
 
