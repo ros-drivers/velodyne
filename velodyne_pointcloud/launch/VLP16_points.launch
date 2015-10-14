@@ -10,7 +10,7 @@
   <!-- declare arguments with default values -->
   <arg name="pcap" default="" />
   <arg name="calibration" default="$(find velodyne_pointcloud)/params/VLP16db.yaml"/>
-  <arg name="min_range" default="0.9" />
+  <arg name="min_range" default="0.4" />
   <arg name="max_range" default="130.0" />
 
   <!-- start nodelet manager and driver nodelets -->
