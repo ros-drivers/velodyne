@@ -55,6 +55,7 @@ namespace velodyne_rawdata
   static const float DISTANCE_RESOLUTION = 0.002f; /**< meters */
   static const float DISTANCE_MAX_UNITS = (DISTANCE_MAX
                                            / DISTANCE_RESOLUTION + 1.0);
+  /** @todo make this work for both big and little-endian machines */
   static const uint16_t UPPER_BANK = 0xeeff;
   static const uint16_t LOWER_BANK = 0xddff;
   

@@ -295,7 +295,17 @@ namespace velodyne_rawdata
     const raw_packet_t *raw = (const raw_packet_t *) &pkt.data[0];
 
     for (int block = 0; block < BLOCKS_PER_PACKET; block++) {
-      assert(0xEEFF == raw->blocks[block].header);
+
+      // ignore packets with mangled or otherwise different contents
+      if (UPPER_BANK != raw->blocks[block].header) {
+        // Do not flood the log with messages, only issue at most one
+        // of these warnings per minute.
+        ROS_WARN_STREAM_THROTTLE(60, "skipping invalid VLP-16 packet: block "
+                                 << block << " header value is "
+                                 << raw->blocks[block].header);
+        return;                         // bad packet: skip the rest
+      }
+
       azimuth = (float)(raw->blocks[block].rotation);
       if (block < (BLOCKS_PER_PACKET-1)){
         azimuth_diff = (float)((36000 + raw->blocks[block+1].rotation - raw->blocks[block].rotation)%36000);
