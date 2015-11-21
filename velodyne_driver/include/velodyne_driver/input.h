@@ -2,6 +2,7 @@
  *
  *  Copyright (C) 2007 Austin Robot Technology, Yaxin Liu, Patrick Beeson
  *  Copyright (C) 2009, 2010 Austin Robot Technology, Jack O'Quin
+ *  Copyright (C) 2015, Jack O'Quin
  *
  *  License: Modified BSD Software License Agreement
  *
@@ -18,7 +19,7 @@
  *
  *  Classes:
  *
- *     velodyne::Input -- pure virtual base class to access the data
+ *     velodyne::Input -- base class for accessing the data
  *                      independently of its source
  *
  *     velodyne::InputSocket -- derived class reads live data from the
@@ -41,13 +42,14 @@
 
 namespace velodyne_driver
 {
-  static uint16_t UDP_PORT_NUMBER = 2368;
+  static uint16_t DATA_PORT_NUMBER = 2368;     // default data port
+  static uint16_t POSITION_PORT_NUMBER = 8308; // default position port
 
-  /** @brief Pure virtual Velodyne input base class */
+  /** @brief Velodyne input base class */
   class Input
   {
   public:
-    Input() {}
+    Input(ros::NodeHandle private_nh, int port);
 
     /** @brief Read one Velodyne packet.
      *
@@ -59,13 +61,9 @@ namespace velodyne_driver
      */
     virtual int getPacket(velodyne_msgs::VelodynePacket *pkt) = 0;
 
-
-    /** @brief Set source IP, from where packets are accepted
-     *
-     * @param ip IP of a Velodyne LIDAR e.g. 192.168.51.70
-     */
-    virtual void setDeviceIP( const std::string& ip ) { devip_str_ = ip; }
   protected:
+    ros::NodeHandle private_nh_;
+    int port_;
     std::string devip_str_;
   };
 
@@ -73,14 +71,12 @@ namespace velodyne_driver
   class InputSocket: public Input
   {
   public:
-    InputSocket(ros::NodeHandle private_nh,
-                uint16_t udp_port = UDP_PORT_NUMBER);
+    InputSocket(ros::NodeHandle private_nh, int port);
     ~InputSocket();
 
     virtual int getPacket(velodyne_msgs::VelodynePacket *pkt);
-    void setDeviceIP( const std::string& ip );
-  private:
 
+  private:
     int sockfd_;
     in_addr devip_;
   };
@@ -94,29 +90,22 @@ namespace velodyne_driver
   class InputPCAP: public Input
   {
   public:
-    InputPCAP(ros::NodeHandle private_nh,
-              double packet_rate,
-              std::string filename="",
-              bool read_once=false,
-              bool read_fast=false,
-              double repeat_delay=0.0);
+    InputPCAP(ros::NodeHandle private_nh, int port,
+              double packet_rate, std::string filename="");
     ~InputPCAP();
 
     virtual int getPacket(velodyne_msgs::VelodynePacket *pkt);
-    void setDeviceIP( const std::string& ip );
 
   private:
-
+    ros::Rate packet_rate_;
     std::string filename_;
-    FILE *fp_;
     pcap_t *pcap_;
+    bpf_program pcap_packet_filter_;
     char errbuf_[PCAP_ERRBUF_SIZE];
     bool empty_;
     bool read_once_;
     bool read_fast_;
     double repeat_delay_;
-    ros::Rate packet_rate_;
-    bpf_program velodyne_pointdata_filter_;
   };
 
 } // velodyne_driver namespace
