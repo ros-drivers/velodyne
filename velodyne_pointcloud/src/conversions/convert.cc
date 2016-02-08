@@ -71,11 +71,54 @@ namespace velodyne_pointcloud
       {
         data_->unpack(scanMsg->packets[i], *outMsg);
       }
+    
+    // Rearrange the point cloud to render it organized.
+    organizePointCloud(outMsg, data_->getNumLasers());
 
     // publish the accumulated cloud message
     ROS_DEBUG_STREAM("Publishing " << outMsg->height * outMsg->width
                      << " Velodyne points, time: " << outMsg->header.stamp);
     output_.publish(outMsg);
+  }
+  
+  void Convert::organizePointCloud(
+      velodyne_rawdata::VPointCloud::Ptr pc, int numLasers)
+  {
+    // Rearrange only data coming from VLP-16.
+    if (numLasers != velodyne_rawdata::VLP16_SCANS_PER_FIRING)
+      return;
+    
+    // Allocate the organized point cloud.
+    int height = velodyne_rawdata::VLP16_SCANS_PER_FIRING;
+    int width  = pc->width*pc->height / height;
+    if (pc->width*pc->height % height > 0) {
+      width++;
+    }
+    
+    velodyne_rawdata::VPoint defaultPointValue;
+    defaultPointValue.x         = std::numeric_limits<float>::infinity();
+    defaultPointValue.y         = std::numeric_limits<float>::infinity();
+    defaultPointValue.z         = std::numeric_limits<float>::infinity();
+    defaultPointValue.intensity = 0.0f;
+    defaultPointValue.ring      = std::numeric_limits<uint16_t>::infinity();
+    
+    velodyne_rawdata::VPointCloud::Ptr organizedPc(
+          new velodyne_rawdata::VPointCloud(width, height, defaultPointValue));
+    organizedPc->header = pc->header;
+    
+    // Copy the given point cloud to the organized cloud.
+    for (int p = 0; p < pc->size(); ++p) {
+      
+      // Point clouds are organized from upper left to lower right.
+      // Compute the row and column of the point cloud.
+      int col     = p / velodyne_rawdata::VLP16_SCANS_PER_FIRING;
+      int laserId = p % velodyne_rawdata::VLP16_SCANS_PER_FIRING;
+      int row     = (30 - 15*(laserId%2) - laserId) / 2;
+      organizedPc->at(col, row) = pc->at(p);
+    }
+    
+    pc = organizedPc;
+    ROS_INFO_STREAM("w x h = " << pc->width << " x " << pc->height);
   }
 
 } // namespace velodyne_pointcloud

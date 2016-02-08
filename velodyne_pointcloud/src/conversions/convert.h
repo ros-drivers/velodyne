@@ -39,6 +39,13 @@ namespace velodyne_pointcloud
     void callback(velodyne_pointcloud::VelodyneConfigConfig &config,
                 uint32_t level);
     void processScan(const velodyne_msgs::VelodyneScan::ConstPtr &scanMsg);
+    
+    /// \brief Rearranges a given 1D point cloud and makes it an organized cloud.
+    /// \param[in;out] pc point cloud that is organized.
+    /// \param[in] numLasers number of laser beams of the Velodyne lidar in use.
+    /// \todo Currently only works for VLP-16. Add support for other models.
+    void organizePointCloud(velodyne_rawdata::VPointCloud::Ptr pc, 
+                            int numLasers);
 
     ///Pointer to dynamic reconfigure service srv_
     boost::shared_ptr<dynamic_reconfigure::Server<velodyne_pointcloud::
