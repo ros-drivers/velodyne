@@ -44,7 +44,7 @@ namespace velodyne_rawdata
 
   RawData::RawData() {}
   
-  /** Uppdate parameters: conversions and update */
+  /** Update parameters: conversions and update */
   void RawData::setParameters(double min_range,
                               double max_range,
                               double view_direction,
@@ -305,6 +305,7 @@ namespace velodyne_rawdata
         return;                         // bad packet: skip the rest
       }
 
+      // Calculate difference between current and next block's azimuth angle.
       azimuth = (float)(raw->blocks[block].rotation);
       if (block < (BLOCKS_PER_PACKET-1)){
         azimuth_diff = (float)((36000 + raw->blocks[block+1].rotation - raw->blocks[block].rotation)%36000);
@@ -335,6 +336,8 @@ namespace velodyne_rawdata
                ||(config_.min_angle > config_.max_angle 
                && (azimuth_corrected <= config_.max_angle 
                || azimuth_corrected >= config_.min_angle))){
+
+            // convert polar coordinates to Euclidean XYZ
             float distance = tmp.uint * DISTANCE_RESOLUTION;
             distance += corrections.dist_correction;
             
@@ -418,7 +421,6 @@ namespace velodyne_rawdata
             float z_coord = z;
     
             /** Intensity Calculation */
-    
             float min_intensity = corrections.min_intensity;
             float max_intensity = corrections.max_intensity;
     
@@ -435,15 +437,14 @@ namespace velodyne_rawdata
     
             if (pointInRange(distance)) {
     
-              // convert polar coordinates to Euclidean XYZ
+              // append this point to the cloud
               VPoint point;
               point.ring = corrections.laser_ring;
               point.x = x_coord;
               point.y = y_coord;
               point.z = z_coord;
               point.intensity = (uint8_t) intensity;
-    
-              // append this point to the cloud
+
               pc.points.push_back(point);
               ++pc.width;
             }
