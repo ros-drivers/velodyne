@@ -44,7 +44,7 @@ namespace velodyne_pointcloud
     /// \param[in;out] pc point cloud that is organized.
     /// \param[in] numLasers number of laser beams of the Velodyne lidar in use.
     /// \todo Currently only works for VLP-16. Add support for other models.
-    void organizePointCloud(velodyne_rawdata::VPointCloud::Ptr pc, 
+    void organizePointCloud(velodyne_rawdata::VPointCloud::Ptr& pc, 
                             int numLasers);
 
     ///Pointer to dynamic reconfigure service srv_

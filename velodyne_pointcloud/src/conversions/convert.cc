@@ -76,13 +76,13 @@ namespace velodyne_pointcloud
     organizePointCloud(outMsg, data_->getNumLasers());
 
     // publish the accumulated cloud message
-    ROS_DEBUG_STREAM("Publishing " << outMsg->height * outMsg->width
+    ROS_DEBUG_STREAM("Publishing " << outMsg->height << " x " <<  outMsg->width
                      << " Velodyne points, time: " << outMsg->header.stamp);
     output_.publish(outMsg);
   }
   
   void Convert::organizePointCloud(
-      velodyne_rawdata::VPointCloud::Ptr pc, int numLasers)
+      velodyne_rawdata::VPointCloud::Ptr& pc, int numLasers)
   {
     // Rearrange only data coming from VLP-16.
     if (numLasers != velodyne_rawdata::VLP16_SCANS_PER_FIRING)
@@ -111,14 +111,12 @@ namespace velodyne_pointcloud
       
       // Point clouds are organized from upper left to lower right.
       // Compute the row and column of the point cloud.
-      int col     = p / velodyne_rawdata::VLP16_SCANS_PER_FIRING;
-      int laserId = p % velodyne_rawdata::VLP16_SCANS_PER_FIRING;
-      int row     = (30 - 15*(laserId%2) - laserId) / 2;
+      int col = p / velodyne_rawdata::VLP16_SCANS_PER_FIRING;
+      int row = 15 - pc->at(p).ring;
       organizedPc->at(col, row) = pc->at(p);
     }
     
     pc = organizedPc;
-    ROS_INFO_STREAM("w x h = " << pc->width << " x " << pc->height);
   }
 
 } // namespace velodyne_pointcloud

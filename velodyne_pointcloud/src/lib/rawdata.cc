@@ -158,6 +158,8 @@ namespace velodyne_rawdata
              ||(config_.min_angle > config_.max_angle 
              && (raw->blocks[i].rotation <= config_.max_angle 
              || raw->blocks[i].rotation >= config_.min_angle))){
+          
+          // convert polar coordinates to Euclidean XYZ
           float distance = tmp.uint * DISTANCE_RESOLUTION;
           distance += corrections.dist_correction;
   
@@ -258,7 +260,7 @@ namespace velodyne_rawdata
   
           if (pointInRange(distance)) {
   
-            // convert polar coordinates to Euclidean XYZ
+            // append this point to the cloud
             VPoint point;
             point.ring = corrections.laser_ring;
             point.x = x_coord;
@@ -266,7 +268,6 @@ namespace velodyne_rawdata
             point.z = z_coord;
             point.intensity = (uint8_t) intensity;
   
-            // append this point to the cloud
             pc.points.push_back(point);
             ++pc.width;
           }
@@ -435,19 +436,27 @@ namespace velodyne_rawdata
             intensity = (intensity < min_intensity) ? min_intensity : intensity;
             intensity = (intensity > max_intensity) ? max_intensity : intensity;
     
+            // append this point to the cloud
+            VPoint point;
+            point.ring = corrections.laser_ring;
             if (pointInRange(distance)) {
-    
-              // append this point to the cloud
-              VPoint point;
-              point.ring = corrections.laser_ring;
+
               point.x = x_coord;
               point.y = y_coord;
               point.z = z_coord;
               point.intensity = (uint8_t) intensity;
-
-              pc.points.push_back(point);
-              ++pc.width;
             }
+            else {
+              
+              // If not in the specified range, set point to NaN.
+              point.x = std::numeric_limits<float>::infinity();
+              point.y = std::numeric_limits<float>::infinity();
+              point.z = std::numeric_limits<float>::infinity();
+              point.intensity = 0u;
+            }
+
+            pc.points.push_back(point);
+            ++pc.width;
           }
         }
       }
