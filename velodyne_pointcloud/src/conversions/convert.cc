@@ -91,16 +91,14 @@ namespace velodyne_pointcloud
     // Allocate the organized point cloud.
     int height = velodyne_rawdata::VLP16_SCANS_PER_FIRING;
     int width  = pc->width*pc->height / height;
-    if (pc->width*pc->height % height > 0) {
-      width++;
-    }
+    if (pc->width*pc->height % height > 0) { width++; }
     
     velodyne_rawdata::VPoint defaultPointValue;
     defaultPointValue.x         = std::numeric_limits<float>::infinity();
     defaultPointValue.y         = std::numeric_limits<float>::infinity();
     defaultPointValue.z         = std::numeric_limits<float>::infinity();
     defaultPointValue.intensity = 0.0f;
-    defaultPointValue.ring      = std::numeric_limits<uint16_t>::infinity();
+    defaultPointValue.ring      = std::numeric_limits<uint16_t>::max();
     
     velodyne_rawdata::VPointCloud::Ptr organizedPc(
           new velodyne_rawdata::VPointCloud(width, height, defaultPointValue));
@@ -112,7 +110,7 @@ namespace velodyne_pointcloud
       // Point clouds are organized from upper left to lower right.
       // Compute the row and column of the point cloud.
       int col = p / velodyne_rawdata::VLP16_SCANS_PER_FIRING;
-      int row = 15 - pc->at(p).ring;
+      int row = velodyne_rawdata::VLP16_SCANS_PER_FIRING-1 - pc->at(p).ring;
       organizedPc->at(col, row) = pc->at(p);
     }
     
