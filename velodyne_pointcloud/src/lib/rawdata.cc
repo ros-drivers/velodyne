@@ -275,6 +275,14 @@ namespace velodyne_rawdata
     }
   }
   
+  ReturnMode RawData::getReturnMode(const velodyne_msgs::VelodynePacket& pkt)
+  {
+    const raw_packet_t* raw = (const raw_packet_t*)&pkt.data[0];
+    
+    // Read scanner's return mode from factory bytes.
+    return (ReturnMode)raw->status[PACKET_STATUS_SIZE-2];    
+  }
+  
   void RawData::unpack_vlp16(const velodyne_msgs::VelodynePacket &pkt,
                              VPointCloud &pc)
   {
@@ -283,9 +291,6 @@ namespace velodyne_rawdata
     float last_azimuth_diff;
 
     const raw_packet_t *raw = (const raw_packet_t *) &pkt.data[0];
-
-    // Read scanner's return mode from factory bytes.
-    ReturnMode return_mode = (ReturnMode)raw->status[PACKET_STATUS_SIZE-2];
 
     // Process the packet's blocks.
     for (int block = 0; block < BLOCKS_PER_PACKET; block++) {
