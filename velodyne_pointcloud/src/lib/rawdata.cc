@@ -284,11 +284,8 @@ namespace velodyne_rawdata
 
     const raw_packet_t *raw = (const raw_packet_t *) &pkt.data[0];
 
-    // Read scanner's return mode from factory bytes:
-    // 0x37 ... strongest return
-    // 0x38 ... last return
-    // 0x39 ... dual return
-    uint8_t return_mode = raw->status[PACKET_STATUS_SIZE-2];
+    // Read scanner's return mode from factory bytes.
+    ReturnMode return_mode = (ReturnMode)raw->status[PACKET_STATUS_SIZE-2];
 
     // Process the packet's blocks.
     for (int block = 0; block < BLOCKS_PER_PACKET; block++) {
