@@ -290,6 +290,7 @@ namespace velodyne_rawdata
     // 0x39 ... dual return
     uint8_t return_mode = raw->status[PACKET_STATUS_SIZE-2];
 
+    // Process the packet's blocks.
     for (int block = 0; block < BLOCKS_PER_PACKET; block++) {
 
       // ignore packets with mangled or otherwise different contents
@@ -311,8 +312,9 @@ namespace velodyne_rawdata
         azimuth_diff = last_azimuth_diff;
       }
 
-      for (int firing=0, k=0; firing < VLP16_FIRINGS_PER_BLOCK; firing++){
-        read_firing_vlp16(raw->blocks[block].data, azimuth, azimuth_diff, pc);
+      for (int firing=0; firing < VLP16_FIRINGS_PER_BLOCK; firing++){
+        read_firing_vlp16(raw->blocks[block].data + firing*VLP16_SCANS_PER_FIRING*RAW_SCAN_SIZE, 
+                          azimuth, azimuth_diff, pc);
       }
     }
   }
@@ -321,15 +323,14 @@ namespace velodyne_rawdata
                                   float azimuth, float azimuth_diff,
                                   VPointCloud &pc)
   {
-    int k = 0;int firing=0;
-    for (int dsr=0; dsr < VLP16_SCANS_PER_FIRING; dsr++, k+=RAW_SCAN_SIZE){
+    for (int dsr=0; dsr < VLP16_SCANS_PER_FIRING; dsr++){
       velodyne_pointcloud::LaserCorrection &corrections = 
         calibration_.laser_corrections[dsr];
 
       /** Position Calculation */
       union two_bytes tmp;
-      tmp.bytes[0] = data[k];
-      tmp.bytes[1] = data[k+1];
+      tmp.bytes[0] = data[dsr*RAW_SCAN_SIZE];
+      tmp.bytes[1] = data[dsr*RAW_SCAN_SIZE + 1];
       
       /** correct for the laser rotation as a function of timing during the firings **/
       float azimuth_corrected_f = azimuth + (dsr*VLP16_DSR_TOFFSET) * (azimuth_diff/VLP16_FIRING_TOFFSET);
@@ -430,7 +431,7 @@ namespace velodyne_rawdata
         float min_intensity = corrections.min_intensity;
         float max_intensity = corrections.max_intensity;
 
-        float intensity = data[k+2];
+        float intensity = data[dsr*RAW_SCAN_SIZE + 2];
 
         float focal_offset = 256 
                            * (1 - corrections.focal_distance / 13100) 
