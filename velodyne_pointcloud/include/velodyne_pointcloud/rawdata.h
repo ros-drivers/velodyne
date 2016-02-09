@@ -166,7 +166,21 @@ namespace velodyne_rawdata
     float cos_rot_table_[ROTATION_MAX_UNITS];
     
     /** add private function to handle the VLP16 **/ 
+    /** @brief convert raw VLP16 packet to point cloud
+     *
+     *  @param pkt raw packet to unpack
+     *  @param pc shared pointer to point cloud (points are appended)
+     */
     void unpack_vlp16(const velodyne_msgs::VelodynePacket &pkt, VPointCloud &pc);
+    
+    /// \brief Read one VLP-16 firing sequence (half a block).
+    /// \param[in] data pointer to first range-intensity data element.
+    /// \param[in] azimuth azimuth angle of first data element.
+    /// \param[in] azimuth_diff azimuth difference to first element of next firing.
+    /// \param[out] pc point cloud to which the read points are appended.
+    void read_firing_vlp16(const uint8_t* data, 
+                           float azimuth, float azimuth_diff,
+                           VPointCloud &pc);
 
     /** in-line test whether a point is in range */
     bool pointInRange(float range)
