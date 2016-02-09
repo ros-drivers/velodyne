@@ -283,6 +283,14 @@ namespace velodyne_rawdata
     return (ReturnMode)raw->status[PACKET_STATUS_SIZE-2];    
   }
   
+  SensorModel RawData::getSensorModel(const velodyne_msgs::VelodynePacket& pkt)
+  {
+    const raw_packet_t* raw = (const raw_packet_t*)&pkt.data[0];
+   
+    // Read the scanner model from factory bytes.
+    return (SensorModel)raw->status[PACKET_STATUS_SIZE-1];
+  }
+  
   void RawData::unpack_vlp16(const velodyne_msgs::VelodynePacket &pkt,
                              VPointCloud &pc)
   {

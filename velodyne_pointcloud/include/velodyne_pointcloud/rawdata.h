@@ -66,6 +66,11 @@ namespace velodyne_rawdata
     Dual      = 0x39
   };
   
+  enum SensorModel {
+    Hdl32e  = 0x21,
+    Vlp16   = 0x22
+  };
+  
   /** Special Defines for VLP16 support **/
   static const int    VLP16_FIRINGS_PER_BLOCK =   2;
   static const int    VLP16_SCANS_PER_FIRING  =  16;
@@ -149,7 +154,15 @@ namespace velodyne_rawdata
     void setParameters(double min_range, double max_range, double view_direction,
                        double view_width);
     
-    ReturnMode getReturnMode(const velodyne_msgs::VelodynePacket& pkt);
+    /// \brief Returns the mode of operation of the laser scanner.
+    /// \note For this feature to work, the sensor must run at least firmware
+    ///   version 3.0.23.0.
+    static ReturnMode getReturnMode(const velodyne_msgs::VelodynePacket& pkt);
+    
+    /// \brief Returns the sensor model.
+    /// \note For this feature to work, the sensor must run at least firmware
+    ///   version 3.0.23.0.
+    static SensorModel getSensorModel(const velodyne_msgs::VelodynePacket& pkt);
 
   private:
 
