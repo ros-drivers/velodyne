@@ -66,11 +66,48 @@ namespace velodyne_rawdata
     Dual      = 0x39
   };
   
+  inline std::ostream& operator<<(std::ostream& os, ReturnMode mode)
+  {
+    switch (mode)
+    {
+    case Strongest:
+      os << "strongest"; 
+      break;
+    case Last:
+      os << "last"; 
+      break;
+    case Dual:
+      os << "dual";
+      break;
+    default:
+      os << "[unknown return mode]";
+    }
+    
+    return os;
+  }
+  
   enum SensorModel {
     Hdl32e  = 0x21,
     Vlp16   = 0x22
   };
   
+  inline std::ostream& operator<<(std::ostream& os, SensorModel model)
+  {
+    switch (model)
+    {
+    case Hdl32e:
+      os << "HDL-32E";
+      break;
+    case Vlp16:
+      os << "VLP-16";
+      break;
+    default:
+      os << "[unknown sensor model]";
+    }
+    
+    return os;
+  }
+   
   /** Special Defines for VLP16 support **/
   static const int    VLP16_FIRINGS_PER_BLOCK =   2;
   static const int    VLP16_SCANS_PER_FIRING  =  16;

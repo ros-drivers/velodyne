@@ -80,8 +80,9 @@ namespace velodyne_pointcloud
 
     // Only for VLP-16 in dual-return mode: process two messages at once 
     // to capture a full scanner revolution.
-    if (getSensorModel(scanMsg->packets[0])   == Vlp16
-        && getReturnMode(scanMsg->packets[0]) == Dual) {
+    SensorModel model = getSensorModel(scanMsg->packets[0]);
+    ReturnMode  mode  = getReturnMode(scanMsg->packets[0]);
+    if (model == Vlp16 && mode == Dual) {
       if (bufferedMsg_) {
         // Insert the buffered message into the current one.
         outMsg->insert(outMsg->begin(), bufferedMsg_->begin(), bufferedMsg_->end());
@@ -94,8 +95,10 @@ namespace velodyne_pointcloud
     }
 
     // publish the accumulated cloud message
-    ROS_DEBUG_STREAM("Publishing " << outMsg->height * outMsg->width
-                     << " Velodyne points, time: " << outMsg->header.stamp);
+    ROS_DEBUG_STREAM("Publishing " << outMsg->height * outMsg->width << "points "
+                     << "from " << model << " "
+                     << "in " << mode << " return mode, "
+                     << "time: " << outMsg->header.stamp);
     output_.publish(outMsg);
   }
 
