@@ -47,11 +47,6 @@ namespace velodyne_pointcloud
     tf_filter_->registerCallback(boost::bind(&Transform::processScan, this, _1));
   }
 
-  /** @brief Callback for raw scan messages.
-   *
-   *  @pre TF message filter has already waited until the transform to
-   *       the configured @c frame_id can succeed.
-   */
   void
     Transform::processScan(const velodyne_msgs::VelodyneScan::ConstPtr &scanMsg)
   {

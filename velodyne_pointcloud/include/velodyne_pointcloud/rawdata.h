@@ -127,6 +127,26 @@ namespace velodyne_rawdata
     uint16_t revolution;
     uint8_t status[PACKET_STATUS_SIZE]; 
   } raw_packet_t;
+  
+  /// \brief Returns the return mode of the laser scanner.
+  /// \note Requires Velodyne sensor firmware version 3.0.23.0 or higher.
+  static ReturnMode getReturnMode(const velodyne_msgs::VelodynePacket& pkt)
+  {
+    const raw_packet_t* raw = (const raw_packet_t*)&pkt.data[0];
+    
+    // Read scanner's return mode from factory bytes.
+    return (ReturnMode)raw->status[PACKET_STATUS_SIZE-2];    
+  }
+  
+  /// \brief Returns the sensor model.
+  /// \note Requires Velodyne sensor firmware version 3.0.23.0 or higher.
+  static SensorModel getSensorModel(const velodyne_msgs::VelodynePacket& pkt)
+  {
+    const raw_packet_t* raw = (const raw_packet_t*)&pkt.data[0];
+   
+    // Read the scanner model from factory bytes.
+    return (SensorModel)raw->status[PACKET_STATUS_SIZE-1];
+  }
 
   /** \brief Velodyne data conversion class */
   class RawData
@@ -149,21 +169,17 @@ namespace velodyne_rawdata
      */
     int setup(ros::NodeHandle private_nh);
 
+    /** @brief convert raw packet to point cloud
+     *
+     *  @param pkt raw packet to unpack
+     *  @param pc shared pointer to point cloud (points are appended)
+     *  @param[out] m return mode of the laser scanner: last, strongest, or dual
+     */
     void unpack(const velodyne_msgs::VelodynePacket &pkt, VPointCloud &pc);
     
     void setParameters(double min_range, double max_range, double view_direction,
                        double view_width);
     
-    /// \brief Returns the mode of operation of the laser scanner.
-    /// \note For this feature to work, the sensor must run at least firmware
-    ///   version 3.0.23.0.
-    static ReturnMode getReturnMode(const velodyne_msgs::VelodynePacket& pkt);
-    
-    /// \brief Returns the sensor model.
-    /// \note For this feature to work, the sensor must run at least firmware
-    ///   version 3.0.23.0.
-    static SensorModel getSensorModel(const velodyne_msgs::VelodynePacket& pkt);
-
   private:
 
     /** configuration parameters */
@@ -193,15 +209,6 @@ namespace velodyne_rawdata
      *  @param pc shared pointer to point cloud (points are appended)
      */
     void unpack_vlp16(const velodyne_msgs::VelodynePacket &pkt, VPointCloud &pc);
-    
-    /// \brief Read one VLP-16 firing sequence (half a block).
-    /// \param[in] data pointer to first range-intensity data element.
-    /// \param[in] azimuth azimuth angle of first data element.
-    /// \param[in] azimuth_diff azimuth difference to first element of next firing.
-    /// \param[out] pc point cloud to which the read points are appended.
-    void read_firing_vlp16(const uint8_t* data, 
-                           float azimuth, float azimuth_diff,
-                           VPointCloud &pc);
 
     /** in-line test whether a point is in range */
     bool pointInRange(float range)

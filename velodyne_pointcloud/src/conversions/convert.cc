@@ -55,22 +55,43 @@ namespace velodyne_pointcloud
   /** @brief Callback for raw scan messages. */
   void Convert::processScan(const velodyne_msgs::VelodyneScan::ConstPtr &scanMsg)
   {
+    using namespace velodyne_rawdata;
+    
     if (output_.getNumSubscribers() == 0)         // no one listening?
       return;                                     // avoid much work
 
     // allocate a point cloud with same time and frame ID as raw data
-    velodyne_rawdata::VPointCloud::Ptr
-      outMsg(new velodyne_rawdata::VPointCloud());
+    VPointCloud::Ptr
+      outMsg(new VPointCloud());
     // outMsg's header is a pcl::PCLHeader, convert it before stamp assignment
     outMsg->header.stamp = pcl_conversions::toPCL(scanMsg->header).stamp;
     outMsg->header.frame_id = scanMsg->header.frame_id;
     outMsg->height = 1;
+    
+    // If the message contains no packets, return an empty point cloud.
+    if (scanMsg->packets.size() < 1) {
+      output_.publish(outMsg);
+      return;
+    }
 
     // process each packet provided by the driver
     for (size_t i = 0; i < scanMsg->packets.size(); ++i)
-      {
-        data_->unpack(scanMsg->packets[i], *outMsg);
+      data_->unpack(scanMsg->packets[i], *outMsg);
+
+    // Only for VLP-16 in dual-return mode: process two messages at once 
+    // to capture a full scanner revolution.
+    if (getSensorModel(scanMsg->packets[0])   == Vlp16
+        && getReturnMode(scanMsg->packets[0]) == Dual) {
+      if (bufferedMsg_) {
+        // Insert the buffered message into the current one.
+        outMsg->insert(outMsg->begin(), bufferedMsg_->begin(), bufferedMsg_->end());
+        outMsg->header = bufferedMsg_->header;
+        bufferedMsg_.reset();
+      } else {
+        bufferedMsg_ = outMsg;
+        return;
       }
+    }
 
     // publish the accumulated cloud message
     ROS_DEBUG_STREAM("Publishing " << outMsg->height * outMsg->width
