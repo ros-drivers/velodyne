@@ -95,7 +95,7 @@ namespace velodyne_pointcloud
     }
 
     // publish the accumulated cloud message
-    ROS_DEBUG_STREAM("Publishing " << outMsg->height * outMsg->width << "points "
+    ROS_DEBUG_STREAM("Publishing " << outMsg->height << " x " << outMsg->width << "points "
                      << "from " << model << " "
                      << "in " << mode << " return mode, "
                      << "time: " << outMsg->header.stamp);
