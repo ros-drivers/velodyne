@@ -18,6 +18,7 @@
 */
 
 #include "transform.h"
+#include "convert.h"
 
 #include <pcl_conversions/pcl_conversions.h>
 
@@ -66,7 +67,7 @@ namespace velodyne_pointcloud
 
     // process each packet provided by the driver
     for (size_t next = 0; next < scanMsg->packets.size(); ++next)
-      {
+    {
         // clear input point cloud to handle this packet
         inPc_.points.clear();
         inPc_.width = 0;
@@ -89,7 +90,7 @@ namespace velodyne_pointcloud
 
         // transform the packet point cloud into the target frame
         try
-          {
+        {
             ROS_DEBUG_STREAM("transforming from" << inPc_.header.frame_id
                              << " to " << config_.frame_id);
             pcl_ros::transformPointCloud(config_.frame_id, inPc_, tfPc_,
@@ -100,20 +101,23 @@ namespace velodyne_pointcloud
                                          config_.frame_id,
                                          tfPc_, listener_);
 #endif
-          }
+        }
         catch (tf::TransformException &ex)
-          {
+        {
             // only log tf error once every 100 times
             ROS_WARN_THROTTLE(100, "%s", ex.what());
             continue;                   // skip this packet
-          }
+        }
 
         // append transformed packet data to end of output message
         outMsg->points.insert(outMsg->points.end(),
                              tfPc_.points.begin(),
                              tfPc_.points.end());
         outMsg->width += tfPc_.points.size();
-      }
+    }
+    
+    // Rearrange the point cloud to render it organized.
+    Convert::organizePointCloud(outMsg, data_->getNumLasers());
 
     // publish the accumulated cloud message
     ROS_DEBUG_STREAM("Publishing " << outMsg->height * outMsg->width
