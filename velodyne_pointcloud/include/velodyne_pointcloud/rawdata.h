@@ -61,9 +61,10 @@ namespace velodyne_rawdata
   static const uint16_t LOWER_BANK = 0xddff;
   
   enum ReturnMode {
-    Strongest = 0x37,
-    Last      = 0x38,
-    Dual      = 0x39
+    UnknownMode   = 0x00,
+    Strongest     = 0x37,
+    Last          = 0x38,
+    Dual          = 0x39
   };
   
   inline std::ostream& operator<<(std::ostream& os, ReturnMode mode)
@@ -71,14 +72,11 @@ namespace velodyne_rawdata
     switch (mode)
     {
     case Strongest:
-      os << "strongest"; 
-      break;
+      os << "strongest";  break;
     case Last:
-      os << "last"; 
-      break;
+      os << "last";       break;
     case Dual:
-      os << "dual";
-      break;
+      os << "dual";       break;
     default:
       os << "[unknown return mode]";
     }
@@ -87,8 +85,10 @@ namespace velodyne_rawdata
   }
   
   enum SensorModel {
-    Hdl32e  = 0x21,
-    Vlp16   = 0x22
+    UnknownModel  = 0x00,
+    Hdl32e        = 0x21,
+    Vlp16         = 0x22,
+    Hdl64e
   };
   
   inline std::ostream& operator<<(std::ostream& os, SensorModel model)
@@ -96,11 +96,11 @@ namespace velodyne_rawdata
     switch (model)
     {
     case Hdl32e:
-      os << "HDL-32E";
-      break;
+      os << "HDL-32E";  break;
     case Vlp16:
-      os << "VLP-16";
-      break;
+      os << "VLP-16";   break;
+    case Hdl64e:
+      os << "HDL-64E";  break;
     default:
       os << "[unknown sensor model]";
     }
@@ -165,25 +165,6 @@ namespace velodyne_rawdata
     uint8_t status[PACKET_STATUS_SIZE]; 
   } raw_packet_t;
   
-  /// \brief Returns the return mode of the laser scanner.
-  /// \note Requires Velodyne sensor firmware version 3.0.23.0 or higher.
-  static ReturnMode getReturnMode(const velodyne_msgs::VelodynePacket& pkt)
-  {
-    const raw_packet_t* raw = (const raw_packet_t*)&pkt.data[0];
-    
-    // Read scanner's return mode from factory bytes.
-    return (ReturnMode)raw->status[PACKET_STATUS_SIZE-2];    
-  }
-  
-  /// \brief Returns the sensor model.
-  /// \note Requires Velodyne sensor firmware version 3.0.23.0 or higher.
-  static SensorModel getSensorModel(const velodyne_msgs::VelodynePacket& pkt)
-  {
-    const raw_packet_t* raw = (const raw_packet_t*)&pkt.data[0];
-   
-    // Read the scanner model from factory bytes.
-    return (SensorModel)raw->status[PACKET_STATUS_SIZE-1];
-  }
 
   /** \brief Velodyne data conversion class */
   class RawData
@@ -216,6 +197,13 @@ namespace velodyne_rawdata
     
     void setParameters(double min_range, double max_range, double view_direction,
                        double view_width);
+    
+    /// \brief Reads scanner's return mode from given packet's factory bytes.
+    /// \note Supports only VLP-16 with firmware version 3.0.23.0 or higher.
+    ReturnMode getReturnMode(const velodyne_msgs::VelodynePacket& pkt);
+    
+    /// \brief Reads the sensor model from number of lasers in calibration.
+    SensorModel getSensorModel();
     
   private:
 
