@@ -200,10 +200,10 @@ namespace velodyne_rawdata
     
     /// \brief Reads scanner's return mode from given packet's factory bytes.
     /// \note Supports only VLP-16 with firmware version 3.0.23.0 or higher.
-    ReturnMode getReturnMode(const velodyne_msgs::VelodynePacket& pkt);
+    ReturnMode getReturnMode(const velodyne_msgs::VelodynePacket& pkt) const;
     
     /// \brief Reads the sensor model from number of lasers in calibration.
-    SensorModel getSensorModel();
+    SensorModel getSensorModel() const;
     
   private:
 

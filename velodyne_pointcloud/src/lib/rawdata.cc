@@ -106,9 +106,8 @@ namespace velodyne_rawdata
    return 0;
   }
   
-  ReturnMode RawData::getReturnMode(const velodyne_msgs::VelodynePacket& pkt)
+  ReturnMode RawData::getReturnMode(const velodyne_msgs::VelodynePacket& pkt) const
   {
-    // Read scanner's return mode from factory bytes only for VLP-16.
     if (getSensorModel() == Vlp16) {
       const raw_packet_t* raw = (const raw_packet_t*)&pkt.data[0];
       return (ReturnMode)raw->status[PACKET_STATUS_SIZE-2];    
@@ -116,7 +115,7 @@ namespace velodyne_rawdata
       return UnknownMode;
   }
   
-  SensorModel RawData::getSensorModel()
+  SensorModel RawData::getSensorModel() const
   {     
     switch (calibration_.num_lasers)
     {
