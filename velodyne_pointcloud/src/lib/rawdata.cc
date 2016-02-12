@@ -105,6 +105,31 @@ namespace velodyne_rawdata
     }
    return 0;
   }
+  
+  ReturnMode RawData::getReturnMode(const velodyne_msgs::VelodynePacket& pkt)
+  {
+    // Read scanner's return mode from factory bytes only for VLP-16.
+    if (getSensorModel() == Vlp16) {
+      const raw_packet_t* raw = (const raw_packet_t*)&pkt.data[0];
+      return (ReturnMode)raw->status[PACKET_STATUS_SIZE-2];    
+    } else 
+      return UnknownMode;
+  }
+  
+  SensorModel RawData::getSensorModel()
+  {     
+    switch (calibration_.num_lasers)
+    {
+    case 16:
+      return Vlp16;
+    case 32:
+      return Hdl32e;
+    case 64:
+      return Hdl64e;
+    default:
+      return UnknownModel;
+    }
+  }
 
   void RawData::unpack(const velodyne_msgs::VelodynePacket &pkt,
                        VPointCloud &pc)

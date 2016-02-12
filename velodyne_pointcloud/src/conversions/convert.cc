@@ -80,8 +80,8 @@ namespace velodyne_pointcloud
 
     // Only for VLP-16 in dual-return mode: process two messages at once 
     // to capture a full scanner revolution.
-    SensorModel model = getSensorModel(scanMsg->packets[0]);
-    ReturnMode  mode  = getReturnMode(scanMsg->packets[0]);
+    SensorModel model = data_->getSensorModel();
+    ReturnMode  mode  = data_->getReturnMode(scanMsg->packets[0]);
     if (model == Vlp16 && mode == Dual) {
       if (bufferedMsg_) {
         // Insert the buffered message into the current one.
