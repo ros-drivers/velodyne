@@ -62,6 +62,7 @@ namespace velodyne_pointcloud
     message_filters::Subscriber<velodyne_msgs::VelodyneScan> velodyne_scan_;
     tf::MessageFilter<velodyne_msgs::VelodyneScan> *tf_filter_;
     ros::Publisher output_;
+    velodyne_rawdata::VPointCloud::Ptr bufferedMsg_;
     tf::TransformListener listener_;
 
     /// configuration parameters
