@@ -58,6 +58,12 @@ namespace velodyne_pointcloud
     outMsg->header.stamp = pcl_conversions::toPCL(scanMsg->header).stamp;
     outMsg->header.frame_id = config_.frame_id;
     outMsg->height = 1;
+    
+    // If the message contains no packets, return an empty point cloud.
+    if (scanMsg->packets.size() < 1) {
+      output_.publish(outMsg);
+      return;
+    }
 
     // process each packet provided by the driver
     for (size_t next = 0; next < scanMsg->packets.size(); ++next)
