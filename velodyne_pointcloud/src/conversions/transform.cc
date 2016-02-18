@@ -90,7 +90,7 @@ namespace velodyne_pointcloud
         // transform the packet point cloud into the target frame
         try
           {
-            ROS_DEBUG_STREAM("transforming from" << inPc_.header.frame_id
+            ROS_DEBUG_STREAM("transforming from " << inPc_.header.frame_id
                              << " to " << config_.frame_id);
             pcl_ros::transformPointCloud(config_.frame_id, inPc_, tfPc_,
                                          listener_);
