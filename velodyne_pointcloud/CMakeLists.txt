@@ -10,7 +10,9 @@ set(${PROJECT_NAME}_CATKIN_DEPS
     sensor_msgs
     tf
     velodyne_driver
-    velodyne_msgs)
+    velodyne_msgs
+    dynamic_reconfigure
+)
 
 find_package(catkin REQUIRED COMPONENTS
              ${${PROJECT_NAME}_CATKIN_DEPS} pcl_conversions)
@@ -28,13 +30,16 @@ find_library(YAML_CPP_LIBRARY
              PATHS ${YAML_CPP_LIBRARY_DIRS})
              
 generate_dynamic_reconfigure_options(
-  cfg/VelodyneConfig.cfg)
+  cfg/CloudNode.cfg cfg/TransformNode.cfg
+)
 
 if(NOT ${YAML_CPP_VERSION} VERSION_LESS "0.5")
 add_definitions(-DHAVE_NEW_YAMLCPP)
 endif(NOT ${YAML_CPP_VERSION} VERSION_LESS "0.5")
 
-include_directories(include ${catkin_INCLUDE_DIRS})
+include_directories(include ${catkin_INCLUDE_DIRS} 
+  ${dynamic_reconfigure_PACKAGE_PATH}/cmake/cfgbuild.cmake
+)
 
 catkin_package(
     CATKIN_DEPENDS ${${PROJECT_NAME}_CATKIN_DEPS}

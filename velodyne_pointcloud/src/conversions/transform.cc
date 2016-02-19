@@ -38,6 +38,13 @@ namespace velodyne_pointcloud
     output_ =
       node.advertise<sensor_msgs::PointCloud2>("velodyne_points", 10);
 
+    srv_ = boost::make_shared <dynamic_reconfigure::Server<velodyne_pointcloud::
+      TransformNodeConfig> > (private_nh);
+    dynamic_reconfigure::Server<velodyne_pointcloud::TransformNodeConfig>::
+      CallbackType f;
+    f = boost::bind (&Transform::callback, this, _1, _2);
+    srv_->setCallback (f);
+    
     // subscribe to VelodyneScan packets using transform filter
     velodyne_scan_.subscribe(node, "velodyne_packets", 10);
     tf_filter_ =
@@ -45,6 +52,15 @@ namespace velodyne_pointcloud
                                                          listener_,
                                                          config_.frame_id, 10);
     tf_filter_->registerCallback(boost::bind(&Transform::processScan, this, _1));
+  }
+  
+  void Transform::callback(velodyne_pointcloud::TransformNodeConfig &config,
+                uint32_t level)
+  {
+    ROS_INFO("Reconfigure Request");
+    data_->setParameters(config.min_range, config.max_range, 
+                         config.view_direction, config.view_width);
+    config_.frame_id = config.frame_id;
   }
 
   /** @brief Callback for raw scan messages.
