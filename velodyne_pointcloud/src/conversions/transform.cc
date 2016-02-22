@@ -25,13 +25,10 @@ namespace velodyne_pointcloud
 {
   /** @brief Constructor. */
   Transform::Transform(ros::NodeHandle node, ros::NodeHandle private_nh):
-    data_(new velodyne_rawdata::RawData())
+    data_(new velodyne_rawdata::RawData()),
+    tf_prefix_(tf::getPrefixParam(private_nh))
   {
-    private_nh.param("frame_id", config_.frame_id, std::string("odom"));
-    std::string tf_prefix = tf::getPrefixParam(private_nh);
-    config_.frame_id = tf::resolve(tf_prefix, config_.frame_id);
-    ROS_INFO_STREAM("target frame ID: " << config_.frame_id);
-
+    // Read calibration.
     data_->setup(private_nh);
 
     // advertise output point cloud (before subscribing to input data)
@@ -42,7 +39,7 @@ namespace velodyne_pointcloud
       TransformNodeConfig> > (private_nh);
     dynamic_reconfigure::Server<velodyne_pointcloud::TransformNodeConfig>::
       CallbackType f;
-    f = boost::bind (&Transform::callback, this, _1, _2);
+    f = boost::bind (&Transform::reconfigure_callback, this, _1, _2);
     srv_->setCallback (f);
     
     // subscribe to VelodyneScan packets using transform filter
@@ -54,13 +51,14 @@ namespace velodyne_pointcloud
     tf_filter_->registerCallback(boost::bind(&Transform::processScan, this, _1));
   }
   
-  void Transform::callback(velodyne_pointcloud::TransformNodeConfig &config,
-                uint32_t level)
+  void Transform::reconfigure_callback(
+      velodyne_pointcloud::TransformNodeConfig &config, uint32_t level)
   {
-    ROS_INFO("Reconfigure Request");
+    ROS_INFO_STREAM("Reconfigure request.");
     data_->setParameters(config.min_range, config.max_range, 
                          config.view_direction, config.view_width);
-    config_.frame_id = config.frame_id;
+    config_.frame_id = tf::resolve(tf_prefix_, config.frame_id);
+    ROS_INFO_STREAM("Target frame ID: " << config_.frame_id);
   }
 
   /** @brief Callback for raw scan messages.

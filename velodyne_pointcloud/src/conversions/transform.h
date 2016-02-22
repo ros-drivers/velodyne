@@ -59,9 +59,10 @@ namespace velodyne_pointcloud
     ///Pointer to dynamic reconfigure service srv_
     boost::shared_ptr<dynamic_reconfigure::Server<velodyne_pointcloud::
       TransformNodeConfig> > srv_;
-    void callback(velodyne_pointcloud::TransformNodeConfig &config,
+    void reconfigure_callback(velodyne_pointcloud::TransformNodeConfig &config,
                   uint32_t level);
     
+    const std::string tf_prefix_;
     boost::shared_ptr<velodyne_rawdata::RawData> data_;
     message_filters::Subscriber<velodyne_msgs::VelodyneScan> velodyne_scan_;
     tf::MessageFilter<velodyne_msgs::VelodyneScan> *tf_filter_;
