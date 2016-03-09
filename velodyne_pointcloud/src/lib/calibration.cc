@@ -73,11 +73,17 @@ namespace velodyne_pointcloud
     node[DIST_CORRECTION_X] >> correction.second.dist_correction_x;
     node[DIST_CORRECTION_Y] >> correction.second.dist_correction_y;
     node[VERT_OFFSET_CORRECTION] >> correction.second.vert_offset_correction;
-    node[HORIZ_OFFSET_CORRECTION] >> correction.second.horiz_offset_correction;
 #ifdef HAVE_NEW_YAMLCPP
+    if (node[HORIZ_OFFSET_CORRECTION])
+      node[HORIZ_OFFSET_CORRECTION] >>
+        correction.second.horiz_offset_correction;
 #else
+    if (const YAML::Node *pName = node.FindValue(HORIZ_OFFSET_CORRECTION))
+      *pName >> correction.second.horiz_offset_correction;
 #endif
     else
+      correction.second.horiz_offset_correction = 0;
+
     const YAML::Node * max_intensity_node;
 #ifdef HAVE_NEW_YAMLCPP
     max_intensity_node = node[MAX_INTENSITY];
