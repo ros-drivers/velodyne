@@ -73,25 +73,56 @@ namespace velodyne_pointcloud
     node[DIST_CORRECTION_X] >> correction.second.dist_correction_x;
     node[DIST_CORRECTION_Y] >> correction.second.dist_correction_y;
     node[VERT_OFFSET_CORRECTION] >> correction.second.vert_offset_correction;
-    node[HORIZ_OFFSET_CORRECTION] >> correction.second.horiz_offset_correction;
 #ifdef HAVE_NEW_YAMLCPP
-    if (node[MAX_INTENSITY])
-      node[MAX_INTENSITY] >> correction.second.max_intensity;
+    if (node[HORIZ_OFFSET_CORRECTION])
+      node[HORIZ_OFFSET_CORRECTION] >>
+        correction.second.horiz_offset_correction;
 #else
-    if (const YAML::Node *pName = node.FindValue(MAX_INTENSITY))
-      *pName >> correction.second.max_intensity;
+    if (const YAML::Node *pName = node.FindValue(HORIZ_OFFSET_CORRECTION))
+      *pName >> correction.second.horiz_offset_correction;
 #endif
     else
+      correction.second.horiz_offset_correction = 0;
+
+    const YAML::Node * max_intensity_node;
+#ifdef HAVE_NEW_YAMLCPP
+    max_intensity_node = node[MAX_INTENSITY];
+#else
+    max_intensity_node = node.FindValue(MAX_INTENSITY);
+#endif
+    if (max_intensity_node) {
+      try {
+        *max_intensity_node >> correction.second.max_intensity;
+      } catch(const YAML::InvalidScalar & exc) {
+        float max_intensity_float;
+        *max_intensity_node >> max_intensity_float;
+        correction.second.max_intensity = floor(max_intensity_float);
+        ROS_WARN_ONCE("Implicitly converting 'max_intensity' values from floats to ints.");
+      }
+    }
+    else {
       correction.second.max_intensity = 255;
+    }
+
+    const YAML::Node * min_intensity_node;
 #ifdef HAVE_NEW_YAMLCPP
-    if (node[MIN_INTENSITY])
-      node[MIN_INTENSITY] >> correction.second.min_intensity;
+    min_intensity_node = node[MIN_INTENSITY];
 #else
-    if (const YAML::Node *pName = node.FindValue(MIN_INTENSITY))
-      *pName >> correction.second.min_intensity;
+    min_intensity_node = node.FindValue(MIN_INTENSITY);
 #endif
-    else
+    if (min_intensity_node) {
+      try {
+        *min_intensity_node >> correction.second.min_intensity;
+      } catch(const YAML::InvalidScalar & exc) {
+        float min_intensity_float;
+        *min_intensity_node >> min_intensity_float;
+        correction.second.min_intensity = floor(min_intensity_float);
+        ROS_WARN_ONCE("Implicitly converting 'min_intensity' values from floats to ints.");
+      }
+    }
+    else {
       correction.second.min_intensity = 0;
+    }
     node[FOCAL_DISTANCE] >> correction.second.focal_distance;
     node[FOCAL_SLOPE] >> correction.second.focal_slope;
 
