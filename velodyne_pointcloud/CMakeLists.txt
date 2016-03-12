@@ -26,7 +26,9 @@ find_path(YAML_CPP_INCLUDE_DIR
 find_library(YAML_CPP_LIBRARY
              NAMES YAML_CPP
              PATHS ${YAML_CPP_LIBRARY_DIRS})
-             
+
+link_directories(${YAML_CPP_LIBRARY_DIRS})
+
 generate_dynamic_reconfigure_options(
   cfg/VelodyneConfig.cfg)
 
