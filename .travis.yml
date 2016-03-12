@@ -30,4 +30,4 @@ script:
     catkin_make_isolated --install --cmake-args -DCMAKE_BUILD_TYPE=Release --catkin-make-args tests &&
     catkin_make_isolated --install --cmake-args -DCMAKE_BUILD_TYPE=Release --catkin-make-args run_tests
   # Check results
-  - catkin_test_results ./build
+  - catkin_test_results ./build_isolated
