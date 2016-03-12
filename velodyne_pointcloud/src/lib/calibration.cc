@@ -86,7 +86,8 @@ namespace velodyne_pointcloud
 
     const YAML::Node * max_intensity_node;
 #ifdef HAVE_NEW_YAMLCPP
-    max_intensity_node = node[MAX_INTENSITY];
+    const YAML::Node max_intensity_node_ref = node[MAX_INTENSITY];
+    max_intensity_node = &max_intensity_node_ref;
 #else
     max_intensity_node = node.FindValue(MAX_INTENSITY);
 #endif
@@ -106,7 +107,8 @@ namespace velodyne_pointcloud
 
     const YAML::Node * min_intensity_node;
 #ifdef HAVE_NEW_YAMLCPP
-    min_intensity_node = node[MIN_INTENSITY];
+    const YAML::Node min_intensity_node_ref = node[MIN_INTENSITY];
+    min_intensity_node = &min_intensity_node_ref;
 #else
     min_intensity_node = node.FindValue(MIN_INTENSITY);
 #endif
