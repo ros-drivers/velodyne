@@ -183,7 +183,7 @@ namespace velodyne_rawdata
            * was added to the expression due to the mathemathical
            * model we used.
            */
-          float xy_distance = distance * cos_vert_angle + vert_offset * sin_vert_angle;
+          float xy_distance = distance * cos_vert_angle - vert_offset * sin_vert_angle;
   
           // Calculate temporal X, use absolute value.
           float xx = xy_distance * sin_rot_angle - horiz_offset * cos_rot_angle;
@@ -215,12 +215,12 @@ namespace velodyne_rawdata
            * was added to the expression due to the mathemathical
            * model we used.
            */
-          xy_distance = distance_x * cos_vert_angle + vert_offset * sin_vert_angle ;
+          xy_distance = distance_x * cos_vert_angle - vert_offset * sin_vert_angle ;
           ///the expression wiht '-' is proved to be better than the one with '+'
           x = xy_distance * sin_rot_angle - horiz_offset * cos_rot_angle;
   
           float distance_y = distance + distance_corr_y;
-          xy_distance = distance_y * cos_vert_angle + vert_offset * sin_vert_angle ;
+          xy_distance = distance_y * cos_vert_angle - vert_offset * sin_vert_angle ;
           /**the new term of 'vert_offset * sin_vert_angle'
            * was added to the expression due to the mathemathical
            * model we used.
@@ -363,7 +363,7 @@ namespace velodyne_rawdata
              * was added to the expression due to the mathemathical
              * model we used.
              */
-            float xy_distance = distance * cos_vert_angle + vert_offset * sin_vert_angle;
+            float xy_distance = distance * cos_vert_angle - vert_offset * sin_vert_angle;
     
             // Calculate temporal X, use absolute value.
             float xx = xy_distance * sin_rot_angle - horiz_offset * cos_rot_angle;
@@ -395,7 +395,7 @@ namespace velodyne_rawdata
              * was added to the expression due to the mathemathical
              * model we used.
              */
-            xy_distance = distance_x * cos_vert_angle + vert_offset * sin_vert_angle ;
+            xy_distance = distance_x * cos_vert_angle - vert_offset * sin_vert_angle ;
             x = xy_distance * sin_rot_angle - horiz_offset * cos_rot_angle;
     
             float distance_y = distance + distance_corr_y;
@@ -403,7 +403,7 @@ namespace velodyne_rawdata
              * was added to the expression due to the mathemathical
              * model we used.
              */
-            xy_distance = distance_y * cos_vert_angle + vert_offset * sin_vert_angle ;
+            xy_distance = distance_y * cos_vert_angle - vert_offset * sin_vert_angle ;
             y = xy_distance * cos_rot_angle + horiz_offset * sin_rot_angle;
     
             // Using distance_y is not symmetric, but the velodyne manual
