@@ -96,14 +96,9 @@ namespace velodyne_pointcloud
       max_intensity_node = pName;
 #endif
     if (max_intensity_node) {
-      try {
-        *max_intensity_node >> correction.second.max_intensity;
-      } catch(const YAML::InvalidScalar & exc) {
-        float max_intensity_float;
-        *max_intensity_node >> max_intensity_float;
-        correction.second.max_intensity = floor(max_intensity_float);
-        ROS_WARN_ONCE("Implicitly converting 'max_intensity' values from floats to ints.");
-      }
+      float max_intensity_float;
+      *max_intensity_node >> max_intensity_float;
+      correction.second.max_intensity = floor(max_intensity_float);
     }
     else {
       correction.second.max_intensity = 255;
@@ -120,14 +115,9 @@ namespace velodyne_pointcloud
       min_intensity_node = pName;
 #endif
     if (min_intensity_node) {
-      try {
-        *min_intensity_node >> correction.second.min_intensity;
-      } catch(const YAML::InvalidScalar & exc) {
-        float min_intensity_float;
-        *min_intensity_node >> min_intensity_float;
-        correction.second.min_intensity = floor(min_intensity_float);
-        ROS_WARN_ONCE("Implicitly converting 'min_intensity' values from floats to ints.");
-      }
+      float min_intensity_float;
+      *min_intensity_node >> min_intensity_float;
+      correction.second.min_intensity = floor(min_intensity_float);
     }
     else {
       correction.second.min_intensity = 0;
