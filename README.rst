@@ -9,7 +9,7 @@ definition 3D LIDARs`_.
   The master branch normally contains code being tested for the next
   ROS release.  It will not always work with every previous release.
 
-The current ``master`` branch works with ROS Indigo and Hydro.  It may
+The current ``master`` branch works with ROS Jade, Indigo and Hydro.  It may
 work with Groovy, but that is not guaranteed.  To build for Fuerte
 from source, check out the ``rosbuild`` branch instead of ``master``.
 

@@ -1,6 +1,12 @@
 Change history
 ==============
 
+1.3.0 (forthcoming)
+-------------------
+* Add VLP-16 support.
+* Add support for multiple devices.
+* Contributors: Brice Rebsamen, ddillenberger, Patrick Hussey, Jack O'Quin
+
 1.2.0 (2014-08-06)
 ------------------
 * Fixed bug in diagnostic rate for driver (`#16
