@@ -4,6 +4,7 @@ Change history
 1.3.0 (forthcoming)
 -------------------
 
+* Provide dynamic reconfiguration for TransformNodelet (`#78`_).
 * Allow ``min_range`` as short as 0.4m.
 * Add VLP-16 support (`#44`_).
 * Fix several errors in point computations (`#43`_, `#47`_, `#50`_,
@@ -129,3 +130,4 @@ Change history
 .. _`#50`: https://github.com/ros-drivers/velodyne/issue/50
 .. _`#55`: https://github.com/ros-drivers/velodyne/pull/55
 .. _`#76`: https://github.com/ros-drivers/velodyne/pull/76
+.. _`#78`: https://github.com/ros-drivers/velodyne/pull/78
