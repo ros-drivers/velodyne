@@ -5,6 +5,7 @@
 # these dependencies are only needed for unit testing
 find_package(roslaunch REQUIRED)
 find_package(rostest REQUIRED)
+find_package(tf2_ros REQUIRED)
 
 # C++ gtests
 catkin_add_gtest(test_calibration test_calibration.cpp)
@@ -46,8 +47,8 @@ add_rostest(cloud_nodelet_vlp16_hz.test)
 
 ## These tests don't work well enough to be worth the effort of
 ## running them:
-#add_rostest(tests/transform_node_hz.test)
-#add_rostest(tests/transform_nodelet_hz.test)
+add_rostest(transform_node_hz.test)
+add_rostest(transform_nodelet_hz.test)
 
 # parse check all the launch/*.launch files
 roslaunch_add_file_check(../launch)

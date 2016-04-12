@@ -33,6 +33,7 @@
   <!-- these build dependencies are only needed for unit testing -->
   <build_depend>roslaunch</build_depend>
   <build_depend>rostest</build_depend>
+  <build_depend>tf2_ros</build_depend>
 
   <run_depend>angles</run_depend>
   <run_depend>nodelet</run_depend>
