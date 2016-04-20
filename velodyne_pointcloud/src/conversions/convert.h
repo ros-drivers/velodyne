@@ -50,6 +50,7 @@ namespace velodyne_pointcloud
 
     /// configuration parameters
     typedef struct {
+      double latency;                  ///< Constant latency of the sensor in seconds. Is subtracted from the time stamp.
       int npackets;                    ///< number of packets to combine
     } Config;
     Config config_;
