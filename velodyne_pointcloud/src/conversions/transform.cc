@@ -25,8 +25,8 @@ namespace velodyne_pointcloud
 {
   /** @brief Constructor. */
   Transform::Transform(ros::NodeHandle node, ros::NodeHandle private_nh):
-    data_(new velodyne_rawdata::RawData()),
-    tf_prefix_(tf::getPrefixParam(private_nh))
+    tf_prefix_(tf::getPrefixParam(private_nh)),
+    data_(new velodyne_rawdata::RawData())
   {
     // Read calibration.
     data_->setup(private_nh);
