@@ -58,7 +58,7 @@ namespace velodyne_driver
      *          -1 if end of file
      *          > 0 if incomplete packet (is this possible?)
      */
-    virtual int getPacket(velodyne_msgs::VelodynePacket *pkt) = 0;
+    virtual int getPacket(velodyne_msgs::VelodynePacket *pkt, const double time_offset) = 0;
 
 
     /** @brief Set source IP, from where packets are accepted
@@ -78,7 +78,7 @@ namespace velodyne_driver
                 uint16_t udp_port = UDP_PORT_NUMBER);
     virtual ~InputSocket();
 
-    virtual int getPacket(velodyne_msgs::VelodynePacket *pkt);
+    virtual int getPacket(velodyne_msgs::VelodynePacket *pkt, const double time_offset);
     void setDeviceIP( const std::string& ip );
   private:
 
@@ -103,7 +103,7 @@ namespace velodyne_driver
               double repeat_delay=0.0);
     virtual ~InputPCAP();
 
-    virtual int getPacket(velodyne_msgs::VelodynePacket *pkt);
+    virtual int getPacket(velodyne_msgs::VelodynePacket *pkt, const double time_offset);
     void setDeviceIP( const std::string& ip );
 
   private:

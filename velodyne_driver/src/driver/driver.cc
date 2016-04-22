@@ -81,6 +81,14 @@ VelodyneDriver::VelodyneDriver(ros::NodeHandle node,
   int udp_port;
   private_nh.param("port", udp_port, (int)UDP_PORT_NUMBER);
 
+  // Initialize dynamic reconfigure
+  srv_ = boost::make_shared <dynamic_reconfigure::Server<velodyne_driver::
+    VelodyneNodeConfig> > (private_nh);
+  dynamic_reconfigure::Server<velodyne_driver::VelodyneNodeConfig>::
+    CallbackType f;
+  f = boost::bind (&VelodyneDriver::callback, this, _1, _2);
+  srv_->setCallback (f); // Set callback function und call initially
+
   // initialize diagnostics
   diagnostics_.setHardwareID(deviceName);
   const double diag_freq = packet_rate/config_.npackets;
@@ -134,7 +142,7 @@ bool VelodyneDriver::poll(void)
       while (true)
         {
           // keep reading until full packet received
-          int rc = input_->getPacket(&scan->packets[i]);
+          int rc = input_->getPacket(&scan->packets[i], config_.time_offset);
           if (rc == 0) break;       // got a full packet?
           if (rc < 0) return false; // end of file reached?
         }
@@ -142,7 +150,7 @@ bool VelodyneDriver::poll(void)
 
   // publish message using time of last packet read
   ROS_DEBUG("Publishing a full Velodyne scan.");
-  scan->header.stamp = ros::Time(scan->packets[config_.npackets - 1].stamp);
+  scan->header.stamp = scan->packets[config_.npackets - 1].stamp;
   scan->header.frame_id = config_.frame_id;
   output_.publish(scan);
 
@@ -152,6 +160,13 @@ bool VelodyneDriver::poll(void)
   diagnostics_.update();
 
   return true;
+}
+
+void VelodyneDriver::callback(velodyne_driver::VelodyneNodeConfig &config,
+              uint32_t level)
+{
+  ROS_INFO("Reconfigure Request");
+  config_.time_offset = config.time_offset;
 }
 
 } // namespace velodyne_driver
