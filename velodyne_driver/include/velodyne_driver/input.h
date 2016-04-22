@@ -48,6 +48,7 @@ namespace velodyne_driver
   {
   public:
     Input() {}
+    virtual ~Input() {}
 
     /** @brief Read one Velodyne packet.
      *
@@ -75,7 +76,7 @@ namespace velodyne_driver
   public:
     InputSocket(ros::NodeHandle private_nh,
                 uint16_t udp_port = UDP_PORT_NUMBER);
-    ~InputSocket();
+    virtual ~InputSocket();
 
     virtual int getPacket(velodyne_msgs::VelodynePacket *pkt);
     void setDeviceIP( const std::string& ip );
@@ -100,7 +101,7 @@ namespace velodyne_driver
               bool read_once=false,
               bool read_fast=false,
               double repeat_delay=0.0);
-    ~InputPCAP();
+    virtual ~InputPCAP();
 
     virtual int getPacket(velodyne_msgs::VelodynePacket *pkt);
     void setDeviceIP( const std::string& ip );
