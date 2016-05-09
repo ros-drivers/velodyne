@@ -15,8 +15,6 @@
 
 #include "convert.h"
 
-#include <pcl_conversions/pcl_conversions.h>
-
 namespace velodyne_pointcloud
 {
   /** @brief Constructor. */
@@ -59,10 +57,8 @@ namespace velodyne_pointcloud
       return;                                     // avoid much work
 
     // allocate a point cloud with same time and frame ID as raw data
-    velodyne_rawdata::VPointCloud::Ptr
-      outMsg(new velodyne_rawdata::VPointCloud());
-    // outMsg's header is a pcl::PCLHeader, convert it before stamp assignment
-    outMsg->header.stamp = pcl_conversions::toPCL(scanMsg->header).stamp;
+    sensor_msgs::PointCloud2::Ptr outMsg = createVelodyneCloud();
+    outMsg->header.stamp = scanMsg->header.stamp;
     outMsg->header.frame_id = scanMsg->header.frame_id;
     outMsg->height = 1;
 

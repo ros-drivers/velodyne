@@ -33,6 +33,7 @@
 #include <angles/angles.h>
 
 #include <velodyne_pointcloud/rawdata.h>
+#include <velodyne_pointcloud/point_types.h>
 
 namespace velodyne_rawdata
 {
@@ -112,17 +113,33 @@ namespace velodyne_rawdata
    *  @param pc shared pointer to point cloud (points are appended)
    */
   void RawData::unpack(const velodyne_msgs::VelodynePacket &pkt,
-                       VPointCloud &pc)
+                       sensor_msgs::PointCloud2 &pc)
   {
     ROS_DEBUG_STREAM("Received packet, time: " << pkt.stamp);
-    
+
+    velodyne_pointcloud::setVelodyneCloudFields(pc);
+
+    sensor_msgs::PointCloud2Modifier modifier(pc);
     /** special parsing for the VLP16 **/
     if (calibration_.num_lasers == 16)
     {
-      unpack_vlp16(pkt, pc);
+      unpack_vlp16(pkt, pc, modifier);
       return;
     }
-    
+
+    size_t n_good_points = modifier.size();
+    modifier.resize(n_good_points + BLOCKS_PER_PACKET * SCANS_PER_BLOCK);
+    sensor_msgs::PointCloud2Iterator<float> iter_x(pc, "x");
+    sensor_msgs::PointCloud2Iterator<float> iter_y(pc, "y");
+    sensor_msgs::PointCloud2Iterator<float> iter_z(pc, "z");
+    sensor_msgs::PointCloud2Iterator<float> iter_intensity(pc, "intensity");
+    sensor_msgs::PointCloud2Iterator<uint16_t> iter_ring(pc, "ring");
+    iter_x += n_good_points;
+    iter_y += n_good_points;
+    iter_z += n_good_points;
+    iter_intensity += n_good_points;
+    iter_ring += n_good_points;
+
     const raw_packet_t *raw = (const raw_packet_t *) &pkt.data[0];
 
     for (int i = 0; i < BLOCKS_PER_PACKET; i++) {
@@ -259,29 +276,33 @@ namespace velodyne_rawdata
           if (pointInRange(distance)) {
   
             // convert polar coordinates to Euclidean XYZ
-            VPoint point;
-            point.ring = corrections.laser_ring;
-            point.x = x_coord;
-            point.y = y_coord;
-            point.z = z_coord;
-            point.intensity = (uint8_t) intensity;
-  
+            *iter_ring = corrections.laser_ring;
+            *iter_x = x_coord;
+            *iter_y = y_coord;
+            *iter_z = z_coord;
+            *iter_intensity = (uint8_t) intensity;
+
             // append this point to the cloud
-            pc.points.push_back(point);
-            ++pc.width;
+            ++iter_ring;
+            ++iter_x;
+            ++iter_y;
+            ++iter_z;
+            ++iter_intensity;
+            ++n_good_points;
           }
         }
       }
     }
+    modifier.resize(n_good_points);
   }
-  
+
   /** @brief convert raw VLP16 packet to point cloud
    *
    *  @param pkt raw packet to unpack
    *  @param pc shared pointer to point cloud (points are appended)
    */
   void RawData::unpack_vlp16(const velodyne_msgs::VelodynePacket &pkt,
-                             VPointCloud &pc)
+                             sensor_msgs::PointCloud2 &pc, sensor_msgs::PointCloud2Modifier &modifier)
   {
     float azimuth;
     float azimuth_diff;
@@ -290,6 +311,20 @@ namespace velodyne_rawdata
     int azimuth_corrected;
     float x, y, z;
     float intensity;
+    uint8_t dsr;
+
+    size_t n_good_points = modifier.size();
+    modifier.resize(n_good_points + BLOCKS_PER_PACKET * VLP16_FIRINGS_PER_BLOCK * VLP16_SCANS_PER_FIRING);
+    sensor_msgs::PointCloud2Iterator<float> iter_x(pc, "x");
+    sensor_msgs::PointCloud2Iterator<float> iter_y(pc, "y");
+    sensor_msgs::PointCloud2Iterator<float> iter_z(pc, "z");
+    sensor_msgs::PointCloud2Iterator<float> iter_intensity(pc, "intensity");
+    sensor_msgs::PointCloud2Iterator<uint16_t> iter_ring(pc, "ring");
+    iter_x += n_good_points;
+    iter_y += n_good_points;
+    iter_z += n_good_points;
+    iter_intensity += n_good_points;
+    iter_ring += n_good_points;
 
     const raw_packet_t *raw = (const raw_packet_t *) &pkt.data[0];
 
@@ -436,22 +471,26 @@ namespace velodyne_rawdata
             intensity = (intensity > max_intensity) ? max_intensity : intensity;
     
             if (pointInRange(distance)) {
-    
               // append this point to the cloud
-              VPoint point;
-              point.ring = corrections.laser_ring;
-              point.x = x_coord;
-              point.y = y_coord;
-              point.z = z_coord;
-              point.intensity = (uint8_t) intensity;
+              *iter_ring = corrections.laser_ring;
+              *iter_x = x_coord;
+              *iter_y = y_coord;
+              *iter_z = z_coord;
+              *iter_intensity = (uint8_t) intensity;
 
-              pc.points.push_back(point);
-              ++pc.width;
+              // append this point to the cloud
+              ++iter_ring;
+              ++iter_x;
+              ++iter_y;
+              ++iter_z;
+              ++iter_intensity;
+              ++n_good_points;
             }
           }
         }
       }
     }
+    modifier.resize(n_good_points);
   }  
 
 } // namespace velodyne_rawdata

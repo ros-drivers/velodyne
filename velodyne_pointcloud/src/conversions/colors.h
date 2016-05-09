@@ -19,16 +19,10 @@
 #define _VELODYNE_POINTCLOUD_COLORS_H_
 
 #include <ros/ros.h>
-#include <pcl_ros/point_cloud.h>
-#include <pcl/point_types.h>
-#include <velodyne_pointcloud/point_types.h>
+#include <sensor_msgs/PointCloud2.h>
 
 namespace velodyne_pointcloud
 {
-  // shorter names for point cloud types in this namespace
-  typedef velodyne_pointcloud::PointXYZIR VPoint;
-  typedef pcl::PointCloud<VPoint> VPointCloud;
-
   class RingColors
   {
   public:
@@ -38,7 +32,7 @@ namespace velodyne_pointcloud
 
   private:
 
-    void convertPoints(const VPointCloud::ConstPtr &inMsg);
+    void convertPoints(const sensor_msgs::PointCloud2ConstPtr &inMsg);
 
     ros::Subscriber input_;
     ros::Publisher output_;

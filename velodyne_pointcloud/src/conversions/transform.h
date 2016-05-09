@@ -19,7 +19,6 @@
 #define _VELODYNE_POINTCLOUD_TRANSFORM_H_ 1
 
 #include <ros/ros.h>
-#include "tf/message_filter.h"
 #include "message_filters/subscriber.h"
 #include <sensor_msgs/PointCloud2.h>
 
@@ -29,19 +28,8 @@
 #include <dynamic_reconfigure/server.h>
 #include <velodyne_pointcloud/TransformNodeConfig.h>
 
-// include template implementations to transform a custom point cloud
-#include <pcl_ros/impl/transforms.hpp>
-
-/** types of point and cloud to work with */
-typedef velodyne_rawdata::VPoint VPoint;
-typedef velodyne_rawdata::VPointCloud VPointCloud;
-
-// instantiate template for transforming a VPointCloud
-template bool
-  pcl_ros::transformPointCloud<VPoint>(const std::string &,
-                                       const VPointCloud &,
-                                       VPointCloud &,
-                                       const tf::TransformListener &);
+#include <tf2_ros/message_filter.h>
+#include <tf2_ros/transform_listener.h>
 
 namespace velodyne_pointcloud
 {
@@ -65,9 +53,10 @@ namespace velodyne_pointcloud
     const std::string tf_prefix_;
     boost::shared_ptr<velodyne_rawdata::RawData> data_;
     message_filters::Subscriber<velodyne_msgs::VelodyneScan> velodyne_scan_;
-    tf::MessageFilter<velodyne_msgs::VelodyneScan> *tf_filter_;
+    tf2_ros::MessageFilter<velodyne_msgs::VelodyneScan> *tf_filter_;
     ros::Publisher output_;
-    tf::TransformListener listener_;
+    tf2_ros::Buffer buffer_;
+    tf2_ros::TransformListener listener_;
 
     /// configuration parameters
     typedef struct {
@@ -78,8 +67,8 @@ namespace velodyne_pointcloud
     // Point cloud buffers for collecting points within a packet.  The
     // inPc_ and tfPc_ are class members only to avoid reallocation on
     // every message.
-    VPointCloud inPc_;              ///< input packet point cloud
-    VPointCloud tfPc_;              ///< transformed packet point cloud
+    sensor_msgs::PointCloud2 inPc_;              ///< input packet point cloud
+    sensor_msgs::PointCloud2 tfPc_;              ///< transformed packet point cloud
   };
 
 } // namespace velodyne_pointcloud

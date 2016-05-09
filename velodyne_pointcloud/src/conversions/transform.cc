@@ -19,14 +19,18 @@
 
 #include "transform.h"
 
-#include <pcl_conversions/pcl_conversions.h>
+#include <sensor_msgs/point_cloud2_iterator.h>
+#include <tf2_sensor_msgs/tf2_sensor_msgs.h>
+
+#include <tf/tf.h>
+#include <tf/transform_listener.h>
 
 namespace velodyne_pointcloud
 {
   /** @brief Constructor. */
   Transform::Transform(ros::NodeHandle node, ros::NodeHandle private_nh):
     data_(new velodyne_rawdata::RawData()),
-    tf_prefix_(tf::getPrefixParam(private_nh))
+    listener_(buffer_)
   {
     // Read calibration.
     data_->setup(private_nh);
@@ -45,9 +49,9 @@ namespace velodyne_pointcloud
     // subscribe to VelodyneScan packets using transform filter
     velodyne_scan_.subscribe(node, "velodyne_packets", 10);
     tf_filter_ =
-      new tf::MessageFilter<velodyne_msgs::VelodyneScan>(velodyne_scan_,
-                                                         listener_,
-                                                         config_.frame_id, 10);
+      new tf2_ros::MessageFilter<velodyne_msgs::VelodyneScan>(velodyne_scan_,
+                                                         buffer_,
+                                                         config_.frame_id, 10, node);
     tf_filter_->registerCallback(boost::bind(&Transform::processScan, this, _1));
   }
   
@@ -73,41 +77,32 @@ namespace velodyne_pointcloud
       return;                                     // avoid much work
 
     // allocate an output point cloud with same time as raw data
-    VPointCloud::Ptr outMsg(new VPointCloud());
-    outMsg->header.stamp = pcl_conversions::toPCL(scanMsg->header).stamp;
+    sensor_msgs::PointCloud2Ptr outMsg = velodyne_pointcloud::createVelodyneCloud();
+    outMsg->header.stamp = scanMsg->header.stamp;
     outMsg->header.frame_id = config_.frame_id;
     outMsg->height = 1;
+
+    sensor_msgs::PointCloud2Modifier modifier_in(inPc_);
 
     // process each packet provided by the driver
     for (size_t next = 0; next < scanMsg->packets.size(); ++next)
       {
         // clear input point cloud to handle this packet
-        inPc_.points.clear();
+        modifier_in.clear();
         inPc_.width = 0;
         inPc_.height = 1;
-        std_msgs::Header header;
-        header.stamp = scanMsg->packets[next].stamp;
-        header.frame_id = scanMsg->header.frame_id;
-        pcl_conversions::toPCL(header, inPc_.header);
+        inPc_.header.stamp = scanMsg->packets[next].stamp;
+        inPc_.header.frame_id = scanMsg->header.frame_id;
 
         // unpack the raw data
         data_->unpack(scanMsg->packets[next], inPc_);
-
-        // clear transform point cloud for this packet
-        tfPc_.points.clear();           // is this needed?
-        tfPc_.width = 0;
-        tfPc_.height = 1;
-        header.stamp = scanMsg->packets[next].stamp;
-        pcl_conversions::toPCL(header, tfPc_.header);
-        tfPc_.header.frame_id = config_.frame_id;
 
         // transform the packet point cloud into the target frame
         try
           {
             ROS_DEBUG_STREAM("transforming from " << inPc_.header.frame_id
                              << " to " << config_.frame_id);
-            pcl_ros::transformPointCloud(config_.frame_id, inPc_, tfPc_,
-                                         listener_);
+            buffer_.transform(inPc_, tfPc_, config_.frame_id);
 #if 0       // use the latest transform available, should usually work fine
             pcl_ros::transformPointCloud(inPc_.header.frame_id,
                                          ros::Time(0), inPc_,
@@ -123,10 +118,11 @@ namespace velodyne_pointcloud
           }
 
         // append transformed packet data to end of output message
-        outMsg->points.insert(outMsg->points.end(),
-                             tfPc_.points.begin(),
-                             tfPc_.points.end());
-        outMsg->width += tfPc_.points.size();
+        outMsg->data.insert(outMsg->data.end(),
+                             tfPc_.data.begin(),
+                             tfPc_.data.end());
+        outMsg->width += tfPc_.data.size() / tfPc_.point_step;
+        outMsg->row_step += tfPc_.data.size() / tfPc_.point_step;
       }
 
     // publish the accumulated cloud message
