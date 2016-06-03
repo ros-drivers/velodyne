@@ -285,7 +285,7 @@ namespace velodyne_rawdata
   {
     float azimuth;
     float azimuth_diff;
-    float last_azimuth_diff;
+    float last_azimuth_diff=0;
     float azimuth_corrected_f;
     int azimuth_corrected;
     float x, y, z;
