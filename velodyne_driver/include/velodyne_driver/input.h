@@ -50,6 +50,7 @@ namespace velodyne_driver
   {
   public:
     Input(ros::NodeHandle private_nh, int port);
+    virtual ~Input() {}
 
     /** @brief Read one Velodyne packet.
      *
@@ -59,7 +60,8 @@ namespace velodyne_driver
      *          -1 if end of file
      *          > 0 if incomplete packet (is this possible?)
      */
-    virtual int getPacket(velodyne_msgs::VelodynePacket *pkt) = 0;
+    virtual int getPacket(velodyne_msgs::VelodynePacket *pkt,
+                          const double time_offset) = 0;
 
   protected:
     ros::NodeHandle private_nh_;
@@ -71,10 +73,14 @@ namespace velodyne_driver
   class InputSocket: public Input
   {
   public:
-    InputSocket(ros::NodeHandle private_nh, int port);
-    ~InputSocket();
+    InputSocket(ros::NodeHandle private_nh,
+                uint16_t udp_port = UDP_PORT_NUMBER);
+    virtual ~InputSocket();
 
-    virtual int getPacket(velodyne_msgs::VelodynePacket *pkt);
+    virtual int getPacket(velodyne_msgs::VelodynePacket *pkt, 
+                          const double time_offset);
+    void setDeviceIP( const std::string& ip );
+  private:
 
   private:
     int sockfd_;
@@ -90,11 +96,17 @@ namespace velodyne_driver
   class InputPCAP: public Input
   {
   public:
-    InputPCAP(ros::NodeHandle private_nh, int port,
-              double packet_rate, std::string filename="");
-    ~InputPCAP();
+    InputPCAP(ros::NodeHandle private_nh,
+              double packet_rate,
+              std::string filename="",
+              bool read_once=false,
+              bool read_fast=false,
+              double repeat_delay=0.0);
+    virtual ~InputPCAP();
 
-    virtual int getPacket(velodyne_msgs::VelodynePacket *pkt);
+    virtual int getPacket(velodyne_msgs::VelodynePacket *pkt, 
+                          const double time_offset);
+    void setDeviceIP( const std::string& ip );
 
   private:
     ros::Rate packet_rate_;

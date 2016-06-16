@@ -1,8 +1,22 @@
 Change history
 ==============
 
+1.3.0 (forthcoming)
+-------------------
+
+* Provide dynamic reconfiguration for TransformNodelet (`#78`_).
+* Allow ``min_range`` as short as 0.4m.
+* Add VLP-16 support (`#44`_).
+* Fix several errors in point computations (`#43`_, `#47`_, `#50`_,
+  `#55`_, `#76`_).
+* Fix several calibration file problems (`#41`_, `#42`_).
+* Contributors: Bo Li, Patrick Hussey, William Woodall, Kun Li,
+  lemiant, Jose Luis Blanco-Claraco, Alexander Schaefer, François
+  Pomerleau, Jack O'Quin
+
 1.2.0 (2014-08-06)
 ------------------
+
 * velodyne_pointcloud: remove model-dependent "constants" from
   rawdata.h (`#28
   <https://github.com/ros-drivers/velodyne/issues/28>`_)
@@ -16,7 +30,7 @@ Change history
 * Contributors: Jack O'Quin, Scott K Logan, Thomas Solatges
 
 1.1.2 (2013-11-05)
--------------------
+------------------
 
  * Move unit test data to download.ros.org (`#18`_).
  * Install missing gen_calibration.py script (`#20`_).
@@ -108,3 +122,12 @@ Change history
 .. _`#17`: https://github.com/ros-drivers/velodyne/issues/17
 .. _`#18`: https://github.com/ros-drivers/velodyne/issues/18
 .. _`#20`: https://github.com/ros-drivers/velodyne/issues/20
+.. _`#41`: https://github.com/ros-drivers/velodyne/pull/41
+.. _`#42`: https://github.com/ros-drivers/velodyne/pull/42
+.. _`#43`: https://github.com/ros-drivers/velodyne/pull/43
+.. _`#44`: https://github.com/ros-drivers/velodyne/pull/44
+.. _`#47`: https://github.com/ros-drivers/velodyne/pull/47
+.. _`#50`: https://github.com/ros-drivers/velodyne/issue/50
+.. _`#55`: https://github.com/ros-drivers/velodyne/pull/55
+.. _`#76`: https://github.com/ros-drivers/velodyne/pull/76
+.. _`#78`: https://github.com/ros-drivers/velodyne/pull/78
