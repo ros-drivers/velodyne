@@ -47,7 +47,7 @@ namespace velodyne_driver
    *  @param private_nh ROS private handle for calling node.
    *  @param port UDP port number.
    */
-  Input::Input(ros::NodeHandle private_nh, int port):
+  Input::Input(ros::NodeHandle private_nh, uint16_t port):
     private_nh_(private_nh),
     port_(port)
   {
@@ -66,7 +66,7 @@ namespace velodyne_driver
    *  @param private_nh ROS private handle for calling node.
    *  @param port UDP port number
    */
-  InputSocket::InputSocket(ros::NodeHandle private_nh, int port):
+  InputSocket::InputSocket(ros::NodeHandle private_nh, uint16_t port):
     Input(private_nh, port)
   {
     sockfd_ = -1;
@@ -214,8 +214,9 @@ namespace velodyne_driver
    *  @param packet_rate expected device packet frequency (Hz)
    *  @param filename PCAP dump file name
    */
-  InputPCAP::InputPCAP(ros::NodeHandle private_nh, int port,
-                       double packet_rate, std::string filename):
+  InputPCAP::InputPCAP(ros::NodeHandle private_nh, uint16_t port,
+                       double packet_rate, std::string filename,
+                       bool read_once, bool read_fast, double repeat_delay):
     Input(private_nh, port),
     packet_rate_(packet_rate),
     filename_(filename)

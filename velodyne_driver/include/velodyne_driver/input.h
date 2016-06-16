@@ -49,7 +49,7 @@ namespace velodyne_driver
   class Input
   {
   public:
-    Input(ros::NodeHandle private_nh, int port);
+    Input(ros::NodeHandle private_nh, uint16_t port);
     virtual ~Input() {}
 
     /** @brief Read one Velodyne packet.
@@ -65,7 +65,7 @@ namespace velodyne_driver
 
   protected:
     ros::NodeHandle private_nh_;
-    int port_;
+    uint16_t port_;
     std::string devip_str_;
   };
 
@@ -74,7 +74,7 @@ namespace velodyne_driver
   {
   public:
     InputSocket(ros::NodeHandle private_nh,
-                uint16_t udp_port = UDP_PORT_NUMBER);
+                uint16_t port = DATA_PORT_NUMBER);
     virtual ~InputSocket();
 
     virtual int getPacket(velodyne_msgs::VelodynePacket *pkt, 
@@ -97,7 +97,8 @@ namespace velodyne_driver
   {
   public:
     InputPCAP(ros::NodeHandle private_nh,
-              double packet_rate,
+              uint16_t port = DATA_PORT_NUMBER,
+              double packet_rate = 0.0,
               std::string filename="",
               bool read_once=false,
               bool read_fast=false,
