@@ -79,7 +79,7 @@ VelodyneDriver::VelodyneDriver(ros::NodeHandle node,
   private_nh.param("pcap", dump_file, std::string(""));
 
   int udp_port;
-  private_nh.param("port", udp_port, (int)UDP_PORT_NUMBER);
+  private_nh.param("port", udp_port, (int) DATA_PORT_NUMBER);
 
   // Initialize dynamic reconfigure
   srv_ = boost::make_shared <dynamic_reconfigure::Server<velodyne_driver::
@@ -104,25 +104,21 @@ VelodyneDriver::VelodyneDriver(ros::NodeHandle node,
                                         TimeStampStatusParam()));
 
   // open Velodyne input device or file
-  if (dump_file != "")
+  if (dump_file != "")                  // have PCAP file?
     {
-      input_.reset(new velodyne_driver::InputPCAP(private_nh,
-                                                  packet_rate,
-                                                  dump_file));
+      // read data from packet capture file
+      input_.reset(new velodyne_driver::InputPCAP(private_nh, udp_port,
+                                                  packet_rate, dump_file));
     }
   else
     {
+      // read data from live socket
       input_.reset(new velodyne_driver::InputSocket(private_nh, udp_port));
     }
 
-  std::string devip;
-  private_nh.param("device_ip", devip, std::string(""));
-  if(!devip.empty())
-    ROS_INFO_STREAM("Set device ip to " << devip << ", only accepting packets from this address." );
-  input_->setDeviceIP(devip);
-
-  // raw data output topic
-  output_ = node.advertise<velodyne_msgs::VelodyneScan>("velodyne_packets", 10);
+  // raw packet output topic
+  output_ =
+    node.advertise<velodyne_msgs::VelodyneScan>("velodyne_packets", 10);
 }
 
 /** poll the device
