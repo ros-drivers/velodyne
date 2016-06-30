@@ -4,6 +4,8 @@ Change history
 1.3.0 (forthcoming)
 -------------------
 
+* Fix compile warning for "Wrong initialization order".
+* Fix unit tests for transform nodelet.
 * Provide dynamic reconfiguration for TransformNodelet (`#78`_).
 * Allow ``min_range`` as short as 0.4m.
 * Add VLP-16 support (`#44`_).
@@ -12,7 +14,7 @@ Change history
 * Fix several calibration file problems (`#41`_, `#42`_).
 * Contributors: Bo Li, Patrick Hussey, William Woodall, Kun Li,
   lemiant, Jose Luis Blanco-Claraco, Alexander Schaefer, François
-  Pomerleau, Jack O'Quin
+  Pomerleau, Andreas Wachaja, Jack O'Quin
 
 1.2.0 (2014-08-06)
 ------------------

@@ -3,9 +3,14 @@ Change history
 
 1.3.0 (forthcoming)
 -------------------
+* Use port number when reading PCAP data.
+* Fix g++ 5.3.1 compiler errors.
+* Add dynamic_reconfigure and time_offset correction.
+* Make input destructors virtual.
 * Add VLP-16 support.
 * Add support for multiple devices.
-* Contributors: Brice Rebsamen, ddillenberger, Patrick Hussey, Jack O'Quin
+* Contributors: Brice Rebsamen, ddillenberger, Patrick Hussey, Andreas
+  Wachaja, Jack O'Quin
 
 1.2.0 (2014-08-06)
 ------------------
