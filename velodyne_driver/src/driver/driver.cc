@@ -55,7 +55,7 @@ VelodyneDriver::VelodyneDriver(ros::NodeHandle node,
     }
   else if (config_.model == "VLP16")
     {
-      packet_rate = 781.25;             // 300000 / 384
+      packet_rate = 754;             // 754 Packets/Second for Last or Strongest mode 1508 for dual (VLP-16 User Manual)
       model_full_name = "VLP-16";
     }
   else
