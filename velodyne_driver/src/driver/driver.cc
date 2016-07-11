@@ -71,6 +71,21 @@ VelodyneDriver::VelodyneDriver(ros::NodeHandle node,
   std::string deviceName(std::string("Velodyne ") + model_full_name);
 
   private_nh.param("rpm", config_.rpm, 600.0);
+
+  // Different packet rate based on rpm
+
+  if (config_.rpm != 600.0)
+    {
+      if (config_.rpm == 300.0 || config_.rpm == 900)
+        {
+        packet_rate = 3472.5;
+        }
+      else if (config_.rpm == 1200)
+        {
+        packet_rate = 3473.33;
+        }
+    }
+  
   ROS_INFO_STREAM(deviceName << " rotating at " << config_.rpm << " RPM");
   double frequency = (config_.rpm / 60.0);     // expected Hz rate
 
