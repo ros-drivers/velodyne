@@ -38,7 +38,7 @@ VelodyneDriver::VelodyneDriver(ros::NodeHandle node,
   double packet_rate;                   // packet frequency (Hz)
   std::string model_full_name;
   if ((config_.model == "64E_S2") || 
-      (config_.model == "64E_S2.1"))    // generates 1333312 points per second
+      (config_.model == "64E_S2.1"))    // generates 1333312 points per second (see Velodyne datasheet)
     {                                   // 1 packet holds 384 points
       packet_rate = 3472.17;            // 1333312 / 384
       model_full_name = std::string("HDL-") + config_.model;
