@@ -73,6 +73,11 @@ namespace velodyne_driver
 
     // connect to Velodyne UDP port
     ROS_INFO_STREAM("Opening UDP socket: port " << port);
+    
+    // get parameters using private node handle
+    private_nh.param("udp_timeout_ms", udp_timeout_ms_,1000);
+    ROS_INFO_STREAM("UDP socket timeout: " << udp_timeout_ms_ << " (ms)");
+    
     sockfd_ = socket(PF_INET, SOCK_DGRAM, 0);
     if (sockfd_ == -1)
       {
@@ -115,7 +120,7 @@ namespace velodyne_driver
     struct pollfd fds[1];
     fds[0].fd = sockfd_;
     fds[0].events = POLLIN;
-    static const int POLL_TIMEOUT = 1000; // one second (in msec)
+    //static const int POLL_TIMEOUT = 1000; // one second (in msec)
 
     sockaddr_in sender_address;
     socklen_t sender_address_len = sizeof(sender_address);
@@ -142,7 +147,7 @@ namespace velodyne_driver
         // poll() until input available
         do
           {
-            int retval = poll(fds, 1, POLL_TIMEOUT);
+            int retval = poll(fds, 1, udp_timeout_ms_);
             if (retval < 0)             // poll() error?
               {
                 if (errno != EINTR)
