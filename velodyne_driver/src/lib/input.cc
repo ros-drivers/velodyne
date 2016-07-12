@@ -81,10 +81,12 @@ namespace velodyne_driver
     sockfd_ = socket(PF_INET, SOCK_DGRAM, 0);
     if (sockfd_ == -1)
       {
-        perror("socket");               // TODO: ROS_ERROR errno
+        //perror("socket");               // TODO: ROS_ERROR errno
+        ROS_ERROR("InputSocket: Error opening socket (%s)", strerror(errno));
         return;
       }
-  
+    ROS_DEBUG("socket created ");
+    
     sockaddr_in my_addr;                     // my address information
     memset(&my_addr, 0, sizeof(my_addr));    // initialize to zeros
     my_addr.sin_family = AF_INET;            // host byte order
@@ -93,16 +95,20 @@ namespace velodyne_driver
   
     if (bind(sockfd_, (sockaddr *)&my_addr, sizeof(sockaddr)) == -1)
       {
-        perror("bind");                 // TODO: ROS_ERROR errno
+        //perror("bind");                 // TODO: ROS_ERROR errno
+        ROS_ERROR("InputSocket: Error binding socket (%s)", strerror(errno));
         return;
       }
-  
+    ROS_DEBUG("socket binded ");
+    
     if (fcntl(sockfd_,F_SETFL, O_NONBLOCK|FASYNC) < 0)
       {
-        perror("non-block");
+        //perror("non-block");
+        ROS_ERROR("InputSocket: Error setting non-block (%s)", strerror(errno));
         return;
       }
-
+    ROS_DEBUG("socket non-block set ");
+    
     ROS_DEBUG("Velodyne socket fd is %d\n", sockfd_);
   }
 
@@ -179,8 +185,9 @@ namespace velodyne_driver
           {
             if (errno != EWOULDBLOCK)
               {
-                perror("recvfail");
-                ROS_INFO("recvfail");
+                //perror("recvfail");
+                //ROS_INFO("recvfail");
+                ROS_ERROR("recvfail: %s", strerror(errno));
                 return 1;
               }
           }
