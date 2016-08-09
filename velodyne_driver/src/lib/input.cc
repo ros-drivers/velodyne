@@ -70,6 +70,10 @@ namespace velodyne_driver
     Input(private_nh, port)
   {
     sockfd_ = -1;
+    
+    if (!devip_str_.empty()) {
+      inet_aton(devip_str_.c_str(),&devip_);
+    }    
 
     // connect to Velodyne UDP port
     ROS_INFO_STREAM("Opening UDP socket: port " << port);
