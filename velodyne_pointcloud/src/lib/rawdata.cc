@@ -264,7 +264,7 @@ namespace velodyne_rawdata
             point.x = x_coord;
             point.y = y_coord;
             point.z = z_coord;
-            point.intensity = (uint8_t) intensity;
+            point.intensity = intensity;
   
             // append this point to the cloud
             pc.points.push_back(point);
@@ -443,7 +443,7 @@ namespace velodyne_rawdata
               point.x = x_coord;
               point.y = y_coord;
               point.z = z_coord;
-              point.intensity = (uint8_t) intensity;
+              point.intensity = intensity;
 
               pc.points.push_back(point);
               ++pc.width;
