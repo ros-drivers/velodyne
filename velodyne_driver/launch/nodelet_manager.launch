@@ -16,6 +16,7 @@
   <arg name="repeat_delay" default="0.0" />
   <arg name="rpm" default="600.0" />
   <arg name="frame_id" default="velodyne" />
+  <arg name="udp_timeout_ms" default="1000" />
   <node pkg="nodelet" type="nodelet" name="driver_nodelet"
         args="load velodyne_driver/DriverNodelet velodyne_nodelet_manager" >
     <param name="model" value="$(arg model)"/>
@@ -25,6 +26,7 @@
     <param name="repeat_delay" value="$(arg repeat_delay)"/>
     <param name="rpm" value="$(arg rpm)"/>
     <param name="frame_id" value="$(arg frame_id)"/>
+    <param name="udp_timeout_ms" value="$(arg udp_timeout_ms)"/>
   </node>    
 
 </launch>

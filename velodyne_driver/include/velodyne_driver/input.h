@@ -85,6 +85,7 @@ namespace velodyne_driver
   private:
     int sockfd_;
     in_addr devip_;
+    int udp_timeout_ms_;
   };
 
 
