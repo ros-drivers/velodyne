@@ -105,12 +105,31 @@ namespace velodyne_rawdata
     }
    return 0;
   }
+  
+  ReturnMode RawData::getReturnMode(const velodyne_msgs::VelodynePacket& pkt) const
+  {
+    if (getSensorModel() == Vlp16) {
+      const raw_packet_t* raw = (const raw_packet_t*)&pkt.data[0];
+      return (ReturnMode)raw->status[PACKET_STATUS_SIZE-2];    
+    } else 
+      return UnknownMode;
+  }
+  
+  SensorModel RawData::getSensorModel() const
+  {     
+    switch (calibration_.num_lasers)
+    {
+    case 16:
+      return Vlp16;
+    case 32:
+      return Hdl32e;
+    case 64:
+      return Hdl64e;
+    default:
+      return UnknownModel;
+    }
+  }
 
-  /** @brief convert raw packet to point cloud
-   *
-   *  @param pkt raw packet to unpack
-   *  @param pc shared pointer to point cloud (points are appended)
-   */
   void RawData::unpack(const velodyne_msgs::VelodynePacket &pkt,
                        VPointCloud &pc)
   {
@@ -275,13 +294,7 @@ namespace velodyne_rawdata
     }
   }
   
-  /** @brief convert raw VLP16 packet to point cloud
-   *
-   *  @param pkt raw packet to unpack
-   *  @param pc shared pointer to point cloud (points are appended)
-   */
-  void RawData::unpack_vlp16(const velodyne_msgs::VelodynePacket &pkt,
-                             VPointCloud &pc)
+  void RawData::unpack_vlp16(const velodyne_msgs::VelodynePacket &pkt, VPointCloud &pc)
   {
     float azimuth;
     float azimuth_diff;
@@ -292,7 +305,7 @@ namespace velodyne_rawdata
     float intensity;
 
     const raw_packet_t *raw = (const raw_packet_t *) &pkt.data[0];
-
+    
     for (int block = 0; block < BLOCKS_PER_PACKET; block++) {
 
       // ignore packets with mangled or otherwise different contents
@@ -305,10 +318,13 @@ namespace velodyne_rawdata
         return;                         // bad packet: skip the rest
       }
 
-      // Calculate difference between current and next block's azimuth angle.
+      // Calculate the index step to the next block with new azimuth value.
+      int i_diff = (getReturnMode(pkt) == Dual) ? 2 : 1;
+        
+      // Calculate difference between current and next block's azimuth angle.       
       azimuth = (float)(raw->blocks[block].rotation);
-      if (block < (BLOCKS_PER_PACKET-1)){
-        azimuth_diff = (float)((36000 + raw->blocks[block+1].rotation - raw->blocks[block].rotation)%36000);
+      if (block < (BLOCKS_PER_PACKET-i_diff)){
+        azimuth_diff = (float)((36000 + raw->blocks[block+i_diff].rotation - raw->blocks[block].rotation)%36000);
         last_azimuth_diff = azimuth_diff;
       }else{
         azimuth_diff = last_azimuth_diff;

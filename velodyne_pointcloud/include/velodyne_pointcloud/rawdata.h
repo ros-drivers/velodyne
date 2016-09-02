@@ -55,11 +55,59 @@ namespace velodyne_rawdata
   static const float DISTANCE_RESOLUTION = 0.002f; /**< meters */
   static const float DISTANCE_MAX_UNITS = (DISTANCE_MAX
                                            / DISTANCE_RESOLUTION + 1.0);
+  
   /** @todo make this work for both big and little-endian machines */
   static const uint16_t UPPER_BANK = 0xeeff;
   static const uint16_t LOWER_BANK = 0xddff;
   
+  enum ReturnMode {
+    UnknownMode   = 0x00,
+    Strongest     = 0x37,
+    Last          = 0x38,
+    Dual          = 0x39
+  };
   
+  inline std::ostream& operator<<(std::ostream& os, ReturnMode mode)
+  {
+    switch (mode)
+    {
+    case Strongest:
+      os << "strongest";  break;
+    case Last:
+      os << "last";       break;
+    case Dual:
+      os << "dual";       break;
+    default:
+      os << "[unknown return mode]";
+    }
+    
+    return os;
+  }
+  
+  enum SensorModel {
+    UnknownModel  = 0x00,
+    Hdl32e        = 0x21,
+    Vlp16         = 0x22,
+    Hdl64e
+  };
+  
+  inline std::ostream& operator<<(std::ostream& os, SensorModel model)
+  {
+    switch (model)
+    {
+    case Hdl32e:
+      os << "HDL-32E";  break;
+    case Vlp16:
+      os << "VLP-16";   break;
+    case Hdl64e:
+      os << "HDL-64E";  break;
+    default:
+      os << "[unknown sensor model]";
+    }
+    
+    return os;
+  }
+   
   /** Special Defines for VLP16 support **/
   static const int    VLP16_FIRINGS_PER_BLOCK =   2;
   static const int    VLP16_SCANS_PER_FIRING  =  16;
@@ -116,6 +164,7 @@ namespace velodyne_rawdata
     uint16_t revolution;
     uint8_t status[PACKET_STATUS_SIZE]; 
   } raw_packet_t;
+  
 
   /** \brief Velodyne data conversion class */
   class RawData
@@ -138,11 +187,24 @@ namespace velodyne_rawdata
      */
     int setup(ros::NodeHandle private_nh);
 
+    /** @brief convert raw packet to point cloud
+     *
+     *  @param pkt raw packet to unpack
+     *  @param pc shared pointer to point cloud (points are appended)
+     *  @param[out] m return mode of the laser scanner: last, strongest, or dual
+     */
     void unpack(const velodyne_msgs::VelodynePacket &pkt, VPointCloud &pc);
     
     void setParameters(double min_range, double max_range, double view_direction,
                        double view_width);
-
+    
+    /// \brief Reads scanner's return mode from given packet's factory bytes.
+    /// \note Supports only VLP-16 with firmware version 3.0.23.0 or higher.
+    ReturnMode getReturnMode(const velodyne_msgs::VelodynePacket& pkt) const;
+    
+    /// \brief Reads the sensor model from number of lasers in calibration.
+    SensorModel getSensorModel() const;
+    
   private:
 
     /** configuration parameters */
@@ -166,6 +228,11 @@ namespace velodyne_rawdata
     float cos_rot_table_[ROTATION_MAX_UNITS];
     
     /** add private function to handle the VLP16 **/ 
+    /** @brief convert raw VLP16 packet to point cloud
+     *
+     *  @param pkt raw packet to unpack
+     *  @param pc shared pointer to point cloud (points are appended)
+     */
     void unpack_vlp16(const velodyne_msgs::VelodynePacket &pkt, VPointCloud &pc);
 
     /** in-line test whether a point is in range */

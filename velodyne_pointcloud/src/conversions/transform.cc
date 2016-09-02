@@ -61,11 +61,6 @@ namespace velodyne_pointcloud
     ROS_INFO_STREAM("Target frame ID: " << config_.frame_id);
   }
 
-  /** @brief Callback for raw scan messages.
-   *
-   *  @pre TF message filter has already waited until the transform to
-   *       the configured @c frame_id can succeed.
-   */
   void
     Transform::processScan(const velodyne_msgs::VelodyneScan::ConstPtr &scanMsg)
   {
@@ -77,6 +72,12 @@ namespace velodyne_pointcloud
     outMsg->header.stamp = pcl_conversions::toPCL(scanMsg->header).stamp;
     outMsg->header.frame_id = config_.frame_id;
     outMsg->height = 1;
+    
+    // If the message contains no packets, return an empty point cloud.
+    if (scanMsg->packets.size() < 1) {
+      output_.publish(outMsg);
+      return;
+    }
 
     // process each packet provided by the driver
     for (size_t next = 0; next < scanMsg->packets.size(); ++next)
@@ -119,7 +120,17 @@ namespace velodyne_pointcloud
           {
             // only log tf error once every 100 times
             ROS_WARN_THROTTLE(100, "%s", ex.what());
-            continue;                   // skip this packet
+            
+            // Do not skip the invalid points, but set to NaN to keep their order.
+            VPoint nanPoint;
+            nanPoint.x         = std::numeric_limits<float>::infinity();
+            nanPoint.y         = std::numeric_limits<float>::infinity();
+            nanPoint.z         = std::numeric_limits<float>::infinity();
+            nanPoint.intensity = 0.0f;
+            nanPoint.ring      = std::numeric_limits<uint16_t>::max();
+            
+            VPointCloud nanCloud(inPc_.width, inPc_.height, nanPoint);
+            tfPc_.swap(nanCloud);
           }
 
         // append transformed packet data to end of output message
@@ -128,6 +139,24 @@ namespace velodyne_pointcloud
                              tfPc_.points.end());
         outMsg->width += tfPc_.points.size();
       }
+    
+    using namespace velodyne_rawdata;
+    
+    // Only for VLP-16 in dual-return mode: process two messages at once 
+    // to capture a full scanner revolution.
+    SensorModel model = data_->getSensorModel();
+    ReturnMode  mode  = data_->getReturnMode(scanMsg->packets[0]);
+    if (model == Vlp16 && mode == Dual) {
+      if (bufferedMsg_) {
+        // Insert the buffered message into the current one.
+        outMsg->insert(outMsg->begin(), bufferedMsg_->begin(), bufferedMsg_->end());
+        outMsg->header = bufferedMsg_->header;
+        bufferedMsg_.reset();
+      } else {
+        bufferedMsg_ = outMsg;
+        return;
+      }
+    }
 
     // publish the accumulated cloud message
     ROS_DEBUG_STREAM("Publishing " << outMsg->height * outMsg->width
