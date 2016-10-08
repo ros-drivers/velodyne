@@ -1,9 +1,5 @@
 <!-- -*- mode: XML -*- -->
-<!-- run velodyne_pointcloud/CloudNodelet in a nodelet manager for an VLP-16
-
-     arg: calibration = path to calibration file (default: standard VLP16db.yaml)
-          pcap = path to packet capture file (default: use real device)
-  -->
+<!-- run velodyne_pointcloud/CloudNodelet in a nodelet manager for a VLP-16 -->
 
 <launch>
 
@@ -11,6 +7,7 @@
   <arg name="calibration" default="$(find velodyne_pointcloud)/params/VLP16db.yaml"/>
   <arg name="device_ip" default="" />
   <arg name="frame_id" default="velodyne" />
+  <arg name="manager" default="$(arg frame_id)_nodelet_manager" />
   <arg name="max_range" default="130.0" />
   <arg name="min_range" default="0.4" />
   <arg name="pcap" default="" />
@@ -24,6 +21,7 @@
   <include file="$(find velodyne_driver)/launch/nodelet_manager.launch">
     <arg name="device_ip" value="$(arg device_ip)"/>
     <arg name="frame_id" value="$(arg frame_id)"/>
+    <arg name="manager" value="$(arg manager)" />
     <arg name="model" value="VLP16"/>
     <arg name="pcap" value="$(arg pcap)"/>
     <arg name="port" value="$(arg port)"/>
@@ -36,6 +34,7 @@
   <!-- start cloud nodelet -->
   <include file="$(find velodyne_pointcloud)/launch/cloud_nodelet.launch">
     <arg name="calibration" value="$(arg calibration)"/>
+    <arg name="manager" value="$(arg manager)" />
     <arg name="max_range" value="$(arg max_range)"/>
     <arg name="min_range" value="$(arg min_range)"/>
   </include>
