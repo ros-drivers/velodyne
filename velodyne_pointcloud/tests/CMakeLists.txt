@@ -44,11 +44,9 @@ add_rostest(cloud_node_64e_s2.1_hz.test)
 add_rostest(cloud_nodelet_64e_s2.1_hz.test)
 add_rostest(cloud_node_vlp16_hz.test)
 add_rostest(cloud_nodelet_vlp16_hz.test)
-
-## These tests don't work well enough to be worth the effort of
-## running them:
 add_rostest(transform_node_hz.test)
 add_rostest(transform_nodelet_hz.test)
+add_rostest(two_nodelet_managers.test)
 
 # parse check all the launch/*.launch files
 roslaunch_add_file_check(../launch)
