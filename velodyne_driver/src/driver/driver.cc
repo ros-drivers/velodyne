@@ -58,6 +58,10 @@ VelodyneDriver::VelodyneDriver(ros::NodeHandle node,
       packet_rate = 754;             // 754 Packets/Second for Last or Strongest mode 1508 for dual (VLP-16 User Manual)
       model_full_name = "VLP-16";
     }
+  else if (config_.model == "VLP16")    // generates ~300000 points per second
+    {                                   // 1 packet holds 384 points (12x32)
+      packet_rate = 781.25;             // 300000 / 384
+    }
   else
     {
       ROS_ERROR_STREAM("unknown Velodyne LIDAR model: " << config_.model);
