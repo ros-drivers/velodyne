@@ -40,7 +40,7 @@ namespace velodyne_pointcloud
     dynamic_reconfigure::Server<velodyne_pointcloud::TransformNodeConfig>::
       CallbackType f;
     f = boost::bind (&Transform::reconfigure_callback, this, _1, _2);
-    srv_->setCallback (f);
+    srv_->setCallback (f); // Set callback function und call initially
     
     // subscribe to VelodyneScan packets using transform filter
     velodyne_scan_.subscribe(node, "velodyne_packets", 10);
@@ -58,6 +58,7 @@ namespace velodyne_pointcloud
     data_->setParameters(config.min_range, config.max_range, 
                          config.view_direction, config.view_width);
     config_.frame_id = tf::resolve(tf_prefix_, config.frame_id);
+    config_.latency = config.latency;
     ROS_INFO_STREAM("Target frame ID: " << config_.frame_id);
   }
 
@@ -74,7 +75,7 @@ namespace velodyne_pointcloud
 
     // allocate an output point cloud with same time as raw data
     VPointCloud::Ptr outMsg(new VPointCloud());
-    outMsg->header.stamp = pcl_conversions::toPCL(scanMsg->header).stamp;
+    outMsg->header.stamp = pcl_conversions::toPCL(scanMsg->header).stamp - config_.latency * 1000000ull;
     outMsg->header.frame_id = config_.frame_id;
     outMsg->height = 1;
 
@@ -86,7 +87,7 @@ namespace velodyne_pointcloud
         inPc_.width = 0;
         inPc_.height = 1;
         std_msgs::Header header;
-        header.stamp = scanMsg->packets[next].stamp;
+        header.stamp = scanMsg->packets[next].stamp - ros::Duration(config_.latency);
         header.frame_id = scanMsg->header.frame_id;
         pcl_conversions::toPCL(header, inPc_.header);
 
@@ -97,7 +98,7 @@ namespace velodyne_pointcloud
         tfPc_.points.clear();           // is this needed?
         tfPc_.width = 0;
         tfPc_.height = 1;
-        header.stamp = scanMsg->packets[next].stamp;
+        header.stamp = scanMsg->packets[next].stamp - ros::Duration(config_.latency);
         pcl_conversions::toPCL(header, tfPc_.header);
         tfPc_.header.frame_id = config_.frame_id;
 

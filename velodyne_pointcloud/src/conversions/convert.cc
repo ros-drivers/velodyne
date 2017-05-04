@@ -35,7 +35,7 @@ namespace velodyne_pointcloud
     dynamic_reconfigure::Server<velodyne_pointcloud::CloudNodeConfig>::
       CallbackType f;
     f = boost::bind (&Convert::callback, this, _1, _2);
-    srv_->setCallback (f);
+    srv_->setCallback (f); // Set callback function und call initially
 
     // subscribe to VelodyneScan packets
     velodyne_scan_ =
@@ -50,6 +50,7 @@ namespace velodyne_pointcloud
   ROS_INFO("Reconfigure Request");
   data_->setParameters(config.min_range, config.max_range, config.view_direction,
                        config.view_width);
+  config_.latency = config.latency;
   }
 
   /** @brief Callback for raw scan messages. */
@@ -62,7 +63,7 @@ namespace velodyne_pointcloud
     velodyne_rawdata::VPointCloud::Ptr
       outMsg(new velodyne_rawdata::VPointCloud());
     // outMsg's header is a pcl::PCLHeader, convert it before stamp assignment
-    outMsg->header.stamp = pcl_conversions::toPCL(scanMsg->header).stamp;
+    outMsg->header.stamp = pcl_conversions::toPCL(scanMsg->header).stamp - config_.latency * 1000000ull;
     outMsg->header.frame_id = scanMsg->header.frame_id;
     outMsg->height = 1;
 

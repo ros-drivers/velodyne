@@ -72,6 +72,7 @@ namespace velodyne_pointcloud
     /// configuration parameters
     typedef struct {
       std::string frame_id;          ///< target frame ID
+      double latency;                ///< Constant latency of the sensor in seconds. Is subtracted from the time stamp.
     } Config;
     Config config_;
 
