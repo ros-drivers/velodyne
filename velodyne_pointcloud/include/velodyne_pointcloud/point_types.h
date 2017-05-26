@@ -19,6 +19,13 @@
 #ifndef __VELODYNE_POINTCLOUD_POINT_TYPES_H
 #define __VELODYNE_POINTCLOUD_POINT_TYPES_H
 
+#define PCL_NO_PRECOMPILE
+#include <pcl/pcl_base.h>
+#include <pcl/impl/pcl_base.hpp>
+#include <pcl/filters/passthrough.h>
+#include <pcl/filters/impl/passthrough.hpp>
+#include <pcl/kdtree/kdtree_flann.h>
+#include <pcl/kdtree/impl/kdtree_flann.hpp>
 #include <pcl/point_types.h>
 
 namespace velodyne_pointcloud
