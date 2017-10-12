@@ -1,4 +1,4 @@
-<package>
+<package format="2">
 
   <name>velodyne_laserscan</name>
   <version>1.2.0</version>
@@ -16,15 +16,10 @@
 
   <buildtool_depend>catkin</buildtool_depend>
 
-  <build_depend>roscpp</build_depend>
-  <build_depend>nodelet</build_depend>
-  <build_depend>sensor_msgs</build_depend>
-  <build_depend>dynamic_reconfigure</build_depend>
-
-  <run_depend>roscpp</run_depend>
-  <run_depend>nodelet</run_depend>
-  <run_depend>sensor_msgs</run_depend>
-  <run_depend>dynamic_reconfigure</run_depend>
+  <depend>roscpp</depend>
+  <depend>nodelet</depend>
+  <depend>sensor_msgs</depend>
+  <depend>dynamic_reconfigure</depend>
 
   <export>
     <nodelet plugin="${prefix}/nodelets.xml" />
