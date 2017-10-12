@@ -26,10 +26,18 @@ void VelodyneLaserScan::recvCallback(const sensor_msgs::PointCloud2ConstPtr& msg
 {
   // Latch ring count
   if (!ring_count_) {
-    try { // Check for PointCloud2 field 'ring'
-      sensor_msgs::PointCloud2ConstIterator<uint16_t> it(*msg, "ring");
-    } catch (...) {
-      ROS_ERROR("VelodyneLaserScan: 'ring' field not present in PointCloud2");
+    // Check for PointCloud2 field 'ring'
+    bool found = false;
+    for (size_t i = 0; i < msg->fields.size(); i++) {
+      if (msg->fields[i].datatype == sensor_msgs::PointField::UINT16) {
+        if (msg->fields[i].name == "ring") {
+          found = true;
+          break;
+        }
+      }
+    }
+    if (!found) {
+      ROS_ERROR("VelodyneLaserScan: Field 'ring' of type 'UINT16' not present in PointCloud2");
       return;
     }
     for (sensor_msgs::PointCloud2ConstIterator<uint16_t> it(*msg, "ring"); it != it.end(); ++it) {
@@ -41,7 +49,7 @@ void VelodyneLaserScan::recvCallback(const sensor_msgs::PointCloud2ConstPtr& msg
     if (ring_count_) {
       ROS_INFO("VelodyneLaserScan: Latched ring count of %u", ring_count_);
     } else {
-      ROS_ERROR("VelodyneLaserScan: 'ring' field not present in PointCloud2");
+      ROS_ERROR("VelodyneLaserScan: Field 'ring' of type 'UINT16' not present in PointCloud2");
       return;
     }
   }
@@ -69,16 +77,20 @@ void VelodyneLaserScan::recvCallback(const sensor_msgs::PointCloud2ConstPtr& msg
   int offset_i = -1;
   int offset_r = -1;
   for (size_t i = 0; i < msg->fields.size(); i++) {
-    if (msg->fields[i].name == "x") {
-      offset_x = msg->fields[i].offset;
-    } else if (msg->fields[i].name == "y") {
-      offset_y = msg->fields[i].offset;
-    } else if (msg->fields[i].name == "z") {
-      offset_z = msg->fields[i].offset;
-    } else if (msg->fields[i].name == "intensity") {
-      offset_i = msg->fields[i].offset;
-    } else if (msg->fields[i].name == "ring") {
-      offset_r = msg->fields[i].offset;
+    if (msg->fields[i].datatype == sensor_msgs::PointField::FLOAT32) {
+      if (msg->fields[i].name == "x") {
+        offset_x = msg->fields[i].offset;
+      } else if (msg->fields[i].name == "y") {
+        offset_y = msg->fields[i].offset;
+      } else if (msg->fields[i].name == "z") {
+        offset_z = msg->fields[i].offset;
+      } else if (msg->fields[i].name == "intensity") {
+        offset_i = msg->fields[i].offset;
+      }
+    } else if (msg->fields[i].datatype == sensor_msgs::PointField::UINT16) {
+      if (msg->fields[i].name == "ring") {
+        offset_r = msg->fields[i].offset;
+      }
     }
   }
 
@@ -114,11 +126,11 @@ void VelodyneLaserScan::recvCallback(const sensor_msgs::PointCloud2ConstPtr& msg
       ROS_WARN_ONCE("VelodyneLaserScan: PointCloud2 fields in unexpected order. Using slower generic method.");
       if (offset_i >= 0) {
         scan->intensities.resize(SIZE);
+        sensor_msgs::PointCloud2ConstIterator<uint16_t> iter_r(*msg, "ring");
         sensor_msgs::PointCloud2ConstIterator<float> iter_x(*msg, "x");
         sensor_msgs::PointCloud2ConstIterator<float> iter_y(*msg, "y");
-        sensor_msgs::PointCloud2ConstIterator<float> iter_r(*msg, "ring");
         sensor_msgs::PointCloud2ConstIterator<float> iter_i(*msg, "intensity");
-        for ( ; iter_x != iter_x.end(); ++iter_x, ++iter_y, ++iter_r, ++iter_i) {
+        for ( ; iter_r != iter_r.end(); ++iter_x, ++iter_y, ++iter_r, ++iter_i) {
           const uint16_t r = *iter_r; // ring
           if (r == ring) {
             const float x = *iter_x; // x
@@ -132,10 +144,10 @@ void VelodyneLaserScan::recvCallback(const sensor_msgs::PointCloud2ConstPtr& msg
           }
         }
       } else {
+        sensor_msgs::PointCloud2ConstIterator<uint16_t> iter_r(*msg, "ring");
         sensor_msgs::PointCloud2ConstIterator<float> iter_x(*msg, "x");
         sensor_msgs::PointCloud2ConstIterator<float> iter_y(*msg, "y");
-        sensor_msgs::PointCloud2ConstIterator<float> iter_r(*msg, "ring");
-        for ( ; iter_x != iter_x.end(); ++iter_x, ++iter_y, ++iter_r) {
+        for ( ; iter_r != iter_r.end(); ++iter_x, ++iter_y, ++iter_r) {
           const uint16_t r = *iter_r; // ring
           if (r == ring) {
             const float x = *iter_x; // x
