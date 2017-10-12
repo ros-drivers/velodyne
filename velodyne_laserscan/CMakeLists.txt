@@ -44,3 +44,8 @@ install(TARGETS ${PROJECT_NAME} ${PROJECT_NAME}_node
 install(FILES nodelets.xml
         DESTINATION ${CATKIN_PACKAGE_SHARE_DESTINATION}
 )
+
+if (CATKIN_ENABLE_TESTING)
+  add_subdirectory(tests)
+endif()
+
