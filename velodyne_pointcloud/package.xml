@@ -48,6 +48,7 @@
   <run_depend>velodyne_msgs</run_depend>
   <run_depend>yaml-cpp</run_depend>
   <run_depend>dynamic_reconfigure</run_depend>
+  <run_depend>velodyne_laserscan</run_depend>
 
   <export>
     <nodelet plugin="${prefix}/nodelets.xml"/>
