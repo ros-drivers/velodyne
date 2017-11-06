@@ -45,7 +45,6 @@ include_directories(include ${catkin_INCLUDE_DIRS}
 
 catkin_package(
     CATKIN_DEPENDS ${${PROJECT_NAME}_CATKIN_DEPS}
-    DEPENDS yaml-cpp python-yaml
     INCLUDE_DIRS include
     LIBRARIES velodyne_rawdata)
     

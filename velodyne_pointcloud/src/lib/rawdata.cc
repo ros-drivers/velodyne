@@ -106,6 +106,38 @@ namespace velodyne_rawdata
    return 0;
   }
 
+
+  /** Set up for offline operation */
+  int RawData::setupOffline(std::string calibration_file, double max_range_, double min_range_)
+  {
+
+      config_.max_range = max_range_;
+      config_.min_range = min_range_;
+      ROS_INFO_STREAM("data ranges to publish: ["
+	      << config_.min_range << ", "
+	      << config_.max_range << "]");
+
+      config_.calibrationFile = calibration_file;
+
+      ROS_INFO_STREAM("correction angles: " << config_.calibrationFile);
+
+      calibration_.read(config_.calibrationFile);
+      if (!calibration_.initialized) {
+	  ROS_ERROR_STREAM("Unable to open calibration file: " <<
+		  config_.calibrationFile);
+	  return -1;
+      }
+
+      // Set up cached values for sin and cos of all the possible headings
+      for (uint16_t rot_index = 0; rot_index < ROTATION_MAX_UNITS; ++rot_index) {
+	  float rotation = angles::from_degrees(ROTATION_RESOLUTION * rot_index);
+	  cos_rot_table_[rot_index] = cosf(rotation);
+	  sin_rot_table_[rot_index] = sinf(rotation);
+      }
+      return 0;
+  }
+
+
   /** @brief convert raw packet to point cloud
    *
    *  @param pkt raw packet to unpack
