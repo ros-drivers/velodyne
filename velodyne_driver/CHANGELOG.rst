@@ -1,7 +1,7 @@
 Change history
 ==============
 
-Forthcoming
+1.3.0 (2017-11-10)
 ------------------
 * Merge pull request `#129 <https://github.com/ros-drivers/velodyne/issues/129>`_ from kmhallen/pluginlib_macro
   Modern pluginlib macro

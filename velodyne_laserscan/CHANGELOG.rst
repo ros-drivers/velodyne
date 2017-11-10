@@ -2,8 +2,8 @@
 Changelog for package velodyne_laserscan
 ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
 
-Forthcoming
------------
+1.3.0 (2017-11-10)
+------------------
 * Merge pull request `#110 <https://github.com/ros-drivers/velodyne/issues/110>`_ from kmhallen/master
   Added velodyne_laserscan package
 * Added tests for velodyne_laserscan
