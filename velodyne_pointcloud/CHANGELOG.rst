@@ -5,7 +5,7 @@ Forthcoming
 -------------------
 * Merge pull request `#110 <https://github.com/ros-drivers/velodyne/issues/110>`_ from kmhallen/master
   Added velodyne_laserscan package
-* Merge remote-tracking branch 'ros-drivers/master'
+* Merge remote-tracking branch ros-drivers/master
 * Merge pull request `#129 <https://github.com/ros-drivers/velodyne/issues/129>`_ from kmhallen/pluginlib_macro
   Modern pluginlib macro
 * Update to use non deprecated pluginlib macro
@@ -50,11 +50,11 @@ Forthcoming
   Add dynamic latency configuration to velodyne_driver
 * velodyne_pointcloud: Fix compile warning "Wrong initialization order"
 * velodyne_pointcloud: add dynamic reconfig update to change log (`#78 <https://github.com/ros-drivers/velodyne/issues/78>`_)
-* Merge branch 'fudger-reconfigure_transform_node'
+* Merge branch fudger-reconfigure_transform_node
 * velodyne_pointcloud: use recommended add_dependencies() CMake variable `#78 <https://github.com/ros-drivers/velodyne/issues/78>`_
 * velodyne_pointcloud: fix transform unit tests
   Use tf2_ros static_transform_publisher for more consistent timing (`#2 <https://github.com/ros-drivers/velodyne/issues/2>`_)
-* Merge branch 'reconfigure_transform_node' of https://github.com/fudger/velodyne
+* Merge branch reconfigure_transform_node of https://github.com/fudger/velodyne
 * prepare change history for coming Indigo release (`#59 <https://github.com/ros-drivers/velodyne/issues/59>`_)
 * calibration: unit test case improvements (`#84 <https://github.com/ros-drivers/velodyne/issues/84>`_)
 * calibration: read all intensities as float, then convert (`#84 <https://github.com/ros-drivers/velodyne/issues/84>`_)
@@ -82,7 +82,7 @@ Forthcoming
 * Add a missing space.
 * Fix line that always indicates use of model VLP-16.
 * Align console output of calibration data.
-* Merge branch 'master' of https://github.com/ros-drivers/velodyne
+* Merge branch master of https://github.com/ros-drivers/velodyne
 * resolve sign error
 * Merge pull request `#73 <https://github.com/ros-drivers/velodyne/issues/73>`_ from fudger/master
   Correct important data type error for VLP-16
@@ -125,7 +125,7 @@ Forthcoming
   fixed gen_calibration min/max intensity type
 * fixed gen_calibration min/max intensity type
 * fixed a calibration file parsing bug
-* Contributors: Adam Stambler, Alex Rodrigues, Alexander Schaefer, Andreas Wachaja, Bo Li, Daniel Jartoux, Gabor Meszaros, Jack O'Quin, Jose Luis Blanco-Claraco, Joshua Whitley, Kevin Hallenbeck, Kris Kozak, Kun Li, Micho Radovnikovich, Scott K Logan, Thomas Solatges, Todor Stoyanov, William Woodall, jack.oquin, libo24, phussey, piyushk, pomerlef
+* Contributors: Adam Stambler, Alex Rodrigues, Alexander Schaefer, Andreas Wachaja, Bo Li, Daniel Jartoux, Gabor Meszaros, Jack OQuin, Jose Luis Blanco-Claraco, Joshua Whitley, Kevin Hallenbeck, Kris Kozak, Kun Li, Micho Radovnikovich, Scott K Logan, Thomas Solatges, Todor Stoyanov, William Woodall, jack.oquin, libo24, phussey, piyushk, pomerlef
 
 1.2.0 (2014-08-06)
 ------------------
@@ -140,7 +140,7 @@ Forthcoming
 * Add dynamic_reconfigure feature.
 * Add angular limits to the output point cloud, useful for omitting
   part of it. (`#22 <https://github.com/ros-drivers/velodyne/pull/22>`_).
-* Contributors: Jack O'Quin, Scott K Logan, Thomas Solatges
+* Contributors: Jack OQuin, Scott K Logan, Thomas Solatges
 
 1.1.2 (2013-11-05)
 ------------------
@@ -155,7 +155,7 @@ Forthcoming
  * Add support for HDL-64E S2 and S2.1 models, which were not working
    before (`#11`_), thanks to Gabor Meszaros (`#12`_).
  * Add additional parameters to launch files (`#14`_).
- * Contributors: Gabor Meszaros, Jack O'Quin
+ * Contributors: Gabor Meszaros, Jack OQuin
 
 1.1.0 (2013-07-16)
 ------------------
