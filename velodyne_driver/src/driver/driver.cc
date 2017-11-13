@@ -38,9 +38,14 @@ VelodyneDriver::VelodyneDriver(ros::NodeHandle node,
   double packet_rate;                   // packet frequency (Hz)
   std::string model_full_name;
   if ((config_.model == "64E_S2") || 
-      (config_.model == "64E_S2.1"))    // generates 1333312 points per second
+      (config_.model == "64E_S2.1"))    // generates 1333312 points per second (see Velodyne datasheet)
     {                                   // 1 packet holds 384 points
       packet_rate = 3472.17;            // 1333312 / 384
+      model_full_name = std::string("HDL-") + config_.model;
+    }
+    else if (config_.model == "64E_S3") // generates 1333120 points per second @600rpm
+    {                                   // 1 packet --> 384 points (12 fire/packet and 32 laser/fire)
+      packet_rate = 3471.66;
       model_full_name = std::string("HDL-") + config_.model;
     }
   else if (config_.model == "64E")
@@ -66,6 +71,21 @@ VelodyneDriver::VelodyneDriver(ros::NodeHandle node,
   std::string deviceName(std::string("Velodyne ") + model_full_name);
 
   private_nh.param("rpm", config_.rpm, 600.0);
+
+  // Different packet rate based on rpm
+
+  if (config_.rpm != 600.0)
+    {
+      if (config_.rpm == 300.0 || config_.rpm == 900)
+        {
+        packet_rate = 3472.5;
+        }
+      else if (config_.rpm == 1200)
+        {
+        packet_rate = 3473.33;
+        }
+    }
+  
   ROS_INFO_STREAM(deviceName << " rotating at " << config_.rpm << " RPM");
   double frequency = (config_.rpm / 60.0);     // expected Hz rate
 
