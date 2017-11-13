@@ -17,3 +17,11 @@ tested recently.  To build for Fuerte from source, check out the
 .. _ROS: http://www.ros.org
 .. _Velodyne: http://www.ros.org/wiki/velodyne
 .. _`Velodyne high definition 3D LIDARs`: http://www.velodynelidar.com/lidar/lidar.aspx
+
+
+**Requirements**::
+
+If you run into the error ``pcap.h header file``, make sure that you have the following installed:
+::
+
+  sudo apt-get install libpcap0.8-dev
