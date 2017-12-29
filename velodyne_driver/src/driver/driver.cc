@@ -80,7 +80,25 @@ VelodyneDriver::VelodyneDriver(ros::NodeHandle node,
 
   double cut_angle;
   private_nh.param("cut_angle", cut_angle, -0.01);
-  config_.cut_angle = int(cut_angle*100);
+  if (cut_angle < 0.0)
+  {
+    ROS_INFO_STREAM("Cut at specific angle feature deactivated.");
+  }
+  else if (cut_angle < (2*M_PI))
+  {
+      ROS_INFO_STREAM("Cut at specific angle feature activated. " 
+        "Cutting velodyne points always at " << cut_angle << " rad.");
+  }
+  else
+  {
+    ROS_ERROR_STREAM("cut_angle parameter is out of range. Allowed range is "
+    << "between 0.0 and 2*PI or negative values to deactivate this feature.");
+    cut_angle = -0.01;
+  }
+
+  // Convert cut_angle from radian to one-hundredth degree, 
+  // which is used in velodyne packets
+  config_.cut_angle = int((cut_angle*360/(2*M_PI))*100);
 
   int udp_port;
   private_nh.param("port", udp_port, (int) DATA_PORT_NUMBER);
@@ -148,22 +166,23 @@ bool VelodyneDriver::poll(void)
       }
       scan->packets.push_back(tmp_packet);
 
-      static int last_base_rotation = -1;
+      static int last_azimuth = -1;
       // Extract base rotation of first block in packet
-      std::size_t rot_data_pos = 100*0+2;
-      int base_rotation = *( (u_int16_t*) (&tmp_packet.data[rot_data_pos]));
+      std::size_t azimuth_data_pos = 100*0+2;
+      int azimuth = *( (u_int16_t*) (&tmp_packet.data[azimuth_data_pos]));
+
       // Handle overflow 35999->0
-      if(base_rotation<last_base_rotation)
-        last_base_rotation-=36000;
+      if(azimuth<last_azimuth)
+        last_azimuth-=36000;
       // Check if currently passing cut angle
-      if(   last_base_rotation != -1
-         && last_base_rotation < config_.cut_angle
-         && base_rotation >= config_.cut_angle )
+      if(   last_azimuth != -1
+         && last_azimuth < config_.cut_angle
+         && azimuth >= config_.cut_angle )
       {
-        last_base_rotation = base_rotation;
+        last_azimuth = azimuth;
         break; // Cut angle passed, one full revolution collected
       }
-      last_base_rotation = base_rotation;
+      last_azimuth = azimuth;
     }
   }
   else // standard behaviour
