@@ -78,6 +78,28 @@ VelodyneDriver::VelodyneDriver(ros::NodeHandle node,
   std::string dump_file;
   private_nh.param("pcap", dump_file, std::string(""));
 
+  double cut_angle;
+  private_nh.param("cut_angle", cut_angle, -0.01);
+  if (cut_angle < 0.0)
+  {
+    ROS_INFO_STREAM("Cut at specific angle feature deactivated.");
+  }
+  else if (cut_angle < (2*M_PI))
+  {
+      ROS_INFO_STREAM("Cut at specific angle feature activated. " 
+        "Cutting velodyne points always at " << cut_angle << " rad.");
+  }
+  else
+  {
+    ROS_ERROR_STREAM("cut_angle parameter is out of range. Allowed range is "
+    << "between 0.0 and 2*PI or negative values to deactivate this feature.");
+    cut_angle = -0.01;
+  }
+
+  // Convert cut_angle from radian to one-hundredth degree, 
+  // which is used in velodyne packets
+  config_.cut_angle = int((cut_angle*360/(2*M_PI))*100);
+
   int udp_port;
   private_nh.param("port", udp_port, (int) DATA_PORT_NUMBER);
 
@@ -129,11 +151,46 @@ bool VelodyneDriver::poll(void)
 {
   // Allocate a new shared pointer for zero-copy sharing with other nodelets.
   velodyne_msgs::VelodyneScanPtr scan(new velodyne_msgs::VelodyneScan);
-  scan->packets.resize(config_.npackets);
 
+  if( config_.cut_angle >= 0) //Cut at specific angle feature enabled
+  {
+    scan->packets.reserve(config_.npackets);
+    velodyne_msgs::VelodynePacket tmp_packet;
+    while(true)
+    {
+      while(true)
+      {
+        int rc = input_->getPacket(&tmp_packet, config_.time_offset);
+        if (rc == 0) break;       // got a full packet?
+        if (rc < 0) return false; // end of file reached?
+      }
+      scan->packets.push_back(tmp_packet);
+
+      static int last_azimuth = -1;
+      // Extract base rotation of first block in packet
+      std::size_t azimuth_data_pos = 100*0+2;
+      int azimuth = *( (u_int16_t*) (&tmp_packet.data[azimuth_data_pos]));
+
+      // Handle overflow 35999->0
+      if(azimuth<last_azimuth)
+        last_azimuth-=36000;
+      // Check if currently passing cut angle
+      if(   last_azimuth != -1
+         && last_azimuth < config_.cut_angle
+         && azimuth >= config_.cut_angle )
+      {
+        last_azimuth = azimuth;
+        break; // Cut angle passed, one full revolution collected
+      }
+      last_azimuth = azimuth;
+    }
+  }
+  else // standard behaviour
+  {
   // Since the velodyne delivers data at a very high rate, keep
   // reading and publishing scans as fast as possible.
-  for (int i = 0; i < config_.npackets; ++i)
+    scan->packets.resize(config_.npackets);
+    for (int i = 0; i < config_.npackets; ++i)
     {
       while (true)
         {
@@ -143,10 +200,11 @@ bool VelodyneDriver::poll(void)
           if (rc < 0) return false; // end of file reached?
         }
     }
+  }
 
   // publish message using time of last packet read
   ROS_DEBUG("Publishing a full Velodyne scan.");
-  scan->header.stamp = scan->packets[config_.npackets - 1].stamp;
+  scan->header.stamp = scan->packets.back().stamp;
   scan->header.frame_id = config_.frame_id;
   output_.publish(scan);
 
