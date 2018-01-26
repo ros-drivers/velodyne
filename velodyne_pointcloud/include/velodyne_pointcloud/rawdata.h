@@ -149,7 +149,7 @@ namespace velodyne_rawdata
     void unpack(const velodyne_msgs::VelodynePacket &pkt, VPointCloud &pc);
     
     void setParameters(double min_range, double max_range, double view_direction,
-                       double view_width);
+                       double view_width, bool organize_cloud);
 
   private:
 
@@ -163,6 +163,8 @@ namespace velodyne_rawdata
       
       double tmp_min_angle;
       double tmp_max_angle;
+
+      bool organize_cloud;
     } Config;
     Config config_;
 

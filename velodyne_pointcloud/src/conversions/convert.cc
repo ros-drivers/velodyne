@@ -49,7 +49,7 @@ namespace velodyne_pointcloud
   {
   ROS_INFO("Reconfigure Request");
   data_->setParameters(config.min_range, config.max_range, config.view_direction,
-                       config.view_width);
+                       config.view_width, config.organize_cloud);
   }
 
   /** @brief Callback for raw scan messages. */
