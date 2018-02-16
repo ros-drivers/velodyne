@@ -2,7 +2,7 @@ Overview
 ========
 
 Velodyne_ is a collection of ROS_ packages supporting `Velodyne high
-definition 3D LIDARs`_ .
+definition 3D LIDARs`_.
 
 **Warning**::
 

@@ -1,4 +1,6 @@
 <!-- -*- mode: XML -*- -->
+<!-- Copyright (C) 2017, Velodyne LiDAR INC., Algorithms and Signal Processing Group -->
+<!-- Author : Velodyne LiDAR, Algorithms and Signal Processing Group -->
 <!-- run velodyne_pointcloud/CloudNodelet in a nodelet manager for an VLP-32C -->
 
 <launch>
@@ -8,7 +10,7 @@
   <arg name="device_ip" default="" />
   <arg name="frame_id" default="velodyne" />
   <arg name="manager" default="$(arg frame_id)_nodelet_manager" />
-  <arg name="max_range" default="130.0" />
+  <arg name="max_range" default="200.0" />
   <arg name="min_range" default="0.4" />
   <arg name="pcap" default="" />
   <arg name="port" default="2368" />
@@ -16,15 +18,13 @@
   <arg name="read_once" default="false" />
   <arg name="repeat_delay" default="0.0" />
   <arg name="rpm" default="600.0" />
-  <arg name="laserscan_ring" default="-1" />
-  <arg name="laserscan_resolution" default="0.007" />
 
   <!-- start nodelet manager and driver nodelets -->
   <include file="$(find velodyne_driver)/launch/nodelet_manager.launch">
     <arg name="device_ip" value="$(arg device_ip)"/>
     <arg name="frame_id" value="$(arg frame_id)"/>
     <arg name="manager" value="$(arg manager)" />
-    <arg name="model" value="32C"/>
+    <arg name="model" value="VLP32C"/>
     <arg name="pcap" value="$(arg pcap)"/>
     <arg name="port" value="$(arg port)"/>
     <arg name="read_fast" value="$(arg read_fast)"/>
@@ -39,13 +39,6 @@
     <arg name="manager" value="$(arg manager)" />
     <arg name="max_range" value="$(arg max_range)"/>
     <arg name="min_range" value="$(arg min_range)"/>
-  </include>
-
-  <!-- start laserscan nodelet -->
-  <include file="$(find velodyne_pointcloud)/launch/laserscan_nodelet.launch">
-    <arg name="manager" value="$(arg manager)" />
-    <arg name="ring" value="$(arg laserscan_ring)"/>
-    <arg name="resolution" value="$(arg laserscan_resolution)"/>
   </include>
 
 </launch>

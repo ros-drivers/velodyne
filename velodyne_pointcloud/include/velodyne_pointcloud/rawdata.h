@@ -2,6 +2,7 @@
  *
  *  Copyright (C) 2007 Austin Robot Technology, Yaxin Liu, Patrick Beeson
  *  Copyright (C) 2009, 2010, 2012 Austin Robot Technology, Jack O'Quin
+ *  Copyright (C) 2017, Velodyne LiDAR INC., Algorithms and Signal Processing Group
  *
  *  License: Modified BSD Software License Agreement
  *
@@ -15,6 +16,7 @@
  *  @author Yaxin Liu
  *  @author Patrick Beeson
  *  @author Jack O'Quin
+ *  @author Velodyne LiDAR, Algorithms and Signal Processing Group
  */
 
 #ifndef __VELODYNE_RAWDATA_H
@@ -41,28 +43,31 @@ namespace velodyne_rawdata
   /**
    * Raw Velodyne packet constants and structures.
    */
-  static const int SIZE_BLOCK = 100;
-  static const int RAW_SCAN_SIZE = 3;
-  static const int SCANS_PER_BLOCK = 32;
-  static const int BLOCK_DATA_SIZE = (SCANS_PER_BLOCK * RAW_SCAN_SIZE);
+  static const int BLOCK_SIZE = 100; // [bytes]
+  static const int CHANNEL_SIZE = 3; // [bytes]
+  static const int NUM_CHANS_PER_BLOCK = 32;
+  static const int BLOCK_DATA_SIZE = (NUM_CHANS_PER_BLOCK * CHANNEL_SIZE);
+  static const float  CHANNEL_TDURATION  =   2.304f;   // [µs] Channels corresponds to one laser firing
+  static const float  SEQ_TDURATION      =  55.296f;   // [µs] Sequence is a set of laser firings including recharging
 
-  static const float ROTATION_RESOLUTION      =     0.01f;  // [deg]
-  static const uint16_t ROTATION_MAX_UNITS    = 36000u;     // [deg/100]
-  static const float DISTANCE_RESOLUTION      =     0.002f; // [m]
+  static const float    ROTATION_RESOLUTION   =     0.01f;  // [deg]
+  static const uint16_t ROTATION_MAX_UNITS    =    36000u;  // [deg/100]
+  static const float    DISTANCE_RESOLUTION   =    0.002f;  // [m]
+  static const float    VLP32_DISTANCE_RESOLUTION   =    0.004f;  // [m]
 
   /** @todo make this work for both big and little-endian machines */
   static const uint16_t UPPER_BANK = 0xeeff;
   static const uint16_t LOWER_BANK = 0xddff;
   
+  /** Special Definitions for VLP16 support **/
+  static const int    VLP16_NUM_SEQS_PER_BLOCK  = 2;
+  static const int    VLP16_NUM_CHANS_PER_SEQ   = 16;
+  static const float  VLP16_BLOCK_TDURATION     = (VLP16_NUM_SEQS_PER_BLOCK * SEQ_TDURATION);
+ 
+  /** Special Definitions for HDL32 support **/
+  static const float  HDL32_CHANNEL_TDURATION  =   1.152f;   // [µs] From Application Note: HDL-32E Packet Structure and Timing Defition
+  static const float  HDL32_SEQ_TDURATION      =  46.080f;   // [µs] Sequence is a set of laser firings including recharging
   
-  /** Special Defines for VLP16 support **/
-  static const int    VLP16_FIRINGS_PER_BLOCK =   2;
-  static const int    VLP16_SCANS_PER_FIRING  =  16;
-  static const float  VLP16_BLOCK_TDURATION   = 110.592f;   // [µs]
-  static const float  VLP16_DSR_TOFFSET       =   2.304f;   // [µs]
-  static const float  VLP16_FIRING_TOFFSET    =  55.296f;   // [µs]
-  
-
   /** \brief Raw Velodyne data block.
    *
    *  Each block contains data from either the upper or lower laser
@@ -88,10 +93,10 @@ namespace velodyne_rawdata
     uint8_t  bytes[2];
   };
 
-  static const int PACKET_SIZE = 1206;
-  static const int BLOCKS_PER_PACKET = 12;
+  static const int PACKET_SIZE = 1206; // [bytes]
+  static const int NUM_BLOCKS_PER_PACKET = 12;
   static const int PACKET_STATUS_SIZE = 4;
-  static const int SCANS_PER_PACKET = (SCANS_PER_BLOCK * BLOCKS_PER_PACKET);
+  static const int NUM_CHANS_PER_PACKET = (NUM_CHANS_PER_BLOCK * NUM_BLOCKS_PER_PACKET);
 
   /** \brief Raw Velodyne packet.
    *
@@ -107,7 +112,7 @@ namespace velodyne_rawdata
    */
   typedef struct raw_packet
   {
-    raw_block_t blocks[BLOCKS_PER_PACKET];
+    raw_block_t blocks[NUM_BLOCKS_PER_PACKET];
     uint16_t revolution;
     uint8_t status[PACKET_STATUS_SIZE]; 
   } raw_packet_t;
@@ -173,8 +178,13 @@ namespace velodyne_rawdata
     float sin_rot_table_[ROTATION_MAX_UNITS];
     float cos_rot_table_[ROTATION_MAX_UNITS];
     
-    /** add private function to handle the VLP16 **/ 
+    /** add private function to handle each sensor **/ 
     void unpack_vlp16(const velodyne_msgs::VelodynePacket &pkt, VPointCloud &pc);
+    void unpack_vlp32(const velodyne_msgs::VelodynePacket &pkt, VPointCloud &pc);
+    void unpack_hdl32(const velodyne_msgs::VelodynePacket &pkt, VPointCloud &pc);
+    void unpack_hdl64(const velodyne_msgs::VelodynePacket &pkt, VPointCloud &pc);
+    void compute_xyzi(const uint8_t chan_id, const uint16_t azimuth_uint, const float distance, float &intensity,
+      float &x_coord, float &y_coord, float &z_coord); 
 
     /** in-line test whether a point is in range */
     bool pointInRange(float range)
