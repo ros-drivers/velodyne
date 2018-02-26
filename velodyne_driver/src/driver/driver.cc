@@ -229,8 +229,9 @@ void VelodyneDriver::callback(velodyne_driver::VelodyneNodeConfig &config,
   config_.time_offset = config.time_offset;
 }
 
-void VelodyneDriver::diagTimerCallback(const ros::TimerEvent &)
+void VelodyneDriver::diagTimerCallback(const ros::TimerEvent &event)
 {
+  (void)event;
   // Call necessary to provide an error when no velodyne packets are received
   diagnostics_.update();
 }

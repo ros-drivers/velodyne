@@ -43,7 +43,7 @@ private:
   void callback(velodyne_driver::VelodyneNodeConfig &config,
               uint32_t level);
   /// Callback for diagnostics update for lost communication with vlp
-  void diagTimerCallback(const ros::TimerEvent&);
+  void diagTimerCallback(const ros::TimerEvent&event);
 
   ///Pointer to dynamic reconfigure service srv_
   boost::shared_ptr<dynamic_reconfigure::Server<velodyne_driver::
