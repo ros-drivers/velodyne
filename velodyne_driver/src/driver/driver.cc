@@ -129,6 +129,7 @@ VelodyneDriver::VelodyneDriver(ros::NodeHandle node,
                                                              &diag_max_freq_,
                                                              0.1, 10),
                                         TimeStampStatusParam()));
+  diag_timer_ = private_nh.createTimer(ros::Duration(0.2), &VelodyneDriver::diagTimerCallback,this);
 
   // open Velodyne input device or file
   if (dump_file != "")                  // have PCAP file?
@@ -226,6 +227,13 @@ void VelodyneDriver::callback(velodyne_driver::VelodyneNodeConfig &config,
 {
   ROS_INFO("Reconfigure Request");
   config_.time_offset = config.time_offset;
+}
+
+void VelodyneDriver::diagTimerCallback(const ros::TimerEvent &event)
+{
+  (void)event;
+  // Call necessary to provide an error when no velodyne packets are received
+  diagnostics_.update();
 }
 
 } // namespace velodyne_driver
