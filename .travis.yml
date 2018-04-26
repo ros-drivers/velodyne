@@ -4,11 +4,9 @@ language: generic
 compiler:
   - gcc
 env:
-  global:
-    - AFTER_SCRIPT='./build_script.sh'
   matrix:
-    - ROS_DISTRO="indigo" ROS_REPO=ros/main CATKIN_CONFIG="-DCMAKE_BUILD_TYPE=Release"
-    - ROS_DISTRO="kinetic" ROS_REPO=ros/main CATKIN_CONFIG="-DCMAKE_BUILD_TYPE=Release"
+    - ROS_DISTRO="indigo" ROS_REPOSITORY_PATH=http://packages.ros.org/ros/ubuntu CATKIN_CONFIG="-DCMAKE_BUILD_TYPE=Release" DOCKER_BASE_IMAGE=ros:indigo-perception
+    - ROS_DISTRO="kinetic" ROS_REPOSITORY_PATH=http://packages.ros.org/ros/ubuntu CATKIN_CONFIG="-DCMAKE_BUILD_TYPE=Release" DOCKER_BASE_IMAGE=ros:kinetic-perception
 
 install:
   git clone https://github.com/ros-industrial/industrial_ci.git .ci_config
