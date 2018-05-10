@@ -1,0 +1,15 @@
+sudo: required
+dist: trusty
+language: generic
+compiler:
+  - gcc
+env:
+  matrix:
+    - ROS_DISTRO="indigo" ROS_REPO=ros CATKIN_CONFIG="-DCMAKE_BUILD_TYPE=Release" DOCKER_BASE_IMAGE=ros:indigo-perception
+    - ROS_DISTRO="kinetic" ROS_REPO=ros CATKIN_CONFIG="-DCMAKE_BUILD_TYPE=Release" DOCKER_BASE_IMAGE=ros:kinetic-perception
+    - ROS_DISTRO="lunar" ROS_REPO=ros CATKIN_CONFIG="-DCMAKE_BUILD_TYPE=Release" DOCKER_BASE_IMAGE=ros:kinetic-perception
+
+install:
+  git clone https://github.com/ros-industrial/industrial_ci.git .ci_config
+script:
+  source .ci_config/travis.sh

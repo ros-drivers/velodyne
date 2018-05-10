@@ -1,6 +1,13 @@
 Change history
 ==============
 
+1.3.0 (2017-11-10)
+------------------
+* Merge pull request `#110 <https://github.com/ros-drivers/velodyne/issues/110>`_ from kmhallen/master
+  Added velodyne_laserscan package
+* Added velodyne_laserscan package and inserted into existing launch files
+* Contributors: Jack O'Quin, Joshua Whitley, Kevin Hallenbeck
+
 1.2.0 (2014-08-06)
 ------------------
 
