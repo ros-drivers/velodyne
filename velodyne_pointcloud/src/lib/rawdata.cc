@@ -146,6 +146,7 @@ namespace velodyne_rawdata
   void RawData::unpack(const velodyne_msgs::VelodynePacket &pkt,
                        VPointCloud &pc)
   {
+    using velodyne_pointcloud::LaserCorrection;
     ROS_DEBUG_STREAM("Received packet, time: " << pkt.stamp);
     
     /** special parsing for the VLP16 **/
@@ -157,6 +158,21 @@ namespace velodyne_rawdata
     
     const raw_packet_t *raw = (const raw_packet_t *) &pkt.data[0];
 
+    // This is a more CPU and chache friendly data structure.
+    std::vector<LaserCorrection*> laser_corrections;
+    laser_corrections.resize(calibration_.laser_corrections.size());
+
+    for( std::map<int, LaserCorrection>::iterator it = calibration_.laser_corrections.begin();
+         it != calibration_.laser_corrections.end();
+         it++)
+    {
+        const int index = 0;
+        if( index >= calibration_.laser_corrections.size()) // this will not happen... probably
+        {
+            laser_corrections.resize(index+1);
+        }
+        laser_corrections[ it->first ] = &(it->second);
+    }
     for (int i = 0; i < BLOCKS_PER_PACKET; i++) {
 
       // upper bank lasers are numbered [0..31]
@@ -174,8 +190,7 @@ namespace velodyne_rawdata
         uint8_t laser_number;       ///< hardware laser number
 
         laser_number = j + bank_origin;
-        velodyne_pointcloud::LaserCorrection &corrections = 
-          calibration_.laser_corrections[laser_number];
+        const LaserCorrection &corrections = *laser_corrections[laser_number];
 
         /** Position Calculation */
         const raw_block_t &block = raw->blocks[i];
