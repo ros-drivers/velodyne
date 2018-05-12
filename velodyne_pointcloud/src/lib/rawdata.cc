@@ -158,8 +158,8 @@ namespace velodyne_rawdata
     
     const raw_packet_t *raw = (const raw_packet_t *) &pkt.data[0];
 
-    // This is a more CPU and chache friendly data structure.
-    std::vector<LaserCorrection*> laser_corrections;
+    // This is a more CPU and cache friendly data structure.
+    static std::vector<LaserCorrection*> laser_corrections;
     laser_corrections.resize(calibration_.laser_corrections.size());
 
     for( std::map<int, LaserCorrection>::iterator it = calibration_.laser_corrections.begin();
