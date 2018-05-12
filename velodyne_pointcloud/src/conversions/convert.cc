@@ -66,11 +66,13 @@ namespace velodyne_pointcloud
     outMsg->header.frame_id = scanMsg->header.frame_id;
     outMsg->height = 1;
 
+    outMsg->points.reserve(scanMsg->packets.size() * data_->scansPerPacket());
+
     // process each packet provided by the driver
     for (size_t i = 0; i < scanMsg->packets.size(); ++i)
-      {
+    {
         data_->unpack(scanMsg->packets[i], *outMsg);
-      }
+    }
 
     // publish the accumulated cloud message
     ROS_DEBUG_STREAM("Publishing " << outMsg->height * outMsg->width

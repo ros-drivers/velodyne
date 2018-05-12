@@ -36,6 +36,8 @@
 
 namespace velodyne_rawdata
 {
+inline float SQR(float val) { return val*val; }
+
   ////////////////////////////////////////////////////////////////////////
   //
   // RawData base class implementation
@@ -70,6 +72,18 @@ namespace velodyne_rawdata
       //avoid returning empty cloud if min_angle = max_angle
       config_.min_angle = 0;
       config_.max_angle = 36000;
+    }
+  }
+
+  int RawData::scansPerPacket() const
+  {
+    if( calibration_.num_lasers == 16)
+    {
+      return BLOCKS_PER_PACKET * VLP16_FIRINGS_PER_BLOCK *
+          VLP16_SCANS_PER_FIRING;
+    }
+    else{
+      return BLOCKS_PER_PACKET * SCANS_PER_BLOCK;
     }
   }
 
@@ -286,7 +300,7 @@ namespace velodyne_rawdata
                              * (1 - corrections.focal_distance / 13100);
           float focal_slope = corrections.focal_slope;
           intensity += focal_slope * (std::abs(focal_offset - 256 * 
-            (1 - static_cast<float>(tmp.uint)/65535)*(1 - static_cast<float>(tmp.uint)/65535)));
+            SQR(1 - static_cast<float>(tmp.uint)/65535)));
           intensity = (intensity < min_intensity) ? min_intensity : intensity;
           intensity = (intensity > max_intensity) ? max_intensity : intensity;
   
@@ -458,12 +472,10 @@ namespace velodyne_rawdata
     
             intensity = raw->blocks[block].data[k+2];
     
-            float focal_offset = 256 
-                               * (1 - corrections.focal_distance / 13100) 
-                               * (1 - corrections.focal_distance / 13100);
+            float focal_offset = 256 * SQR(1 - corrections.focal_distance / 13100);
             float focal_slope = corrections.focal_slope;
             intensity += focal_slope * (std::abs(focal_offset - 256 * 
-              (1 - tmp.uint/65535)*(1 - tmp.uint/65535)));
+              SQR(1 - tmp.uint/65535)));
             intensity = (intensity < min_intensity) ? min_intensity : intensity;
             intensity = (intensity > max_intensity) ? max_intensity : intensity;
 
