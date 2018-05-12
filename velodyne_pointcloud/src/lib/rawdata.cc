@@ -166,12 +166,12 @@ namespace velodyne_rawdata
          it != calibration_.laser_corrections.end();
          it++)
     {
-        const int index = 0;
+        const int index = it->first;
         if( index >= calibration_.laser_corrections.size()) // this will not happen... probably
         {
             laser_corrections.resize(index+1);
         }
-        laser_corrections[ it->first ] = &(it->second);
+        laser_corrections[ index ] = &(it->second);
     }
     for (int i = 0; i < BLOCKS_PER_PACKET; i++) {
 
