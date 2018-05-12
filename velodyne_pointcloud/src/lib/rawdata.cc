@@ -158,21 +158,6 @@ namespace velodyne_rawdata
     
     const raw_packet_t *raw = (const raw_packet_t *) &pkt.data[0];
 
-    // This is a more CPU and cache friendly data structure.
-    static std::vector<LaserCorrection*> laser_corrections;
-    laser_corrections.resize(calibration_.laser_corrections.size());
-
-    for( std::map<int, LaserCorrection>::iterator it = calibration_.laser_corrections.begin();
-         it != calibration_.laser_corrections.end();
-         it++)
-    {
-        const int index = it->first;
-        if( index >= calibration_.laser_corrections.size()) // this will not happen... probably
-        {
-            laser_corrections.resize(index+1);
-        }
-        laser_corrections[ index ] = &(it->second);
-    }
     for (int i = 0; i < BLOCKS_PER_PACKET; i++) {
 
       // upper bank lasers are numbered [0..31]
@@ -187,10 +172,9 @@ namespace velodyne_rawdata
         
         float x, y, z;
         float intensity;
-        uint8_t laser_number;       ///< hardware laser number
+        const uint8_t laser_number  = j + bank_origin;
 
-        laser_number = j + bank_origin;
-        const LaserCorrection &corrections = *laser_corrections[laser_number];
+        const LaserCorrection &corrections = calibration_.laser_corrections[laser_number];
 
         /** Position Calculation */
         const raw_block_t &block = raw->blocks[i];
@@ -337,12 +321,6 @@ namespace velodyne_rawdata
     int azimuth_corrected;
     float x, y, z;
     float intensity;
-    velodyne_pointcloud::LaserCorrection* laser_corrections[VLP16_SCANS_PER_FIRING];
-
-    // convert the map into a simpler (and faster) array of pointers
-    for (int dsr=0; dsr < VLP16_SCANS_PER_FIRING; dsr++){
-      laser_corrections[dsr] = &(calibration_.laser_corrections[dsr]);
-    }
 
     const raw_packet_t *raw = (const raw_packet_t *) &pkt.data[0];
 
@@ -369,7 +347,7 @@ namespace velodyne_rawdata
 
       for (int firing=0, k=0; firing < VLP16_FIRINGS_PER_BLOCK; firing++){
         for (int dsr=0; dsr < VLP16_SCANS_PER_FIRING; dsr++, k+=RAW_SCAN_SIZE){
-          velodyne_pointcloud::LaserCorrection &corrections = *(laser_corrections[dsr]);
+          velodyne_pointcloud::LaserCorrection &corrections = calibration_.laser_corrections[dsr];
 
           /** Position Calculation */
           union two_bytes tmp;

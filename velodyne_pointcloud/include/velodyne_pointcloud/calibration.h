@@ -13,6 +13,7 @@
 #define __VELODYNE_CALIBRATION_H
 
 #include <map>
+#include <vector>
 #include <string>
 
 namespace velodyne_pointcloud {
@@ -56,7 +57,8 @@ namespace velodyne_pointcloud {
 
   public:
 
-    std::map<int, LaserCorrection> laser_corrections;
+    std::map<int,LaserCorrection> laser_corrections_map;
+    std::vector<LaserCorrection> laser_corrections;
     int num_lasers;
     bool initialized;
     bool ros_info;
