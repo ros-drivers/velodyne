@@ -19,7 +19,7 @@
 #include <tf/transform_listener.h>
 #include <velodyne_msgs/VelodyneScan.h>
 
-#include "driver.h"
+#include "velodyne_driver/driver.h"
 
 namespace velodyne_driver
 {

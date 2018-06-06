@@ -13,7 +13,7 @@
 
 */
 
-#include "convert.h"
+#include "velodyne_pointcloud/convert.h"
 
 #include <pcl_conversions/pcl_conversions.h>
 
