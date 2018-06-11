@@ -3,10 +3,10 @@
 Overview
 ========
 
-Velodyne_ is a collection of ROS_ packages supporting `Velodyne high
-definition 3D LIDARs`_ .
+Velodyne<sup>1</sup> is a collection of ROS<sup>2</sup> packages supporting `Velodyne high
+definition 3D LIDARs`<sup>3</sup>.
 
-**Warning**::
+**Warning**:
 
   The master branch normally contains code being tested for the next
   ROS release.  It will not always work with every previous release.
@@ -17,6 +17,6 @@ The current ``master`` branch works with ROS Indigo and Kinetic.
 CI builds are currently run for Lunar and Melodic but extensive
 testing has not been completed in those environments.
 
-.. _ROS: http://www.ros.org
-.. _Velodyne: http://www.ros.org/wiki/velodyne
-.. _`Velodyne high definition 3D LIDARs`: http://www.velodynelidar.com/lidar/lidar.aspx
+- <sup>1</sup>ROS: http://www.ros.org
+- <sup>2</sup>Velodyne: http://www.ros.org/wiki/velodyne
+- <sup>3</sup>`Velodyne high definition 3D LIDARs`: http://www.velodynelidar.com/lidar/lidar.aspx
