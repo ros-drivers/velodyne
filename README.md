@@ -11,7 +11,7 @@ definition 3D LIDARs`<sup>3</sup>.
   The master branch normally contains code being tested for the next
   ROS release.  It will not always work with every previous release.
   To check out the source for the most recent release, check out the
-  tag 'velodyne-<version>' with the highest version number.
+  tag `velodyne-<version>` with the highest version number.
 
 The current ``master`` branch works with ROS Indigo and Kinetic.
 CI builds are currently run for Lunar and Melodic but extensive
