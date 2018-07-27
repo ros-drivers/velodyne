@@ -143,15 +143,14 @@ namespace velodyne_rawdata
    *  @param pkt raw packet to unpack
    *  @param pc shared pointer to point cloud (points are appended)
    */
-  void RawData::unpack(const velodyne_msgs::VelodynePacket &pkt,
-                       VPointCloud &pc)
+  void RawData::unpack(const velodyne_msgs::VelodynePacket &pkt, DataContainerBase& data)
   {
     ROS_DEBUG_STREAM("Received packet, time: " << pkt.stamp);
     
     /** special parsing for the VLP16 **/
     if (calibration_.num_lasers == 16)
     {
-      unpack_vlp16(pkt, pc);
+      unpack_vlp16(pkt, data);
       return;
     }
     
@@ -289,18 +288,7 @@ namespace velodyne_rawdata
           intensity = (intensity > max_intensity) ? max_intensity : intensity;
   
           if (pointInRange(distance)) {
-  
-            // convert polar coordinates to Euclidean XYZ
-            VPoint point;
-            point.ring = corrections.laser_ring;
-            point.x = x_coord;
-            point.y = y_coord;
-            point.z = z_coord;
-            point.intensity = intensity;
-  
-            // append this point to the cloud
-            pc.points.push_back(point);
-            ++pc.width;
+            data.addPoint(x_coord, y_coord, z_coord, corrections.laser_ring, raw->blocks[i].rotation, distance, intensity);
           }
         }
       }
@@ -312,8 +300,7 @@ namespace velodyne_rawdata
    *  @param pkt raw packet to unpack
    *  @param pc shared pointer to point cloud (points are appended)
    */
-  void RawData::unpack_vlp16(const velodyne_msgs::VelodynePacket &pkt,
-                             VPointCloud &pc)
+  void RawData::unpack_vlp16(const velodyne_msgs::VelodynePacket &pkt, DataContainerBase& data)
   {
     float azimuth;
     float azimuth_diff;
@@ -467,18 +454,8 @@ namespace velodyne_rawdata
             intensity = (intensity < min_intensity) ? min_intensity : intensity;
             intensity = (intensity > max_intensity) ? max_intensity : intensity;
     
-            if (pointInRange(distance)) {
-    
-              // append this point to the cloud
-              VPoint point;
-              point.ring = corrections.laser_ring;
-              point.x = x_coord;
-              point.y = y_coord;
-              point.z = z_coord;
-              point.intensity = intensity;
-
-              pc.points.push_back(point);
-              ++pc.width;
+            if (pointInRange(distance)) {    
+              data.addPoint(x_coord, y_coord, z_coord, corrections.laser_ring, azimuth_corrected, distance, intensity);
             }
           }
         }
