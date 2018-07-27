@@ -278,9 +278,8 @@ namespace velodyne_driver
           {
             // Skip packets not for the correct port and from the
             // selected IP address.
-            if (!devip_str_.empty() &&
-                (0 == pcap_offline_filter(&pcap_packet_filter_,
-                                          header, pkt_data)))
+            if (0 == pcap_offline_filter(&pcap_packet_filter_,
+                                          header, pkt_data))
               continue;
 
             // Keep the reader from blowing through the file.
