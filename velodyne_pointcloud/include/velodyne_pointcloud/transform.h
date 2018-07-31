@@ -34,9 +34,9 @@
 
 // instantiate template for transforming a VPointCloud
 template bool
-  pcl_ros::transformPointCloud<velodyne_pointcloud::VPoint>(const std::string &,
-                                       const velodyne_pointcloud::VPointCloud &,
-                                       velodyne_pointcloud::VPointCloud &,
+  pcl_ros::transformPointCloud<velodyne_rawdata::VPoint>(const std::string &,
+                                       const velodyne_rawdata::VPointCloud &,
+                                       velodyne_rawdata::VPointCloud &,
                                        const tf::TransformListener &);
 
 namespace velodyne_pointcloud
@@ -75,7 +75,7 @@ namespace velodyne_pointcloud
     // inPc_ and tfPc_ are class members only to avoid reallocation on
     // every message.
     PointcloudXYZIR inPc_;              ///< input packet point cloud
-    VPointCloud tfPc_;              ///< transformed packet point cloud
+    velodyne_rawdata::VPointCloud tfPc_;              ///< transformed packet point cloud
   };
 
 } // namespace velodyne_pointcloud

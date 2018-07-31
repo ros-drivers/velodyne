@@ -30,9 +30,16 @@
 #include <velodyne_msgs/VelodyneScan.h>
 #include <velodyne_pointcloud/calibration.h>
 #include <velodyne_pointcloud/datacontainerbase.h>
+#include <pcl_ros/point_cloud.h>
+#include <velodyne_pointcloud/point_types.h>
+
 
 namespace velodyne_rawdata
 {
+    // Shorthand typedefs for point cloud representations
+  typedef velodyne_pointcloud::PointXYZIR VPoint;
+  typedef pcl::PointCloud<VPoint> VPointCloud;
+
   /**
    * Raw Velodyne packet constants and structures.
    */

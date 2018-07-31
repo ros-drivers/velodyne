@@ -73,7 +73,7 @@ namespace velodyne_pointcloud
       return;                                     // avoid much work
 
     // allocate an output point cloud with same time as raw data
-    VPointCloud::Ptr outMsg(new VPointCloud());
+    velodyne_rawdata::VPointCloud::Ptr outMsg(new velodyne_rawdata::VPointCloud());
     outMsg->header.stamp = pcl_conversions::toPCL(scanMsg->header).stamp;
     outMsg->header.frame_id = config_.frame_id;
     outMsg->height = 1;
@@ -109,8 +109,8 @@ namespace velodyne_pointcloud
             pcl_ros::transformPointCloud(config_.frame_id, *(inPc_.pc), tfPc_,
                                          listener_);
 #if 0       // use the latest transform available, should usually work fine
-            pcl_ros::transformPointCloud(inPc_.header.frame_id,
-                                         ros::Time(0), inPc_,
+            pcl_ros::transformPointCloud(inPc_.pc->header.frame_id,
+                                         ros::Time(0), *(inPc_.pc),
                                          config_.frame_id,
                                          tfPc_, listener_);
 #endif
