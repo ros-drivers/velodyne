@@ -13,7 +13,7 @@
 
 */
 
-#include "convert.h"
+#include "velodyne_pointcloud/convert.h"
 
 #include <pcl_conversions/pcl_conversions.h>
 
@@ -29,7 +29,7 @@ namespace velodyne_pointcloud
     // advertise output point cloud (before subscribing to input data)
     output_ =
       node.advertise<sensor_msgs::PointCloud2>("velodyne_points", 10);
-      
+
     srv_ = boost::make_shared <dynamic_reconfigure::Server<velodyne_pointcloud::
       CloudNodeConfig> > (private_nh);
     dynamic_reconfigure::Server<velodyne_pointcloud::CloudNodeConfig>::
@@ -42,8 +42,21 @@ namespace velodyne_pointcloud
       node.subscribe("velodyne_packets", 10,
                      &Convert::processScan, (Convert *) this,
                      ros::TransportHints().tcpNoDelay(true));
+
+    // Diagnostics
+    diagnostics_.setHardwareID("Velodyne Convert");
+    // Arbitrary frequencies since we don't know which RPM is used, and are only
+    // concerned about monitoring the frequency.
+    diag_min_freq_ = 2.0;
+    diag_max_freq_ = 20.0;
+    using namespace diagnostic_updater;
+    diag_topic_.reset(new TopicDiagnostic("velodyne_points", diagnostics_,
+                                       FrequencyStatusParam(&diag_min_freq_,
+                                                            &diag_max_freq_,
+                                                            0.1, 10),
+                                       TimeStampStatusParam()));
   }
-  
+
   void Convert::callback(velodyne_pointcloud::CloudNodeConfig &config,
                 uint32_t level)
   {
@@ -59,23 +72,26 @@ namespace velodyne_pointcloud
       return;                                     // avoid much work
 
     // allocate a point cloud with same time and frame ID as raw data
-    velodyne_rawdata::VPointCloud::Ptr
-      outMsg(new velodyne_rawdata::VPointCloud());
+    PointcloudXYZIR outMsg;
     // outMsg's header is a pcl::PCLHeader, convert it before stamp assignment
-    outMsg->header.stamp = pcl_conversions::toPCL(scanMsg->header).stamp;
-    outMsg->header.frame_id = scanMsg->header.frame_id;
-    outMsg->height = 1;
+    outMsg.pc->header.stamp = pcl_conversions::toPCL(scanMsg->header).stamp;
+    outMsg.pc->header.frame_id = scanMsg->header.frame_id;
+    outMsg.pc->height = 1;
+
+    outMsg.pc->points.reserve(scanMsg->packets.size() * data_->scansPerPacket());
 
     // process each packet provided by the driver
     for (size_t i = 0; i < scanMsg->packets.size(); ++i)
-      {
-        data_->unpack(scanMsg->packets[i], *outMsg);
-      }
+    {
+      data_->unpack(scanMsg->packets[i], outMsg);
+    }
 
     // publish the accumulated cloud message
-    ROS_DEBUG_STREAM("Publishing " << outMsg->height * outMsg->width
-                     << " Velodyne points, time: " << outMsg->header.stamp);
-    output_.publish(outMsg);
+    ROS_DEBUG_STREAM("Publishing " << outMsg.pc->height * outMsg.pc->width
+                     << " Velodyne points, time: " << outMsg.pc->header.stamp);
+    output_.publish(outMsg.pc);
+    diag_topic_->tick(scanMsg->header.stamp);
+    diagnostics_.update();
   }
 
 } // namespace velodyne_pointcloud

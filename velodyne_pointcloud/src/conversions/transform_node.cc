@@ -8,12 +8,12 @@
 /** \file
 
     This ROS node transforms raw Velodyne LIDAR packets to PointCloud2
-    in the /odom frame of reference.
+    in the /map frame of reference.
 
 */
 
 #include <ros/ros.h>
-#include "transform.h"
+#include "velodyne_pointcloud/transform.h"
 
 /** Main node entry point. */
 int main(int argc, char **argv)

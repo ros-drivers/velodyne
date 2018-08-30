@@ -1,6 +1,15 @@
 cmake_minimum_required(VERSION 2.8.3)
 project(velodyne_driver)
 
+# Set minimum C++ standard to C++11
+if (NOT "${CMAKE_CXX_STANDARD_COMPUTED_DEFAULT}")
+  message(STATUS "Changing CXX_STANDARD from C++98 to C++11")
+  set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -std=c++11")
+elseif ("${CMAKE_CXX_STANDARD_COMPUTED_DEFAULT}" STREQUAL "98")
+  message(STATUS "Changing CXX_STANDARD from C++98 to C++11")
+  set(CMAKE_CXX_STANDARD 11)
+endif()
+
 set(${PROJECT_NAME}_CATKIN_DEPS 
     diagnostic_updater
     dynamic_reconfigure
@@ -9,7 +18,7 @@ set(${PROJECT_NAME}_CATKIN_DEPS
     tf
     velodyne_msgs)
 
-find_package(catkin REQUIRED COMPONENTS ${${PROJECT_NAME}_CATKIN_DEPS})
+find_package(catkin REQUIRED COMPONENTS ${${PROJECT_NAME}_CATKIN_DEPS} roslint)
 
 # This driver uses Boost threads
 find_package(Boost REQUIRED COMPONENTS thread)
@@ -39,6 +48,8 @@ install(DIRECTORY launch/
         DESTINATION ${CATKIN_PACKAGE_SHARE_DESTINATION}/launch)
 install(PROGRAMS src/vdump
         DESTINATION ${CATKIN_PACKAGE_BIN_DESTINATION})
+
+roslint_cpp()
 
 if (CATKIN_ENABLE_TESTING)
 
@@ -75,4 +86,9 @@ if (CATKIN_ENABLE_TESTING)
   # parse check all the launch/*.launch files
   roslaunch_add_file_check(launch)
 
+  # unit test
+  catkin_add_gtest(time_test tests/timeconversiontest.cpp)
+  target_link_libraries(time_test
+    ${catkin_LIBRARIES}
+    ${Boost_LIBRARIES})
 endif (CATKIN_ENABLE_TESTING)
