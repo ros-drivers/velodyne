@@ -1,8 +1,8 @@
 Change history
 ==============
 
-Forthcoming
------------
+1.4.0 (2018-09-19)
+------------------
 * Merge pull request `#160 <https://github.com/ros-drivers/velodyne/issues/160>`_ from ros-drivers/maint/updating_package_xml_to_v2
 * Updated all package.xmls to ver 2. Cleaned up catkin_lint errors.
   All package.xml files are now compatible with version 2 of the

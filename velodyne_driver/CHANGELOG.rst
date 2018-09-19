@@ -1,8 +1,8 @@
 Change history
 ==============
 
-Forthcoming
------------
+1.4.0 (2018-09-19)
+------------------
 * Merge pull request `#178 <https://github.com/ros-drivers/velodyne/issues/178>`_ from sts-thm/bugfix_issue\_`#174 <https://github.com/ros-drivers/velodyne/issues/174>`_
   Bugfix issue `#174 <https://github.com/ros-drivers/velodyne/issues/174>`_
 * Removed debug outputs

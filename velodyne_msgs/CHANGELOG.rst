@@ -1,8 +1,8 @@
 Change history
 ==============
 
-Forthcoming
------------
+1.4.0 (2018-09-19)
+------------------
 * Updated all package.xmls to ver 2. Cleaned up catkin_lint errors.
   All package.xml files are now compatible with version 2 of the
   package.xml specification in REP 140. Removed some unnecessary
