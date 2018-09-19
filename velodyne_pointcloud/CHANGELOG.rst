@@ -1,6 +1,34 @@
 Change history
 ==============
 
+Forthcoming
+-----------
+* Merge pull request `#178 <https://github.com/ros-drivers/velodyne/issues/178>`_ from sts-thm/bugfix_issue\_`#174 <https://github.com/ros-drivers/velodyne/issues/174>`_
+  Bugfix issue `#174 <https://github.com/ros-drivers/velodyne/issues/174>`_
+* Merge pull request `#177 <https://github.com/ros-drivers/velodyne/issues/177>`_ from C-NR/feature/WrapPointcloudData
+  Feature/wrap pointcloud data
+* Changes fixing deadlock for specific cut_angle values.
+* moved definition of VPoint and VPointCloud back to namespace rawdata in rawdata.h
+* put a wrapper around pointcloud data including a generic setter method to enable the use of arbitrary data structures  (pcl pointcloud, depth image, octomaps and so on) to be filled by just using RawData::unpack method with the wrapper object as parameter
+* Merge pull request `#170 <https://github.com/ros-drivers/velodyne/issues/170>`_ from ros-drivers/maint/move_header_files
+  Moving header files to traditional location inside include folders.
+* Merge pull request `#160 <https://github.com/ros-drivers/velodyne/issues/160>`_ from ros-drivers/maint/updating_package_xml_to_v2
+* Updated all package.xmls to ver 2. Cleaned up catkin_lint errors.
+  All package.xml files are now compatible with version 2 of the
+  package.xml specification in REP 140. Removed some unnecessary
+  execute permissions on a few files. Fixed a missing test_depend.
+* Merge pull request `#136 <https://github.com/ros-drivers/velodyne/issues/136>`_ from stsundermann/patch-1
+  Use std::abs instead of abs
+* Adding missing 32C configuration file.
+* Merge pull request `#139 <https://github.com/ros-drivers/velodyne/issues/139>`_ from ASDeveloper00/vlp32
+  Adding support for VLP-32C.
+* Merge pull request `#138 <https://github.com/ros-drivers/velodyne/issues/138>`_ from volkandre/cut_at_specified_angle_feature
+  Cut at specified angle feature
+* Updated default cut_angle parameters in launch files after switching from deg to rad.
+* Use std::abs instead of abs
+  abs is the c version which returns an integer. This is probably not intended here, so use the templated std::abs function.
+* Contributors: Andre Volk, Autonomoustuff Developer, CNR, Joshua Whitley, Kyle Rector, Stephan Sundermann, Tobias Athmer, kennouni
+
 1.3.0 (2017-11-10)
 -------------------
 * Merge pull request `#110 <https://github.com/ros-drivers/velodyne/issues/110>`_ from kmhallen/master
