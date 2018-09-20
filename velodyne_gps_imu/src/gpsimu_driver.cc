@@ -90,7 +90,7 @@ void GpsImuDriver::handleSocketRead(const boost::system::error_code &error, std:
   }
   else
   {
-      if( error.value() != 995 )
+      if( error != boost::asio::error::operation_aborted )
       {
         std::cerr << "ERROR: " << "data connection error: " << error.message() << "(" << error.value() << ")" << std::endl;
         std::cout << "Trying to rebind socket" << std::endl;
