@@ -47,7 +47,7 @@ bool GpsImuDriver::bind(const int udp_port)
   {
     // Bind socket
       udp_socket_ = new boost::asio::ip::udp::socket(io_service_, boost::asio::ip::udp::v4());
-      udp_socket_->bind(boost::asio::ip::udp::endpoint(boost::asio::ip::udp::v4(), 8308));
+      udp_socket_->bind(boost::asio::ip::udp::endpoint(boost::asio::ip::udp::v4(), udp_port));
       // Start async reading
       asyncReceiveFrom();
       io_service_thread_ = boost::thread(boost::bind(&boost::asio::io_service::run, &io_service_));
