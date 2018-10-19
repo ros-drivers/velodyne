@@ -1,8 +1,8 @@
 Change history
 ==============
 
-Forthcoming
------------
+1.5.0 (2018-10-19)
+------------------
 * Merge pull request `#187 <https://github.com/ros-drivers/velodyne/issues/187>`_ from moooeeeep/master
   Fixed sign error in return value of InputSocket::getPacket()
 * bugfix: getPacket() function is expected to return negative value on error
