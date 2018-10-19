@@ -37,6 +37,7 @@ namespace velodyne_pointcloud
 {
 
   const std::string NUM_LASERS = "num_lasers";
+  const std::string DISTANCE_RESOLUTION = "distance_resolution";
   const std::string LASERS = "lasers";
   const std::string LASER_ID = "laser_id";
   const std::string ROT_CORRECTION = "rot_correction";
@@ -143,9 +144,12 @@ namespace velodyne_pointcloud
   {
     int num_lasers;
     node[NUM_LASERS] >> num_lasers;
+    float distance_resolution_m;
+    node[DISTANCE_RESOLUTION] >> distance_resolution_m;
     const YAML::Node& lasers = node[LASERS];
     calibration.laser_corrections.clear();
     calibration.num_lasers = num_lasers;
+    calibration.distance_resolution_m = distance_resolution_m;
     for (int i = 0; i < num_lasers; i++) {
       std::pair<int, LaserCorrection> correction;
       lasers[i] >> correction;
@@ -223,6 +227,8 @@ namespace velodyne_pointcloud
     out << YAML::BeginMap;
     out << YAML::Key << NUM_LASERS <<
       YAML::Value << calibration.laser_corrections.size();
+    out << YAML::Key << DISTANCE_RESOLUTION <<
+      YAML::Value << calibration.distance_resolution_m;
     out << YAML::Key << LASERS << YAML::Value << YAML::BeginSeq;
     for (std::map<int, LaserCorrection>::const_iterator
            it = calibration.laser_corrections.begin();

@@ -50,7 +50,6 @@ namespace velodyne_rawdata
 
   static const float ROTATION_RESOLUTION      =     0.01f;  // [deg]
   static const uint16_t ROTATION_MAX_UNITS    = 36000u;     // [deg/100]
-  static const float DISTANCE_RESOLUTION      =     0.002f; // [m]
 
   /** @todo make this work for both big and little-endian machines */
   static const uint16_t UPPER_BANK = 0xeeff;

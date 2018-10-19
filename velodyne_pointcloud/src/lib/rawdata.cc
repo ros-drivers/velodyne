@@ -189,7 +189,7 @@ namespace velodyne_rawdata
              ||(config_.min_angle > config_.max_angle 
              && (raw->blocks[i].rotation <= config_.max_angle 
              || raw->blocks[i].rotation >= config_.min_angle))){
-          float distance = tmp.uint * DISTANCE_RESOLUTION;
+          float distance = tmp.uint * calibration_.distance_resolution_m;
           distance += corrections.dist_correction;
   
           float cos_vert_angle = corrections.cos_vert_correction;
@@ -373,7 +373,7 @@ namespace velodyne_rawdata
                || azimuth_corrected >= config_.min_angle))){
 
             // convert polar coordinates to Euclidean XYZ
-            float distance = tmp.uint * DISTANCE_RESOLUTION;
+            float distance = tmp.uint * calibration_.distance_resolution_m;
             distance += corrections.dist_correction;
             
             float cos_vert_angle = corrections.cos_vert_correction;
