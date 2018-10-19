@@ -1,6 +1,25 @@
 Change history
 ==============
 
+Forthcoming
+-----------
+* Merge pull request `#164 <https://github.com/ros-drivers/velodyne/issues/164>`_ from ros-drivers/maint/vlp_32c_support
+  Adding VLP-32C support.
+  This was tested by AutonomouStuff and several external users. Though it does not include new information that I've learned (it appears that the distance resolution is different <50m vs >=50m), it is a good start.
+* Merge pull request `#189 <https://github.com/ros-drivers/velodyne/issues/189>`_ from kveretennicov/patch-1
+* Fix malformed plugin description XML
+  ROS pluginlib only recognizes multiple <library> elements if they are under
+  <class_libraries> XML root. It silently ignores malformed XMLs with multiple
+  <library> "root"s and just reads the first one, due to relaxed way tinyxml2 does
+  parsing. Though if you do `rosrun nodelet declared_nodelets`, the issue is
+  reported properly.
+  See also similar issue in https://github.com/ros-perception/perception_pcl/issues/131
+* Adding distance_resolution to test yaml files.
+* Adding VLP-32C support.
+  Based on work done by @rockcdr. Adds distance_resolution calibration
+  value to support 0.004m distance resolution for VLP-32C.
+* Contributors: Joshua Whitley, Konstantin Veretennicov
+
 1.4.0 (2018-09-19)
 ------------------
 * Merge pull request `#178 <https://github.com/ros-drivers/velodyne/issues/178>`_ from sts-thm/bugfix_issue\_`#174 <https://github.com/ros-drivers/velodyne/issues/174>`_
