@@ -65,6 +65,8 @@ namespace velodyne_pointcloud
     outMsg.pc->header.frame_id = scanMsg->header.frame_id;
     outMsg.pc->height = 1;
 
+    outMsg.pc->points.reserve(scanMsg->packets.size() * data_->scansPerPacket());
+
     // process each packet provided by the driver
     for (size_t i = 0; i < scanMsg->packets.size(); ++i)
     {

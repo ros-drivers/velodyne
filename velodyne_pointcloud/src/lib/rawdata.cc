@@ -36,6 +36,8 @@
 
 namespace velodyne_rawdata
 {
+inline float SQR(float val) { return val*val; }
+
   ////////////////////////////////////////////////////////////////////////
   //
   // RawData base class implementation
@@ -70,6 +72,18 @@ namespace velodyne_rawdata
       //avoid returning empty cloud if min_angle = max_angle
       config_.min_angle = 0;
       config_.max_angle = 36000;
+    }
+  }
+
+  int RawData::scansPerPacket() const
+  {
+    if( calibration_.num_lasers == 16)
+    {
+      return BLOCKS_PER_PACKET * VLP16_FIRINGS_PER_BLOCK *
+          VLP16_SCANS_PER_FIRING;
+    }
+    else{
+      return BLOCKS_PER_PACKET * SCANS_PER_BLOCK;
     }
   }
 
@@ -145,6 +159,7 @@ namespace velodyne_rawdata
    */
   void RawData::unpack(const velodyne_msgs::VelodynePacket &pkt, DataContainerBase& data)
   {
+    using velodyne_pointcloud::LaserCorrection;
     ROS_DEBUG_STREAM("Received packet, time: " << pkt.stamp);
 
     /** special parsing for the VLP16 **/
@@ -170,21 +185,24 @@ namespace velodyne_rawdata
         
         float x, y, z;
         float intensity;
-        uint8_t laser_number;       ///< hardware laser number
+        const uint8_t laser_number  = j + bank_origin;
 
-        laser_number = j + bank_origin;
-        velodyne_pointcloud::LaserCorrection &corrections = 
-          calibration_.laser_corrections[laser_number];
+        const LaserCorrection &corrections = calibration_.laser_corrections[laser_number];
 
         /** Position Calculation */
-
+        const raw_block_t &block = raw->blocks[i];
         union two_bytes tmp;
-        tmp.bytes[0] = raw->blocks[i].data[k];
-        tmp.bytes[1] = raw->blocks[i].data[k+1];
+        tmp.bytes[0] = block.data[k];
+        tmp.bytes[1] = block.data[k+1];
+
+        float distance = tmp.uint * calibration_.distance_resolution_m;
+        distance += corrections.dist_correction;
+        if (!pointInRange(distance)) continue;
+
         /*condition added to avoid calculating points which are not
           in the interesting defined area (min_angle < area < max_angle)*/
-        if ((raw->blocks[i].rotation >= config_.min_angle 
-             && raw->blocks[i].rotation <= config_.max_angle 
+        if ((block.rotation >= config_.min_angle
+             && block.rotation <= config_.max_angle
              && config_.min_angle < config_.max_angle)
              ||(config_.min_angle > config_.max_angle 
              && (raw->blocks[i].rotation <= config_.max_angle 
@@ -200,11 +218,11 @@ namespace velodyne_rawdata
           // cos(a-b) = cos(a)*cos(b) + sin(a)*sin(b)
           // sin(a-b) = sin(a)*cos(b) - cos(a)*sin(b)
           float cos_rot_angle = 
-            cos_rot_table_[raw->blocks[i].rotation] * cos_rot_correction + 
-            sin_rot_table_[raw->blocks[i].rotation] * sin_rot_correction;
+            cos_rot_table_[block.rotation] * cos_rot_correction +
+            sin_rot_table_[block.rotation] * sin_rot_correction;
           float sin_rot_angle = 
-            sin_rot_table_[raw->blocks[i].rotation] * cos_rot_correction - 
-            cos_rot_table_[raw->blocks[i].rotation] * sin_rot_correction;
+            sin_rot_table_[block.rotation] * cos_rot_correction -
+            cos_rot_table_[block.rotation] * sin_rot_correction;
   
           float horiz_offset = corrections.horiz_offset_correction;
           float vert_offset = corrections.vert_offset_correction;
@@ -283,13 +301,11 @@ namespace velodyne_rawdata
                              * (1 - corrections.focal_distance / 13100);
           float focal_slope = corrections.focal_slope;
           intensity += focal_slope * (std::abs(focal_offset - 256 * 
-            (1 - static_cast<float>(tmp.uint)/65535)*(1 - static_cast<float>(tmp.uint)/65535)));
+            SQR(1 - static_cast<float>(tmp.uint)/65535)));
           intensity = (intensity < min_intensity) ? min_intensity : intensity;
           intensity = (intensity > max_intensity) ? max_intensity : intensity;
   
-          if (pointInRange(distance)) {
-            data.addPoint(x_coord, y_coord, z_coord, corrections.laser_ring, raw->blocks[i].rotation, distance, intensity);
-          }
+          data.addPoint(x_coord, y_coord, z_coord, corrections.laser_ring, raw->blocks[i].rotation, distance, intensity);
         }
       }
     }
@@ -351,18 +367,23 @@ namespace velodyne_rawdata
 
       for (int firing=0, k=0; firing < VLP16_FIRINGS_PER_BLOCK; firing++){
         for (int dsr=0; dsr < VLP16_SCANS_PER_FIRING; dsr++, k+=RAW_SCAN_SIZE){
-          velodyne_pointcloud::LaserCorrection &corrections = 
-            calibration_.laser_corrections[dsr];
+          velodyne_pointcloud::LaserCorrection &corrections = calibration_.laser_corrections[dsr];
 
           /** Position Calculation */
           union two_bytes tmp;
           tmp.bytes[0] = raw->blocks[block].data[k];
           tmp.bytes[1] = raw->blocks[block].data[k+1];
           
+          float distance = tmp.uint * calibration_.distance_resolution_m;
+          distance += corrections.dist_correction;
+
+          // skip the point if out of range
+          if ( !pointInRange(distance)) continue;
+
           /** correct for the laser rotation as a function of timing during the firings **/
           azimuth_corrected_f = azimuth + (azimuth_diff * ((dsr*VLP16_DSR_TOFFSET) + (firing*VLP16_FIRING_TOFFSET)) / VLP16_BLOCK_TDURATION);
           azimuth_corrected = ((int)round(azimuth_corrected_f)) % 36000;
-          
+                 
           /*condition added to avoid calculating points which are not
             in the interesting defined area (min_angle < area < max_angle)*/
           if ((azimuth_corrected >= config_.min_angle 
@@ -461,18 +482,14 @@ namespace velodyne_rawdata
     
             intensity = raw->blocks[block].data[k+2];
     
-            float focal_offset = 256 
-                               * (1 - corrections.focal_distance / 13100) 
-                               * (1 - corrections.focal_distance / 13100);
+            float focal_offset = 256 * SQR(1 - corrections.focal_distance / 13100);
             float focal_slope = corrections.focal_slope;
             intensity += focal_slope * (std::abs(focal_offset - 256 * 
-              (1 - tmp.uint/65535)*(1 - tmp.uint/65535)));
+              SQR(1 - tmp.uint/65535)));
             intensity = (intensity < min_intensity) ? min_intensity : intensity;
             intensity = (intensity > max_intensity) ? max_intensity : intensity;
     
-            if (pointInRange(distance)) {    
-              data.addPoint(x_coord, y_coord, z_coord, corrections.laser_ring, azimuth_corrected, distance, intensity);
-            }
+            data.addPoint(x_coord, y_coord, z_coord, corrections.laser_ring, azimuth_corrected, distance, intensity);
           }
         }
       }
