@@ -4,7 +4,7 @@
 <launch>
 
   <!-- declare arguments with default values -->
-  <arg name="calibration" default="$(find velodyne_pointcloud)/params/32db.yaml"/>
+  <arg name="calibration" default="$(find velodyne_pointcloud)/params/64e_s3-xiesc.yaml"/>
   <arg name="device_ip" default="" />
   <arg name="frame_id" default="velodyne" />
   <arg name="manager" default="$(arg frame_id)_nodelet_manager" />
