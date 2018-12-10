@@ -1,8 +1,8 @@
 Change history
 ==============
 
-Forthcoming
------------
+1.5.1 (2018-12-10)
+------------------
 * Merge pull request `#194 <https://github.com/ros-drivers/velodyne/issues/194>`_ from ros-drivers/avoid_unnecessary_computation
   Avoid unnecessary computation - causes approximately 20% performance increase on VLP-32C - should be similar for other sensors
 * std::vector<>::reserve is your friend
