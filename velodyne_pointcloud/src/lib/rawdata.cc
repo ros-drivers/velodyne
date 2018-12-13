@@ -197,7 +197,6 @@ inline float SQR(float val) { return val*val; }
 
         float distance = tmp.uint * calibration_.distance_resolution_m;
         distance += corrections.dist_correction;
-        if (!pointInRange(distance)) continue;
 
         /*condition added to avoid calculating points which are not
           in the interesting defined area (min_angle < area < max_angle)*/
@@ -304,10 +303,11 @@ inline float SQR(float val) { return val*val; }
             SQR(1 - static_cast<float>(tmp.uint)/65535)));
           intensity = (intensity < min_intensity) ? min_intensity : intensity;
           intensity = (intensity > max_intensity) ? max_intensity : intensity;
-  
+
           data.addPoint(x_coord, y_coord, z_coord, corrections.laser_ring, raw->blocks[i].rotation, distance, intensity);
         }
       }
+      data.newLine();
     }
   }
   
@@ -374,12 +374,6 @@ inline float SQR(float val) { return val*val; }
           tmp.bytes[0] = raw->blocks[block].data[k];
           tmp.bytes[1] = raw->blocks[block].data[k+1];
           
-          float distance = tmp.uint * calibration_.distance_resolution_m;
-          distance += corrections.dist_correction;
-
-          // skip the point if out of range
-          if ( !pointInRange(distance)) continue;
-
           /** correct for the laser rotation as a function of timing during the firings **/
           azimuth_corrected_f = azimuth + (azimuth_diff * ((dsr*VLP16_DSR_TOFFSET) + (firing*VLP16_FIRING_TOFFSET)) / VLP16_BLOCK_TDURATION);
           azimuth_corrected = ((int)round(azimuth_corrected_f)) % 36000;
@@ -492,8 +486,8 @@ inline float SQR(float val) { return val*val; }
             data.addPoint(x_coord, y_coord, z_coord, corrections.laser_ring, azimuth_corrected, distance, intensity);
           }
         }
+        data.newLine();
       }
     }
-  }  
-
+  }
 } // namespace velodyne_rawdata

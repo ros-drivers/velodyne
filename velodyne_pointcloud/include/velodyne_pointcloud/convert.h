@@ -21,7 +21,6 @@
 
 #include <sensor_msgs/PointCloud2.h>
 #include <velodyne_pointcloud/rawdata.h>
-#include <velodyne_pointcloud/pointcloudXYZIR.h>
 
 #include <dynamic_reconfigure/server.h>
 #include <velodyne_pointcloud/CloudNodeConfig.h>
@@ -51,9 +50,15 @@ namespace velodyne_pointcloud
 
     /// configuration parameters
     typedef struct {
-      int npackets;                    ///< number of packets to combine
+      std::string target_frame;      ///< target frame
+      std::string fixed_frame;       ///< fixed frame
+      bool organize_cloud;           ///< enable/disable organized cloud structure
+      double max_range;              ///< maximum range to publish
+      double min_range;              ///< minimum range to publish
+      uint16_t num_lasers;           ///< number of lasers
+      int npackets;                  ///< number of packets to combine
     } Config;
-    Config config_;    
+    Config config_;
   };
 
 } // namespace velodyne_pointcloud

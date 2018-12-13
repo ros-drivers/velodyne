@@ -61,21 +61,21 @@ namespace velodyne_pointcloud
     const std::string tf_prefix_;
     boost::shared_ptr<velodyne_rawdata::RawData> data_;
     message_filters::Subscriber<velodyne_msgs::VelodyneScan> velodyne_scan_;
-    tf::MessageFilter<velodyne_msgs::VelodyneScan> *tf_filter_;
     ros::Publisher output_;
-    tf::TransformListener listener_;
+    boost::shared_ptr<tf::MessageFilter<velodyne_msgs::VelodyneScan> >tf_filter_ptr_;
+    boost::shared_ptr<tf::TransformListener> listener_ptr_;
 
     /// configuration parameters
     typedef struct {
-      std::string frame_id;          ///< target frame ID
+      std::string target_frame;      ///< target frame
+      std::string fixed_frame;       ///< fixed frame
+      bool organize_cloud;           ///< enable/disable organized cloud structure
+      double max_range;              ///< maximum range to publish
+      double min_range;              ///< minimum range to publish
+      uint16_t num_lasers;           ///< number of lasers
     } Config;
     Config config_;
 
-    // Point cloud buffers for collecting points within a packet.  The
-    // inPc_ and tfPc_ are class members only to avoid reallocation on
-    // every message.
-    PointcloudXYZIR inPc_;              ///< input packet point cloud
-    velodyne_rawdata::VPointCloud tfPc_;              ///< transformed packet point cloud
   };
 
 } // namespace velodyne_pointcloud

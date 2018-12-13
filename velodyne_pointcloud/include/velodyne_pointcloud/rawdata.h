@@ -30,16 +30,10 @@
 #include <velodyne_msgs/VelodyneScan.h>
 #include <velodyne_pointcloud/calibration.h>
 #include <velodyne_pointcloud/datacontainerbase.h>
-#include <pcl_ros/point_cloud.h>
-#include <velodyne_pointcloud/point_types.h>
 
 
 namespace velodyne_rawdata
 {
-    // Shorthand typedefs for point cloud representations
-  typedef velodyne_pointcloud::PointXYZIR VPoint;
-  typedef pcl::PointCloud<VPoint> VPointCloud;
-
   /**
    * Raw Velodyne packet constants and structures.
    */
@@ -163,7 +157,7 @@ namespace velodyne_rawdata
       double min_range;                ///< minimum range to publish
       int min_angle;                   ///< minimum angle to publish
       int max_angle;                   ///< maximum angle to publish
-      
+
       double tmp_min_angle;
       double tmp_max_angle;
     } Config;
@@ -179,12 +173,6 @@ namespace velodyne_rawdata
     /** add private function to handle the VLP16 **/ 
     void unpack_vlp16(const velodyne_msgs::VelodynePacket &pkt, DataContainerBase& data);
 
-    /** in-line test whether a point is in range */
-    bool pointInRange(float range)
-    {
-      return (range >= config_.min_range
-              && range <= config_.max_range);
-    }
   };
 
 } // namespace velodyne_rawdata
