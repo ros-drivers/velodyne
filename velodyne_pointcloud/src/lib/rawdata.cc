@@ -89,9 +89,7 @@ inline float SQR(float val) { return val*val; }
 
   /** Set up for on-line operation. */
   int RawData::setup(ros::NodeHandle private_nh)
-  { 
-    // get velodyne lidar model type
-    private_nh.getParam("model", config_.model);
+  {
     // get path to angles.config file for this device
     if (!private_nh.getParam("calibration", config_.calibrationFile))
       {
@@ -177,14 +175,6 @@ inline float SQR(float val) { return val*val; }
 
       // upper bank lasers are numbered [0..31]
       // NOTE: this is a change from the old velodyne_common implementation
-      if (config_.model == "64E_S3")
-      {
-        if (i % 4 < 1) {       //only return strongest return NOTE: for 64E_S3 dual return mode.
-          continue;
-        }
-      }
-
-
       int bank_origin = 0;
       if (raw->blocks[i].header == LOWER_BANK) {
         // lower bank lasers are [32..63]
@@ -204,10 +194,6 @@ inline float SQR(float val) { return val*val; }
         union two_bytes tmp;
         tmp.bytes[0] = block.data[k];
         tmp.bytes[1] = block.data[k+1];
-        if (tmp.bytes[0]==0 &&tmp.bytes[1]==0 ) //no laser beam return
-        {
-          continue;
-        }
 
         float distance = tmp.uint * calibration_.distance_resolution_m;
         distance += corrections.dist_correction;
