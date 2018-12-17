@@ -166,6 +166,7 @@ namespace velodyne_rawdata
       
       double tmp_min_angle;
       double tmp_max_angle;
+      std::string model;     ///< device model name
     } Config;
     Config config_;
 
