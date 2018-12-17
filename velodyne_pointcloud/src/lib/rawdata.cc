@@ -179,7 +179,7 @@ inline float SQR(float val) { return val*val; }
       // NOTE: this is a change from the old velodyne_common implementation
       if (config_.model == "64E_S3")
       {
-        if (i % 4 < 1) {       //only return strongest return NOTE: for 64E_S3 dual return mode.
+        if (i % 4 > 1) {       //only return strongest return NOTE: for 64E_S3 dual return mode.
           continue;
         }
       }
