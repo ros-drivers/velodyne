@@ -89,9 +89,7 @@ inline float SQR(float val) { return val*val; }
 
   /** Set up for on-line operation. */
   int RawData::setup(ros::NodeHandle private_nh)
-  { 
-    // get velodyne lidar model type
-    private_nh.getParam("model", config_.model);
+  {
     // get path to angles.config file for this device
     if (!private_nh.getParam("calibration", config_.calibrationFile))
       {
@@ -197,10 +195,6 @@ inline float SQR(float val) { return val*val; }
         union two_bytes tmp;
         tmp.bytes[0] = block.data[k];
         tmp.bytes[1] = block.data[k+1];
-        if (tmp.bytes[0]==0 &&tmp.bytes[1]==0 ) //no laser beam return
-        {
-          continue;
-        }
 
         float distance = tmp.uint * calibration_.distance_resolution_m;
         distance += corrections.dist_correction;

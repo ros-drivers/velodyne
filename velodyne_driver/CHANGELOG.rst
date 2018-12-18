@@ -1,6 +1,9 @@
 Change history
 ==============
 
+1.5.1 (2018-12-10)
+------------------
+
 1.5.0 (2018-10-19)
 ------------------
 * Merge pull request `#187 <https://github.com/ros-drivers/velodyne/issues/187>`_ from moooeeeep/master

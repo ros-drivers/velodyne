@@ -1,6 +1,15 @@
 Change history
 ==============
 
+1.5.1 (2018-12-10)
+------------------
+* Merge pull request `#194 <https://github.com/ros-drivers/velodyne/issues/194>`_ from ros-drivers/avoid_unnecessary_computation
+  Avoid unnecessary computation - causes approximately 20% performance increase on VLP-32C - should be similar for other sensors
+* std::vector<>::reserve is your friend
+* add static to avoid frequence memory allocation
+* avoid unecesary calculations in unpack()
+* Contributors: Davide Faconti, Joshua Whitley
+
 1.5.0 (2018-10-19)
 ------------------
 * Merge pull request `#164 <https://github.com/ros-drivers/velodyne/issues/164>`_ from ros-drivers/maint/vlp_32c_support
