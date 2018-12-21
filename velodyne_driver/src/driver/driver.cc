@@ -58,6 +58,8 @@ VelodyneDriver::VelodyneDriver(ros::NodeHandle node,
 
   // get model name, validate string, determine packet rate
   private_nh.param("model", config_.model, std::string("64E"));
+  private_nh.param("dual_return_mode", config_.is_dual_return_mode,
+    false);
   double packet_rate;                   // packet frequency (Hz)
   std::string model_full_name;
   if ((config_.model == "64E_S2") || 
@@ -88,7 +90,9 @@ VelodyneDriver::VelodyneDriver(ros::NodeHandle node,
     }
   else if (config_.model == "VLP16")
     {
-      packet_rate = 754;             // 754 Packets/Second for Last or Strongest mode 1508 for dual (VLP-16 User Manual)
+      packet_rate = 753.5;             // 753.5 Packets/Second for Last or
+      // Strongest mode 1508 for dual (VLP-16 User Manual)
+      if(config_.is_dual_return_mode) { packet_rate *= 2.0; }
       model_full_name = "VLP-16";
     }
   else

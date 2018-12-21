@@ -1,3 +1,4 @@
+
 // Copyright (C) 2012, 2019 Austin Robot Technology, Jack O'Quin, Joshua Whitley
 // All rights reserved.
 //
@@ -30,29 +31,32 @@
 // ANY WAY OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE
 // POSSIBILITY OF SUCH DAMAGE.
 
-#ifndef VELODYNE_POINTCLOUD_POINTCLOUDXYZIR_H
-#define VELODYNE_POINTCLOUD_POINTCLOUDXYZIR_H
+
+#ifndef VELODYNE_POINTCLOUD_POINTCLOUDXYZIRR_H
+#define VELODYNE_POINTCLOUD_POINTCLOUDXYZIRR_H
 
 #include <velodyne_pointcloud/rawdata.h>
+#include <velodyne_pointcloud/point_types.h>
 
 namespace velodyne_pointcloud
 {
-class PointcloudXYZIR : public velodyne_rawdata::DataContainerBase
+class PointcloudXYZIRR : public velodyne_rawdata::DataContainerBase
 {
-public:
+ public:
   velodyne_rawdata::VPointCloud::Ptr pc;
 
-  PointcloudXYZIR() : pc(new velodyne_rawdata::VPointCloud) {}
+  PointcloudXYZIRR() : pc(new velodyne_rawdata::VPointCloud) {}
 
   virtual void addPoint(
-    const float& x,
-    const float& y,
-    const float& z,
-    const uint16_t& ring,
-    const uint16_t& azimuth,
-    const float& distance,
-    const float& intensity);
+      const float& x,
+      const float& y,
+      const float& z,
+      const uint16_t& ring,
+      const uint16_t& azimuth,
+      const float& distance,
+      const float& intensity,
+      const uint8_t& return_type);
 };
 }  // namespace velodyne_pointcloud
 
-#endif  // VELODYNE_POINTCLOUD_POINTCLOUDXYZIR_H
+#endif  // VELODYNE_POINTCLOUD_POINTCLOUDXYZIRR_H

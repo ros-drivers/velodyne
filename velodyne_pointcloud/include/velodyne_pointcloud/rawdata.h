@@ -58,7 +58,7 @@
 namespace velodyne_rawdata
 {
 // Shorthand typedefs for point cloud representations
-typedef velodyne_pointcloud::PointXYZIR VPoint;
+typedef velodyne_pointcloud::PointXYZIRR VPoint;
 typedef pcl::PointCloud<VPoint> VPointCloud;
 
 /**
@@ -73,16 +73,22 @@ static const float ROTATION_RESOLUTION      =     0.01f;  // [deg]
 static const uint16_t ROTATION_MAX_UNITS    = 36000u;     // [deg/100]
 
 /** @todo make this work for both big and little-endian machines */
-static const uint16_t UPPER_BANK = 0xeeff;
-static const uint16_t LOWER_BANK = 0xddff;
+static const uint16_t UPPER_BANK            = 0xeeff;
+static const uint16_t LOWER_BANK            = 0xddff;
+static const uint8_t  RETURN_MODE_STRONGEST = 0x37;
+static const uint8_t  RETURN_MODE_LAST      = 0x38;
+static const uint8_t  RETURN_MODE_DUAL      = 0x39;
 
 
 /** Special Defines for VLP16 support **/
-static const int    VLP16_FIRINGS_PER_BLOCK =   2;
-static const int    VLP16_SCANS_PER_FIRING  =  16;
-static const float  VLP16_BLOCK_TDURATION   = 110.592f;   // [µs]
-static const float  VLP16_DSR_TOFFSET       =   2.304f;   // [µs]
-static const float  VLP16_FIRING_TOFFSET    =  55.296f;   // [µs]
+static const int    VLP16_FIRINGS_PER_BLOCK       =   2;
+static const int    VLP16_SCANS_PER_FIRING        =  16;
+static const float  VLP16_BLOCK_TDURATION         = 110.592f;   // [µs]
+static const float  VLP16_DSR_TOFFSET             =   2.304f;   // [µs]
+static const float  VLP16_FIRING_TOFFSET          =  55.296f;   // [µs]
+static const int    VLP16_FACTORY_BYTES_SIZE      =   2;
+static const int    VLP16_FACTORY_RETURN_MODE_IDX =   0;
+static const int    VLP16_FACTORY_PRODUCT_ID_IDX  =   1;
 
 
 /** \brief Raw Velodyne data block.
@@ -135,6 +141,14 @@ typedef struct raw_packet
   uint8_t status[PACKET_STATUS_SIZE];
 }
 raw_packet_t;
+
+typedef struct raw_packet_vlp16
+{
+  raw_block_t blocks[BLOCKS_PER_PACKET];
+  uint32_t    timestamp;
+  uint8_t     factory[VLP16_FACTORY_BYTES_SIZE];
+}
+raw_packet_vlp16_t;
 
 /** \brief Velodyne data conversion class */
 class RawData
@@ -207,6 +221,42 @@ private:
   {
     return (range >= config_.min_range
             && range <= config_.max_range);
+  }
+
+  /** Only for vlp16, check factory bytes for return mode **/
+  static inline bool isDualReturnMode(const raw_packet_vlp16_t* raw)
+  {
+    return raw->factory[VLP16_FACTORY_RETURN_MODE_IDX]
+        == RETURN_MODE_DUAL;
+  }
+
+  static inline velodyne_pointcloud::ReturnType
+  returnModeToReturnType(const raw_packet_vlp16_t* raw)
+  {
+    switch (raw->factory[VLP16_FACTORY_RETURN_MODE_IDX])
+    {
+      case RETURN_MODE_STRONGEST:
+        return velodyne_pointcloud::RETURN_STRONGEST;
+      case RETURN_MODE_LAST:
+        return velodyne_pointcloud::RETURN_LAST;
+      default:
+        return velodyne_pointcloud::RETURN_UNKNOWN;
+    }
+  }
+
+  static inline velodyne_pointcloud::ReturnType
+  blockIdxToReturnType(const int &block_idx)
+  {
+    if (block_idx % 2 == 0)
+    {
+      return velodyne_pointcloud::RETURN_LAST;
+    }
+    else
+    {
+      return velodyne_pointcloud::RETURN_STRONGEST;
+      // Or second Strongest?? Should we
+      // distinguish between the two?
+    }
   }
 };
 }  // namespace velodyne_rawdata

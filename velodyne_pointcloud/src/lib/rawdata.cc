@@ -310,7 +310,9 @@ inline float SQR(float val) { return val*val; }
           intensity = (intensity < min_intensity) ? min_intensity : intensity;
           intensity = (intensity > max_intensity) ? max_intensity : intensity;
   
-          data.addPoint(x_coord, y_coord, z_coord, corrections.laser_ring, raw->blocks[i].rotation, distance, intensity);
+          data.addPoint(x_coord, y_coord, z_coord, corrections.laser_ring,
+              raw->blocks[i].rotation, distance, intensity,
+              velodyne_pointcloud::RETURN_UNKNOWN);
         }
       }
     }
@@ -332,7 +334,9 @@ inline float SQR(float val) { return val*val; }
     float x, y, z;
     float intensity;
 
-    const raw_packet_t *raw = (const raw_packet_t *) &pkt.data[0];
+    const raw_packet_vlp16_t *raw = (const raw_packet_vlp16_t *) &pkt.data[0];
+
+    bool is_dual_return = isDualReturnMode(raw);
 
     for (int block = 0; block < BLOCKS_PER_PACKET; block++) {
 
@@ -349,24 +353,24 @@ inline float SQR(float val) { return val*val; }
       // Calculate difference between current and next block's azimuth angle.
       azimuth = (float)(raw->blocks[block].rotation);
       if (block < (BLOCKS_PER_PACKET-1)){
-	raw_azimuth_diff = raw->blocks[block+1].rotation - raw->blocks[block].rotation;
+	    raw_azimuth_diff = raw->blocks[block+1].rotation - raw->blocks[block].rotation;
         azimuth_diff = (float)((36000 + raw_azimuth_diff)%36000);
-	// some packets contain an angle overflow where azimuth_diff < 0 
-	if(raw_azimuth_diff < 0)//raw->blocks[block+1].rotation - raw->blocks[block].rotation < 0)
-	  {
-	    ROS_WARN_STREAM_THROTTLE(60, "Packet containing angle overflow, first angle: " << raw->blocks[block].rotation << " second angle: " << raw->blocks[block+1].rotation);
-	    // if last_azimuth_diff was not zero, we can assume that the velodyne's speed did not change very much and use the same difference
-	    if(last_azimuth_diff > 0){
-	      azimuth_diff = last_azimuth_diff;
-	    }
-	    // otherwise we are not able to use this data
-	    // TODO: we might just not use the second 16 firings
-	    else{
-	      continue;
-	    }
-	  }
-        last_azimuth_diff = azimuth_diff;
-      }else{
+	    // some packets contain an angle overflow where azimuth_diff < 0
+        if(raw_azimuth_diff < 0)//raw->blocks[block+1].rotation - raw->blocks[block].rotation < 0)
+        {
+          ROS_WARN_STREAM_THROTTLE(60, "Packet containing angle overflow, first angle: " << raw->blocks[block].rotation << " second angle: " << raw->blocks[block+1].rotation);
+          // if last_azimuth_diff was not zero, we can assume that the velodyne's speed did not change very much and use the same difference
+          if(last_azimuth_diff > 0){
+            azimuth_diff = last_azimuth_diff;
+          }
+          // otherwise we are not able to use this data
+          // TODO: we might just not use the second 16 firings
+          else{
+            continue;
+          }
+        }
+          last_azimuth_diff = azimuth_diff;
+      } else {
         azimuth_diff = last_azimuth_diff;
       }
 
@@ -378,6 +382,17 @@ inline float SQR(float val) { return val*val; }
           union two_bytes tmp;
           tmp.bytes[0] = raw->blocks[block].data[k];
           tmp.bytes[1] = raw->blocks[block].data[k+1];
+          // If we are in dual return mode, check if this channel data is
+          // equal to the previous block data to prevent duplication of
+          // points in the cloud
+          if (is_dual_return && (block % 2 == 1)) {
+            // TODO is 3 equalities slower than agregate bytes and subtraction?
+            if((raw->blocks[block].data[k] == raw->blocks[block-1].data[k]) &&
+                (raw->blocks[block].data[k+1] == raw->blocks[block-1].data[k+1]) &&
+                (raw->blocks[block].data[k+2] == raw->blocks[block-1].data[k+2])) {
+              continue;
+            }
+          }
           
           float distance = tmp.uint * calibration_.distance_resolution_m;
           distance += corrections.dist_correction;
@@ -493,8 +508,15 @@ inline float SQR(float val) { return val*val; }
               SQR(1 - tmp.uint/65535)));
             intensity = (intensity < min_intensity) ? min_intensity : intensity;
             intensity = (intensity > max_intensity) ? max_intensity : intensity;
-    
-            data.addPoint(x_coord, y_coord, z_coord, corrections.laser_ring, azimuth_corrected, distance, intensity);
+
+            velodyne_pointcloud::ReturnType return_type;
+            if(is_dual_return) {
+              return_type = blockIdxToReturnType(block);
+            } else {
+              return_type = returnModeToReturnType(raw);
+            }
+            data.addPoint(x_coord, y_coord, z_coord, corrections.laser_ring,
+                azimuth_corrected, distance, intensity, return_type);
           }
         }
       }

@@ -34,6 +34,7 @@
 #define VELODYNE_POINTCLOUD_DATACONTAINERBASE_H
 
 #include <ros/ros.h>
+#include <velodyne_pointcloud/point_types.h>
 
 namespace velodyne_rawdata
 {
@@ -47,7 +48,8 @@ public:
     const uint16_t& ring,
     const uint16_t& azimuth,
     const float& distance,
-    const float& intensity) = 0;
+    const float& intensity,
+    const uint8_t& return_type) = 0;
 };
 }  // namespace velodyne_rawdata
 

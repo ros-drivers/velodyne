@@ -48,7 +48,7 @@
 #include <sensor_msgs/PointCloud2.h>
 
 #include <velodyne_pointcloud/rawdata.h>
-#include <velodyne_pointcloud/pointcloudXYZIR.h>
+#include <velodyne_pointcloud/pointcloudXYZIRR.h>
 
 #include <dynamic_reconfigure/server.h>
 #include <velodyne_pointcloud/TransformNodeConfig.h>
@@ -104,8 +104,8 @@ private:
   // Point cloud buffers for collecting points within a packet.  The
   // inPc_ and tfPc_ are class members only to avoid reallocation on
   // every message.
-  PointcloudXYZIR inPc_;                // input packet point cloud
-  velodyne_rawdata::VPointCloud tfPc_;  // transformed packet point cloud
+  PointcloudXYZIRR inPc_;                // input packet point cloud
+  velodyne_rawdata::VPointCloud tfPc_;   // transformed packet point cloud
 
   // diagnostics updater
   diagnostic_updater::Updater diagnostics_;
