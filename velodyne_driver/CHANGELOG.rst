@@ -1,8 +1,8 @@
 Change history
 ==============
 
-Forthcoming
------------
+1.5.2 (2019-01-28)
+------------------
 * Merge pull request `#212 <https://github.com/ros-drivers/velodyne/issues/212>`_ from ros-drivers/maint/vdump_as_root
   Modifying vdump script for use as root.
   Tested by @andersfischernielsen.
