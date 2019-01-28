@@ -2,6 +2,9 @@
 Changelog for package velodyne_laserscan
 ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
 
+Forthcoming
+-----------
+
 1.5.1 (2018-12-10)
 ------------------
 
