@@ -48,6 +48,10 @@ namespace velodyne_pointcloud
     ros::Subscriber velodyne_scan_;
     ros::Publisher output_;
 
+    boost::shared_ptr<velodyne_rawdata::DataContainerBase> container_ptr_;
+
+    boost::mutex reconfigure_mtx_;
+
     /// configuration parameters
     typedef struct {
       std::string target_frame;      ///< target frame

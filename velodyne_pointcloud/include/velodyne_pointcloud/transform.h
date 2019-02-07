@@ -76,6 +76,8 @@ namespace velodyne_pointcloud
     } Config;
     Config config_;
 
+    boost::shared_ptr<velodyne_rawdata::DataContainerBase> container_ptr;
+
   };
 
 } // namespace velodyne_pointcloud

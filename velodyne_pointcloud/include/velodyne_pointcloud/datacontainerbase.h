@@ -14,9 +14,15 @@ namespace velodyne_rawdata
   class DataContainerBase
   {
    public:
-    DataContainerBase() : pc(new VPointCloud) {}
+    DataContainerBase() : pc(new VPointCloud) {
+      ROS_INFO("New container");
+    }
 
-    virtual void addPoint(const float& x, const float& y, const float& z, const uint16_t& ring, const uint16_t& azimuth, const float& distance, const float& intensity) = 0;
+    void reset(){pc = VPointCloud::Ptr(new VPointCloud);}
+    virtual void addPoint(
+        const float& x, const float& y, const float& z,
+        const uint16_t& ring, const uint16_t& azimuth,
+        const float& distance, const float& intensity) = 0;
     virtual void newLine() = 0;
 
     void setParameters(
@@ -24,8 +30,11 @@ namespace velodyne_rawdata
         const double max_range,
         const std::string target_frame,
         const std::string fixed_frame,
-        boost::shared_ptr<tf::TransformListener> tf_ptr = boost::shared_ptr<tf::TransformListener>())
+        boost::shared_ptr<tf::TransformListener> tf_ptr
+          = boost::shared_ptr<tf::TransformListener>(new tf::TransformListener))
     {
+
+      ROS_INFO("Config...");
       config_.max_range = max_range;
       config_.min_range = min_range;
       config_.target_frame = target_frame;

@@ -50,6 +50,19 @@ namespace velodyne_pointcloud
         new tf::MessageFilter<velodyne_msgs::VelodyneScan>(velodyne_scan_, *listener_ptr_, config_.target_frame, 10));
     tf_filter_ptr_->registerCallback(boost::bind(&Transform::processScan, this, _1));
     private_nh.param<std::string>("fixed_frame", config_.fixed_frame, "odom");
+
+    if(config_.organize_cloud)
+    {
+      container_ptr = boost::shared_ptr<OrganizedCloudXYZIR>(new OrganizedCloudXYZIR);
+      container_ptr->pc->width = config_.num_lasers;
+      container_ptr->pc->is_dense = false;
+    }
+    else
+    {
+      container_ptr = boost::shared_ptr<PointcloudXYZIR>(new PointcloudXYZIR);
+      container_ptr->pc->height = 1;
+      container_ptr->pc->is_dense = true;
+    }
   }
   
   void Transform::reconfigure_callback(
@@ -63,6 +76,22 @@ namespace velodyne_pointcloud
     config_.organize_cloud = config.organize_cloud;
     config_.min_range = config.min_range;
     config_.max_range = config.max_range;
+
+    if(config_.organize_cloud)
+    {
+      container_ptr = boost::shared_ptr<OrganizedCloudXYZIR>(new OrganizedCloudXYZIR);
+      container_ptr->pc->width = config_.num_lasers;
+      container_ptr->pc->is_dense = false;
+    }
+    else
+    {
+      container_ptr = boost::shared_ptr<PointcloudXYZIR>(new PointcloudXYZIR);
+      container_ptr->pc->height = 1;
+      container_ptr->pc->is_dense = true;
+    }
+    container_ptr->setParameters(
+        config_.min_range, config_.max_range,
+        config_.target_frame, config_.fixed_frame, listener_ptr_);
   }
 
   /** @brief Callback for raw scan messages.
@@ -76,23 +105,8 @@ namespace velodyne_pointcloud
     if (output_.getNumSubscribers() == 0)         // no one listening?
       return;                                     // avoid much work
 
-    velodyne_rawdata::DataContainerBase* container_ptr;
-    if(config_.organize_cloud)
-    {
-      container_ptr = new OrganizedCloudXYZIR();
-      container_ptr->pc->width = config_.num_lasers;
-    }
-    else
-    {
-      container_ptr = new PointcloudXYZIR();
-      // outMsg's header is a pcl::PCLHeader, convert it before stamp assignment
-      container_ptr->pc->height = 1;
-      container_ptr->pc->is_dense = false;
-    }
-    container_ptr->setParameters(
-        config_.min_range, config_.max_range,
-        config_.target_frame, config_.fixed_frame, listener_ptr_);
-    container_ptr->pc->header.stamp = pcl_conversions::toPCL(scanMsg->header).stamp;
+    container_ptr->reset();
+    container_ptr->pc->header.stamp = pcl_conversions::toPCL(scanMsg->header.stamp);
     container_ptr->pc->header.frame_id = scanMsg->header.frame_id;
 
     // allocate a point cloud with same time and frame ID as raw data
@@ -110,7 +124,6 @@ namespace velodyne_pointcloud
     ROS_DEBUG_STREAM("Publishing " << container_ptr->pc->height * container_ptr->pc->width
                                    << " Velodyne points, time: " << container_ptr->pc->header.stamp);
     output_.publish(container_ptr->pc);
-    delete container_ptr;
   }
 
 } // namespace velodyne_pointcloud

@@ -13,7 +13,9 @@ namespace velodyne_pointcloud
 
     virtual void newLine();
 
-    virtual void addPoint(const float& x, const float& y, const float& z, const uint16_t& ring, const uint16_t& azimuth, const float& distance, const float& intensity);
+    virtual void addPoint(const float& x, const float& y, const float& z,
+        const uint16_t& ring, const uint16_t& azimuth,
+        const float& distance, const float& intensity);
 
   };
 }

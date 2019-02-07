@@ -9,7 +9,7 @@ namespace velodyne_pointcloud
   {
     if(config_.transform)
     {
-        computeTransformation(ros::Time(pc->header.stamp));
+        computeTransformation(pcl_conversions::fromPCL(pc->header.stamp));
     }
   }
 
