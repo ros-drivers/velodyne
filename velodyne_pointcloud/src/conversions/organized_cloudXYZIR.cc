@@ -3,11 +3,21 @@
 
 namespace velodyne_pointcloud
 {
+
+  OrganizedCloudXYZIR::OrganizedCloudXYZIR(
+      const double max_range, const double min_range,
+      const std::string& target_frame, const std::string& fixed_frame,
+      const unsigned int num_lasers, const unsigned int scans_per_block)
+    : DataContainerBase(
+        max_range, min_range, target_frame, fixed_frame,
+        num_lasers, 0, false, scans_per_block){
+  }
+
   void OrganizedCloudXYZIR::newLine()
   {
     if(config_.transform)
     {
-      computeTransformation(ros::Time(pc->header.stamp));
+      computeTransformation(pcl_conversions::fromPCL(pc->header.stamp));
     }
     for (int j = 0; j < organized_lasers.size(); j++)
     {
@@ -39,7 +49,8 @@ namespace velodyne_pointcloud
       point_ptr->y = y;
       point_ptr->z = z;
       point_ptr->intensity = intensity;
-    } else
+    }
+    else
     {
       point_ptr->x = nan("");
       point_ptr->y = nan("");

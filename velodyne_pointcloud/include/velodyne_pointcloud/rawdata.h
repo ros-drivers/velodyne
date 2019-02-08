@@ -126,7 +126,7 @@ namespace velodyne_rawdata
      *  @returns 0 if successful;
      *           errno value for failure
      */
-    int setup(ros::NodeHandle private_nh);
+    boost::optional<velodyne_pointcloud::Calibration> setup(ros::NodeHandle private_nh);
 
     /** \brief Set up for data processing offline. 
       * Performs the same initialization as in setup, in the abscence of a ros::NodeHandle.

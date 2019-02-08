@@ -5,6 +5,16 @@
 
 namespace velodyne_pointcloud 
 {
+
+  PointcloudXYZIR::PointcloudXYZIR(
+    const double max_range, const double min_range,
+    const std::string& target_frame, const std::string& fixed_frame,
+    const unsigned int scans_per_block)
+    : DataContainerBase(
+        max_range, min_range, target_frame, fixed_frame,
+        0, 1, true, scans_per_block)
+    {};
+
   void PointcloudXYZIR::newLine()
   {
     if(config_.transform)
@@ -15,8 +25,8 @@ namespace velodyne_pointcloud
 
   void PointcloudXYZIR::addPoint(const float& x, const float& y, const float& z, const uint16_t& ring, const uint16_t& /*azimuth*/, const float& distance, const float& intensity)
   {
-    if(pointInRange(distance))
-      return;
+    if(!pointInRange(distance)) return;
+
     // convert polar coordinates to Euclidean XYZ
     velodyne_rawdata::VPoint point;
     point.ring = ring;

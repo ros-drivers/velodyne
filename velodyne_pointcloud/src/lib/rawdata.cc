@@ -88,7 +88,7 @@ inline float SQR(float val) { return val*val; }
   }
 
   /** Set up for on-line operation. */
-  int RawData::setup(ros::NodeHandle private_nh)
+  boost::optional<velodyne_pointcloud::Calibration> RawData::setup(ros::NodeHandle private_nh)
   {
     // get path to angles.config file for this device
     if (!private_nh.getParam("calibration", config_.calibrationFile))
@@ -104,20 +104,20 @@ inline float SQR(float val) { return val*val; }
 
     calibration_.read(config_.calibrationFile);
     if (!calibration_.initialized) {
-      ROS_ERROR_STREAM("Unable to open calibration file: " << 
+      ROS_ERROR_STREAM("Unable to open calibration file: " <<
           config_.calibrationFile);
-      return -1;
+      return boost::none;
     }
-    
+
     ROS_INFO_STREAM("Number of lasers: " << calibration_.num_lasers << ".");
-    
+
     // Set up cached values for sin and cos of all the possible headings
     for (uint16_t rot_index = 0; rot_index < ROTATION_MAX_UNITS; ++rot_index) {
       float rotation = angles::from_degrees(ROTATION_RESOLUTION * rot_index);
       cos_rot_table_[rot_index] = cosf(rotation);
       sin_rot_table_[rot_index] = sinf(rotation);
     }
-   return 0;
+   return calibration_;
   }
 
 

@@ -63,6 +63,7 @@ namespace velodyne_pointcloud
       int npackets;                  ///< number of packets to combine
     } Config;
     Config config_;
+    bool first_rcfg_call;
   };
 
 } // namespace velodyne_pointcloud

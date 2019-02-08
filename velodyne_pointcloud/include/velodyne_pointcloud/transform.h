@@ -78,6 +78,8 @@ namespace velodyne_pointcloud
 
     boost::shared_ptr<velodyne_rawdata::DataContainerBase> container_ptr;
 
+    boost::mutex reconfigure_mtx_;
+
   };
 
 } // namespace velodyne_pointcloud

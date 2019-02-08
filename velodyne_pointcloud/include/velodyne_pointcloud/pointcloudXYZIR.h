@@ -11,6 +11,11 @@ namespace velodyne_pointcloud
   {
   public:
 
+    PointcloudXYZIR(
+        const double max_range, const double min_range,
+        const std::string& target_frame, const std::string& fixed_frame,
+        const unsigned int scans_per_block);
+
     virtual void newLine();
 
     virtual void addPoint(const float& x, const float& y, const float& z,

@@ -4,6 +4,7 @@
 #include <pcl_ros/point_cloud.h>
 #include <velodyne_pointcloud/point_types.h>
 #include <tf/transform_listener.h>
+#include <velodyne_msgs/VelodyneScan.h>
 
 namespace velodyne_rawdata
 {
@@ -14,33 +15,78 @@ namespace velodyne_rawdata
   class DataContainerBase
   {
    public:
-    DataContainerBase() : pc(new VPointCloud) {
-      ROS_INFO("New container");
+    DataContainerBase(
+        const double max_range, const double min_range,
+        const std::string& target_frame, const std::string& fixed_frame,
+        const unsigned int init_width, const unsigned int init_height,
+        const bool is_dense, const unsigned int scans_per_packet)
+        : config_(max_range, min_range, target_frame, fixed_frame,
+          init_width, init_height, is_dense, scans_per_packet), pc(new VPointCloud) {
+
+      if(config_.transform)
+      {
+        tf_ptr = boost::shared_ptr<tf::TransformListener>(new tf::TransformListener);
+      }
+
     }
 
-    void reset(){pc = VPointCloud::Ptr(new VPointCloud);}
+    struct Config {
+      double max_range;                ///< maximum range to publish
+      double min_range;                ///< minimum range to publish
+      std::string target_frame;        ///< target frame to transform a point
+      std::string fixed_frame;         ///< fixed frame used for transform
+      unsigned int init_width;
+      unsigned int init_height;
+      bool is_dense;
+      unsigned int scans_per_packet;
+      bool transform;                  ///< enable / disable transform points
+
+      Config(
+          double max_range, double min_range,
+          std::string target_frame, std::string fixed_frame,
+          unsigned int init_width, unsigned int init_height,
+          bool is_dense, unsigned int scans_per_packet)
+            : max_range(max_range), min_range(min_range),
+              target_frame(target_frame), fixed_frame(fixed_frame),
+              transform(fixed_frame!=target_frame),
+              init_width(init_width), init_height(init_height),
+              is_dense(is_dense), scans_per_packet(scans_per_packet)
+          {
+            ROS_INFO_STREAM("Initialized container with "
+                << "min_range: "<< min_range << ", max_range: " << max_range
+                << ", target_frame: " << target_frame << ", fixed_frame: " << fixed_frame
+                << ", init_with: " << init_width << ", init_height: " << init_height
+                << ", is_dense: " << is_dense << ", scans_per_packet: " << scans_per_packet);
+          }
+    };
+
+    void setup(const velodyne_msgs::VelodyneScan::ConstPtr& scan_msg){
+      pc = VPointCloud::Ptr(new VPointCloud);
+      pc->header.stamp = pcl_conversions::toPCL(scan_msg->header.stamp);
+      pc->header.frame_id = scan_msg->header.frame_id;
+      pc->points.reserve(scan_msg->packets.size() * config_.scans_per_packet);
+      pc->width = config_.init_width;
+      pc->height = config_.init_height;
+      pc->is_dense = config_.is_dense;
+    }
+
     virtual void addPoint(
         const float& x, const float& y, const float& z,
         const uint16_t& ring, const uint16_t& azimuth,
         const float& distance, const float& intensity) = 0;
     virtual void newLine() = 0;
 
-    void setParameters(
-        const double min_range,
-        const double max_range,
-        const std::string target_frame,
-        const std::string fixed_frame,
-        boost::shared_ptr<tf::TransformListener> tf_ptr
-          = boost::shared_ptr<tf::TransformListener>(new tf::TransformListener))
-    {
-
-      ROS_INFO("Config...");
+    void configure(const double max_range, const double min_range,
+        const std::string fixed_frame, const std::string target_frame) {
       config_.max_range = max_range;
       config_.min_range = min_range;
-      config_.target_frame = target_frame;
       config_.fixed_frame = fixed_frame;
-      config_.tf_ptr = tf_ptr;
-      config_.transform = target_frame != pc->header.frame_id;
+      config_.target_frame = target_frame;
+      config_.transform = fixed_frame != target_frame;
+      if(config_.transform)
+      {
+        tf_ptr = boost::shared_ptr<tf::TransformListener>(new tf::TransformListener);
+      }
     }
 
     VPointCloud::Ptr pc;
@@ -56,7 +102,7 @@ namespace velodyne_rawdata
     bool computeTransformation(const ros::Time& time){
       tf::StampedTransform transform;
       try{
-        config_.tf_ptr->lookupTransform(config_.target_frame, pc->header.frame_id, time, transform);
+        tf_ptr->lookupTransform(config_.target_frame, pc->header.frame_id, time, transform);
       }
       catch (tf::LookupException &e){
         ROS_ERROR ("%s", e.what ());
@@ -98,18 +144,11 @@ namespace velodyne_rawdata
           && range <= config_.max_range);
     }
 
-    typedef struct {
-      double max_range;                ///< maximum range to publish
-      double min_range;                ///< minimum range to publish
-      std::string target_frame;        ///< target frame to transform a point
-      std::string fixed_frame;         ///< fixed frame used for transform
-      boost::shared_ptr<tf::TransformListener> tf_ptr; ///< transform listener
-      bool transform;                  ///< enable / disable transform points
-    } Config;
     Config config_;
 
-    Eigen::Affine3d transformation;
+    boost::shared_ptr<tf::TransformListener> tf_ptr; ///< transform listener
 
-  };
+    Eigen::Affine3d transformation;
+};
 }
 #endif //__DATACONTAINERBASE_H

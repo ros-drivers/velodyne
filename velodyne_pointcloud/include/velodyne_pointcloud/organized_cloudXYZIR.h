@@ -9,6 +9,11 @@ namespace velodyne_pointcloud
   {
    public:
 
+    OrganizedCloudXYZIR(
+        const double max_range, const double min_range,
+        const std::string& target_frame, const std::string& fixed_frame,
+        const unsigned int num_lasers, const unsigned int scans_per_block);
+
     virtual void newLine();
 
     virtual void addPoint(
@@ -22,7 +27,6 @@ namespace velodyne_pointcloud
 
    private:
     std::map<uint16_t, velodyne_rawdata::VPoint*> organized_lasers;
-    uint16_t laser_cnt;
   };
 }
 #endif //__ORGANIZED_CLOUDXYZIR_H

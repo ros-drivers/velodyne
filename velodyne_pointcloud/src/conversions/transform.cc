@@ -30,8 +30,30 @@ namespace velodyne_pointcloud
     tf_prefix_(tf::getPrefixParam(private_nh)),
     data_(new velodyne_rawdata::RawData())
   {
-    // Read calibration.
-    data_->setup(private_nh);
+    boost::optional<velodyne_pointcloud::Calibration> calibration = data_->setup(private_nh);
+    if(calibration)
+    {
+      ROS_DEBUG_STREAM("Calibration file loaded.");
+      config_.num_lasers = static_cast<uint16_t>(calibration.get().num_lasers);
+    }
+    else
+    {
+      ROS_ERROR_STREAM("Could not load calibration file!");
+    }
+
+    if(config_.organize_cloud)
+    {
+      container_ptr = boost::shared_ptr<OrganizedCloudXYZIR>(
+          new OrganizedCloudXYZIR(config_.max_range, config_.min_range, config_.target_frame, config_.fixed_frame,
+                                  config_.num_lasers, data_->scansPerPacket()));
+    }
+    else
+    {
+      container_ptr = boost::shared_ptr<PointcloudXYZIR>(
+          new PointcloudXYZIR(config_.max_range, config_.min_range,
+                              config_.target_frame, config_.fixed_frame,
+                              data_->scansPerPacket()));
+    }
 
     // advertise output point cloud (before subscribing to input data)
     output_ =
@@ -51,18 +73,6 @@ namespace velodyne_pointcloud
     tf_filter_ptr_->registerCallback(boost::bind(&Transform::processScan, this, _1));
     private_nh.param<std::string>("fixed_frame", config_.fixed_frame, "odom");
 
-    if(config_.organize_cloud)
-    {
-      container_ptr = boost::shared_ptr<OrganizedCloudXYZIR>(new OrganizedCloudXYZIR);
-      container_ptr->pc->width = config_.num_lasers;
-      container_ptr->pc->is_dense = false;
-    }
-    else
-    {
-      container_ptr = boost::shared_ptr<PointcloudXYZIR>(new PointcloudXYZIR);
-      container_ptr->pc->height = 1;
-      container_ptr->pc->is_dense = true;
-    }
   }
   
   void Transform::reconfigure_callback(
@@ -73,25 +83,29 @@ namespace velodyne_pointcloud
                          config.view_direction, config.view_width);
     config_.target_frame = tf::resolve(tf_prefix_, config.frame_id);
     ROS_INFO_STREAM("Target frame ID: " << config_.target_frame);
-    config_.organize_cloud = config.organize_cloud;
     config_.min_range = config.min_range;
     config_.max_range = config.max_range;
 
-    if(config_.organize_cloud)
-    {
-      container_ptr = boost::shared_ptr<OrganizedCloudXYZIR>(new OrganizedCloudXYZIR);
-      container_ptr->pc->width = config_.num_lasers;
-      container_ptr->pc->is_dense = false;
+    if(config.organize_cloud != config_.organize_cloud){
+      boost::lock_guard<boost::mutex> guard(reconfigure_mtx_);
+      config_.organize_cloud = config.organize_cloud;
+      if(config_.organize_cloud)
+      {
+        ROS_INFO_STREAM("Using the organized cloud format...");
+        container_ptr = boost::shared_ptr<OrganizedCloudXYZIR>(
+            new OrganizedCloudXYZIR(config_.max_range, config_.min_range,
+                                    config_.target_frame, config_.fixed_frame,
+                                    config_.num_lasers, data_->scansPerPacket()));
+      }
+      else
+      {
+        container_ptr = boost::shared_ptr<PointcloudXYZIR>(
+            new PointcloudXYZIR(config_.max_range, config_.min_range,
+                                config_.target_frame, config_.fixed_frame,
+                                data_->scansPerPacket()));
+      }
     }
-    else
-    {
-      container_ptr = boost::shared_ptr<PointcloudXYZIR>(new PointcloudXYZIR);
-      container_ptr->pc->height = 1;
-      container_ptr->pc->is_dense = true;
-    }
-    container_ptr->setParameters(
-        config_.min_range, config_.max_range,
-        config_.target_frame, config_.fixed_frame, listener_ptr_);
+    container_ptr->configure(config_.max_range, config_.min_range, config_.fixed_frame, config_.target_frame);
   }
 
   /** @brief Callback for raw scan messages.
@@ -105,12 +119,10 @@ namespace velodyne_pointcloud
     if (output_.getNumSubscribers() == 0)         // no one listening?
       return;                                     // avoid much work
 
-    container_ptr->reset();
-    container_ptr->pc->header.stamp = pcl_conversions::toPCL(scanMsg->header.stamp);
-    container_ptr->pc->header.frame_id = scanMsg->header.frame_id;
+    boost::lock_guard<boost::mutex> guard(reconfigure_mtx_);
 
     // allocate a point cloud with same time and frame ID as raw data
-    container_ptr->pc->points.reserve(scanMsg->packets.size() * data_->scansPerPacket());
+    container_ptr->setup(scanMsg);
 
     // process each packet provided by the driver
     for (size_t i = 0; i < scanMsg->packets.size(); ++i)
