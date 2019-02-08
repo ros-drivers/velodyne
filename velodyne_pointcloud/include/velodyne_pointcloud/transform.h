@@ -29,16 +29,6 @@
 #include <dynamic_reconfigure/server.h>
 #include <velodyne_pointcloud/TransformNodeConfig.h>
 
-// include template implementations to transform a custom point cloud
-#include <pcl_ros/impl/transforms.hpp>
-
-// instantiate template for transforming a VPointCloud
-template bool
-  pcl_ros::transformPointCloud<velodyne_rawdata::VPoint>(const std::string &,
-                                       const velodyne_rawdata::VPointCloud &,
-                                       velodyne_rawdata::VPointCloud &,
-                                       const tf::TransformListener &);
-
 namespace velodyne_pointcloud
 {
   class Transform

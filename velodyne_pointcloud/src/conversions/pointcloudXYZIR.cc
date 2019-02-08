@@ -12,37 +12,54 @@ namespace velodyne_pointcloud
     const unsigned int scans_per_block)
     : DataContainerBase(
         max_range, min_range, target_frame, fixed_frame,
-        0, 1, true, scans_per_block)
+        0, 1, true, scans_per_block, 5,
+        "x", 1, sensor_msgs::PointField::FLOAT32,
+        "y", 1, sensor_msgs::PointField::FLOAT32,
+        "z", 1, sensor_msgs::PointField::FLOAT32,
+        "intensity", 1, sensor_msgs::PointField::FLOAT32,
+        "ring", 1, sensor_msgs::PointField::UINT16),
+        iter_x(cloud, "x"), iter_y(cloud, "y"), iter_z(cloud, "z"),
+        iter_ring(cloud, "ring"), iter_intensity(cloud, "intensity")
     {};
+
+  void PointcloudXYZIR::setup(const velodyne_msgs::VelodyneScan::ConstPtr& scan_msg){
+    DataContainerBase::setup(scan_msg);
+    iter_x = sensor_msgs::PointCloud2Iterator<float>(cloud, "x");
+    iter_y = sensor_msgs::PointCloud2Iterator<float>(cloud, "y");
+    iter_z = sensor_msgs::PointCloud2Iterator<float>(cloud, "z");
+    iter_intensity = sensor_msgs::PointCloud2Iterator<float>(cloud, "intensity");
+    iter_ring = sensor_msgs::PointCloud2Iterator<uint16_t >(cloud, "ring");
+  }
 
   void PointcloudXYZIR::newLine()
   {
     if(config_.transform)
     {
-        computeTransformation(pcl_conversions::fromPCL(pc->header.stamp));
+        computeTransformation(cloud.header.stamp);
     }
   }
 
-  void PointcloudXYZIR::addPoint(const float& x, const float& y, const float& z, const uint16_t& ring, const uint16_t& /*azimuth*/, const float& distance, const float& intensity)
+  void PointcloudXYZIR::addPoint(float x, float y, float z, uint16_t ring, uint16_t /*azimuth*/, float distance, float intensity)
   {
     if(!pointInRange(distance)) return;
 
     // convert polar coordinates to Euclidean XYZ
-    velodyne_rawdata::VPoint point;
-    point.ring = ring;
-    point.x = x;
-    point.y = y;
-    point.z = z;
-    point.intensity = intensity;
 
     if(config_.transform)
-    {
-      transformPoint(point);
-    }
+      transformPoint(x, y, z);
 
-    // append this point to the cloud
-    pc->points.push_back(point);
-    ++pc->width;
+    *iter_x = x;
+    *iter_y = y;
+    *iter_z = z;
+    *iter_ring = ring;
+    *iter_intensity = intensity;
+
+    ++cloud.width;
+    ++iter_x;
+    ++iter_y;
+    ++iter_z;
+    ++iter_ring;
+    ++iter_intensity;
   }
 }
 

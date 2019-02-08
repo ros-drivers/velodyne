@@ -1,17 +1,14 @@
 #ifndef __DATACONTAINERBASE_H
 #define __DATACONTAINERBASE_H
 
-#include <pcl_ros/point_cloud.h>
-#include <velodyne_pointcloud/point_types.h>
 #include <tf/transform_listener.h>
 #include <velodyne_msgs/VelodyneScan.h>
+#include <sensor_msgs/point_cloud2_iterator.h>
+#include <Eigen/Eigen>
+#include <cstdarg>
 
 namespace velodyne_rawdata
 {
-  // Shorthand typedefs for point cloud representations
-  typedef velodyne_pointcloud::PointXYZIR VPoint;
-  typedef pcl::PointCloud<VPoint> VPointCloud;
-
   class DataContainerBase
   {
    public:
@@ -19,10 +16,25 @@ namespace velodyne_rawdata
         const double max_range, const double min_range,
         const std::string& target_frame, const std::string& fixed_frame,
         const unsigned int init_width, const unsigned int init_height,
-        const bool is_dense, const unsigned int scans_per_packet)
+        const bool is_dense, const unsigned int scans_per_packet, int fields, ...)
         : config_(max_range, min_range, target_frame, fixed_frame,
-          init_width, init_height, is_dense, scans_per_packet), pc(new VPointCloud) {
+          init_width, init_height, is_dense, scans_per_packet) {
 
+      va_list vl;
+      cloud.fields.clear();
+      cloud.fields.reserve(fields);
+      va_start(vl, fields);
+      int offset = 0;
+      for (int i = 0; i < fields; ++i) {
+        // Create the corresponding PointField
+        std::string name(va_arg(vl, char*));
+        int count(va_arg(vl, int));
+        int datatype(va_arg(vl, int));
+        offset = addPointField(cloud, name, count, datatype, offset);
+      }
+      va_end(vl);
+      cloud.point_step = offset;
+      cloud.row_step = cloud.width * cloud.point_step;
       if(config_.transform)
       {
         tf_ptr = boost::shared_ptr<tf::TransformListener>(new tf::TransformListener);
@@ -60,21 +72,28 @@ namespace velodyne_rawdata
           }
     };
 
-    void setup(const velodyne_msgs::VelodyneScan::ConstPtr& scan_msg){
-      pc = VPointCloud::Ptr(new VPointCloud);
-      pc->header.stamp = pcl_conversions::toPCL(scan_msg->header.stamp);
-      pc->header.frame_id = scan_msg->header.frame_id;
-      pc->points.reserve(scan_msg->packets.size() * config_.scans_per_packet);
-      pc->width = config_.init_width;
-      pc->height = config_.init_height;
-      pc->is_dense = config_.is_dense;
+    virtual void setup(const velodyne_msgs::VelodyneScan::ConstPtr& scan_msg){
+      cloud.header = scan_msg->header;
+      cloud.data.resize(scan_msg->packets.size() * config_.scans_per_packet * cloud.point_step);
+      cloud.width = config_.init_width;
+      cloud.height = config_.init_height;
+      cloud.is_dense = static_cast<uint8_t >(config_.is_dense);
     }
 
     virtual void addPoint(
-        const float& x, const float& y, const float& z,
-        const uint16_t& ring, const uint16_t& azimuth,
-        const float& distance, const float& intensity) = 0;
+        float x, float y, float z,
+        const uint16_t ring, const uint16_t azimuth,
+        const float distance, const float intensity) = 0;
     virtual void newLine() = 0;
+
+    const sensor_msgs::PointCloud2& finishCloud(){
+      cloud.data.resize(cloud.point_step * cloud.width * cloud.height);
+      cloud.header.frame_id = config_.target_frame;
+      ROS_DEBUG_STREAM("Prepared cloud width" << cloud.height * cloud.width
+          << " Velodyne points, time: " << cloud.header.stamp);
+
+      return cloud;
+    }
 
     void configure(const double max_range, const double min_range,
         const std::string fixed_frame, const std::string target_frame) {
@@ -89,7 +108,7 @@ namespace velodyne_rawdata
       }
     }
 
-    VPointCloud::Ptr pc;
+    sensor_msgs::PointCloud2 cloud;
 
    protected:
 
@@ -102,7 +121,7 @@ namespace velodyne_rawdata
     bool computeTransformation(const ros::Time& time){
       tf::StampedTransform transform;
       try{
-        tf_ptr->lookupTransform(config_.target_frame, pc->header.frame_id, time, transform);
+        tf_ptr->lookupTransform(config_.target_frame, cloud.header.frame_id, time, transform);
       }
       catch (tf::LookupException &e){
         ROS_ERROR ("%s", e.what ());
@@ -129,13 +148,10 @@ namespace velodyne_rawdata
       return true;
     }
 
-    inline bool transformPoint(velodyne_rawdata::VPoint& point)
+    void transformPoint(float& x, float& y, float& z)
     {
-      Eigen::Vector3d vec(point.x, point.y, point.z), out_vec;
-      out_vec = transformation * vec;
-      point.x = out_vec(0);
-      point.y = out_vec(1);
-      point.z = out_vec(2);
+      Eigen::Vector3d p = transformation * Eigen::Vector3d(x, y, z);
+      x = p.x(); y = p.y(); z = p.z();
     }
 
     inline bool pointInRange(float range)
@@ -145,10 +161,9 @@ namespace velodyne_rawdata
     }
 
     Config config_;
-
     boost::shared_ptr<tf::TransformListener> tf_ptr; ///< transform listener
-
     Eigen::Affine3d transformation;
+
 };
 }
 #endif //__DATACONTAINERBASE_H

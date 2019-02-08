@@ -4,7 +4,6 @@ project(velodyne_pointcloud)
 set(${PROJECT_NAME}_CATKIN_DEPS
     angles
     nodelet
-    pcl_ros
     roscpp
     roslib
     sensor_msgs
@@ -14,10 +13,9 @@ set(${PROJECT_NAME}_CATKIN_DEPS
     dynamic_reconfigure
 )
 
-find_package(catkin REQUIRED COMPONENTS
-             ${${PROJECT_NAME}_CATKIN_DEPS} pcl_conversions)
+find_package(catkin REQUIRED COMPONENTS ${${PROJECT_NAME}_CATKIN_DEPS})
 find_package(Boost COMPONENTS signals)
-
+find_package(Eigen3 REQUIRED)
 # Resolve system dependency on yaml-cpp, which apparently does not
 # provide a CMake find_package() module.
 find_package(PkgConfig REQUIRED)
@@ -39,8 +37,9 @@ if(NOT ${YAML_CPP_VERSION} VERSION_LESS "0.5")
   add_definitions(-DHAVE_NEW_YAMLCPP)
 endif(NOT ${YAML_CPP_VERSION} VERSION_LESS "0.5")
 
-include_directories(include ${catkin_INCLUDE_DIRS} 
+include_directories(include ${catkin_INCLUDE_DIRS}
   ${dynamic_reconfigure_PACKAGE_PATH}/cmake/cfgbuild.cmake
+  ${EIGEN3_INCLUDE_DIRS}
 )
 
 catkin_package(

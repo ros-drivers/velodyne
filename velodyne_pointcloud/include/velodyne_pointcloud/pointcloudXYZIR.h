@@ -18,9 +18,13 @@ namespace velodyne_pointcloud
 
     virtual void newLine();
 
-    virtual void addPoint(const float& x, const float& y, const float& z,
-        const uint16_t& ring, const uint16_t& azimuth,
-        const float& distance, const float& intensity);
+    virtual void setup(const velodyne_msgs::VelodyneScan::ConstPtr& scan_msg);
+
+    virtual void addPoint(float x, float y, float z,
+        uint16_t ring, uint16_t azimuth, float distance, float intensity);
+
+    sensor_msgs::PointCloud2Iterator<float> iter_x, iter_y, iter_z, iter_intensity;
+    sensor_msgs::PointCloud2Iterator<uint16_t> iter_ring;
 
   };
 }

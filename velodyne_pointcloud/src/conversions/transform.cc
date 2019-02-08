@@ -14,6 +14,7 @@
 
     @author Jack O'Quin
     @author Jesse Vera
+    @author Sebastian Pütz
 
 */
 
@@ -21,7 +22,6 @@
 
 #include <velodyne_pointcloud/pointcloudXYZIR.h>
 #include <velodyne_pointcloud/organized_cloudXYZIR.h>
-#include <pcl_conversions/pcl_conversions.h>
 
 namespace velodyne_pointcloud
 {
@@ -129,13 +129,7 @@ namespace velodyne_pointcloud
     {
       data_->unpack(scanMsg->packets[i], *container_ptr);
     }
-    // did transformation of point in the container if necessary
-    container_ptr->pc->header.frame_id = config_.target_frame;
-
-    // publish the accumulated cloud message
-    ROS_DEBUG_STREAM("Publishing " << container_ptr->pc->height * container_ptr->pc->width
-                                   << " Velodyne points, time: " << container_ptr->pc->header.stamp);
-    output_.publish(container_ptr->pc);
+    output_.publish(container_ptr->finishCloud());
   }
 
 } // namespace velodyne_pointcloud

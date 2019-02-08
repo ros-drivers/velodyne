@@ -2,6 +2,7 @@
 #define __ORGANIZED_CLOUDXYZIR_H
 
 #include <velodyne_pointcloud/datacontainerbase.h>
+#include <sensor_msgs/point_cloud2_iterator.h>
 
 namespace velodyne_pointcloud
 {
@@ -16,17 +17,16 @@ namespace velodyne_pointcloud
 
     virtual void newLine();
 
+    virtual void setup(const velodyne_msgs::VelodyneScan::ConstPtr& scan_msg);
+
     virtual void addPoint(
-        const float& x,
-        const float& y,
-        const float& z,
-        const uint16_t& ring,
-        const uint16_t& azimuth,
-        const float& distance,
-        const float& intensity);
+        float x, float y, float z,
+        const uint16_t ring, const uint16_t azimuth,
+        const float distance, const float intensity);
 
    private:
-    std::map<uint16_t, velodyne_rawdata::VPoint*> organized_lasers;
+    sensor_msgs::PointCloud2Iterator<float> iter_x, iter_y, iter_z, iter_intensity;
+    sensor_msgs::PointCloud2Iterator<uint16_t> iter_ring;
   };
 }
 #endif //__ORGANIZED_CLOUDXYZIR_H
