@@ -23,6 +23,11 @@ namespace velodyne_pointcloud
 
   void OrganizedCloudXYZIR::newLine()
   {
+    iter_x = iter_x + config_.init_width;
+    iter_y = iter_y + config_.init_width;
+    iter_z = iter_z + config_.init_width;
+    iter_ring = iter_ring + config_.init_width;
+    iter_intensity = iter_intensity + config_.init_width;
     ++cloud.height;
     if(config_.transform)
     {
@@ -69,12 +74,6 @@ namespace velodyne_pointcloud
       *(iter_intensity+ring) = nanf("");
       *(iter_ring+ring) = ring;
     }
-
-    ++iter_x;
-    ++iter_y;
-    ++iter_z;
-    ++iter_ring;
-    ++iter_intensity;
   }
 }
 
