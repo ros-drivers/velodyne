@@ -4,7 +4,7 @@
 #include <tf/transform_listener.h>
 #include <velodyne_msgs/VelodyneScan.h>
 #include <sensor_msgs/point_cloud2_iterator.h>
-#include <Eigen/Eigen>
+#include <Eigen/Dense>
 #include <cstdarg>
 
 namespace velodyne_rawdata
