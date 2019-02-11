@@ -1,6 +1,13 @@
 Change history
 ==============
 
+1.5.2 (2019-01-28)
+------------------
+* Merge pull request `#205 <https://github.com/ros-drivers/velodyne/issues/205>`_ from xiesc/master
+  support for 64E-S3
+* add an example yaml file for S3
+* Contributors: Joshua Whitley, Shichao XIE, xiesc
+
 1.5.1 (2018-12-10)
 ------------------
 * Merge pull request `#194 <https://github.com/ros-drivers/velodyne/issues/194>`_ from ros-drivers/avoid_unnecessary_computation
