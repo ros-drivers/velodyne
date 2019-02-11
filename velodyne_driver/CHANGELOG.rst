@@ -1,6 +1,15 @@
 Change history
 ==============
 
+1.5.2 (2019-01-28)
+------------------
+* Merge pull request `#212 <https://github.com/ros-drivers/velodyne/issues/212>`_ from ros-drivers/maint/vdump_as_root
+  Modifying vdump script for use as root.
+  Tested by @andersfischernielsen.
+* Merge pull request `#205 <https://github.com/ros-drivers/velodyne/issues/205>`_ from xiesc/master
+  support for 64E-S3
+* Contributors: Joshua Whitley, Shichao XIE, xiesc
+
 1.5.1 (2018-12-10)
 ------------------
 

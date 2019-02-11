@@ -175,6 +175,7 @@ inline float SQR(float val) { return val*val; }
 
       // upper bank lasers are numbered [0..31]
       // NOTE: this is a change from the old velodyne_common implementation
+
       int bank_origin = 0;
       if (raw->blocks[i].header == LOWER_BANK) {
         // lower bank lasers are [32..63]
@@ -194,6 +195,10 @@ inline float SQR(float val) { return val*val; }
         union two_bytes tmp;
         tmp.bytes[0] = block.data[k];
         tmp.bytes[1] = block.data[k+1];
+        if (tmp.bytes[0]==0 &&tmp.bytes[1]==0 ) //no laser beam return
+        {
+          continue;
+        }
 
         float distance = tmp.uint * calibration_.distance_resolution_m;
         distance += corrections.dist_correction;
