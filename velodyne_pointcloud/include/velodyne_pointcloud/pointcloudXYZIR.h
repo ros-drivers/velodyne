@@ -14,7 +14,9 @@ namespace velodyne_pointcloud
     PointcloudXYZIR(
         const double max_range, const double min_range,
         const std::string& target_frame, const std::string& fixed_frame,
-        const unsigned int scans_per_block);
+        const unsigned int scans_per_block,
+        boost::shared_ptr<tf::TransformListener> tf_ptr = boost::shared_ptr<tf::TransformListener>()
+    );
 
     virtual void newLine();
 

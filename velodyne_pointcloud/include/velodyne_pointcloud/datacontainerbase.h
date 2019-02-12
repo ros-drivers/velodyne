@@ -16,9 +16,11 @@ namespace velodyne_rawdata
         const double max_range, const double min_range,
         const std::string& target_frame, const std::string& fixed_frame,
         const unsigned int init_width, const unsigned int init_height,
-        const bool is_dense, const unsigned int scans_per_packet, int fields, ...)
+        const bool is_dense, const unsigned int scans_per_packet,
+        boost::shared_ptr<tf::TransformListener>& tf_ptr,
+        int fields, ...)
         : config_(max_range, min_range, target_frame, fixed_frame,
-          init_width, init_height, is_dense, scans_per_packet) {
+          init_width, init_height, is_dense, scans_per_packet), tf_ptr(tf_ptr) {
 
       va_list vl;
       cloud.fields.clear();
@@ -35,7 +37,7 @@ namespace velodyne_rawdata
       va_end(vl);
       cloud.point_step = offset;
       cloud.row_step = cloud.width * cloud.point_step;
-      if(config_.transform)
+      if(config_.transform && !tf_ptr)
       {
         tf_ptr = boost::shared_ptr<tf::TransformListener>(new tf::TransformListener);
       }
@@ -78,6 +80,12 @@ namespace velodyne_rawdata
       cloud.width = config_.init_width;
       cloud.height = config_.init_height;
       cloud.is_dense = static_cast<uint8_t >(config_.is_dense);
+      if(config_.transform)
+      {
+        if(!computeTransformation(scan_msg->header.stamp)){
+          ROS_ERROR_STREAM("Could not transform points!");
+        }
+      }
     }
 
     virtual void addPoint(
@@ -101,8 +109,9 @@ namespace velodyne_rawdata
       config_.min_range = min_range;
       config_.fixed_frame = fixed_frame;
       config_.target_frame = target_frame;
-      config_.transform = fixed_frame != target_frame;
-      if(config_.transform)
+
+      config_.transform = fixed_frame.compare(target_frame) != 0;
+      if(config_.transform && !tf_ptr)
       {
         tf_ptr = boost::shared_ptr<tf::TransformListener>(new tf::TransformListener);
       }
@@ -118,7 +127,7 @@ namespace velodyne_rawdata
       eigen_vec(2) = tf_vec[2];
     }
 
-    bool computeTransformation(const ros::Time& time){
+    inline bool computeTransformation(const ros::Time& time){
       tf::StampedTransform transform;
       try{
         tf_ptr->lookupTransform(config_.target_frame, cloud.header.frame_id, time, transform);
@@ -140,15 +149,14 @@ namespace velodyne_rawdata
           quaternion.z ()
       );
 
-      tf::Vector3 origin = transform.getOrigin ();
       Eigen::Vector3d eigen_origin;
-      vectorTfToEigen(origin, eigen_origin);
+      vectorTfToEigen(transform.getOrigin(), eigen_origin);
       Eigen::Translation3d translation ( eigen_origin );
       transformation = translation * rotation;
       return true;
     }
 
-    void transformPoint(float& x, float& y, float& z)
+    inline void transformPoint(float& x, float& y, float& z)
     {
       Eigen::Vector3d p = transformation * Eigen::Vector3d(x, y, z);
       x = p.x(); y = p.y(); z = p.z();
@@ -163,7 +171,6 @@ namespace velodyne_rawdata
     Config config_;
     boost::shared_ptr<tf::TransformListener> tf_ptr; ///< transform listener
     Eigen::Affine3d transformation;
-
 };
 }
 #endif //__DATACONTAINERBASE_H

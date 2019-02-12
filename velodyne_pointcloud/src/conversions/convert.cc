@@ -82,7 +82,7 @@ namespace velodyne_pointcloud
     config_.max_range = config.max_range;
 
     if(first_rcfg_call || config.organize_cloud != config_.organize_cloud){
-        boost::lock_guard<boost::mutex> guard(reconfigure_mtx_);
+        first_rcfg_call = false;
         config_.organize_cloud = config.organize_cloud;
         if(config_.organize_cloud) // TODO only on change
         {
@@ -100,7 +100,6 @@ namespace velodyne_pointcloud
                     data_->scansPerPacket()));
         }
     }
-    first_rcfg_call = false;
 
     container_ptr_->configure(config_.max_range, config_.min_range, config_.fixed_frame, config_.target_frame);
 

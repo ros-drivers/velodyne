@@ -53,7 +53,7 @@ namespace velodyne_pointcloud
     message_filters::Subscriber<velodyne_msgs::VelodyneScan> velodyne_scan_;
     ros::Publisher output_;
     boost::shared_ptr<tf::MessageFilter<velodyne_msgs::VelodyneScan> >tf_filter_ptr_;
-    boost::shared_ptr<tf::TransformListener> listener_ptr_;
+    boost::shared_ptr<tf::TransformListener> tf_ptr_;
 
     /// configuration parameters
     typedef struct {
@@ -65,6 +65,7 @@ namespace velodyne_pointcloud
       uint16_t num_lasers;           ///< number of lasers
     } Config;
     Config config_;
+    bool first_rcfg_call;
 
     boost::shared_ptr<velodyne_rawdata::DataContainerBase> container_ptr;
 
