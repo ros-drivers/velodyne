@@ -72,7 +72,7 @@ void DriverNodelet::devicePoll()
       // poll device until end of file
       running_ = dvr_->poll();
       if (!running_)
-        break;
+        ROS_ERROR_THROTTLE(1.0, "DriverNodelet::devicePoll - Failed to poll device.");
     }
   running_ = false;
 }
