@@ -62,6 +62,7 @@ private:
 
   boost::shared_ptr<Input> input_;
   ros::Publisher output_;
+  int last_azimuth_;
 
   /** diagnostics updater */
   ros::Timer diag_timer_;

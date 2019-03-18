@@ -152,6 +152,8 @@ VelodyneDriver::VelodyneDriver(ros::NodeHandle node,
   // raw packet output topic
   output_ =
     node.advertise<velodyne_msgs::VelodyneScan>("velodyne_packets", 10);
+
+  last_azimuth_ = -1;
 }
 
 /** poll the device
@@ -177,24 +179,23 @@ bool VelodyneDriver::poll(void)
       }
       scan->packets.push_back(tmp_packet);
 
-      static int last_azimuth = -1;
       // Extract base rotation of first block in packet
       std::size_t azimuth_data_pos = 100*0+2;
       int azimuth = *( (u_int16_t*) (&tmp_packet.data[azimuth_data_pos]));
 
-      //if first packet in scan, there is no "valid" last_azimuth
-      if (last_azimuth == -1) {
-      	 last_azimuth = azimuth;
+      //if first packet in scan, there is no "valid" last_azimuth_
+      if (last_azimuth_ == -1) {
+      	 last_azimuth_ = azimuth;
       	 continue;
       }
-      if((last_azimuth < config_.cut_angle && config_.cut_angle <= azimuth)
-      	 || ( config_.cut_angle <= azimuth && azimuth < last_azimuth)
-      	 || (azimuth < last_azimuth && last_azimuth < config_.cut_angle))
+      if((last_azimuth_ < config_.cut_angle && config_.cut_angle <= azimuth)
+      	 || ( config_.cut_angle <= azimuth && azimuth < last_azimuth_)
+      	 || (azimuth < last_azimuth_ && last_azimuth_ < config_.cut_angle))
       {
-        last_azimuth = azimuth;
+        last_azimuth_ = azimuth;
         break; // Cut angle passed, one full revolution collected
       }
-      last_azimuth = azimuth;
+      last_azimuth_ = azimuth;
     }
   }
   else // standard behaviour
