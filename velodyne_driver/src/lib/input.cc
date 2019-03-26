@@ -32,6 +32,7 @@
 #include <fcntl.h>
 #include <sys/file.h>
 #include <velodyne_driver/input.h>
+#include <velodyne_driver/time_conversion.hpp>
 
 namespace velodyne_driver
 {
@@ -199,10 +200,9 @@ namespace velodyne_driver
                          << nbytes << " bytes");
       }
 
-    // Average the times at which we begin and end reading.  Use that to
-    // estimate when the scan occurred. Add the time offset.
-    double time2 = ros::Time::now().toSec();
-    pkt->stamp = ros::Time((time2 + time1) / 2.0 + time_offset);
+    // time for each packet is a 4 byte uint located starting at offset 1200 in
+    // the data packet
+    pkt->stamp = rosTimeFromGpsTimestamp(&(pkt->data[1200]));
 
     return 0;
   }
