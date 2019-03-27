@@ -67,6 +67,7 @@ namespace velodyne_driver
     ros::NodeHandle private_nh_;
     uint16_t port_;
     std::string devip_str_;
+    bool gps_time_;
   };
 
   /** @brief Live Velodyne input from socket. */
