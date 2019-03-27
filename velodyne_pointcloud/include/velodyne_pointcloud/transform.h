@@ -21,6 +21,8 @@
 #include <ros/ros.h>
 #include "tf/message_filter.h"
 #include "message_filters/subscriber.h"
+#include <diagnostic_updater/diagnostic_updater.h>
+#include <diagnostic_updater/publisher.h>
 #include <sensor_msgs/PointCloud2.h>
 
 #include <velodyne_pointcloud/rawdata.h>
@@ -74,8 +76,14 @@ namespace velodyne_pointcloud
     // Point cloud buffers for collecting points within a packet.  The
     // inPc_ and tfPc_ are class members only to avoid reallocation on
     // every message.
-    PointcloudXYZIR inPc_;              ///< input packet point cloud
-    velodyne_rawdata::VPointCloud tfPc_;              ///< transformed packet point cloud
+    PointcloudXYZIR inPc_;                ///< input packet point cloud
+    velodyne_rawdata::VPointCloud tfPc_;  ///< transformed packet point cloud
+
+    // diagnostics updater
+    diagnostic_updater::Updater diagnostics_;
+    double diag_min_freq_;
+    double diag_max_freq_;
+    boost::shared_ptr<diagnostic_updater::TopicDiagnostic> diag_topic_;
   };
 
 } // namespace velodyne_pointcloud

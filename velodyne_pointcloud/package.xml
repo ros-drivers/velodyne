@@ -29,6 +29,7 @@
   <depend>velodyne_msgs</depend>
   <depend>yaml-cpp</depend>
   <depend>dynamic_reconfigure</depend>
+  <depend>diagnostic_updater</depend>
 
   <exec_depend>velodyne_laserscan</exec_depend>
 
