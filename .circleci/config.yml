@@ -1,6 +1,7 @@
-version: 2 
+version: 2
 jobs:
   indigo:
+    parallelism: 2
     docker:
       - image: ros:indigo-perception
     steps:
@@ -29,6 +30,7 @@ jobs:
     working_directory: ~/src
 
   kinetic:
+    parallelism: 2
     docker:
       - image: ros:kinetic-perception
     steps:
@@ -57,6 +59,7 @@ jobs:
     working_directory: ~/src
 
   melodic:
+    parallelism: 2
     docker:
       - image: ros:melodic-perception
     steps:
