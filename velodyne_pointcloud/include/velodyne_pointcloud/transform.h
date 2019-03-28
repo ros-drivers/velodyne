@@ -11,7 +11,7 @@
 /** @file
 
     This class transforms raw Velodyne 3D LIDAR packets to PointCloud2
-    in the /odom frame of reference.
+    in the /map frame of reference.
 
 */
 
@@ -69,7 +69,7 @@ namespace velodyne_pointcloud
 
     /// configuration parameters
     typedef struct {
-      std::string frame_id;          ///< target frame ID
+      std::string frame_id;          ///< fixed frame ID
     } Config;
     Config config_;
 

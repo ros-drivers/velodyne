@@ -3,7 +3,7 @@
 
 <launch>
   <arg name="calibration" default="" />
-  <arg name="frame_id" default="odom" />
+  <arg name="frame_id" default="map" />
   <arg name="manager" default="velodyne_nodelet_manager" />
   <arg name="max_range" default="130.0" />
   <arg name="min_range" default="0.9" />
