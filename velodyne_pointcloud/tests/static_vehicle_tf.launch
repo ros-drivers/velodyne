@@ -14,4 +14,10 @@
         name="vehicle_is_odom"
         args="0 0 0 0 0 0 odom vehicle" />
 
+  <!-- publish identity /map -> /odom transform
+       (for viewing sensor data for a static vehicle) -->
+  <node pkg="tf2_ros" type="static_transform_publisher"
+        name="map_to_odom"
+        args="0 0 0 0 0 0 map odom" />
+
 </launch>

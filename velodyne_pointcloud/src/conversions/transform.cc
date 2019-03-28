@@ -10,7 +10,7 @@
 /** @file
 
     This class transforms raw Velodyne 3D LIDAR packets to PointCloud2
-    in the /odom frame of reference.
+    in the /map frame of reference.
 
     @author Jack O'Quin
     @author Jesse Vera
@@ -69,7 +69,7 @@ namespace velodyne_pointcloud
     data_->setParameters(config.min_range, config.max_range, 
                          config.view_direction, config.view_width);
     config_.frame_id = tf::resolve(tf_prefix_, config.frame_id);
-    ROS_INFO_STREAM("Target frame ID: " << config_.frame_id);
+    ROS_INFO_STREAM("Fixed frame ID: " << config_.frame_id);
   }
 
   /** @brief Callback for raw scan messages.
@@ -115,16 +115,15 @@ namespace velodyne_pointcloud
         // transform the packet point cloud into the target frame
         try
           {
-            ROS_DEBUG_STREAM("transforming from " << inPc_.pc->header.frame_id
-                             << " to " << config_.frame_id);
-            pcl_ros::transformPointCloud(config_.frame_id, *(inPc_.pc), tfPc_,
-                                         listener_);
-#if 0       // use the latest transform available, should usually work fine
+            ROS_DEBUG_STREAM("correcting distortion relative to " << config_.frame_id);
+            // stamp in the header is microseconds unix time.
+            ros::Time stamp(outMsg->header.stamp / 1000000, (outMsg->header.stamp % 1000000)*1000);
             pcl_ros::transformPointCloud(inPc_.pc->header.frame_id,
-                                         ros::Time(0), *(inPc_.pc),
+                                         stamp,
+                                         *(inPc_.pc),
                                          config_.frame_id,
-                                         tfPc_, listener_);
-#endif
+                                         tfPc_,
+                                         listener_);
           }
         catch (tf::TransformException &ex)
           {

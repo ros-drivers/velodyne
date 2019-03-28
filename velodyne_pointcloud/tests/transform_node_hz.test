@@ -19,7 +19,7 @@
 
   <!-- Verify PointCloud2 publication rate.  Unfortunately,
        transformed clouds run very slowly, they spend too much time
-       waiting for the /velodyne to /odom transform to be available.
+       waiting for the /velodyne to /map transform to be available.
   -->
   <test test-name="transform_node_hz_test" pkg="rostest"
         type="hztest" name="hztest_transform_node_64e" >
