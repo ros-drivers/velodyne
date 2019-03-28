@@ -1,7 +1,6 @@
 version: 2
 jobs:
   indigo:
-    parallelism: 3
     docker:
       - image: ros:indigo-perception
     steps:
@@ -19,7 +18,7 @@ jobs:
           name: Build
           command: |
             cd ..
-            catkin build
+            catkin build -j 2
       - run:
           name: Run Tests
           command: |
@@ -30,7 +29,6 @@ jobs:
     working_directory: ~/src
 
   kinetic:
-    parallelism: 3
     docker:
       - image: ros:kinetic-perception
     steps:
@@ -48,7 +46,7 @@ jobs:
           name: Build
           command: |
             cd ..
-            catkin build
+            catkin build -j 2
       - run:
           name: Run Tests
           command: |
@@ -59,7 +57,6 @@ jobs:
     working_directory: ~/src
 
   melodic:
-    parallelism: 3
     docker:
       - image: ros:melodic-perception
     steps:
@@ -77,7 +74,7 @@ jobs:
           name: Build
           command: |
             cd ..
-            catkin build
+            catkin build -j 2
       - run:
           name: Run Tests
           command: |
