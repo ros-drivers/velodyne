@@ -67,8 +67,7 @@ namespace velodyne_pointcloud
 
     /// configuration parameters
     typedef struct {
-      std::string frame_id;          ///< target frame ID
-      std::string fixed_frame_id;    ///< absolute frame ID
+      std::string frame_id;          ///< fixed frame ID
     } Config;
     Config config_;
 

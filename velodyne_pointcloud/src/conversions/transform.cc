@@ -43,11 +43,11 @@ namespace velodyne_pointcloud
     srv_->setCallback (f);
     
     // subscribe to VelodyneScan packets using transform filter
-    velodyne_scan_.subscribe(node, "velodyne_packets", 15);
+    velodyne_scan_.subscribe(node, "velodyne_packets", 10);
     tf_filter_ =
       new tf::MessageFilter<velodyne_msgs::VelodyneScan>(velodyne_scan_,
                                                          listener_,
-                                                         config_.fixed_frame_id, 100);
+                                                         config_.frame_id, 10);
     tf_filter_->registerCallback(boost::bind(&Transform::processScan, this, _1));
   }
   
@@ -58,8 +58,7 @@ namespace velodyne_pointcloud
     data_->setParameters(config.min_range, config.max_range, 
                          config.view_direction, config.view_width);
     config_.frame_id = tf::resolve(tf_prefix_, config.frame_id);
-    config_.fixed_frame_id = tf::resolve(tf_prefix_, config.fixed_frame_id);
-    ROS_INFO_STREAM("Target frame ID: " << config_.frame_id);
+    ROS_INFO_STREAM("Fixed frame ID: " << config_.frame_id);
   }
 
   /** @brief Callback for raw scan messages.
@@ -105,13 +104,13 @@ namespace velodyne_pointcloud
         // transform the packet point cloud into the target frame
         try
           {
-            ROS_DEBUG_STREAM("correcting distortion relative to " << config_.fixed_frame_id);
+            ROS_DEBUG_STREAM("correcting distortion relative to " << config_.frame_id);
             // stamp in the header is microseconds unix time.
             ros::Time stamp(outMsg->header.stamp / 1000000, (outMsg->header.stamp % 1000000)*1000);
             pcl_ros::transformPointCloud(inPc_.pc->header.frame_id,
                                          stamp,
                                          *(inPc_.pc),
-                                         config_.fixed_frame_id,
+                                         config_.frame_id,
                                          tfPc_,
                                          listener_);
           }

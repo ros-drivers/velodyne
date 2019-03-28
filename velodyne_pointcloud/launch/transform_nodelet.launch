@@ -3,8 +3,7 @@
 
 <launch>
   <arg name="calibration" default="" />
-  <arg name="fixed_frame_id" default="odom" />
-  <arg name="frame_id" default="velodyne" />
+  <arg name="frame_id" default="map" />
   <arg name="manager" default="velodyne_nodelet_manager" />
   <arg name="max_range" default="130.0" />
   <arg name="min_range" default="0.9" />
@@ -12,7 +11,6 @@
         args="load velodyne_pointcloud/TransformNodelet $(arg manager)" >
     <param name="calibration" value="$(arg calibration)"/>
     <param name="frame_id" value="$(arg frame_id)"/>
-    <param name="fixed_frame_id" value="$(arg fixed_frame_id)" />
     <param name="max_range" value="$(arg max_range)"/>
     <param name="min_range" value="$(arg min_range)"/>
   </node>
