@@ -18,6 +18,8 @@
 #define _VELODYNE_POINTCLOUD_CONVERT_H_ 1
 
 #include <ros/ros.h>
+#include <diagnostic_updater/diagnostic_updater.h>
+#include <diagnostic_updater/publisher.h>
 
 #include <sensor_msgs/PointCloud2.h>
 #include <velodyne_pointcloud/rawdata.h>
@@ -36,7 +38,7 @@ namespace velodyne_pointcloud
     ~Convert() {}
 
   private:
-    
+
     void callback(velodyne_pointcloud::CloudNodeConfig &config,
                 uint32_t level);
     void processScan(const velodyne_msgs::VelodyneScan::ConstPtr &scanMsg);
@@ -44,7 +46,7 @@ namespace velodyne_pointcloud
     ///Pointer to dynamic reconfigure service srv_
     boost::shared_ptr<dynamic_reconfigure::Server<velodyne_pointcloud::
       CloudNodeConfig> > srv_;
-    
+
     boost::shared_ptr<velodyne_rawdata::RawData> data_;
     ros::Subscriber velodyne_scan_;
     ros::Publisher output_;
@@ -53,7 +55,13 @@ namespace velodyne_pointcloud
     typedef struct {
       int npackets;                    ///< number of packets to combine
     } Config;
-    Config config_;    
+    Config config_;
+
+    // diagnostics updater
+    diagnostic_updater::Updater diagnostics_;
+    double diag_min_freq_;
+    double diag_max_freq_;
+    boost::shared_ptr<diagnostic_updater::TopicDiagnostic> diag_topic_;
   };
 
 } // namespace velodyne_pointcloud

@@ -12,6 +12,7 @@ set(${PROJECT_NAME}_CATKIN_DEPS
     velodyne_driver
     velodyne_msgs
     dynamic_reconfigure
+    diagnostic_updater
 )
 
 find_package(catkin REQUIRED COMPONENTS
@@ -39,7 +40,7 @@ if(NOT ${YAML_CPP_VERSION} VERSION_LESS "0.5")
   add_definitions(-DHAVE_NEW_YAMLCPP)
 endif(NOT ${YAML_CPP_VERSION} VERSION_LESS "0.5")
 
-include_directories(include ${catkin_INCLUDE_DIRS} 
+include_directories(include ${catkin_INCLUDE_DIRS}
   ${dynamic_reconfigure_PACKAGE_PATH}/cmake/cfgbuild.cmake
 )
 
@@ -47,7 +48,7 @@ catkin_package(
     CATKIN_DEPENDS ${${PROJECT_NAME}_CATKIN_DEPS}
     INCLUDE_DIRS include
     LIBRARIES velodyne_rawdata)
-    
+
 #add_executable(dynamic_reconfigure_node src/dynamic_reconfigure_node.cpp)
 #target_link_libraries(dynamic_reconfigure_node
 #   ${catkin_LIBRARIES}
@@ -66,7 +67,7 @@ install(DIRECTORY params/
         DESTINATION ${CATKIN_PACKAGE_SHARE_DESTINATION}/params)
 install(PROGRAMS scripts/gen_calibration.py
         DESTINATION ${CATKIN_PACKAGE_BIN_DESTINATION})
-  
+
 
 if (CATKIN_ENABLE_TESTING)
   add_subdirectory(tests)

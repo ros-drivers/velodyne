@@ -49,6 +49,19 @@ namespace velodyne_pointcloud
                                                          listener_,
                                                          config_.frame_id, 10);
     tf_filter_->registerCallback(boost::bind(&Transform::processScan, this, _1));
+
+    // Diagnostics
+    diagnostics_.setHardwareID("Velodyne Transform");
+    // Arbitrary frequencies since we don't know which RPM is used, and are only
+    // concerned about monitoring the frequency.
+    diag_min_freq_ = 2.0;
+    diag_max_freq_ = 20.0;
+    using namespace diagnostic_updater;
+    diag_topic_.reset(new TopicDiagnostic("velodyne_points", diagnostics_,
+                                          FrequencyStatusParam(&diag_min_freq_,
+                                                               &diag_max_freq_,
+                                                               0.1, 10),
+                                          TimeStampStatusParam()));
   }
   
   void Transform::reconfigure_callback(
@@ -132,6 +145,8 @@ namespace velodyne_pointcloud
     ROS_DEBUG_STREAM("Publishing " << outMsg->height * outMsg->width
                      << " Velodyne points, time: " << outMsg->header.stamp);
     output_.publish(outMsg);
+    diag_topic_->tick(scanMsg->header.stamp);
+    diagnostics_.update();
   }
 
 } // namespace velodyne_pointcloud

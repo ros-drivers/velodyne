@@ -16,6 +16,8 @@
 
   <buildtool_depend>catkin</buildtool_depend>
 
+  <build_depend>roslint</build_depend>
+
   <depend>roscpp</depend>
   <depend>nodelet</depend>
   <depend>sensor_msgs</depend>
