@@ -30,8 +30,8 @@
 // ANY WAY OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE
 // POSSIBILITY OF SUCH DAMAGE.
 
-#ifndef _VELODYNE_DRIVER_H_
-#define _VELODYNE_DRIVER_H_
+#ifndef VELODYNE_DRIVER_DRIVER_H
+#define VELODYNE_DRIVER_DRIVER_H
 
 #include <string>
 #include <ros/ros.h>
@@ -48,7 +48,6 @@ namespace velodyne_driver
 class VelodyneDriver
 {
 public:
-
   VelodyneDriver(ros::NodeHandle node,
                  ros::NodeHandle private_nh);
   ~VelodyneDriver() {}
@@ -56,33 +55,33 @@ public:
   bool poll(void);
 
 private:
-
-  ///Callback for dynamic reconfigure
+  // Callback for dynamic reconfigure
   void callback(velodyne_driver::VelodyneNodeConfig &config,
               uint32_t level);
-  /// Callback for diagnostics update for lost communication with vlp
+  // Callback for diagnostics update for lost communication with vlp
   void diagTimerCallback(const ros::TimerEvent&event);
 
-  ///Pointer to dynamic reconfigure service srv_
+  // Pointer to dynamic reconfigure service srv_
   boost::shared_ptr<dynamic_reconfigure::Server<velodyne_driver::
               VelodyneNodeConfig> > srv_;
 
   // configuration parameters
   struct
   {
-    std::string frame_id;            ///< tf frame ID
-    std::string model;               ///< device model name
-    int    npackets;                 ///< number of packets to collect
-    double rpm;                      ///< device rotation rate (RPMs)
-    int cut_angle;                   ///< cutting angle in 1/100°
-    double time_offset;              ///< time in seconds added to each velodyne time stamp
-  } config_;
+    std::string frame_id;            // tf frame ID
+    std::string model;               // device model name
+    int    npackets;                 // number of packets to collect
+    double rpm;                      // device rotation rate (RPMs)
+    int cut_angle;                   // cutting angle in 1/100°
+    double time_offset;              // time in seconds added to each velodyne time stamp
+  }
+  config_;
 
   boost::shared_ptr<Input> input_;
   ros::Publisher output_;
   int last_azimuth_;
 
-  /** diagnostics updater */
+  /* diagnostics updater */
   ros::Timer diag_timer_;
   diagnostic_updater::Updater diagnostics_;
   double diag_min_freq_;
@@ -90,6 +89,6 @@ private:
   boost::shared_ptr<diagnostic_updater::TopicDiagnostic> diag_topic_;
 };
 
-} // namespace velodyne_driver
+}  // namespace velodyne_driver
 
-#endif // _VELODYNE_DRIVER_H_
+#endif  // VELODYNE_DRIVER_DRIVER_H
