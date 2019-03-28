@@ -6,10 +6,11 @@ find_package(catkin REQUIRED COMPONENTS
   nodelet
   sensor_msgs
   dynamic_reconfigure
+  roslint
 )
 
 generate_dynamic_reconfigure_options(
-  cfg/VelodyneLaserScan.cfg
+  cfg/velodyne_laserscan.cfg
 )
 
 catkin_package(CATKIN_DEPENDS
@@ -22,7 +23,7 @@ include_directories(
 )
 
 add_library(${PROJECT_NAME}
-  src/VelodyneLaserScan.cpp
+  src/velodyne_laserscan.cpp
   src/nodelet.cpp
 )
 add_dependencies(${PROJECT_NAME}
@@ -48,7 +49,11 @@ install(FILES nodelets.xml
         DESTINATION ${CATKIN_PACKAGE_SHARE_DESTINATION}
 )
 
+roslint_cpp()
+
 if (CATKIN_ENABLE_TESTING)
+#  roslint_add_test()
+
   add_subdirectory(tests)
 endif()
 
