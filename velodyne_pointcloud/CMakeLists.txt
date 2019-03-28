@@ -1,22 +1,27 @@
 cmake_minimum_required(VERSION 2.8.3)
 project(velodyne_pointcloud)
 
+# Default to C++11
+add_compile_options(-std=c++11)
+
 set(${PROJECT_NAME}_CATKIN_DEPS
-    angles
-    nodelet
-    pcl_ros
-    roscpp
-    roslib
-    sensor_msgs
-    tf
-    velodyne_driver
-    velodyne_msgs
-    dynamic_reconfigure
-    diagnostic_updater
+  angles
+  nodelet
+  pcl_ros
+  roscpp
+  roslib
+  sensor_msgs
+  tf
+  velodyne_driver
+  velodyne_msgs
+  dynamic_reconfigure
+  diagnostic_updater
 )
 
 find_package(catkin REQUIRED COMPONENTS
-             ${${PROJECT_NAME}_CATKIN_DEPS} pcl_conversions)
+             ${${PROJECT_NAME}_CATKIN_DEPS}
+             pcl_conversions
+             roslint)
 find_package(Boost COMPONENTS signals)
 
 # Resolve system dependency on yaml-cpp, which apparently does not
@@ -68,7 +73,10 @@ install(DIRECTORY params/
 install(PROGRAMS scripts/gen_calibration.py
         DESTINATION ${CATKIN_PACKAGE_BIN_DESTINATION})
 
+roslint_cpp()
 
 if (CATKIN_ENABLE_TESTING)
+  roslint_add_test()
+
   add_subdirectory(tests)
 endif()
