@@ -19,6 +19,8 @@
 
   <buildtool_depend>catkin</buildtool_depend>
 
+  <build_depend>roslint</build_depend>
+
   <depend>diagnostic_updater</depend>
   <depend>dynamic_reconfigure</depend>
   <depend>libpcap</depend>

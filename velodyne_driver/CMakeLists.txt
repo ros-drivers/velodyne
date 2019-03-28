@@ -9,7 +9,7 @@ set(${PROJECT_NAME}_CATKIN_DEPS
     tf
     velodyne_msgs)
 
-find_package(catkin REQUIRED COMPONENTS ${${PROJECT_NAME}_CATKIN_DEPS})
+find_package(catkin REQUIRED COMPONENTS ${${PROJECT_NAME}_CATKIN_DEPS} roslint)
 
 # This driver uses Boost threads
 find_package(Boost REQUIRED COMPONENTS thread)
@@ -40,11 +40,15 @@ install(DIRECTORY launch/
 install(PROGRAMS src/vdump
         DESTINATION ${CATKIN_PACKAGE_BIN_DESTINATION})
 
+roslint_cpp()
+
 if (CATKIN_ENABLE_TESTING)
 
   # these dependencies are only needed for unit testing
   find_package(roslaunch REQUIRED)
   find_package(rostest REQUIRED)
+
+#  roslint_add_test()
 
   # Download packet capture (PCAP) files containing test data.
   # Store them in devel-space, so rostest can easily find them.
