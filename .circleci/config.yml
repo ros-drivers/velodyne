@@ -8,7 +8,7 @@ jobs:
       - run:
           name: Set Up Container
           command: |
-            apt-get update -qq
+            apt-get update -qq && apt-get install python-catkin-tools
             source `find /opt/ros -name setup.bash | sort | head -1`
             rosdep install --from-paths . --ignore-src -y
             cd ..
@@ -36,7 +36,7 @@ jobs:
       - run:
           name: Set Up Container
           command: |
-            apt-get update -qq
+            apt-get update -qq && apt-get install python-catkin-tools
             source `find /opt/ros -name setup.bash | sort | head -1`
             rosdep install --from-paths . --ignore-src -y
             cd ..
@@ -64,7 +64,7 @@ jobs:
       - run:
           name: Set Up Container
           command: |
-            apt-get update -qq
+            apt-get update -qq && apt-get install python-catkin-tools
             source `find /opt/ros -name setup.bash | sort | head -1`
             rosdep install --from-paths . --ignore-src -y
             cd ..
