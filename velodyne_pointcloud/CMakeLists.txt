@@ -1,18 +1,23 @@
 cmake_minimum_required(VERSION 2.8.3)
 project(velodyne_pointcloud)
 
+# Default to C++11
+if(NOT CMAKE_CXX_STANDARD)
+  set(CMAKE_CXX_STANDARD 11)
+endif()
+
 set(${PROJECT_NAME}_CATKIN_DEPS
-    angles
-    nodelet
-    pcl_ros
-    roscpp
-    roslib
-    sensor_msgs
-    tf
-    velodyne_driver
-    velodyne_msgs
-    dynamic_reconfigure
-    diagnostic_updater
+  angles
+  nodelet
+  pcl_ros
+  roscpp
+  roslib
+  sensor_msgs
+  tf
+  velodyne_driver
+  velodyne_msgs
+  dynamic_reconfigure
+  diagnostic_updater
 )
 
 find_package(catkin REQUIRED COMPONENTS

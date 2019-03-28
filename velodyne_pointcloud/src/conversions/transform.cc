@@ -35,10 +35,8 @@ namespace velodyne_pointcloud
     output_ =
       node.advertise<sensor_msgs::PointCloud2>("velodyne_points", 10);
 
-    srv_ = boost::make_shared <dynamic_reconfigure::Server<velodyne_pointcloud::
-      TransformNodeConfig> > (private_nh);
-    dynamic_reconfigure::Server<velodyne_pointcloud::TransformNodeConfig>::
-      CallbackType f;
+    srv_ = boost::make_shared<dynamic_reconfigure::Server<TransformNodeCfg>> (private_nh);
+    dynamic_reconfigure::Server<TransformNodeCfg>::CallbackType f;
     f = boost::bind (&Transform::reconfigure_callback, this, _1, _2);
     srv_->setCallback (f);
     

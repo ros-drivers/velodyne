@@ -68,6 +68,8 @@ template bool
 
 namespace velodyne_pointcloud
 {
+using TransformNodeCfg = velodyne_pointcloud::TransformNodeConfig;
+
 class Transform
 {
 public:
