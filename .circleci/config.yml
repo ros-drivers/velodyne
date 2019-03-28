@@ -18,7 +18,7 @@ jobs:
           name: Build
           command: |
             cd ..
-            catkin build -j 2
+            catkin build -j 4
       - run:
           name: Run Tests
           command: |
@@ -46,7 +46,7 @@ jobs:
           name: Build
           command: |
             cd ..
-            catkin build -j 2
+            catkin build -j 4
       - run:
           name: Run Tests
           command: |
@@ -74,7 +74,7 @@ jobs:
           name: Build
           command: |
             cd ..
-            catkin build -j 2
+            catkin build -j 4
       - run:
           name: Run Tests
           command: |
