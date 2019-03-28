@@ -52,7 +52,7 @@ install(FILES nodelets.xml
 roslint_cpp()
 
 if (CATKIN_ENABLE_TESTING)
-#  roslint_add_test()
+  roslint_add_test()
 
   add_subdirectory(tests)
 endif()

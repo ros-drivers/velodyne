@@ -45,9 +45,11 @@ public:
   ~LaserScanNodelet() {}
 
 private:
-  virtual void onInit() {
+  virtual void onInit()
+  {
     node_.reset(new VelodyneLaserScan(getNodeHandle(), getPrivateNodeHandle()));
   }
+
   boost::shared_ptr<VelodyneLaserScan> node_;
 };
 

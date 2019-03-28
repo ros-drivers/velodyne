@@ -43,7 +43,8 @@
 #include <dynamic_reconfigure/server.h>
 #include <velodyne_laserscan/VelodyneLaserScanConfig.h>
 
-namespace velodyne_laserscan {
+namespace velodyne_laserscan
+{
 
 class VelodyneLaserScan
 {
