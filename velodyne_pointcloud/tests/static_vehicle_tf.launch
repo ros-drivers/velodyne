@@ -8,10 +8,10 @@
         name="vehicle_velodyne_tf"
         args="0.393 0.278 2.4 -0.02155 0.0164 0.00621 vehicle velodyne" />
 
-  <!-- publish identity /odom -> /vehicle transform
+  <!-- publish identity /map -> /vehicle transform
        (for viewing sensor data for a static vehicle) -->
   <node pkg="tf2_ros" type="static_transform_publisher"
-        name="vehicle_is_odom"
-        args="0 0 0 0 0 0 odom vehicle" />
+        name="vehicle_is_map"
+        args="0 0 0 0 0 0 map vehicle" />
 
 </launch>

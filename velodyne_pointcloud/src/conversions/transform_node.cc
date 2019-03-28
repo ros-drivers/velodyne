@@ -8,7 +8,7 @@
 /** \file
 
     This ROS node transforms raw Velodyne LIDAR packets to PointCloud2
-    in the /odom frame of reference.
+    in the /map frame of reference.
 
 */
 
