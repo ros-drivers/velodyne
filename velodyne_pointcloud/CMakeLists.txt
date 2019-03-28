@@ -16,7 +16,9 @@ set(${PROJECT_NAME}_CATKIN_DEPS
 )
 
 find_package(catkin REQUIRED COMPONENTS
-             ${${PROJECT_NAME}_CATKIN_DEPS} pcl_conversions)
+             ${${PROJECT_NAME}_CATKIN_DEPS}
+             pcl_conversions
+             roslint)
 find_package(Boost COMPONENTS signals)
 
 # Resolve system dependency on yaml-cpp, which apparently does not
@@ -68,7 +70,10 @@ install(DIRECTORY params/
 install(PROGRAMS scripts/gen_calibration.py
         DESTINATION ${CATKIN_PACKAGE_BIN_DESTINATION})
 
+roslint_cpp()
 
 if (CATKIN_ENABLE_TESTING)
+  roslint_add_test()
+
   add_subdirectory(tests)
 endif()
