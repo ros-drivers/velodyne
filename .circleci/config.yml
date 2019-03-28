@@ -13,12 +13,12 @@ jobs:
             rosdep install --from-paths . --ignore-src -y
             cd ..
             catkin init
-            catkin config --extend /opt/ros/$ROS_DISTRO --cmake-args -DCMAKE_BUILD_TYPE=Release
+            catkin config --extend /opt/ros/$ROS_DISTRO -j 4 --cmake-args -DCMAKE_BUILD_TYPE=Release
       - run:
           name: Build
           command: |
             cd ..
-            catkin build -j 4
+            catkin build
       - run:
           name: Run Tests
           command: |
@@ -41,12 +41,12 @@ jobs:
             rosdep install --from-paths . --ignore-src -y
             cd ..
             catkin init
-            catkin config --extend /opt/ros/$ROS_DISTRO --cmake-args -DCMAKE_BUILD_TYPE=Release
+            catkin config --extend /opt/ros/$ROS_DISTRO -j 4 --cmake-args -DCMAKE_BUILD_TYPE=Release
       - run:
           name: Build
           command: |
             cd ..
-            catkin build -j 4
+            catkin build
       - run:
           name: Run Tests
           command: |
@@ -69,12 +69,12 @@ jobs:
             rosdep install --from-paths . --ignore-src -y
             cd ..
             catkin init
-            catkin config --extend /opt/ros/$ROS_DISTRO --cmake-args -DCMAKE_BUILD_TYPE=Release
+            catkin config --extend /opt/ros/$ROS_DISTRO -j 4 --cmake-args -DCMAKE_BUILD_TYPE=Release
       - run:
           name: Build
           command: |
             cd ..
-            catkin build -j 4
+            catkin build
       - run:
           name: Run Tests
           command: |
