@@ -50,8 +50,6 @@ if (CATKIN_ENABLE_TESTING)
   find_package(roslaunch REQUIRED)
   find_package(rostest REQUIRED)
 
-  roslint_add_test()
-
   # Download packet capture (PCAP) files containing test data.
   # Store them in devel-space, so rostest can easily find them.
   catkin_download_test_data(
