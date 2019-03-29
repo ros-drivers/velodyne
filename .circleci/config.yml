@@ -18,13 +18,18 @@ jobs:
           name: Build
           command: |
             cd ..
-            catkin build
+            catkin build --limit-status-rate 0.5
+      - run:
+          name: Lint
+          command: |
+            cd ..
+            catkin build velodyne_driver velodyne_laserscan velodyne_pointcloud --no-deps --make-args roslint
       - run:
           name: Run Tests
           command: |
             source `find /opt/ros -name setup.bash | sort | head -1`
             cd ..
-            catkin run_tests
+            catkin run_tests --limit-status-rate 0.5
             catkin_test_results
     working_directory: ~/src
 
@@ -46,13 +51,18 @@ jobs:
           name: Build
           command: |
             cd ..
-            catkin build
+            catkin build --limit-status-rate 0.5
+      - run:
+          name: Lint
+          command: |
+            cd ..
+            catkin build velodyne_driver velodyne_laserscan velodyne_pointcloud --no-deps --make-args roslint
       - run:
           name: Run Tests
           command: |
             source `find /opt/ros -name setup.bash | sort | head -1`
             cd ..
-            catkin run_tests
+            catkin run_tests --limit-status-rate 0.5
             catkin_test_results
     working_directory: ~/src
 
@@ -74,13 +84,18 @@ jobs:
           name: Build
           command: |
             cd ..
-            catkin build
+            catkin build --limit-status-rate 0.5
+      - run:
+          name: Lint
+          command: |
+            cd ..
+            catkin build velodyne_driver velodyne_laserscan velodyne_pointcloud --no-deps --make-args roslint
       - run:
           name: Run Tests
           command: |
             source `find /opt/ros -name setup.bash | sort | head -1`
             cd ..
-            catkin run_tests
+            catkin run_tests --limit-status-rate 0.5
             catkin_test_results
     working_directory: ~/src
 
