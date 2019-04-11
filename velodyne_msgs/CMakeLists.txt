@@ -1,16 +1,24 @@
-cmake_minimum_required(VERSION 2.8.3)
+cmake_minimum_required(VERSION 3.5)
+
 project(velodyne_msgs)
 
-find_package(catkin REQUIRED COMPONENTS message_generation std_msgs)
+# Default to C++14
+if(NOT CMAKE_CXX_STANDARD)
+  set(CMAKE_CXX_STANDARD 14)
+endif()
 
-add_message_files(
-  DIRECTORY msg
-  FILES
-  VelodynePacket.msg
-  VelodyneScan.msg
-)
-generate_messages(DEPENDENCIES std_msgs)
+find_package(tinyxml2 REQUIRED)
+find_package(ament_cmake REQUIRED)
+find_package(builtin_interfaces REQUIRED)
+find_package(rosidl_default_generators REQUIRED)
+find_package(std_msgs REQUIRED)
 
-catkin_package(
-  CATKIN_DEPENDS message_runtime std_msgs
+rosidl_generate_interfaces(${PROJECT_NAME}
+   "msg/VelodynePacket.msg"
+   "msg/VelodyneScan.msg"
+   DEPENDENCIES std_msgs
+   DEPENDENCIES builtin_interfaces
+
 )
+
+ament_package()
