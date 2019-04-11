@@ -86,7 +86,7 @@ namespace velodyne_pointcloud
     // allocate an output point cloud with same time as raw data
     velodyne_rawdata::VPointCloud::Ptr outMsg(new velodyne_rawdata::VPointCloud());
     outMsg->header.stamp = pcl_conversions::toPCL(scanMsg->header).stamp;
-    outMsg->header.frame_id = config_.frame_id;
+    outMsg->header.frame_id = scanMsg->header.frame_id;
     outMsg->height = 1;
 
     // process each packet provided by the driver
@@ -110,7 +110,7 @@ namespace velodyne_pointcloud
         tfPc_.height = 1;
         header.stamp = scanMsg->packets[next].stamp;
         pcl_conversions::toPCL(header, tfPc_.header);
-        tfPc_.header.frame_id = config_.frame_id;
+        tfPc_.header.frame_id = scanMsg->header.frame_id;
 
         // transform the packet point cloud into the target frame
         try
