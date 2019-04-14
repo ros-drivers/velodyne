@@ -53,26 +53,29 @@
 #ifndef VELODYNE_DRIVER_INPUT_H
 #define VELODYNE_DRIVER_INPUT_H
 
+#include <memory>
+#include <string>
+
 #include <unistd.h>
 #include <stdio.h>
 #include <pcap.h>
 #include <netinet/in.h>
-#include <string>
 
-#include <ros/ros.h>
-#include <velodyne_msgs/VelodynePacket.h>
+#include <rclcpp/rclcpp.hpp>
+
+#include <velodyne_msgs/msg/velodyne_packet.hpp>
+#include <velodyne_msgs/msg/velodyne_scan.hpp>
 
 namespace velodyne_driver
 {
 
 static uint16_t DATA_PORT_NUMBER = 2368;      // default data port
-static uint16_t POSITION_PORT_NUMBER = 8308;  // default position port
 
 /** @brief Velodyne input base class */
 class Input
 {
 public:
-  Input(ros::NodeHandle private_nh, uint16_t port);
+  Input(rclcpp::Node * private_nh, uint16_t port);
   virtual ~Input() {}
 
   /** @brief Read one Velodyne packet.
@@ -83,11 +86,11 @@ public:
    *          -1 if end of file
    *          > 0 if incomplete packet (is this possible?)
    */
-  virtual int getPacket(velodyne_msgs::VelodynePacket *pkt,
+  virtual int getPacket(velodyne_msgs::msg::VelodynePacket *pkt,
                         const double time_offset) = 0;
 
 protected:
-  ros::NodeHandle private_nh_;
+  rclcpp::Node * private_nh_;
   uint16_t port_;
   std::string devip_str_;
   bool gps_time_;
@@ -97,11 +100,11 @@ protected:
 class InputSocket: public Input
 {
 public:
-  InputSocket(ros::NodeHandle private_nh,
+  InputSocket(rclcpp::Node * private_nh,
               uint16_t port = DATA_PORT_NUMBER);
   virtual ~InputSocket();
 
-  virtual int getPacket(velodyne_msgs::VelodynePacket *pkt,
+  virtual int getPacket(velodyne_msgs::msg::VelodynePacket *pkt,
                         const double time_offset);
   void setDeviceIP(const std::string& ip);
 
@@ -119,21 +122,18 @@ private:
 class InputPCAP: public Input
 {
 public:
-  InputPCAP(ros::NodeHandle private_nh,
+  InputPCAP(rclcpp::Node * private_nh,
             uint16_t port = DATA_PORT_NUMBER,
             double packet_rate = 0.0,
-            std::string filename = "",
-            bool read_once = false,
-            bool read_fast = false,
-            double repeat_delay = 0.0);
+            std::string filename = "");
   virtual ~InputPCAP();
 
-  virtual int getPacket(velodyne_msgs::VelodynePacket *pkt,
+  virtual int getPacket(velodyne_msgs::msg::VelodynePacket *pkt,
                         const double time_offset);
   void setDeviceIP(const std::string& ip);
 
 private:
-  ros::Rate packet_rate_;
+  rclcpp::Rate packet_rate_;
   std::string filename_;
   pcap_t *pcap_;
   bpf_program pcap_packet_filter_;

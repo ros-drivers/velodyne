@@ -35,23 +35,19 @@
  *  ROS driver node for the Velodyne 3D LIDARs.
  */
 
-#include <ros/ros.h>
+#include <rclcpp/rclcpp.hpp>
 #include "velodyne_driver/driver.h"
 
 int main(int argc, char** argv)
 {
-  ros::init(argc, argv, "velodyne_node");
-  ros::NodeHandle node;
-  ros::NodeHandle private_nh("~");
+  // Force flush of the stdout buffer.
+  setvbuf(stdout, NULL, _IONBF, BUFSIZ);
 
-  // start the driver
-  velodyne_driver::VelodyneDriver dvr(node, private_nh);
+  rclcpp::init(argc, argv);
 
-  // loop until shut down or end of file
-  while(ros::ok() && dvr.poll())
-    {
-      ros::spinOnce();
-    }
+  rclcpp::spin(std::make_shared<velodyne_driver::VelodyneDriver>());
+
+  rclcpp::shutdown();
 
   return 0;
 }
