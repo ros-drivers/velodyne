@@ -31,17 +31,17 @@
 // POSSIBILITY OF SUCH DAMAGE.
 
 #include "velodyne_driver/time_conversion.hpp"
-#include <ros/time.h>
+#include <rclcpp/rclcpp.hpp>
 #include <gtest/gtest.h>
 
 TEST(TimeConversion, BytesToTimestamp)
 {
-  ros::Time::init();
-  ros::Time ros_stamp = ros::Time::now();
+  auto clock_ = std::make_shared<rclcpp::Clock>();
+  auto ros_stamp = clock_->now();
 
   // get the seconds past the hour and multiply by 1million to convert to microseconds
   // divide nanoseconds by 1000 to convert to microseconds
-  uint32_t since_the_hour = ((ros_stamp.sec % 3600) * 1000000) + ros_stamp.nsec / 1000;
+  uint32_t since_the_hour = (((int)ros_stamp.seconds() % 3600) * 1000000) + ros_stamp.nanoseconds() / 1000;
 
   uint8_t native_format[4];
   native_format[0] = 0xFF & since_the_hour;
@@ -49,10 +49,10 @@ TEST(TimeConversion, BytesToTimestamp)
   native_format[2] = 0xFF & (((uint32_t)since_the_hour) >> 16);
   native_format[3] = 0xFF & (((uint32_t)since_the_hour) >> 24);
 
-  ros::Time ros_stamp_converted = rosTimeFromGpsTimestamp(native_format);
+  rclcpp::Time ros_stamp_converted = rosTimeFromGpsTimestamp(native_format);
 
-  ASSERT_EQ(ros_stamp_converted.sec, ros_stamp.sec);
-  ASSERT_NEAR(ros_stamp_converted.nsec, ros_stamp.nsec, 1000);
+  ASSERT_EQ(ros_stamp_converted.seconds(), ros_stamp.seconds());
+  ASSERT_NEAR(ros_stamp_converted.nanoseconds(), ros_stamp.nanoseconds(), 1000);
 }
 
 int main(int argc, char **argv)

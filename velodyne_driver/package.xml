@@ -1,39 +1,52 @@
 <?xml version="1.0"?>
 <package format="2">
-  <name>velodyne_driver</name>
-  <version>1.5.2</version>
-  <description>
-    ROS device driver for Velodyne 3D LIDARs.
-  </description>
-  <maintainer email="jwhitley@autonomoustuff.com">Josh Whitley</maintainer>
-  <maintainer email="brice.rebsamen@gmail.com">Brice Rebsamen</maintainer>
-  <author>Jack O'Quin</author>
-  <author>Patrick Beeson</author>
-  <author>Michael Quinlan</author>
-  <author>Yaxin Liu </author>
-  <license>BSD</license>
+    <name>velodyne_driver</name>
+    <version>1.5.2</version>
+    <description>
+        ROS device driver for Velodyne 3D LIDARs.
+    </description>
+    <maintainer email="jwhitley@autonomoustuff.com">Josh Whitley</maintainer>
+    <maintainer email="brice.rebsamen@gmail.com">Brice Rebsamen</maintainer>
+    <author>Jack O'Quin</author>
+    <author>Patrick Beeson</author>
+    <author>Michael Quinlan</author>
+    <author>Yaxin Liu </author>
+    <license>BSD</license>
+    
+    <url type="website">http://www.ros.org/wiki/velodyne_driver</url>
+    <url type="repository">https://github.com/ros-drivers/velodyne</url>
+    <url type="bugtracker">https://github.com/ros-drivers/velodyne/issues</url>
 
-  <url type="website">http://www.ros.org/wiki/velodyne_driver</url>
-  <url type="repository">https://github.com/ros-drivers/velodyne</url>
-  <url type="bugtracker">https://github.com/ros-drivers/velodyne/issues</url>
-
-  <buildtool_depend>catkin</buildtool_depend>
-
-  <build_depend>roslint</build_depend>
-
-  <depend>diagnostic_updater</depend>
-  <depend>dynamic_reconfigure</depend>
-  <depend>libpcap</depend>
-  <depend>nodelet</depend>
-  <depend>pluginlib</depend>
-  <depend>roscpp</depend>
-  <depend>tf</depend>
-  <depend>velodyne_msgs</depend>
-
-  <test_depend>roslaunch</test_depend>
-  <test_depend>rostest</test_depend>
-
-  <export>
-    <nodelet plugin="${prefix}/nodelet_velodyne.xml"/>
-  </export>
+    
+    <buildtool_depend>ament_cmake</buildtool_depend>
+    
+    <build_depend>rclcpp</build_depend>
+    <build_depend>rmw_implementation</build_depend>
+    <build_depend>diagnostic_updater</build_depend>
+    <build_depend>libpcap</build_depend>
+    <build_depend>pluginlib</build_depend>
+    <build_depend>console_bridge</build_depend>
+    <build_depend>tf2</build_depend>
+    <build_depend>velodyne_msgs</build_depend>
+    <build_depend>diagnostic_msgs</build_depend>
+    
+    <exec_depend>rclcpp</exec_depend>
+    <exec_depend>rmw_implementation</exec_depend>
+    <exec_depend>diagnostic_updater</exec_depend>
+    <exec_depend>libpcap</exec_depend>
+    <exec_depend>pluginlib</exec_depend>
+    <exec_depend>console_bridge</exec_depend>
+    <exec_depend>tf2</exec_depend>
+    <exec_depend>velodyne_msgs</exec_depend>
+    <exec_depend>diagnostic_msgs</exec_depend>
+    
+    <test_depend>ament_lint_auto</test_depend>
+    <test_depend>ament_lint_common</test_depend>
+    
+    <export>
+        <build_type>ament_cmake</build_type>
+    </export>
+    
 </package>
+
+

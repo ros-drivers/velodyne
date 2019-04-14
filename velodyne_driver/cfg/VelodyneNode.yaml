@@ -1,0 +1,12 @@
+velodyne_node:
+    ros__parameters:
+      frame_id: velodyne
+      model: 64E
+      port: 2368
+      read_fast: false
+      read_once: false
+      repeat_delay: 0.0
+      rpm: 600.0
+      gps_time: false
+      cut_angle: -0.01
+      time_offset: 0.0

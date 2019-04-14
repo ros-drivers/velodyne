@@ -38,26 +38,24 @@
 #include <string>
 #include <cmath>
 
-#include <ros/ros.h>
-#include <tf/transform_listener.h>
-#include <velodyne_msgs/VelodyneScan.h>
+#include <rclcpp/rclcpp.hpp>
+#include <tf2_ros/transform_listener.h>
+#include <velodyne_msgs/msg/velodyne_scan.hpp>
 
 #include "velodyne_driver/driver.h"
+
+using namespace std::chrono_literals;
 
 namespace velodyne_driver
 {
 
-VelodyneDriver::VelodyneDriver(ros::NodeHandle node,
-                               ros::NodeHandle private_nh)
+VelodyneDriver::VelodyneDriver() : rclcpp::Node("velodyne_node")
 {
   // use private node handle to get parameters
-  private_nh.param("frame_id", config_.frame_id, std::string("velodyne"));
-  std::string tf_prefix = tf::getPrefixParam(private_nh);
-  ROS_DEBUG_STREAM("tf_prefix: " << tf_prefix);
-  config_.frame_id = tf::resolve(tf_prefix, config_.frame_id);
+  this->get_parameter_or("frame_id", config_.frame_id, std::string("velodyne"));
 
   // get model name, validate string, determine packet rate
-  private_nh.param("model", config_.model, std::string("64E"));
+  this->get_parameter_or("model", config_.model, std::string("64E"));
   double packet_rate;                   // packet frequency (Hz)
   std::string model_full_name;
   if ((config_.model == "64E_S2") || 
@@ -93,63 +91,55 @@ VelodyneDriver::VelodyneDriver(ros::NodeHandle node,
     }
   else
     {
-      ROS_ERROR_STREAM("unknown Velodyne LIDAR model: " << config_.model);
+      RCLCPP_ERROR(this->get_logger(), "unknown Velodyne LIDAR model: " + config_.model);
       packet_rate = 2600.0;
     }
   std::string deviceName(std::string("Velodyne ") + model_full_name);
 
-  private_nh.param("rpm", config_.rpm, 600.0);
-  ROS_INFO_STREAM(deviceName << " rotating at " << config_.rpm << " RPM");
+  this->get_parameter_or("rpm", config_.rpm, 600.0);
+  RCLCPP_INFO(this->get_logger(), deviceName + " rotating at " + std::to_string(config_.rpm) + " RPM");
   double frequency = (config_.rpm / 60.0);     // expected Hz rate
 
   // default number of packets for each scan is a single revolution
   // (fractions rounded up)
   config_.npackets = (int) ceil(packet_rate / frequency);
-  private_nh.getParam("npackets", config_.npackets);
-  ROS_INFO_STREAM("publishing " << config_.npackets << " packets per scan");
+  this->get_parameter("npackets", config_.npackets);
+  RCLCPP_INFO(this->get_logger(), "publishing " + std::to_string(config_.npackets) + " packets per scan");
 
   std::string dump_file;
-  private_nh.param("pcap", dump_file, std::string(""));
+  this->get_parameter_or("pcap", dump_file, std::string(""));
 
   double cut_angle;
-  private_nh.param("cut_angle", cut_angle, -0.01);
+  this->get_parameter_or("cut_angle", cut_angle, -0.01);
   if (cut_angle < 0.0)
   {
-    ROS_INFO_STREAM("Cut at specific angle feature deactivated.");
+    RCLCPP_INFO(this->get_logger(), "Cut at specific angle feature deactivated.");
   }
   else if (cut_angle < (2*M_PI))
   {
-      ROS_INFO_STREAM("Cut at specific angle feature activated. " 
-        "Cutting velodyne points always at " << cut_angle << " rad.");
+      RCLCPP_INFO(this->get_logger(), "Cut at specific angle feature activated. "
+            "Cutting velodyne points always at " + std::to_string(cut_angle) + " rad.");
   }
   else
   {
-    ROS_ERROR_STREAM("cut_angle parameter is out of range. Allowed range is "
-    << "between 0.0 and 2*PI or negative values to deactivate this feature.");
+    RCLCPP_ERROR(this->get_logger(),"cut_angle parameter is out of range."
+                 "Allowed range is between 0.0 and 2*PI or negative values to deactivate this feature.");
     cut_angle = -0.01;
   }
-
-  // Convert cut_angle from radian to one-hundredth degree, 
+  
+  // Convert cut_angle from radian to one-hundredth degree,
   // which is used in velodyne packets
   config_.cut_angle = int((cut_angle*360/(2*M_PI))*100);
 
   int udp_port;
-  private_nh.param("port", udp_port, (int) DATA_PORT_NUMBER);
-
-  // Initialize dynamic reconfigure
-  srv_ = boost::make_shared <dynamic_reconfigure::Server<velodyne_driver::
-    VelodyneNodeConfig> > (private_nh);
-  dynamic_reconfigure::Server<velodyne_driver::VelodyneNodeConfig>::
-    CallbackType f;
-  f = boost::bind (&VelodyneDriver::callback, this, _1, _2);
-  srv_->setCallback (f); // Set callback function und call initially
-
+  this->get_parameter_or("port", udp_port, (int) DATA_PORT_NUMBER);
+  
   // initialize diagnostics
   diagnostics_.setHardwareID(deviceName);
   const double diag_freq = packet_rate/config_.npackets;
   diag_max_freq_ = diag_freq;
   diag_min_freq_ = diag_freq;
-  ROS_INFO("expected frequency: %.3f (Hz)", diag_freq);
+  RCLCPP_INFO(this->get_logger(), "expected frequency: %.3f (Hz)", diag_freq);
 
   using namespace diagnostic_updater;
   diag_topic_.reset(new TopicDiagnostic("velodyne_packets", diagnostics_,
@@ -157,24 +147,24 @@ VelodyneDriver::VelodyneDriver(ros::NodeHandle node,
                                                              &diag_max_freq_,
                                                              0.1, 10),
                                         TimeStampStatusParam()));
-  diag_timer_ = private_nh.createTimer(ros::Duration(0.2), &VelodyneDriver::diagTimerCallback,this);
-
+  diag_timer_  = this->create_wall_timer(200ms, std::bind(&VelodyneDriver::diagTimerCallback, this));
   // open Velodyne input device or file
   if (dump_file != "")                  // have PCAP file?
     {
       // read data from packet capture file
-      input_.reset(new velodyne_driver::InputPCAP(private_nh, udp_port,
+      input_.reset(new velodyne_driver::InputPCAP(this, udp_port,
                                                   packet_rate, dump_file));
     }
   else
     {
+      
       // read data from live socket
-      input_.reset(new velodyne_driver::InputSocket(private_nh, udp_port));
+      input_.reset(new velodyne_driver::InputSocket(this, udp_port));
     }
-
+  
   // raw packet output topic
   output_ =
-    node.advertise<velodyne_msgs::VelodyneScan>("velodyne_packets", 10);
+    this->create_publisher<velodyne_msgs::msg::VelodyneScan>("~/velodyne_packets", 10);
 
   last_azimuth_ = -1;
 }
@@ -185,13 +175,12 @@ VelodyneDriver::VelodyneDriver(ros::NodeHandle node,
  */
 bool VelodyneDriver::poll(void)
 {
-  // Allocate a new shared pointer for zero-copy sharing with other nodelets.
-  velodyne_msgs::VelodyneScanPtr scan(new velodyne_msgs::VelodyneScan);
-
+  // Allocate a new shared pointer for zero-copy sharing with other nodes.
+  std::shared_ptr<velodyne_msgs::msg::VelodyneScan> scan = std::make_shared<velodyne_msgs::msg::VelodyneScan>();
   if( config_.cut_angle >= 0) //Cut at specific angle feature enabled
   {
     scan->packets.reserve(config_.npackets);
-    velodyne_msgs::VelodynePacket tmp_packet;
+    velodyne_msgs::msg::VelodynePacket tmp_packet;
     while(true)
     {
       while(true)
@@ -239,10 +228,10 @@ bool VelodyneDriver::poll(void)
   }
 
   // publish message using time of last packet read
-  ROS_DEBUG("Publishing a full Velodyne scan.");
+  RCLCPP_DEBUG(this->get_logger(), "Publishing a full Velodyne scan.");
   scan->header.stamp = scan->packets.back().stamp;
   scan->header.frame_id = config_.frame_id;
-  output_.publish(scan);
+  output_->publish(scan);
 
   // notify diagnostics that a message has been published, updating
   // its status
@@ -252,18 +241,17 @@ bool VelodyneDriver::poll(void)
   return true;
 }
 
-void VelodyneDriver::callback(velodyne_driver::VelodyneNodeConfig &config,
-              uint32_t level)
+void VelodyneDriver::diagTimerCallback()
 {
-  ROS_INFO("Reconfigure Request");
-  config_.time_offset = config.time_offset;
-}
-
-void VelodyneDriver::diagTimerCallback(const ros::TimerEvent &event)
-{
-  (void)event;
   // Call necessary to provide an error when no velodyne packets are received
   diagnostics_.update();
 }
 
 } // namespace velodyne_driver
+
+//#include "rclcpp_components/register_node_macro.hpp"
+
+// Register the component with class_loader.
+// This acts as a sort of entry point, allowing the component to be discoverable when its library
+// is being loaded into a running process.
+//RCLCPP_COMPONENTS_REGISTER_NODE(VelodyneDriver::VelodyneDriver)

@@ -34,36 +34,31 @@
 #define VELODYNE_DRIVER_DRIVER_H
 
 #include <string>
-#include <ros/ros.h>
-#include <diagnostic_updater/diagnostic_updater.h>
-#include <diagnostic_updater/publisher.h>
-#include <dynamic_reconfigure/server.h>
+#include <cstdio>
+#include <memory>
+
+#include <rclcpp/rclcpp.hpp>
+#include <rcutils/error_handling.h>
+
+#include <diagnostic_updater/diagnostic_updater.hpp>
+#include <diagnostic_updater/publisher.hpp>
 
 #include <velodyne_driver/input.h>
-#include <velodyne_driver/VelodyneNodeConfig.h>
 
 namespace velodyne_driver
 {
 
-class VelodyneDriver
+class VelodyneDriver : public rclcpp::Node
 {
-public:
-  VelodyneDriver(ros::NodeHandle node,
-                 ros::NodeHandle private_nh);
+public :
+  VelodyneDriver();
   ~VelodyneDriver() {}
 
   bool poll(void);
 
 private:
-  // Callback for dynamic reconfigure
-  void callback(velodyne_driver::VelodyneNodeConfig &config,
-              uint32_t level);
   // Callback for diagnostics update for lost communication with vlp
-  void diagTimerCallback(const ros::TimerEvent&event);
-
-  // Pointer to dynamic reconfigure service srv_
-  boost::shared_ptr<dynamic_reconfigure::Server<velodyne_driver::
-              VelodyneNodeConfig> > srv_;
+  void diagTimerCallback();
 
   // configuration parameters
   struct
@@ -77,16 +72,17 @@ private:
   }
   config_;
 
-  boost::shared_ptr<Input> input_;
-  ros::Publisher output_;
+  std::shared_ptr<Input> input_;
+  /* use std::shared_ptr or ::SharedPtr? */
+  rclcpp::Publisher<velodyne_msgs::msg::VelodyneScan>::SharedPtr output_;
   int last_azimuth_;
 
   /* diagnostics updater */
-  ros::Timer diag_timer_;
+  rclcpp::TimerBase::SharedPtr diag_timer_;
   diagnostic_updater::Updater diagnostics_;
   double diag_min_freq_;
   double diag_max_freq_;
-  boost::shared_ptr<diagnostic_updater::TopicDiagnostic> diag_topic_;
+  std::shared_ptr<diagnostic_updater::TopicDiagnostic> diag_topic_;
 };
 
 }  // namespace velodyne_driver

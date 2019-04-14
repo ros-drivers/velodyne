@@ -1,4 +1,5 @@
 <?xml version="1.0"?>
+<?xml-model href="http://download.ros.org/schema/package_format2.xsd" schematypens="http://www.w3.org/2001/XMLSchema"?>
 <package format="2">
   <name>velodyne</name>
   <version>1.5.2</version>
@@ -12,7 +13,7 @@
   <url type="repository">https://github.com/ros-drivers/velodyne</url>
   <url type="bugtracker">https://github.com/ros-drivers/velodyne/issues</url>
 
-  <buildtool_depend>catkin</buildtool_depend>
+  <buildtool_depend>ament_cmake</buildtool_depend>
 
   <exec_depend>velodyne_driver</exec_depend>
   <exec_depend>velodyne_laserscan</exec_depend>
@@ -20,6 +21,6 @@
   <exec_depend>velodyne_pointcloud</exec_depend>
 
   <export>
-    <metapackage/>
+    <build_type>ament_cmake</build_type>
   </export>
 </package>
