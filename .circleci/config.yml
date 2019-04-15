@@ -10,6 +10,7 @@ jobs:
           command: |
             apt update -qq
             source `find /opt/ros -maxdepth 2 -name setup.bash | sort | head -1`
+            git clone https://github.com/ros/diagnostics -b ros2-devel
             rosdep install --from-paths . --ignore-src -y
       - run:
           name: Build
