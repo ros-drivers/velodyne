@@ -25,7 +25,7 @@ jobs:
             colcon test-result
     working_directory: ~/src
     environment:
-      - MAKEFLAGS: -j4
+      - MAKEFLAGS: -j4 
 
 workflows:
   version: 2
