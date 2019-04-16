@@ -75,7 +75,7 @@ static uint16_t POSITION_PORT_NUMBER = 8308;  // default position port
 class Input
 {
 public:
-  Input(rclcpp::Node * private_nh, uint16_t port);
+  Input(std::shared_ptr<rclcpp::Node> private_nh, uint16_t port);
   virtual ~Input() {}
 
   /** @brief Read one Velodyne packet.
@@ -90,7 +90,7 @@ public:
                         const double time_offset) = 0;
 
 protected:
-  rclcpp::Node * private_nh_;
+  std::shared_ptr<rclcpp::Node> private_nh_;
   uint16_t port_;
   std::string devip_str_;
   bool gps_time_;
@@ -100,7 +100,7 @@ protected:
 class InputSocket: public Input
 {
 public:
-  InputSocket(rclcpp::Node * private_nh,
+  InputSocket(std::shared_ptr<rclcpp::Node> private_nh,
               uint16_t port = DATA_PORT_NUMBER);
   virtual ~InputSocket();
 
@@ -122,7 +122,7 @@ private:
 class InputPCAP: public Input
 {
 public:
-  InputPCAP(rclcpp::Node * private_nh,
+  InputPCAP(std::shared_ptr<rclcpp::Node> private_nh,
             uint16_t port = DATA_PORT_NUMBER,
             double packet_rate = 0.0,
             std::string filename = "",

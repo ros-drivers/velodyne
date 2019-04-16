@@ -97,7 +97,7 @@ VelodyneDriver::VelodyneDriver() : rclcpp::Node("velodyne_node")
   std::string deviceName(std::string("Velodyne ") + model_full_name);
 
   this->get_parameter_or("rpm", config_.rpm, 600.0);
-  RCLCPP_INFO(this->get_logger(), deviceName + " rotating at " + std::to_string(config_.rpm) + " RPM");
+  RCLCPP_INFO(this->get_logger(), "%s rotating at %d RPM", deviceName.c_str(), config_.rpm);
   double frequency = (config_.rpm / 60.0);     // expected Hz rate
 
   // default number of packets for each scan is a single revolution
@@ -152,14 +152,14 @@ VelodyneDriver::VelodyneDriver() : rclcpp::Node("velodyne_node")
   if (dump_file != "")                  // have PCAP file?
     {
       // read data from packet capture file
-      input_.reset(new velodyne_driver::InputPCAP(this, udp_port,
+      input_.reset(new velodyne_driver::InputPCAP(shared_from_this() , udp_port,
                                                   packet_rate, dump_file));
     }
   else
     {
       
       // read data from live socket
-      input_.reset(new velodyne_driver::InputSocket(this, udp_port));
+      input_.reset(new velodyne_driver::InputSocket(shared_from_this() , udp_port));
     }
   
   // raw packet output topic

@@ -1,5 +1,6 @@
 <?xml version="1.0"?>
-<package format="2">
+<?xml-model href="http://download.ros.org/schema/package_format3.xsd" schematypens="http://www.w3.org/2001/XMLSchema"?>
+<package format="3">
     <name>velodyne_driver</name>
     <version>1.5.2</version>
     <description>
@@ -10,7 +11,9 @@
     <author>Jack O'Quin</author>
     <author>Patrick Beeson</author>
     <author>Michael Quinlan</author>
-    <author>Yaxin Liu </author>
+    <author>Yaxin Liu</author>
+    <author>Andreas Klintberg</author>
+
     <license>BSD</license>
     
     <url type="website">http://www.ros.org/wiki/velodyne_driver</url>
@@ -19,26 +22,18 @@
 
     
     <buildtool_depend>ament_cmake</buildtool_depend>
+  
     
-    <build_depend>rclcpp</build_depend>
-    <build_depend>rmw_implementation</build_depend>
-    <build_depend>diagnostic_updater</build_depend>
-    <build_depend>libpcap</build_depend>
-    <build_depend>pluginlib</build_depend>
-    <build_depend>libconsole-bridge-dev</build_depend>
-    <build_depend>tf2</build_depend>
-    <build_depend>velodyne_msgs</build_depend>
-    <build_depend>diagnostic_msgs</build_depend>
+    <depend>rclcpp</depend>
+    <depend>rmw_implementation</depend>
+    <depend>diagnostic_updater</depend>
+    <depend>libpcap</depend>
+    <depend>pluginlib</depend>
+    <depend>console_bridge</depend>
+    <depend>tf2</depend>
+    <depend>velodyne_msgs</depend>
+    <depend>diagnostic_msgs</depend>
     
-    <exec_depend>rclcpp</exec_depend>
-    <exec_depend>rmw_implementation</exec_depend>
-    <exec_depend>diagnostic_updater</exec_depend>
-    <exec_depend>libpcap</exec_depend>
-    <exec_depend>pluginlib</exec_depend>
-    <exec_depend>libconsole-bridge-dev</exec_depend>
-    <exec_depend>tf2</exec_depend>
-    <exec_depend>velodyne_msgs</exec_depend>
-    <exec_depend>diagnostic_msgs</exec_depend>
     
     <test_depend>ament_lint_auto</test_depend>
     <test_depend>ament_lint_common</test_depend>
