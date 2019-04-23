@@ -188,48 +188,10 @@ bool GpsImuDriver::handlePacket(velodyne_packet_structs::VelodynePositioningPack
 
   nmea_msgs::Sentence nmea_sentence_msg;
   std::string nmea_sentence(vppr.nmea_sentence);
-
-  /* This section re-constructs the timestamp of the packet based on the
-   * GPS NMEA time and the packet's microsecond counter.  The microsecond counter
-   * contains the time from the beginning of the GPS hour, so to reconstruct the
-   * packet's scan time, the counter value needs to be added to the time of the 
-   * beginning of the hour.
-   */
-  // Find the current hour using the NMEA sentence from the Velodyne sensor message
-  uint32_t nmeaHourUnixTime = nmeaHourToUnixTime(nmea_sentence);
-  if(nmeaHourUnixTime == -1){
-      return false;
-  }
-  // If the time is un-initialized, or if the seconds counter in the counter is 
-  // greater than 2, set the hour time (the 2 second delay allows for the NMEA
-  // string to be updated as it is delayed by several hundred milliseconds
-  // from the GPS PPS event)
-  if (hour_time_ == 0 || vpp.gps_timestamp > 2.0) {
-      hour_time_ = (double)nmeaHourUnixTime;
-  }
-  // The seconds counter has rolled over - increment the hour. 
-  else if (vppr.gps_timestamp < last_gps_timestamp_) {
-      hour_time_ += 3600;
-  }
-  last_gps_timestamp_ = vppr.gps_timestamp;
-
+  
   // Publish all topics with the same ROS time stamp.
   ros::Time topic_publish_time = ros::Time::now();
-  // === Time Reference Message ===
-  // Set the TimeReference time_ref with the re-constructed sensor time
-  double sensor_scan_time = (double)hour_time_ + vpp.gps_timestamp ;
-  sensor_msgs::TimeReference gpstime_msg;
-  gpstime_msg.header.stamp = topic_publish_time;
-  gpstime_msg.time_ref = ros::Time(sensor_scan_time);
-  gpstime_msg.source = std::string("Sensor On-Board Clock");
-  gpstime_pub.publish(gpstime_msg);
-
-  // === NMEA Sentence ===
-  nmea_sentence = nmea_sentence.substr(0,nmea_sentence.length()-2);
-  nmea_sentence_msg.sentence = nmea_sentence;
-  nmea_sentence_msg.header.stamp = topic_publish_time;
-  nmea_pub.publish(nmea_sentence_msg);
-
+  
   // === IMU Message ===
   sensor_msgs::Imu imumsg;
   imumsg.header.frame_id="/velodyne:"+devip_;
@@ -256,6 +218,45 @@ bool GpsImuDriver::handlePacket(velodyne_packet_structs::VelodynePositioningPack
     tmpmsg.temperature = vpp.gyro_temp_accel_xyz[i].temp;
     temperature_pub.publish(tmpmsg);
   }
+
+  /* This section re-constructs the timestamp of the packet based on the
+   * GPS NMEA time and the packet's microsecond counter.  The microsecond counter
+   * contains the time from the beginning of the GPS hour, so to reconstruct the
+   * packet's scan time, the counter value needs to be added to the time of the 
+   * beginning of the hour.
+   */
+  // Find the current hour using the NMEA sentence from the Velodyne sensor message
+  uint32_t nmeaHourUnixTime = nmeaHourToUnixTime(nmea_sentence);
+  if(nmeaHourUnixTime == -1){
+      return false;
+  }
+  // If the time is un-initialized, or if the seconds counter in the counter is 
+  // greater than 2, set the hour time (the 2 second delay allows for the NMEA
+  // string to be updated as it is delayed by several hundred milliseconds
+  // from the GPS PPS event)
+  if (hour_time_ == 0 || vpp.gps_timestamp > 2.0) {
+      hour_time_ = (double)nmeaHourUnixTime;
+  }
+  // The seconds counter has rolled over - increment the hour. 
+  else if (vppr.gps_timestamp < last_gps_timestamp_) {
+      hour_time_ += 3600;
+  }
+  last_gps_timestamp_ = vppr.gps_timestamp;
+
+  // === Time Reference Message ===
+  // Set the TimeReference time_ref with the re-constructed sensor time
+  double sensor_scan_time = (double)hour_time_ + vpp.gps_timestamp ;
+  sensor_msgs::TimeReference gpstime_msg;
+  gpstime_msg.header.stamp = topic_publish_time;
+  gpstime_msg.time_ref = ros::Time(sensor_scan_time);
+  gpstime_msg.source = std::string("Sensor On-Board Clock");
+  gpstime_pub.publish(gpstime_msg);
+
+  // === NMEA Sentence ===
+  nmea_sentence = nmea_sentence.substr(0,nmea_sentence.length()-2);
+  nmea_sentence_msg.sentence = nmea_sentence;
+  nmea_sentence_msg.header.stamp = topic_publish_time;
+  nmea_pub.publish(nmea_sentence_msg);
 }
 
 //-----------------------------------------------------------------------------
