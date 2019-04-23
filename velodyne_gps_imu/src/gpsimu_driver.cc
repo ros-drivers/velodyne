@@ -196,13 +196,16 @@ bool GpsImuDriver::handlePacket(velodyne_packet_structs::VelodynePositioningPack
    * beginning of the hour.
    */
   // Find the current hour using the NMEA sentence from the Velodyne sensor message
-  double nmeaHourUnixTime = nmeaHourToUnixTime(nmea_sentence);
+  uint32_t nmeaHourUnixTime = nmeaHourToUnixTime(nmea_sentence);
+  if(nmeaHourUnixTime == -1){
+      return false;
+  }
   // If the time is un-initialized, or if the seconds counter in the counter is 
   // greater than 2, set the hour time (the 2 second delay allows for the NMEA
   // string to be updated as it is delayed by several hundred milliseconds
   // from the GPS PPS event)
   if (hour_time_ == 0 || vpp.gps_timestamp > 2.0) {
-      hour_time_ = nmeaHourUnixTime;
+      hour_time_ = (double)nmeaHourUnixTime;
   }
   // The seconds counter has rolled over - increment the hour. 
   else if (vppr.gps_timestamp < last_gps_timestamp_) {
