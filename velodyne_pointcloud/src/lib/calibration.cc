@@ -89,7 +89,7 @@ namespace velodyne_pointcloud
     const YAML::Node * max_intensity_node = NULL;
 #ifdef HAVE_NEW_YAMLCPP
     if (node[MAX_INTENSITY]) {
-      const YAML::Node max_intensity_node_ref = node[MAX_INTENSITY];
+      const YAML::Node &max_intensity_node_ref = node[MAX_INTENSITY];
       max_intensity_node = &max_intensity_node_ref;
     }
 #else
@@ -108,7 +108,7 @@ namespace velodyne_pointcloud
     const YAML::Node * min_intensity_node = NULL;
 #ifdef HAVE_NEW_YAMLCPP
     if (node[MIN_INTENSITY]) {
-      const YAML::Node min_intensity_node_ref = node[MIN_INTENSITY];
+      const YAML::Node &min_intensity_node_ref = node[MIN_INTENSITY];
       min_intensity_node = &min_intensity_node_ref;
     }
 #else
