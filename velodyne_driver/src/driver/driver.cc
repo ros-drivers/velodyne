@@ -159,6 +159,8 @@ VelodyneDriver::VelodyneDriver(ros::NodeHandle node,
                                         TimeStampStatusParam()));
   diag_timer_ = private_nh.createTimer(ros::Duration(0.2), &VelodyneDriver::diagTimerCallback,this);
 
+  config_.enabled = true;
+
   // open Velodyne input device or file
   if (dump_file != "")                  // have PCAP file?
     {
@@ -185,6 +187,13 @@ VelodyneDriver::VelodyneDriver(ros::NodeHandle node,
  */
 bool VelodyneDriver::poll(void)
 {
+  if (!config_.enabled) {
+    // If we are not enabled exit once a second to let the caller handle
+    // anything it might need to, such as if it needs to exit.
+    ros::Duration(1).sleep();
+    return true;
+  }
+
   // Allocate a new shared pointer for zero-copy sharing with other nodelets.
   velodyne_msgs::VelodyneScanPtr scan(new velodyne_msgs::VelodyneScan);
 
@@ -256,7 +265,14 @@ void VelodyneDriver::callback(velodyne_driver::VelodyneNodeConfig &config,
               uint32_t level)
 {
   ROS_INFO("Reconfigure Request");
-  config_.time_offset = config.time_offset;
+  if (level & 1)
+  {
+    config_.time_offset = config.time_offset;
+  }
+  if (level & 2)
+  {
+    config_.enabled = config.enabled;
+  }
 }
 
 void VelodyneDriver::diagTimerCallback(const ros::TimerEvent &event)
