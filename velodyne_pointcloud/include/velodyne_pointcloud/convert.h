@@ -39,6 +39,8 @@
 #ifndef VELODYNE_POINTCLOUD_CONVERT_H
 #define VELODYNE_POINTCLOUD_CONVERT_H
 
+#include <string>
+
 #include <ros/ros.h>
 #include <diagnostic_updater/diagnostic_updater.h>
 #include <diagnostic_updater/publisher.h>
@@ -54,20 +56,15 @@ namespace velodyne_pointcloud
 class Convert
 {
   public:
-
     Convert(ros::NodeHandle node, ros::NodeHandle private_nh);
     ~Convert() {}
 
   private:
-    
-    void callback(velodyne_pointcloud::CloudNodeConfig &config,
-                uint32_t level);
+    void callback(velodyne_pointcloud::CloudNodeConfig &config, uint32_t level);
     void processScan(const velodyne_msgs::VelodyneScan::ConstPtr &scanMsg);
 
-    ///Pointer to dynamic reconfigure service srv_
-    boost::shared_ptr<dynamic_reconfigure::Server<velodyne_pointcloud::
-      CloudNodeConfig> > srv_;
-    
+    boost::shared_ptr<dynamic_reconfigure::Server<velodyne_pointcloud::CloudNodeConfig> > srv_;
+
     boost::shared_ptr<velodyne_rawdata::RawData> data_;
     ros::Subscriber velodyne_scan_;
     ros::Publisher output_;
@@ -77,7 +74,8 @@ class Convert
     boost::mutex reconfigure_mtx_;
 
     /// configuration parameters
-    typedef struct {
+    typedef struct
+    {
       std::string target_frame;      ///< target frame
       std::string fixed_frame;       ///< fixed frame
       bool organize_cloud;           ///< enable/disable organized cloud structure
@@ -85,7 +83,8 @@ class Convert
       double min_range;              ///< minimum range to publish
       uint16_t num_lasers;           ///< number of lasers
       int npackets;                  ///< number of packets to combine
-    } Config;
+    }
+    Config;
     Config config_;
     bool first_rcfg_call;
 

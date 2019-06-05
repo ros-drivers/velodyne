@@ -1,5 +1,5 @@
-// Copyright (C) 2009, 2010, 2011, 2012, 2019 Austin Robot Technology, Jack O'Quin, Jesse Vera, Joshua Whitley, Sebastian Pütz
-// All rights reserved.
+// Copyright (C) 2009, 2010, 2011, 2012, 2019 Austin Robot Technology, Jack O'Quin, Jesse Vera, Joshua Whitley,
+// Sebastian Pütz All rights reserved.
 //
 // Software License Agreement (BSD License 2.0)
 //
@@ -40,6 +40,7 @@
 #ifndef VELODYNE_POINTCLOUD_TRANSFORM_H
 #define VELODYNE_POINTCLOUD_TRANSFORM_H
 
+#include <string>
 #include <ros/ros.h>
 #include "tf/message_filter.h"
 #include "message_filters/subscriber.h"
@@ -61,17 +62,16 @@ class Transform
 {
 public:
   Transform(ros::NodeHandle node, ros::NodeHandle private_nh);
-  ~Transform() {}
+  ~Transform()
+  {
+  }
 
 private:
-  void processScan(const velodyne_msgs::VelodyneScan::ConstPtr &scanMsg);
+  void processScan(const velodyne_msgs::VelodyneScan::ConstPtr& scanMsg);
 
   // Pointer to dynamic reconfigure service srv_
-  boost::shared_ptr<dynamic_reconfigure::Server<velodyne_pointcloud::
-    TransformNodeConfig>> srv_;
-  void reconfigure_callback(
-    velodyne_pointcloud::TransformNodeConfig &config,
-    uint32_t level);
+  boost::shared_ptr<dynamic_reconfigure::Server<velodyne_pointcloud::TransformNodeConfig>> srv_;
+  void reconfigure_callback(velodyne_pointcloud::TransformNodeConfig& config, uint32_t level);
 
   const std::string tf_prefix_;
   boost::shared_ptr<velodyne_rawdata::RawData> data_;
@@ -81,13 +81,14 @@ private:
   boost::shared_ptr<tf::TransformListener> tf_ptr_;
 
   /// configuration parameters
-  typedef struct {
-    std::string target_frame;      ///< target frame
-    std::string fixed_frame;       ///< fixed frame
-    bool organize_cloud;           ///< enable/disable organized cloud structure
-    double max_range;              ///< maximum range to publish
-    double min_range;              ///< minimum range to publish
-    uint16_t num_lasers;           ///< number of lasers
+  typedef struct
+  {
+    std::string target_frame;  ///< target frame
+    std::string fixed_frame;   ///< fixed frame
+    bool organize_cloud;       ///< enable/disable organized cloud structure
+    double max_range;          ///< maximum range to publish
+    double min_range;          ///< minimum range to publish
+    uint16_t num_lasers;       ///< number of lasers
   }
   Config;
   Config config_;
