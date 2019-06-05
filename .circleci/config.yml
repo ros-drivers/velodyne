@@ -1,0 +1,108 @@
+version: 2
+jobs:
+  indigo:
+    docker:
+      - image: ros:indigo-perception
+    steps:
+      - checkout
+      - run:
+          name: Set Up Container
+          command: |
+            apt-get update -qq && apt-get install -y python-catkin-tools
+            source `find /opt/ros -name setup.bash | sort | head -1`
+            rosdep install --from-paths . --ignore-src -y
+            cd ..
+            catkin init
+            catkin config --extend /opt/ros/$ROS_DISTRO -j 4 --cmake-args -DCMAKE_BUILD_TYPE=Release
+      - run:
+          name: Build
+          command: |
+            cd ..
+            catkin build --limit-status-rate 0.5
+      - run:
+          name: Lint
+          command: |
+            cd ..
+            catkin build velodyne_driver velodyne_laserscan velodyne_pointcloud --no-deps --make-args roslint
+      - run:
+          name: Run Tests
+          command: |
+            source `find /opt/ros -name setup.bash | sort | head -1`
+            cd ..
+            catkin run_tests --limit-status-rate 0.5
+            catkin_test_results
+    working_directory: ~/src
+
+  kinetic:
+    docker:
+      - image: ros:kinetic-perception
+    steps:
+      - checkout
+      - run:
+          name: Set Up Container
+          command: |
+            apt-get update -qq && apt-get install -y python-catkin-tools
+            source `find /opt/ros -name setup.bash | sort | head -1`
+            rosdep install --from-paths . --ignore-src -y
+            cd ..
+            catkin init
+            catkin config --extend /opt/ros/$ROS_DISTRO -j 4 --cmake-args -DCMAKE_BUILD_TYPE=Release
+      - run:
+          name: Build
+          command: |
+            cd ..
+            catkin build --limit-status-rate 0.5
+      - run:
+          name: Lint
+          command: |
+            cd ..
+            catkin build velodyne_driver velodyne_laserscan velodyne_pointcloud --no-deps --make-args roslint
+      - run:
+          name: Run Tests
+          command: |
+            source `find /opt/ros -name setup.bash | sort | head -1`
+            cd ..
+            catkin run_tests --limit-status-rate 0.5
+            catkin_test_results
+    working_directory: ~/src
+
+  melodic:
+    docker:
+      - image: ros:melodic-perception
+    steps:
+      - checkout
+      - run:
+          name: Set Up Container
+          command: |
+            apt-get update -qq && apt-get install -y python-catkin-tools
+            source `find /opt/ros -name setup.bash | sort | head -1`
+            rosdep install --from-paths . --ignore-src -y
+            cd ..
+            catkin init
+            catkin config --extend /opt/ros/$ROS_DISTRO -j 4 --cmake-args -DCMAKE_BUILD_TYPE=Release
+      - run:
+          name: Build
+          command: |
+            cd ..
+            catkin build --limit-status-rate 0.5
+      - run:
+          name: Lint
+          command: |
+            cd ..
+            catkin build velodyne_driver velodyne_laserscan velodyne_pointcloud --no-deps --make-args roslint
+      - run:
+          name: Run Tests
+          command: |
+            source `find /opt/ros -name setup.bash | sort | head -1`
+            cd ..
+            catkin run_tests --limit-status-rate 0.5
+            catkin_test_results
+    working_directory: ~/src
+
+workflows:
+  version: 2
+  ros_build:
+    jobs:
+      - indigo
+      - kinetic
+      - melodic

@@ -9,12 +9,15 @@
   <author>Jack O'Quin</author>
   <author>Piyush Khandelwal</author>
   <author>Jesse Vera</author>
+  <author>Sebastian Pütz</author>
   <license>BSD</license>
   <url type="website">http://ros.org/wiki/velodyne_pointcloud</url>
   <url type="repository">https://github.com/ros-drivers/velodyne</url>
   <url type="bugtracker">https://github.com/ros-drivers/velodyne/issues</url>
 
   <buildtool_depend>catkin</buildtool_depend>
+
+  <build_depend>roslint</build_depend>
 
   <depend>angles</depend>
   <depend>nodelet</depend>
@@ -26,6 +29,7 @@
   <depend>velodyne_msgs</depend>
   <depend>yaml-cpp</depend>
   <depend>dynamic_reconfigure</depend>
+  <depend>diagnostic_updater</depend>
   <depend>eigen</depend>
 
   <exec_depend>velodyne_laserscan</exec_depend>

@@ -26,7 +26,7 @@
            type="velodyne_pointcloud::TransformNodelet"
            base_class_type="nodelet::Nodelet">
       <description>
-        Transforms packets into /odom frame, publishing multiple packets
+        Transforms packets into /map frame, publishing multiple packets
         as PointCloud2.
       </description>
     </class>

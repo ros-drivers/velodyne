@@ -1,19 +1,37 @@
-/* -*- mode: C++ -*- */
-/*
- *  Copyright (C) 2012 Austin Robot Technology, Jack O'Quin
- * 
- *  License: Modified BSD Software License Agreement
- *
- *  $Id$
- */
+// Copyright (C) 2012 Austin Robot Technology, Jack O'Quin
+// All rights reserved.
+//
+// Software License Agreement (BSD License 2.0)
+//
+// Redistribution and use in source and binary forms, with or without
+// modification, are permitted provided that the following conditions
+// are met:
+//
+//  * Redistributions of source code must retain the above copyright
+//    notice, this list of conditions and the following disclaimer.
+//  * Redistributions in binary form must reproduce the above
+//    copyright notice, this list of conditions and the following
+//    disclaimer in the documentation and/or other materials provided
+//    with the distribution.
+//  * Neither the name of {copyright_holder} nor the names of its
+//    contributors may be used to endorse or promote products derived
+//    from this software without specific prior written permission.
+//
+// THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS
+// "AS IS" AND ANY EXPRESS OR IMPLIED WARRANTIES, INCLUDING, BUT NOT
+// LIMITED TO, THE IMPLIED WARRANTIES OF MERCHANTABILITY AND FITNESS
+// FOR A PARTICULAR PURPOSE ARE DISCLAIMED. IN NO EVENT SHALL THE
+// COPYRIGHT OWNER OR CONTRIBUTORS BE LIABLE FOR ANY DIRECT, INDIRECT,
+// INCIDENTAL, SPECIAL, EXEMPLARY, OR CONSEQUENTIAL DAMAGES (INCLUDING,
+// BUT NOT LIMITED TO, PROCUREMENT OF SUBSTITUTE GOODS OR SERVICES;
+// LOSS OF USE, DATA, OR PROFITS; OR BUSINESS INTERRUPTION) HOWEVER
+// CAUSED AND ON ANY THEORY OF LIABILITY, WHETHER IN CONTRACT, STRICT
+// LIABILITY, OR TORT (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN
+// ANY WAY OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE
+// POSSIBILITY OF SUCH DAMAGE.
 
-/** \file
- *
- *  ROS driver interface for the Velodyne 3D LIDARs
- */
-
-#ifndef _VELODYNE_DRIVER_H_
-#define _VELODYNE_DRIVER_H_ 1
+#ifndef VELODYNE_DRIVER_DRIVER_H
+#define VELODYNE_DRIVER_DRIVER_H
 
 #include <string>
 #include <ros/ros.h>
@@ -30,7 +48,6 @@ namespace velodyne_driver
 class VelodyneDriver
 {
 public:
-
   VelodyneDriver(ros::NodeHandle node,
                  ros::NodeHandle private_nh);
   ~VelodyneDriver() {}
@@ -38,32 +55,34 @@ public:
   bool poll(void);
 
 private:
-
-  ///Callback for dynamic reconfigure
+  // Callback for dynamic reconfigure
   void callback(velodyne_driver::VelodyneNodeConfig &config,
               uint32_t level);
-  /// Callback for diagnostics update for lost communication with vlp
+  // Callback for diagnostics update for lost communication with vlp
   void diagTimerCallback(const ros::TimerEvent&event);
 
-  ///Pointer to dynamic reconfigure service srv_
+  // Pointer to dynamic reconfigure service srv_
   boost::shared_ptr<dynamic_reconfigure::Server<velodyne_driver::
               VelodyneNodeConfig> > srv_;
 
   // configuration parameters
   struct
   {
-    std::string frame_id;            ///< tf frame ID
-    std::string model;               ///< device model name
-    int    npackets;                 ///< number of packets to collect
-    double rpm;                      ///< device rotation rate (RPMs)
-    int cut_angle;                   ///< cutting angle in 1/100°
-    double time_offset;              ///< time in seconds added to each velodyne time stamp
-  } config_;
+    std::string frame_id;            // tf frame ID
+    std::string model;               // device model name
+    int    npackets;                 // number of packets to collect
+    double rpm;                      // device rotation rate (RPMs)
+    int cut_angle;                   // cutting angle in 1/100°
+    double time_offset;              // time in seconds added to each velodyne time stamp
+    bool enabled;                    // polling is enabled
+  }
+  config_;
 
   boost::shared_ptr<Input> input_;
   ros::Publisher output_;
+  int last_azimuth_;
 
-  /** diagnostics updater */
+  /* diagnostics updater */
   ros::Timer diag_timer_;
   diagnostic_updater::Updater diagnostics_;
   double diag_min_freq_;
@@ -71,6 +90,6 @@ private:
   boost::shared_ptr<diagnostic_updater::TopicDiagnostic> diag_topic_;
 };
 
-} // namespace velodyne_driver
+}  // namespace velodyne_driver
 
-#endif // _VELODYNE_DRIVER_H_
+#endif  // VELODYNE_DRIVER_DRIVER_H

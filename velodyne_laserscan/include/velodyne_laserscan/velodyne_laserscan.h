@@ -30,20 +30,43 @@
 // ANY WAY OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE
 // POSSIBILITY OF SUCH DAMAGE.
 
+#ifndef VELODYNE_LASERSCAN_VELODYNE_LASERSCAN_H
+#define VELODYNE_LASERSCAN_VELODYNE_LASERSCAN_H
+
 #include <ros/ros.h>
-#include "velodyne_laserscan/velodyne_laserscan.h"
+#include <sensor_msgs/PointCloud2.h>
+#include <sensor_msgs/LaserScan.h>
 
-int main(int argc, char** argv)
+#include <boost/thread/mutex.hpp>
+#include <boost/thread/lock_guard.hpp>
+
+#include <dynamic_reconfigure/server.h>
+#include <velodyne_laserscan/VelodyneLaserScanConfig.h>
+
+namespace velodyne_laserscan
 {
-  ros::init(argc, argv, "velodyne_laserscan_node");
-  ros::NodeHandle nh;
-  ros::NodeHandle nh_priv("~");
 
-  // create VelodyneLaserScan class
-  velodyne_laserscan::VelodyneLaserScan n(nh, nh_priv);
+class VelodyneLaserScan
+{
+public:
+  VelodyneLaserScan(ros::NodeHandle &nh, ros::NodeHandle &nh_priv);
 
-  // handle callbacks until shut down
-  ros::spin();
+private:
+  boost::mutex connect_mutex_;
+  void connectCb();
+  void recvCallback(const sensor_msgs::PointCloud2ConstPtr& msg);
 
-  return 0;
-}
+  ros::NodeHandle nh_;
+  ros::Subscriber sub_;
+  ros::Publisher pub_;
+
+  VelodyneLaserScanConfig cfg_;
+  dynamic_reconfigure::Server<VelodyneLaserScanConfig> srv_;
+  void reconfig(VelodyneLaserScanConfig& config, uint32_t level);
+
+  unsigned int ring_count_;
+};
+
+}  // namespace velodyne_laserscan
+
+#endif  // VELODYNE_LASERSCAN_VELODYNE_LASERSCAN_H

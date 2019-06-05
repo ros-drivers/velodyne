@@ -1,11 +1,34 @@
-/*
- *  Copyright (C) 2007 Austin Robot Technology, Patrick Beeson
- *  Copyright (C) 2009-2012 Austin Robot Technology, Jack O'Quin
- * 
- *  License: Modified BSD Software License Agreement
- *
- *  $Id$
- */
+// Copyright (C) 2007, 2009-2012 Austin Robot Technology, Patrick Beeson, Jack O'Quin
+// All rights reserved.
+//
+// Software License Agreement (BSD License 2.0)
+//
+// Redistribution and use in source and binary forms, with or without
+// modification, are permitted provided that the following conditions
+// are met:
+//
+//  * Redistributions of source code must retain the above copyright
+//    notice, this list of conditions and the following disclaimer.
+//  * Redistributions in binary form must reproduce the above
+//    copyright notice, this list of conditions and the following
+//    disclaimer in the documentation and/or other materials provided
+//    with the distribution.
+//  * Neither the name of {copyright_holder} nor the names of its
+//    contributors may be used to endorse or promote products derived
+//    from this software without specific prior written permission.
+//
+// THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS
+// "AS IS" AND ANY EXPRESS OR IMPLIED WARRANTIES, INCLUDING, BUT NOT
+// LIMITED TO, THE IMPLIED WARRANTIES OF MERCHANTABILITY AND FITNESS
+// FOR A PARTICULAR PURPOSE ARE DISCLAIMED. IN NO EVENT SHALL THE
+// COPYRIGHT OWNER OR CONTRIBUTORS BE LIABLE FOR ANY DIRECT, INDIRECT,
+// INCIDENTAL, SPECIAL, EXEMPLARY, OR CONSEQUENTIAL DAMAGES (INCLUDING,
+// BUT NOT LIMITED TO, PROCUREMENT OF SUBSTITUTE GOODS OR SERVICES;
+// LOSS OF USE, DATA, OR PROFITS; OR BUSINESS INTERRUPTION) HOWEVER
+// CAUSED AND ON ANY THEORY OF LIABILITY, WHETHER IN CONTRACT, STRICT
+// LIABILITY, OR TORT (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN
+// ANY WAY OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE
+// POSSIBILITY OF SUCH DAMAGE.
 
 /** \file
  *
@@ -136,6 +159,8 @@ VelodyneDriver::VelodyneDriver(ros::NodeHandle node,
                                         TimeStampStatusParam()));
   diag_timer_ = private_nh.createTimer(ros::Duration(0.2), &VelodyneDriver::diagTimerCallback,this);
 
+  config_.enabled = true;
+
   // open Velodyne input device or file
   if (dump_file != "")                  // have PCAP file?
     {
@@ -152,6 +177,8 @@ VelodyneDriver::VelodyneDriver(ros::NodeHandle node,
   // raw packet output topic
   output_ =
     node.advertise<velodyne_msgs::VelodyneScan>("velodyne_packets", 10);
+
+  last_azimuth_ = -1;
 }
 
 /** poll the device
@@ -160,6 +187,13 @@ VelodyneDriver::VelodyneDriver(ros::NodeHandle node,
  */
 bool VelodyneDriver::poll(void)
 {
+  if (!config_.enabled) {
+    // If we are not enabled exit once a second to let the caller handle
+    // anything it might need to, such as if it needs to exit.
+    ros::Duration(1).sleep();
+    return true;
+  }
+
   // Allocate a new shared pointer for zero-copy sharing with other nodelets.
   velodyne_msgs::VelodyneScanPtr scan(new velodyne_msgs::VelodyneScan);
 
@@ -177,24 +211,23 @@ bool VelodyneDriver::poll(void)
       }
       scan->packets.push_back(tmp_packet);
 
-      static int last_azimuth = -1;
       // Extract base rotation of first block in packet
       std::size_t azimuth_data_pos = 100*0+2;
       int azimuth = *( (u_int16_t*) (&tmp_packet.data[azimuth_data_pos]));
 
-      //if first packet in scan, there is no "valid" last_azimuth
-      if (last_azimuth == -1) {
-      	 last_azimuth = azimuth;
+      //if first packet in scan, there is no "valid" last_azimuth_
+      if (last_azimuth_ == -1) {
+      	 last_azimuth_ = azimuth;
       	 continue;
       }
-      if((last_azimuth < config_.cut_angle && config_.cut_angle <= azimuth)
-      	 || ( config_.cut_angle <= azimuth && azimuth < last_azimuth)
-      	 || (azimuth < last_azimuth && last_azimuth < config_.cut_angle))
+      if((last_azimuth_ < config_.cut_angle && config_.cut_angle <= azimuth)
+      	 || ( config_.cut_angle <= azimuth && azimuth < last_azimuth_)
+      	 || (azimuth < last_azimuth_ && last_azimuth_ < config_.cut_angle))
       {
-        last_azimuth = azimuth;
+        last_azimuth_ = azimuth;
         break; // Cut angle passed, one full revolution collected
       }
-      last_azimuth = azimuth;
+      last_azimuth_ = azimuth;
     }
   }
   else // standard behaviour
@@ -232,7 +265,14 @@ void VelodyneDriver::callback(velodyne_driver::VelodyneNodeConfig &config,
               uint32_t level)
 {
   ROS_INFO("Reconfigure Request");
-  config_.time_offset = config.time_offset;
+  if (level & 1)
+  {
+    config_.time_offset = config.time_offset;
+  }
+  if (level & 2)
+  {
+    config_.enabled = config.enabled;
+  }
 }
 
 void VelodyneDriver::diagTimerCallback(const ros::TimerEvent &event)

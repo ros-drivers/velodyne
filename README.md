@@ -1,4 +1,4 @@
-[![Build Status](https://travis-ci.org/ros-drivers/velodyne.svg?branch=master)](https://travis-ci.org/ros-drivers/velodyne)
+[![CircleCI](https://circleci.com/gh/ros-drivers/velodyne.svg?style=svg)](https://circleci.com/gh/ros-drivers/velodyne)
 
 Overview
 ========
@@ -17,6 +17,6 @@ The current ``master`` branch works with ROS Indigo and Kinetic.
 CI builds are currently run for Lunar and Melodic but extensive
 testing has not been completed in those environments.
 
-- <sup>1</sup>ROS: http://www.ros.org
-- <sup>2</sup>Velodyne: http://www.ros.org/wiki/velodyne
+- <sup>1</sup>Velodyne: http://www.ros.org/wiki/velodyne
+- <sup>2</sup>ROS: http://www.ros.org
 - <sup>3</sup>`Velodyne high definition 3D LIDARs`: http://www.velodynelidar.com/lidar/lidar.aspx

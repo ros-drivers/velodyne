@@ -57,7 +57,7 @@ namespace velodyne_pointcloud
     // advertise output point cloud (before subscribing to input data)
     output_ =
       node.advertise<sensor_msgs::PointCloud2>("velodyne_points", 10);
-      
+
     srv_ = boost::make_shared <dynamic_reconfigure::Server<velodyne_pointcloud::
       CloudNodeConfig> > (private_nh);
     dynamic_reconfigure::Server<velodyne_pointcloud::CloudNodeConfig>::
@@ -70,8 +70,21 @@ namespace velodyne_pointcloud
       node.subscribe("velodyne_packets", 10,
                      &Convert::processScan, (Convert *) this,
                      ros::TransportHints().tcpNoDelay(true));
+
+    // Diagnostics
+    diagnostics_.setHardwareID("Velodyne Convert");
+    // Arbitrary frequencies since we don't know which RPM is used, and are only
+    // concerned about monitoring the frequency.
+    diag_min_freq_ = 2.0;
+    diag_max_freq_ = 20.0;
+    using namespace diagnostic_updater;
+    diag_topic_.reset(new TopicDiagnostic("velodyne_points", diagnostics_,
+                                       FrequencyStatusParam(&diag_min_freq_,
+                                                            &diag_max_freq_,
+                                                            0.1, 10),
+                                       TimeStampStatusParam()));
   }
-  
+
   void Convert::callback(velodyne_pointcloud::CloudNodeConfig &config,
                 uint32_t level)
   {
@@ -121,6 +134,9 @@ namespace velodyne_pointcloud
       data_->unpack(scanMsg->packets[i], *container_ptr_);
     }
 
+    // publish the accumulated cloud message
+    diag_topic_->tick(scanMsg->header.stamp);
+    diagnostics_.update();
     output_.publish(container_ptr_->finishCloud());
   }
 

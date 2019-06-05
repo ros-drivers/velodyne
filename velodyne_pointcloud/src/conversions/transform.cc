@@ -10,7 +10,7 @@
 /** @file
 
     This class transforms raw Velodyne 3D LIDAR packets to PointCloud2
-    in the /odom frame of reference.
+    in the /map frame of reference.
 
     @author Jack O'Quin
     @author Jesse Vera
@@ -63,19 +63,30 @@ namespace velodyne_pointcloud
     output_ =
       node.advertise<sensor_msgs::PointCloud2>("velodyne_points", 10);
 
-    srv_ = boost::make_shared <dynamic_reconfigure::Server<velodyne_pointcloud::
-      TransformNodeConfig> > (private_nh);
-    dynamic_reconfigure::Server<velodyne_pointcloud::TransformNodeConfig>::
-      CallbackType f;
+    srv_ = boost::make_shared<dynamic_reconfigure::Server<TransformNodeCfg>> (private_nh);
+    dynamic_reconfigure::Server<TransformNodeCfg>::CallbackType f;
     f = boost::bind (&Transform::reconfigure_callback, this, _1, _2);
     srv_->setCallback (f);
 
     // subscribe to VelodyneScan packets using transform filter
     velodyne_scan_.subscribe(node, "velodyne_packets", 10);
     tf_filter_ptr_ = boost::shared_ptr<tf::MessageFilter<velodyne_msgs::VelodyneScan> >(
-        new tf::MessageFilter<velodyne_msgs::VelodyneScan>(velodyne_scan_, *tf_ptr_, config_.target_frame, 10));
+            new tf::MessageFilter<velodyne_msgs::VelodyneScan>(velodyne_scan_, *tf_ptr_, config_.target_frame, 10));
     tf_filter_ptr_->registerCallback(boost::bind(&Transform::processScan, this, _1));
     private_nh.param<std::string>("fixed_frame", config_.fixed_frame, "odom");
+
+    // Diagnostics
+    diagnostics_.setHardwareID("Velodyne Transform");
+    // Arbitrary frequencies since we don't know which RPM is used, and are only
+    // concerned about monitoring the frequency.
+    diag_min_freq_ = 2.0;
+    diag_max_freq_ = 20.0;
+    using namespace diagnostic_updater;
+    diag_topic_.reset(new TopicDiagnostic("velodyne_points", diagnostics_,
+                                          FrequencyStatusParam(&diag_min_freq_,
+                                                               &diag_max_freq_,
+                                                               0.1, 10),
+                                          TimeStampStatusParam()));
 
   }
   
@@ -135,7 +146,11 @@ namespace velodyne_pointcloud
     {
       data_->unpack(scanMsg->packets[i], *container_ptr);
     }
+    // publish the accumulated cloud message
     output_.publish(container_ptr->finishCloud());
+
+    diag_topic_->tick(scanMsg->header.stamp);
+    diagnostics_.update();
   }
 
 } // namespace velodyne_pointcloud

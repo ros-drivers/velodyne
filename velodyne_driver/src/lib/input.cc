@@ -1,12 +1,34 @@
-/*
- *  Copyright (C) 2007 Austin Robot Technology, Patrick Beeson
- *  Copyright (C) 2009, 2010 Austin Robot Technology, Jack O'Quin
- *  Copyright (C) 2015, Jack O'Quin
- *
- *  License: Modified BSD Software License Agreement
- *
- *  $Id$
- */
+// Copyright (C) 2007, 2009, 2010, 2015 Austin Robot Technology, Patrick Beeson, Jack O'Quin
+// All rights reserved.
+//
+// Software License Agreement (BSD License 2.0)
+//
+// Redistribution and use in source and binary forms, with or without
+// modification, are permitted provided that the following conditions
+// are met:
+//
+//  * Redistributions of source code must retain the above copyright
+//    notice, this list of conditions and the following disclaimer.
+//  * Redistributions in binary form must reproduce the above
+//    copyright notice, this list of conditions and the following
+//    disclaimer in the documentation and/or other materials provided
+//    with the distribution.
+//  * Neither the name of {copyright_holder} nor the names of its
+//    contributors may be used to endorse or promote products derived
+//    from this software without specific prior written permission.
+//
+// THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS
+// "AS IS" AND ANY EXPRESS OR IMPLIED WARRANTIES, INCLUDING, BUT NOT
+// LIMITED TO, THE IMPLIED WARRANTIES OF MERCHANTABILITY AND FITNESS
+// FOR A PARTICULAR PURPOSE ARE DISCLAIMED. IN NO EVENT SHALL THE
+// COPYRIGHT OWNER OR CONTRIBUTORS BE LIABLE FOR ANY DIRECT, INDIRECT,
+// INCIDENTAL, SPECIAL, EXEMPLARY, OR CONSEQUENTIAL DAMAGES (INCLUDING,
+// BUT NOT LIMITED TO, PROCUREMENT OF SUBSTITUTE GOODS OR SERVICES;
+// LOSS OF USE, DATA, OR PROFITS; OR BUSINESS INTERRUPTION) HOWEVER
+// CAUSED AND ON ANY THEORY OF LIABILITY, WHETHER IN CONTRACT, STRICT
+// LIABILITY, OR TORT (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN
+// ANY WAY OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE
+// POSSIBILITY OF SUCH DAMAGE.
 
 /** \file
  *
@@ -32,6 +54,7 @@
 #include <fcntl.h>
 #include <sys/file.h>
 #include <velodyne_driver/input.h>
+#include <velodyne_driver/time_conversion.hpp>
 
 namespace velodyne_driver
 {
@@ -52,6 +75,7 @@ namespace velodyne_driver
     port_(port)
   {
     private_nh.param("device_ip", devip_str_, std::string(""));
+    private_nh.param("gps_time", gps_time_, false);
     if (!devip_str_.empty())
       ROS_INFO_STREAM("Only accepting packets from IP address: "
                       << devip_str_);
@@ -199,10 +223,16 @@ namespace velodyne_driver
                          << nbytes << " bytes");
       }
 
-    // Average the times at which we begin and end reading.  Use that to
-    // estimate when the scan occurred. Add the time offset.
-    double time2 = ros::Time::now().toSec();
-    pkt->stamp = ros::Time((time2 + time1) / 2.0 + time_offset);
+    if (!gps_time_) {
+      // Average the times at which we begin and end reading.  Use that to
+      // estimate when the scan occurred. Add the time offset.
+      double time2 = ros::Time::now().toSec();
+      pkt->stamp = ros::Time((time2 + time1) / 2.0 + time_offset);
+    } else {
+      // time for each packet is a 4 byte uint located starting at offset 1200 in
+      // the data packet
+      pkt->stamp = rosTimeFromGpsTimestamp(&(pkt->data[1200]));
+    }
 
     return 0;
   }
