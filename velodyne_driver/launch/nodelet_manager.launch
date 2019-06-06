@@ -17,7 +17,7 @@
   <arg name="cut_angle" default="-0.01" />
 
   <!-- start nodelet manager -->
-  <node pkg="nodelet" type="nodelet" name="$(arg manager)" args="manager" />
+  <node pkg="nodelet" type="nodelet" name="$(arg manager)" args="manager" output="screen"/>
 
   <!-- load driver nodelet into it -->
   <node pkg="nodelet" type="nodelet" name="$(arg manager)_driver"

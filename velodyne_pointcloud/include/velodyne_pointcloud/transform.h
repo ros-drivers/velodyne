@@ -1,5 +1,5 @@
-// Copyright (C) 2009, 2010, 2011, 2012, 2019 Austin Robot Technology, Jack O'Quin, Jesse Vera, Joshua Whitley
-// All rights reserved.
+// Copyright (C) 2009, 2010, 2011, 2012, 2019 Austin Robot Technology, Jack O'Quin, Jesse Vera, Joshua Whitley,
+// Sebastian Pütz All rights reserved.
 //
 // Software License Agreement (BSD License 2.0)
 //
@@ -40,6 +40,7 @@
 #ifndef VELODYNE_POINTCLOUD_TRANSFORM_H
 #define VELODYNE_POINTCLOUD_TRANSFORM_H
 
+#include <string>
 #include <ros/ros.h>
 #include "tf/message_filter.h"
 #include "message_filters/subscriber.h"
@@ -53,19 +54,6 @@
 #include <dynamic_reconfigure/server.h>
 #include <velodyne_pointcloud/TransformNodeConfig.h>
 
-// include template implementations to transform a custom point cloud
-#include <pcl_ros/impl/transforms.hpp>
-
-#include <string>
-
-// instantiate template for transforming a VPointCloud
-template bool
-  pcl_ros::transformPointCloud<velodyne_rawdata::VPoint>(
-    const std::string &,
-    const velodyne_rawdata::VPointCloud &,
-    velodyne_rawdata::VPointCloud &,
-    const tf::TransformListener &);
-
 namespace velodyne_pointcloud
 {
 using TransformNodeCfg = velodyne_pointcloud::TransformNodeConfig;
@@ -74,44 +62,47 @@ class Transform
 {
 public:
   Transform(ros::NodeHandle node, ros::NodeHandle private_nh);
-  ~Transform() {}
+  ~Transform()
+  {
+  }
 
 private:
-  void processScan(const velodyne_msgs::VelodyneScan::ConstPtr &scanMsg);
+  void processScan(const velodyne_msgs::VelodyneScan::ConstPtr& scanMsg);
 
   // Pointer to dynamic reconfigure service srv_
-  boost::shared_ptr<dynamic_reconfigure::Server<velodyne_pointcloud::
-    TransformNodeConfig>> srv_;
-  void reconfigure_callback(
-    velodyne_pointcloud::TransformNodeConfig &config,
-    uint32_t level);
+  boost::shared_ptr<dynamic_reconfigure::Server<velodyne_pointcloud::TransformNodeConfig>> srv_;
+  void reconfigure_callback(velodyne_pointcloud::TransformNodeConfig& config, uint32_t level);
 
   const std::string tf_prefix_;
   boost::shared_ptr<velodyne_rawdata::RawData> data_;
   message_filters::Subscriber<velodyne_msgs::VelodyneScan> velodyne_scan_;
-  tf::MessageFilter<velodyne_msgs::VelodyneScan> *tf_filter_;
   ros::Publisher output_;
-  tf::TransformListener listener_;
+  boost::shared_ptr<tf::MessageFilter<velodyne_msgs::VelodyneScan>> tf_filter_ptr_;
+  boost::shared_ptr<tf::TransformListener> tf_ptr_;
 
   /// configuration parameters
   typedef struct
   {
-    std::string frame_id;          // fixed frame ID
+    std::string target_frame;  ///< target frame
+    std::string fixed_frame;   ///< fixed frame
+    bool organize_cloud;       ///< enable/disable organized cloud structure
+    double max_range;          ///< maximum range to publish
+    double min_range;          ///< minimum range to publish
+    uint16_t num_lasers;       ///< number of lasers
   }
   Config;
   Config config_;
 
-  // Point cloud buffers for collecting points within a packet.  The
-  // inPc_ and tfPc_ are class members only to avoid reallocation on
-  // every message.
-  PointcloudXYZIR inPc_;                // input packet point cloud
-  velodyne_rawdata::VPointCloud tfPc_;  // transformed packet point cloud
+  bool first_rcfg_call;
+
+  boost::shared_ptr<velodyne_rawdata::DataContainerBase> container_ptr;
 
   // diagnostics updater
   diagnostic_updater::Updater diagnostics_;
   double diag_min_freq_;
   double diag_max_freq_;
   boost::shared_ptr<diagnostic_updater::TopicDiagnostic> diag_topic_;
+  boost::mutex reconfigure_mtx_;
 };
 }  // namespace velodyne_pointcloud
 

@@ -25,7 +25,6 @@
   <depend>dynamic_reconfigure</depend>
   <depend>libpcap</depend>
   <depend>nodelet</depend>
-  <depend>pluginlib</depend>
   <depend>roscpp</depend>
   <depend>tf</depend>
   <depend>velodyne_msgs</depend>

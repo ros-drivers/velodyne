@@ -11,25 +11,24 @@ elseif ("${CMAKE_CXX_STANDARD_COMPUTED_DEFAULT}" STREQUAL "98")
 endif()
 
 set(${PROJECT_NAME}_CATKIN_DEPS
-  angles
-  nodelet
-  pcl_ros
-  roscpp
-  roslib
-  sensor_msgs
-  tf
-  velodyne_driver
-  velodyne_msgs
-  dynamic_reconfigure
-  diagnostic_updater
+    angles
+    nodelet
+    roscpp
+    roslib
+    sensor_msgs
+    tf
+    velodyne_driver
+    velodyne_msgs
+    dynamic_reconfigure
+    diagnostic_updater
 )
 
 find_package(catkin REQUIRED COMPONENTS
              ${${PROJECT_NAME}_CATKIN_DEPS}
-             pcl_conversions
              roslint)
-find_package(Boost COMPONENTS signals)
 
+find_package(Boost COMPONENTS signals)
+find_package(Eigen3 REQUIRED)
 # Resolve system dependency on yaml-cpp, which apparently does not
 # provide a CMake find_package() module.
 find_package(PkgConfig REQUIRED)
@@ -53,6 +52,7 @@ endif(NOT ${YAML_CPP_VERSION} VERSION_LESS "0.5")
 
 include_directories(include ${catkin_INCLUDE_DIRS}
   ${dynamic_reconfigure_PACKAGE_PATH}/cmake/cfgbuild.cmake
+  ${EIGEN3_INCLUDE_DIR}
 )
 
 catkin_package(
