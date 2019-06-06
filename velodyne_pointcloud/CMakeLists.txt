@@ -52,7 +52,7 @@ endif(NOT ${YAML_CPP_VERSION} VERSION_LESS "0.5")
 
 include_directories(include ${catkin_INCLUDE_DIRS}
   ${dynamic_reconfigure_PACKAGE_PATH}/cmake/cfgbuild.cmake
-  ${EIGEN3_INCLUDE_DIRS}
+  ${EIGEN3_INCLUDE_DIR}
 )
 
 catkin_package(
