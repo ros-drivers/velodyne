@@ -153,7 +153,7 @@ public:
   sensor_msgs::PointCloud2 cloud;
 
 protected:
-  inline void vectorTfToEigen(tf::Vector3& tf_vec, Eigen::Vector3d& eigen_vec)
+  inline void vectorTfToEigen(tf::Vector3& tf_vec, Eigen::Vector3f& eigen_vec)
   {
     eigen_vec(0) = tf_vec[0];
     eigen_vec(1) = tf_vec[1];
@@ -179,18 +179,18 @@ protected:
     }
 
     tf::Quaternion quaternion = transform.getRotation();
-    Eigen::Quaterniond rotation(quaternion.w(), quaternion.x(), quaternion.y(), quaternion.z());
+    Eigen::Quaternionf rotation(quaternion.w(), quaternion.x(), quaternion.y(), quaternion.z());
 
-    Eigen::Vector3d eigen_origin;
+    Eigen::Vector3f eigen_origin;
     vectorTfToEigen(transform.getOrigin(), eigen_origin);
-    Eigen::Translation3d translation(eigen_origin);
+    Eigen::Translation3f translation(eigen_origin);
     transformation = translation * rotation;
     return true;
   }
 
   inline void transformPoint(float& x, float& y, float& z)
   {
-    Eigen::Vector3d p = transformation * Eigen::Vector3d(x, y, z);
+    Eigen::Vector3f p = transformation * Eigen::Vector3f(x, y, z);
     x = p.x();
     y = p.y();
     z = p.z();
@@ -203,7 +203,7 @@ protected:
 
   Config config_;
   boost::shared_ptr<tf::TransformListener> tf_ptr;  ///< transform listener
-  Eigen::Affine3d transformation;
+  Eigen::Affine3f transformation;
 };
 } /* namespace velodyne_rawdata */
 #endif  // VELODYNE_POINTCLOUD_DATACONTAINERBASE_H
