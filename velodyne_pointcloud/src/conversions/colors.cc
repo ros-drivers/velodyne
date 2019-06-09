@@ -44,15 +44,15 @@ namespace velodyne_pointcloud
   typedef pcl::PointCloud<RGBPoint> RGBPointCloud;
 
   /** @brief Constructor. */
-  RingColors::RingColors(ros::NodeHandle node, ros::NodeHandle private_nh)
+  RingColors::RingColors() : rclcpp::Node()
   {
     // advertise output point cloud (before subscribing to input data)
     output_ =
-      node.advertise<sensor_msgs::PointCloud2>("velodyne_rings", 10);
+      self->advertise<sensor_msgs::PointCloud2>("velodyne_rings", 10);
 
     // subscribe to VelodyneScan packets
     input_ =
-      node.subscribe("velodyne_points", 10,
+      self->subscribe("velodyne_points", 10,
                      &RingColors::convertPoints, this,
                      ros::TransportHints().tcpNoDelay(true));
   }
@@ -62,7 +62,7 @@ namespace velodyne_pointcloud
   void
     RingColors::convertPoints(const VPointCloud::ConstPtr &inMsg)
   {
-    if (output_.getNumSubscribers() == 0)         // no one listening?
+    if (output_->getNumSubscribers() == 0)         // no one listening?
       return;                                     // do nothing
 
     // allocate an PointXYZRGB message with same time and frame ID as
@@ -87,7 +87,14 @@ namespace velodyne_pointcloud
         ++outMsg->width;
       }
 
-    output_.publish(outMsg);
+    output_->publish(outMsg);
   }
 
 } // namespace velodyne_pcl
+
+#include "rclcpp_components/register_node_macro.hpp"
+
+// Register the component with class_loader.
+// This acts as a sort of entry point, allowing the component to be discoverable when its library
+// is being loaded into a running process.
+RCLCPP_COMPONENTS_REGISTER_NODE(velodyne_pointcloud::RingColors)

@@ -30,7 +30,7 @@ namespace YAML {
 } /* YAML */
 #endif // HAVE_NEW_YAMLCPP
 
-#include <ros/ros.h>
+#include <rclcpp/rclcpp.hpp>
 #include <velodyne_pointcloud/calibration.h>
 
 namespace velodyne_pointcloud 
@@ -188,8 +188,8 @@ namespace velodyne_pointcloud
         calibration.laser_corrections[next_index].laser_ring = ring;
         next_angle = min_seen;
         if (calibration.ros_info) {
-          ROS_INFO("laser_ring[%2u] = %2u, angle = %+.6f",
-                   next_index, ring, next_angle);
+          //ROS_INFO("laser_ring[%2u] = %2u, angle = %+.6f",
+          //         next_index, ring, next_angle);
         }
       }
     }

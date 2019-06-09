@@ -28,8 +28,7 @@
 #include <fstream>
 #include <math.h>
 
-#include <ros/ros.h>
-#include <ros/package.h>
+#include <rclcpp/rclcpp.hpp>
 #include <angles/angles.h>
 
 #include <velodyne_pointcloud/rawdata.h>
@@ -44,7 +43,7 @@ inline float SQR(float val) { return val*val; }
   //
   ////////////////////////////////////////////////////////////////////////
 
-  RawData::RawData() {}
+  RawData::RawData() : rclcpp::Node("rawdata_node") {}
   
   /** Update parameters: conversions and update */
   void RawData::setParameters(double min_range,
@@ -88,28 +87,28 @@ inline float SQR(float val) { return val*val; }
   }
 
   /** Set up for on-line operation. */
-  int RawData::setup(ros::NodeHandle private_nh)
+  int RawData::setup()
   {
     // get path to angles.config file for this device
-    if (!private_nh.getParam("calibration", config_.calibrationFile))
+    if (!this->get_parameter("calibration", config_.calibrationFile))
       {
-        ROS_ERROR_STREAM("No calibration angles specified! Using test values!");
+        RCLCPP_ERROR(this->get_logger(), "No calibration angles specified! Using test values!");
 
         // have to use something: grab unit test version as a default
         std::string pkgPath = ros::package::getPath("velodyne_pointcloud");
         config_.calibrationFile = pkgPath + "/params/64e_utexas.yaml";
       }
 
-    ROS_INFO_STREAM("correction angles: " << config_.calibrationFile);
+    RCLCPP_INFO(this->get_logger(), "correction angles: %s", config_.calibrationFile);
 
     calibration_.read(config_.calibrationFile);
     if (!calibration_.initialized) {
-      ROS_ERROR_STREAM("Unable to open calibration file: " << 
+      RCLCPP_ERROR(this->get_logger(), "Unable to open calibration file: %s",
           config_.calibrationFile);
       return -1;
     }
     
-    ROS_INFO_STREAM("Number of lasers: " << calibration_.num_lasers << ".");
+    RCLCPP_INFO(this->get_logger(), "Number of lasers: %d.",  calibration_.num_lasers);
     
     // Set up cached values for sin and cos of all the possible headings
     for (uint16_t rot_index = 0; rot_index < ROTATION_MAX_UNITS; ++rot_index) {
@@ -157,10 +156,10 @@ inline float SQR(float val) { return val*val; }
    *  @param pkt raw packet to unpack
    *  @param pc shared pointer to point cloud (points are appended)
    */
-  void RawData::unpack(const velodyne_msgs::VelodynePacket &pkt, DataContainerBase& data)
+  void RawData::unpack(const velodyne_msgs::msg::VelodynePacket &pkt, DataContainerBase& data)
   {
     using velodyne_pointcloud::LaserCorrection;
-    ROS_DEBUG_STREAM("Received packet, time: " << pkt.stamp);
+    RCLCPP_DEBUG(this->get_logger(), "Received packet, time: %s", pkt.stamp);
 
     /** special parsing for the VLP16 **/
     if (calibration_.num_lasers == 16)
@@ -321,7 +320,7 @@ inline float SQR(float val) { return val*val; }
    *  @param pkt raw packet to unpack
    *  @param pc shared pointer to point cloud (points are appended)
    */
-  void RawData::unpack_vlp16(const velodyne_msgs::VelodynePacket &pkt, DataContainerBase& data)
+  void RawData::unpack_vlp16(const velodyne_msgs::msg::VelodynePacket &pkt, DataContainerBase& data)
   {
     float azimuth;
     float azimuth_diff;

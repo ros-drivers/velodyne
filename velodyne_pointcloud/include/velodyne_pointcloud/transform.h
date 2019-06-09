@@ -40,18 +40,15 @@
 #ifndef VELODYNE_POINTCLOUD_TRANSFORM_H
 #define VELODYNE_POINTCLOUD_TRANSFORM_H
 
-#include <ros/ros.h>
-#include "tf/message_filter.h"
+#include <rclcpp/rclcpp.hpp>
+#include "tf2_ros/message_filter.h"
 #include "message_filters/subscriber.h"
-#include <diagnostic_updater/diagnostic_updater.h>
-#include <diagnostic_updater/publisher.h>
-#include <sensor_msgs/PointCloud2.h>
+#include <diagnostic_updater/diagnostic_updater.hpp>
+#include <diagnostic_updater/publisher.hpp>
+#include <sensor_msgs/msg/point_cloud2.hpp>
 
 #include <velodyne_pointcloud/rawdata.h>
 #include <velodyne_pointcloud/pointcloudXYZIR.h>
-
-#include <dynamic_reconfigure/server.h>
-#include <velodyne_pointcloud/TransformNodeConfig.h>
 
 // include template implementations to transform a custom point cloud
 #include <pcl_ros/impl/transforms.hpp>
@@ -64,34 +61,25 @@ template bool
     const std::string &,
     const velodyne_rawdata::VPointCloud &,
     velodyne_rawdata::VPointCloud &,
-    const tf::TransformListener &);
+    const tf2_ros::Buffer &);
 
 namespace velodyne_pointcloud
 {
-using TransformNodeCfg = velodyne_pointcloud::TransformNodeConfig;
 
-class Transform
+class Transform : public rclcpp::Node
 {
 public:
-  Transform(ros::NodeHandle node, ros::NodeHandle private_nh);
+  Transform();
   ~Transform() {}
 
 private:
-  void processScan(const velodyne_msgs::VelodyneScan::ConstPtr &scanMsg);
+  void processScan(const velodyne_msgs::msg::VelodyneScan::ConstPtr &scanMsg);
 
-  // Pointer to dynamic reconfigure service srv_
-  boost::shared_ptr<dynamic_reconfigure::Server<velodyne_pointcloud::
-    TransformNodeConfig>> srv_;
-  void reconfigure_callback(
-    velodyne_pointcloud::TransformNodeConfig &config,
-    uint32_t level);
-
-  const std::string tf_prefix_;
-  boost::shared_ptr<velodyne_rawdata::RawData> data_;
-  message_filters::Subscriber<velodyne_msgs::VelodyneScan> velodyne_scan_;
-  tf::MessageFilter<velodyne_msgs::VelodyneScan> *tf_filter_;
-  ros::Publisher output_;
-  tf::TransformListener listener_;
+  std::shared_ptr<velodyne_rawdata::RawData> data_;
+  message_filters::Subscriber<velodyne_msgs::msg::VelodyneScan> velodyne_scan_;
+  tf2_ros::MessageFilter<velodyne_msgs::msg::VelodyneScan> *tf_filter_;
+  rclcpp::Publisher<sensor_msgs::msg::PointCloud2>::SharedPtr output_;
+  tf2_ros::TransformListener listener_;
 
   /// configuration parameters
   typedef struct
@@ -111,7 +99,7 @@ private:
   diagnostic_updater::Updater diagnostics_;
   double diag_min_freq_;
   double diag_max_freq_;
-  boost::shared_ptr<diagnostic_updater::TopicDiagnostic> diag_topic_;
+  std::shared_ptr<diagnostic_updater::TopicDiagnostic> diag_topic_;
 };
 }  // namespace velodyne_pointcloud
 

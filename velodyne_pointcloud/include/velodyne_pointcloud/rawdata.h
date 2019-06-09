@@ -45,11 +45,10 @@
 #include <errno.h>
 #include <stdint.h>
 #include <string>
-#include <boost/format.hpp>
 #include <math.h>
 
-#include <ros/ros.h>
-#include <velodyne_msgs/VelodyneScan.h>
+#include <rclcpp/rclcpp.hpp>
+#include <velodyne_msgs/msg/velodyne_scan.hpp>
 #include <velodyne_pointcloud/calibration.h>
 #include <velodyne_pointcloud/datacontainerbase.h>
 #include <pcl_ros/point_cloud.h>
@@ -137,7 +136,7 @@ typedef struct raw_packet
 raw_packet_t;
 
 /** \brief Velodyne data conversion class */
-class RawData
+class RawData : rclcpp::Node
 {
 public:
   RawData();
@@ -154,7 +153,7 @@ public:
    *  @returns 0 if successful;
    *           errno value for failure
    */
-  int setup(ros::NodeHandle private_nh);
+  int setup(std::shared_ptr<rclcpp::Node> private_nh);
 
   /** \brief Set up for data processing offline. 
     * Performs the same initialization as in setup, in the abscence of a ros::NodeHandle.
@@ -169,7 +168,7 @@ public:
     */
   int setupOffline(std::string calibration_file, double max_range_, double min_range_);
 
-  void unpack(const velodyne_msgs::VelodynePacket &pkt, DataContainerBase& data);
+  void unpack(const velodyne_msgs::msg::VelodynePacket &pkt, DataContainerBase& data);
 
   void setParameters(double min_range, double max_range, double view_direction,
                       double view_width);
@@ -200,7 +199,7 @@ private:
   float cos_rot_table_[ROTATION_MAX_UNITS];
 
   /** add private function to handle the VLP16 **/
-  void unpack_vlp16(const velodyne_msgs::VelodynePacket &pkt, DataContainerBase& data);
+  void unpack_vlp16(const velodyne_msgs::msg::VelodynePacket &pkt, DataContainerBase& data);
 
   /** in-line test whether a point is in range */
   bool pointInRange(float range)

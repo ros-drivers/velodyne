@@ -39,38 +39,29 @@
 #ifndef VELODYNE_POINTCLOUD_CONVERT_H
 #define VELODYNE_POINTCLOUD_CONVERT_H
 
-#include <ros/ros.h>
-#include <diagnostic_updater/diagnostic_updater.h>
-#include <diagnostic_updater/publisher.h>
+#include <rclcpp/rclcpp.hpp>
+#include <diagnostic_updater/diagnostic_updater.hpp>
+#include <diagnostic_updater/publisher.hpp>
 
-#include <sensor_msgs/PointCloud2.h>
+#include <sensor_msgs/msg/point_cloud2.hpp>
 #include <velodyne_pointcloud/rawdata.h>
 #include <velodyne_pointcloud/pointcloudXYZIR.h>
 
-#include <dynamic_reconfigure/server.h>
-#include <velodyne_pointcloud/CloudNodeConfig.h>
 
 namespace velodyne_pointcloud
 {
-class Convert
+class Convert : public rclcpp::Node
 {
 public:
-  Convert(ros::NodeHandle node, ros::NodeHandle private_nh);
+  Convert();
   ~Convert() {}
 
 private:
-  void callback(
-    velodyne_pointcloud::CloudNodeConfig &config,
-    uint32_t level);
-  void processScan(const velodyne_msgs::VelodyneScan::ConstPtr &scanMsg);
+  void processScan(const velodyne_msgs::msg::VelodyneScan::SharedPtr &scanMsg);
 
-  // Pointer to dynamic reconfigure service srv_
-  boost::shared_ptr<dynamic_reconfigure::Server<velodyne_pointcloud::
-    CloudNodeConfig> > srv_;
-
-  boost::shared_ptr<velodyne_rawdata::RawData> data_;
-  ros::Subscriber velodyne_scan_;
-  ros::Publisher output_;
+  std::shared_ptr<velodyne_rawdata::RawData> data_;
+  rclcpp::Subscription<velodyne_msgs::msg::VelodyneScan>::SharedPtr velodyne_scan_;
+  rclcpp::Publisher<sensor_msgs::msg::PointCloud2>::SharedPtr output_;
 
   /// configuration parameters
   typedef struct
@@ -84,7 +75,7 @@ private:
   diagnostic_updater::Updater diagnostics_;
   double diag_min_freq_;
   double diag_max_freq_;
-  boost::shared_ptr<diagnostic_updater::TopicDiagnostic> diag_topic_;
+  std::shared_ptr<diagnostic_updater::TopicDiagnostic> diag_topic_;
 };
 }  // namespace velodyne_pointcloud
 

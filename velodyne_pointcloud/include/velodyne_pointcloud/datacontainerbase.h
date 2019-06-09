@@ -33,7 +33,7 @@
 #ifndef VELODYNE_POINTCLOUD_DATACONTAINERBASE_H
 #define VELODYNE_POINTCLOUD_DATACONTAINERBASE_H
 
-#include <ros/ros.h>
+#include <rclcpp/rclcpp.hpp>
 
 namespace velodyne_rawdata
 {

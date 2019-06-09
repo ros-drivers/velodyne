@@ -20,26 +20,19 @@
 namespace velodyne_pointcloud
 {
   /** @brief Constructor. */
-  Convert::Convert(ros::NodeHandle node, ros::NodeHandle private_nh):
+  Convert::Convert() : rclcpp::Node("convert"),
     data_(new velodyne_rawdata::RawData())
   {
-    data_->setup(private_nh);
+    data_->setup();
 
 
     // advertise output point cloud (before subscribing to input data)
     output_ =
-      node.advertise<sensor_msgs::PointCloud2>("velodyne_points", 10);
-
-    srv_ = boost::make_shared <dynamic_reconfigure::Server<velodyne_pointcloud::
-      CloudNodeConfig> > (private_nh);
-    dynamic_reconfigure::Server<velodyne_pointcloud::CloudNodeConfig>::
-      CallbackType f;
-    f = boost::bind (&Convert::callback, this, _1, _2);
-    srv_->setCallback (f);
+    this->create_publisher<sensor_msgs::msg::PointCloud2>("velodyne_points", 10);
 
     // subscribe to VelodyneScan packets
     velodyne_scan_ =
-      node.subscribe("velodyne_packets", 10,
+      this->create_subscription("velodyne_packets", 10,
                      &Convert::processScan, (Convert *) this,
                      ros::TransportHints().tcpNoDelay(true));
 
@@ -60,7 +53,7 @@ namespace velodyne_pointcloud
   void Convert::callback(velodyne_pointcloud::CloudNodeConfig &config,
                 uint32_t level)
   {
-  ROS_INFO("Reconfigure Request");
+  RCLCPP_INFO(this->get_logger(), "Reconfigure Request");
   data_->setParameters(config.min_range, config.max_range, config.view_direction,
                        config.view_width);
   }
@@ -87,9 +80,9 @@ namespace velodyne_pointcloud
     }
 
     // publish the accumulated cloud message
-    ROS_DEBUG_STREAM("Publishing " << outMsg.pc->height * outMsg.pc->width
-                     << " Velodyne points, time: " << outMsg.pc->header.stamp);
-    output_.publish(outMsg.pc);
+  RCLCPP_DEBUG(this->get_logger(), "Publishing %d Velodyne points, time: %s", outMsg.pc->height * outMsg.pc->width
+                     ,outMsg.pc->header.stamp);
+    output_->publish(outMsg.pc);
     diag_topic_->tick(scanMsg->header.stamp);
     diagnostics_.update();
   }

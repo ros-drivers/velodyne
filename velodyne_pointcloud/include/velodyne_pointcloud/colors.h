@@ -42,7 +42,7 @@
 #ifndef VELODYNE_POINTCLOUD_COLORS_H
 #define VELODYNE_POINTCLOUD_COLORS_H
 
-#include <ros/ros.h>
+#include <rclcpp/rclcpp.hpp>
 #include <pcl_ros/point_cloud.h>
 #include <pcl/point_types.h>
 #include <velodyne_pointcloud/point_types.h>
@@ -53,17 +53,17 @@ namespace velodyne_pointcloud
 typedef velodyne_pointcloud::PointXYZIR VPoint;
 typedef pcl::PointCloud<VPoint> VPointCloud;
 
-class RingColors
+class RingColors : public rclcpp::Node
 {
 public:
-  RingColors(ros::NodeHandle node, ros::NodeHandle private_nh);
+  RingColors();
   ~RingColors() {}
 
 private:
   void convertPoints(const VPointCloud::ConstPtr &inMsg);
 
-  ros::Subscriber input_;
-  ros::Publisher output_;
+  rclcpp::Subscription<VPoint>::SharedPtr input_;
+  rclcpp::Publisher<sensor_msgs::msg::PointCloud2>::SharedPtr output_;
 };
 }  // namespace velodyne_pointcloud
 
