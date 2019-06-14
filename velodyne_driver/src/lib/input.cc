@@ -77,8 +77,10 @@ namespace velodyne_driver
     private_nh.param("device_ip", devip_str_, std::string(""));
     private_nh.param("gps_time", gps_time_, false);
     if (!devip_str_.empty())
-      ROS_INFO_STREAM("Only accepting packets from IP address: "
-                      << devip_str_);
+      {
+        ROS_INFO_STREAM("Only accepting packets from IP address: "
+                        << devip_str_);
+      }
   }
 
   ////////////////////////////////////////////////////////////////////////
@@ -95,9 +97,10 @@ namespace velodyne_driver
   {
     sockfd_ = -1;
 
-    if (!devip_str_.empty()) {
-      inet_aton(devip_str_.c_str(),&devip_);
-    }
+    if (!devip_str_.empty())
+      {
+        inet_aton(devip_str_.c_str(), &devip_);
+      }
 
     // connect to Velodyne UDP port
     ROS_INFO_STREAM("Opening UDP socket: port " << port);
@@ -214,25 +217,32 @@ namespace velodyne_driver
             // continue otherwise we are done
             if(devip_str_ != ""
                && sender_address.sin_addr.s_addr != devip_.s_addr)
-              continue;
+              {
+                continue;
+              }
             else
-              break; //done
+              {
+                break; // done
+              }
           }
 
         ROS_DEBUG_STREAM("incomplete Velodyne packet read: "
                          << nbytes << " bytes");
       }
 
-    if (!gps_time_) {
-      // Average the times at which we begin and end reading.  Use that to
-      // estimate when the scan occurred. Add the time offset.
-      double time2 = ros::Time::now().toSec();
-      pkt->stamp = ros::Time((time2 + time1) / 2.0 + time_offset);
-    } else {
-      // time for each packet is a 4 byte uint located starting at offset 1200 in
-      // the data packet
-      pkt->stamp = rosTimeFromGpsTimestamp(&(pkt->data[1200]));
-    }
+    if (!gps_time_)
+      {
+        // Average the times at which we begin and end reading.  Use that to
+        // estimate when the scan occurred. Add the time offset.
+        double time2 = ros::Time::now().toSec();
+        pkt->stamp = ros::Time((time2 + time1) / 2.0 + time_offset);
+      }
+    else
+      {
+        // time for each packet is a 4 byte uint located starting at offset 1200 in
+        // the data packet
+        pkt->stamp = rosTimeFromGpsTimestamp(&(pkt->data[1200]));
+      }
 
     return 0;
   }
@@ -264,12 +274,18 @@ namespace velodyne_driver
     private_nh.param("repeat_delay", repeat_delay_, 0.0);
 
     if (read_once_)
-      ROS_INFO("Read input file only once.");
+      {
+        ROS_INFO("Read input file only once.");
+      }
     if (read_fast_)
-      ROS_INFO("Read input file as quickly as possible.");
+      {
+        ROS_INFO("Read input file as quickly as possible.");
+      }
     if (repeat_delay_ > 0.0)
-      ROS_INFO("Delay %.3f seconds before repeating input file.",
-               repeat_delay_);
+      {
+        ROS_INFO("Delay %.3f seconds before repeating input file.",
+                 repeat_delay_);
+      }
 
     // Open the PCAP dump file
     ROS_INFO("Opening PCAP file \"%s\"", filename_.c_str());
@@ -280,7 +296,7 @@ namespace velodyne_driver
       }
 
     std::stringstream filter;
-    if( devip_str_ != "" )              // using specific IP?
+    if(devip_str_ != "")              // using specific IP?
       {
         filter << "src host " << devip_str_ << " && ";
       }
@@ -310,11 +326,15 @@ namespace velodyne_driver
             // selected IP address.
             if (0 == pcap_offline_filter(&pcap_packet_filter_,
                                           header, pkt_data))
-              continue;
+              {
+                continue;
+              }
 
             // Keep the reader from blowing through the file.
             if (read_fast_ == false)
-              packet_rate_.sleep();
+              {
+                packet_rate_.sleep();
+              }
 
             memcpy(&pkt->data[0], pkt_data+42, packet_size);
             pkt->stamp = ros::Time::now(); // time_offset not considered here, as no synchronization required

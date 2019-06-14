@@ -27,31 +27,31 @@ namespace velodyne_pointcloud
 
     boost::optional<velodyne_pointcloud::Calibration> calibration = data_->setup(private_nh);
     if(calibration)
-    {
+      {
         ROS_DEBUG_STREAM("Calibration file loaded.");
         config_.num_lasers = static_cast<uint16_t>(calibration.get().num_lasers);
-    }
+      }
     else
-    {
+      {
         ROS_ERROR_STREAM("Could not load calibration file!");
-    }
+      }
 
     config_.target_frame = config_.fixed_frame = "velodyne";
 
     if(config_.organize_cloud)
-    {
-      container_ptr_ = boost::shared_ptr<OrganizedCloudXYZIR>(
+      {
+        container_ptr_ = boost::shared_ptr<OrganizedCloudXYZIR>(
           new OrganizedCloudXYZIR(config_.max_range, config_.min_range,
-              config_.target_frame, config_.fixed_frame,
-              config_.num_lasers, data_->scansPerPacket()));
-    }
+            config_.target_frame, config_.fixed_frame,
+            config_.num_lasers, data_->scansPerPacket()));
+      }
     else
-    {
-      container_ptr_ = boost::shared_ptr<PointcloudXYZIR>(
+      {
+        container_ptr_ = boost::shared_ptr<PointcloudXYZIR>(
           new PointcloudXYZIR(config_.max_range, config_.min_range,
-              config_.target_frame, config_.fixed_frame,
-              data_->scansPerPacket()));
-    }
+            config_.target_frame, config_.fixed_frame,
+            data_->scansPerPacket()));
+      }
 
 
     // advertise output point cloud (before subscribing to input data)
@@ -79,10 +79,10 @@ namespace velodyne_pointcloud
     diag_max_freq_ = 20.0;
     using namespace diagnostic_updater;
     diag_topic_.reset(new TopicDiagnostic("velodyne_points", diagnostics_,
-                                       FrequencyStatusParam(&diag_min_freq_,
-                                                            &diag_max_freq_,
-                                                            0.1, 10),
-                                       TimeStampStatusParam()));
+                                          FrequencyStatusParam(&diag_min_freq_,
+                                                               &diag_max_freq_,
+                                                               0.1, 10),
+                                          TimeStampStatusParam()));
   }
 
   void Convert::callback(velodyne_pointcloud::CloudNodeConfig &config,
@@ -94,35 +94,37 @@ namespace velodyne_pointcloud
     config_.min_range = config.min_range;
     config_.max_range = config.max_range;
 
-    if(first_rcfg_call || config.organize_cloud != config_.organize_cloud){
+    if (first_rcfg_call || config.organize_cloud != config_.organize_cloud)
+      {
         first_rcfg_call = false;
         config_.organize_cloud = config.organize_cloud;
         if(config_.organize_cloud) // TODO only on change
-        {
+          {
             ROS_INFO_STREAM("Using the organized cloud format...");
             container_ptr_ = boost::shared_ptr<OrganizedCloudXYZIR>(
                 new OrganizedCloudXYZIR(config_.max_range, config_.min_range,
                     config_.target_frame, config_.fixed_frame,
                     config_.num_lasers, data_->scansPerPacket()));
-        }
+          }
         else
-        {
+          {
             container_ptr_ = boost::shared_ptr<PointcloudXYZIR>(
                 new PointcloudXYZIR(config_.max_range, config_.min_range,
                     config_.target_frame, config_.fixed_frame,
                     data_->scansPerPacket()));
-        }
+          }
     }
 
     container_ptr_->configure(config_.max_range, config_.min_range, config_.fixed_frame, config_.target_frame);
-
   }
 
   /** @brief Callback for raw scan messages. */
   void Convert::processScan(const velodyne_msgs::VelodyneScan::ConstPtr &scanMsg)
   {
     if (output_.getNumSubscribers() == 0)         // no one listening?
-      return;                                     // avoid much work
+      {
+        return;                                     // avoid much work
+      }
 
     boost::lock_guard<boost::mutex> guard(reconfigure_mtx_);
     // allocate a point cloud with same time and frame ID as raw data
@@ -130,9 +132,9 @@ namespace velodyne_pointcloud
 
     // process each packet provided by the driver
     for (size_t i = 0; i < scanMsg->packets.size(); ++i)
-    {
-      data_->unpack(scanMsg->packets[i], *container_ptr_);
-    }
+      {
+        data_->unpack(scanMsg->packets[i], *container_ptr_);
+      }
 
     // publish the accumulated cloud message
     diag_topic_->tick(scanMsg->header.stamp);

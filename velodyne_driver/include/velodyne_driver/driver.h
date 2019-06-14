@@ -57,7 +57,7 @@ public:
 private:
   // Callback for dynamic reconfigure
   void callback(velodyne_driver::VelodyneNodeConfig &config,
-              uint32_t level);
+                uint32_t level);
   // Callback for diagnostics update for lost communication with vlp
   void diagTimerCallback(const ros::TimerEvent&event);
 

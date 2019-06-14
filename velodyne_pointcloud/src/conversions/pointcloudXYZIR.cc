@@ -19,7 +19,8 @@ namespace velodyne_pointcloud
         iter_ring(cloud, "ring"), iter_intensity(cloud, "intensity")
     {};
 
-  void PointcloudXYZIR::setup(const velodyne_msgs::VelodyneScan::ConstPtr& scan_msg){
+  void PointcloudXYZIR::setup(const velodyne_msgs::VelodyneScan::ConstPtr& scan_msg)
+  {
     DataContainerBase::setup(scan_msg);
     iter_x = sensor_msgs::PointCloud2Iterator<float>(cloud, "x");
     iter_y = sensor_msgs::PointCloud2Iterator<float>(cloud, "y");
@@ -33,12 +34,17 @@ namespace velodyne_pointcloud
 
   void PointcloudXYZIR::addPoint(float x, float y, float z, uint16_t ring, uint16_t /*azimuth*/, float distance, float intensity)
   {
-    if(!pointInRange(distance)) return;
+    if (!pointInRange(distance))
+      {
+        return;
+      }
 
     // convert polar coordinates to Euclidean XYZ
 
     if(config_.transform)
-      transformPoint(x, y, z);
+      {
+        transformPoint(x, y, z);
+      }
 
     *iter_x = x;
     *iter_y = y;

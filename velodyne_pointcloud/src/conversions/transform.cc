@@ -32,32 +32,32 @@ namespace velodyne_pointcloud
     first_rcfg_call(true)
   {
     boost::optional<velodyne_pointcloud::Calibration> calibration = data_->setup(private_nh);
-    if(calibration)
-    {
-      ROS_DEBUG_STREAM("Calibration file loaded.");
-      config_.num_lasers = static_cast<uint16_t>(calibration.get().num_lasers);
-    }
+    if (calibration)
+      {
+        ROS_DEBUG_STREAM("Calibration file loaded.");
+        config_.num_lasers = static_cast<uint16_t>(calibration.get().num_lasers);
+      }
     else
-    {
-      ROS_ERROR_STREAM("Could not load calibration file!");
-    }
+      {
+        ROS_ERROR_STREAM("Could not load calibration file!");
+      }
 
     config_.target_frame = config_.fixed_frame = "velodyne";
     tf_ptr_ = boost::make_shared<tf::TransformListener>();
 
     if(config_.organize_cloud)
-    {
-      container_ptr = boost::shared_ptr<OrganizedCloudXYZIR>(
+      {
+        container_ptr = boost::shared_ptr<OrganizedCloudXYZIR>(
           new OrganizedCloudXYZIR(config_.max_range, config_.min_range, config_.target_frame, config_.fixed_frame,
                                   config_.num_lasers, data_->scansPerPacket(), tf_ptr_));
-    }
+      }
     else
-    {
-      container_ptr = boost::shared_ptr<PointcloudXYZIR>(
+      {
+        container_ptr = boost::shared_ptr<PointcloudXYZIR>(
           new PointcloudXYZIR(config_.max_range, config_.min_range,
                               config_.target_frame, config_.fixed_frame,
                               data_->scansPerPacket(), tf_ptr_));
-    }
+      }
 
     // advertise output point cloud (before subscribing to input data)
     output_ =
@@ -102,25 +102,26 @@ namespace velodyne_pointcloud
 
     boost::lock_guard<boost::mutex> guard(reconfigure_mtx_);
 
-    if(first_rcfg_call || config.organize_cloud != config_.organize_cloud){
-      first_rcfg_call = false;
-      config_.organize_cloud = config.organize_cloud;
-      if(config_.organize_cloud)
+    if (first_rcfg_call || config.organize_cloud != config_.organize_cloud)
       {
-        ROS_INFO_STREAM("Using the organized cloud format...");
-        container_ptr = boost::shared_ptr<OrganizedCloudXYZIR>(
-            new OrganizedCloudXYZIR(config_.max_range, config_.min_range,
-                                    config_.target_frame, config_.fixed_frame,
-                                    config_.num_lasers, data_->scansPerPacket()));
+        first_rcfg_call = false;
+        config_.organize_cloud = config.organize_cloud;
+        if (config_.organize_cloud)
+          {
+            ROS_INFO_STREAM("Using the organized cloud format...");
+            container_ptr = boost::shared_ptr<OrganizedCloudXYZIR>(
+              new OrganizedCloudXYZIR(config_.max_range, config_.min_range,
+                                      config_.target_frame, config_.fixed_frame,
+                                      config_.num_lasers, data_->scansPerPacket()));
+          }
+        else
+          {
+            container_ptr = boost::shared_ptr<PointcloudXYZIR>(
+              new PointcloudXYZIR(config_.max_range, config_.min_range,
+                                  config_.target_frame, config_.fixed_frame,
+                                  data_->scansPerPacket()));
+          }
       }
-      else
-      {
-        container_ptr = boost::shared_ptr<PointcloudXYZIR>(
-            new PointcloudXYZIR(config_.max_range, config_.min_range,
-                                config_.target_frame, config_.fixed_frame,
-                                data_->scansPerPacket()));
-      }
-    }
     container_ptr->configure(config_.max_range, config_.min_range, config_.fixed_frame, config_.target_frame);
   }
 
@@ -133,7 +134,9 @@ namespace velodyne_pointcloud
     Transform::processScan(const velodyne_msgs::VelodyneScan::ConstPtr &scanMsg)
   {
     if (output_.getNumSubscribers() == 0)         // no one listening?
-      return;                                     // avoid much work
+      {
+        return;                                     // avoid much work
+      }
 
     boost::lock_guard<boost::mutex> guard(reconfigure_mtx_);
 
@@ -142,9 +145,9 @@ namespace velodyne_pointcloud
 
     // process each packet provided by the driver
     for (size_t i = 0; i < scanMsg->packets.size(); ++i)
-    {
-      data_->unpack(scanMsg->packets[i], *container_ptr);
-    }
+      {
+        data_->unpack(scanMsg->packets[i], *container_ptr);
+      }
     // publish the accumulated cloud message
     output_.publish(container_ptr->finishCloud());
 

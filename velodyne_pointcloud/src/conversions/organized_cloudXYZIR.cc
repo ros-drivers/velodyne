@@ -31,7 +31,8 @@ namespace velodyne_pointcloud
     ++cloud.height;
   }
 
-  void OrganizedCloudXYZIR::setup(const velodyne_msgs::VelodyneScan::ConstPtr& scan_msg){
+  void OrganizedCloudXYZIR::setup(const velodyne_msgs::VelodyneScan::ConstPtr& scan_msg)
+  {
     DataContainerBase::setup(scan_msg);
     iter_x = sensor_msgs::PointCloud2Iterator<float>(cloud, "x");
     iter_y = sensor_msgs::PointCloud2Iterator<float>(cloud, "y");
@@ -51,23 +52,25 @@ namespace velodyne_pointcloud
      * NaN.
      */
     if (pointInRange(distance))
-    {
-      if(config_.transform)
-        transformPoint(x, y, z);
+      {
+        if(config_.transform)
+          {
+            transformPoint(x, y, z);
+          }
 
-      *(iter_x+ring) = x;
-      *(iter_y+ring) = y;
-      *(iter_z+ring) = z;
-      *(iter_intensity+ring) = intensity;
-      *(iter_ring+ring) = ring;
-    }
+        *(iter_x+ring) = x;
+        *(iter_y+ring) = y;
+        *(iter_z+ring) = z;
+        *(iter_intensity+ring) = intensity;
+        *(iter_ring+ring) = ring;
+      }
     else
-    {
-      *(iter_x+ring) = nanf("");
-      *(iter_y+ring) = nanf("");
-      *(iter_z+ring) = nanf("");
-      *(iter_intensity+ring) = nanf("");
-      *(iter_ring+ring) = ring;
-    }
+      {
+        *(iter_x+ring) = nanf("");
+        *(iter_y+ring) = nanf("");
+        *(iter_z+ring) = nanf("");
+        *(iter_intensity+ring) = nanf("");
+        *(iter_ring+ring) = ring;
+      }
   }
 }

@@ -58,20 +58,20 @@ public:
     va_start(vl, fields);
     int offset = 0;
     for (int i = 0; i < fields; ++i)
-    {
-      // Create the corresponding PointField
-      std::string name(va_arg(vl, char*));
-      int count(va_arg(vl, int));
-      int datatype(va_arg(vl, int));
-      offset = addPointField(cloud, name, count, datatype, offset);
-    }
+      {
+        // Create the corresponding PointField
+        std::string name(va_arg(vl, char*));
+        int count(va_arg(vl, int));
+        int datatype(va_arg(vl, int));
+        offset = addPointField(cloud, name, count, datatype, offset);
+      }
     va_end(vl);
     cloud.point_step = offset;
     cloud.row_step = cloud.width * cloud.point_step;
     if (config_.transform && !tf_ptr)
-    {
-      tf_ptr = boost::shared_ptr<tf::TransformListener>(new tf::TransformListener);
-    }
+      {
+        tf_ptr = boost::shared_ptr<tf::TransformListener>(new tf::TransformListener);
+      }
   }
 
   struct Config
@@ -114,12 +114,12 @@ public:
     cloud.height = config_.init_height;
     cloud.is_dense = static_cast<uint8_t>(config_.is_dense);
     if (config_.transform)
-    {
-      if (!computeTransformation(scan_msg->header.stamp))
       {
-        ROS_ERROR_STREAM("Could not transform points!");
+        if (!computeTransformation(scan_msg->header.stamp))
+          {
+            ROS_ERROR_STREAM("Could not transform points!");
+          }
       }
-    }
   }
 
   virtual void addPoint(float x, float y, float z, const uint16_t ring, const uint16_t azimuth, const float distance,
@@ -145,9 +145,9 @@ public:
 
     config_.transform = fixed_frame.compare(target_frame) != 0;
     if (config_.transform && !tf_ptr)
-    {
-      tf_ptr = boost::shared_ptr<tf::TransformListener>(new tf::TransformListener);
-    }
+      {
+        tf_ptr = boost::shared_ptr<tf::TransformListener>(new tf::TransformListener);
+      }
   }
 
   sensor_msgs::PointCloud2 cloud;
@@ -164,19 +164,19 @@ protected:
   {
     tf::StampedTransform transform;
     try
-    {
-      tf_ptr->lookupTransform(config_.target_frame, cloud.header.frame_id, time, transform);
-    }
+      {
+        tf_ptr->lookupTransform(config_.target_frame, cloud.header.frame_id, time, transform);
+      }
     catch (tf::LookupException& e)
-    {
-      ROS_ERROR("%s", e.what());
-      return false;
-    }
+      {
+        ROS_ERROR("%s", e.what());
+        return false;
+      }
     catch (tf::ExtrapolationException& e)
-    {
-      ROS_ERROR("%s", e.what());
-      return false;
-    }
+      {
+        ROS_ERROR("%s", e.what());
+        return false;
+      }
 
     tf::Quaternion quaternion = transform.getRotation();
     Eigen::Quaternionf rotation(quaternion.w(), quaternion.x(), quaternion.y(), quaternion.z());
