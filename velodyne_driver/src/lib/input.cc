@@ -99,12 +99,12 @@ namespace velodyne_driver
 
     if (!devip_str_.empty())
       {
-        inet_aton(devip_str_.c_str(), &devip_);
+        ::inet_aton(devip_str_.c_str(), &devip_);
       }
 
     // connect to Velodyne UDP port
     ROS_INFO_STREAM("Opening UDP socket: port " << port);
-    sockfd_ = socket(PF_INET, SOCK_DGRAM, 0);
+    sockfd_ = ::socket(PF_INET, SOCK_DGRAM, 0);
     if (sockfd_ == -1)
       {
         perror("socket");               // TODO: ROS_ERROR errno
@@ -114,16 +114,16 @@ namespace velodyne_driver
     sockaddr_in my_addr;                     // my address information
     memset(&my_addr, 0, sizeof(my_addr));    // initialize to zeros
     my_addr.sin_family = AF_INET;            // host byte order
-    my_addr.sin_port = htons(port);          // port in network byte order
+    my_addr.sin_port = ::htons(port);          // port in network byte order
     my_addr.sin_addr.s_addr = INADDR_ANY;    // automatically fill in my IP
 
-    if (bind(sockfd_, (sockaddr *)&my_addr, sizeof(sockaddr)) == -1)
+    if (::bind(sockfd_, (sockaddr *)&my_addr, sizeof(sockaddr)) == -1)
       {
         perror("bind");                 // TODO: ROS_ERROR errno
         return;
       }
 
-    if (fcntl(sockfd_,F_SETFL, O_NONBLOCK|FASYNC) < 0)
+    if (::fcntl(sockfd_,F_SETFL, O_NONBLOCK|FASYNC) < 0)
       {
         perror("non-block");
         return;
@@ -135,7 +135,7 @@ namespace velodyne_driver
   /** @brief destructor */
   InputSocket::~InputSocket(void)
   {
-    (void) close(sockfd_);
+    (void) ::close(sockfd_);
   }
 
   /** @brief Get one velodyne packet. */
@@ -173,7 +173,7 @@ namespace velodyne_driver
         // poll() until input available
         do
           {
-            int retval = poll(fds, 1, POLL_TIMEOUT);
+            int retval = ::poll(fds, 1, POLL_TIMEOUT);
             if (retval < 0)             // poll() error?
               {
                 if (errno != EINTR)
@@ -196,16 +196,16 @@ namespace velodyne_driver
 
         // Receive packets that should now be available from the
         // socket using a blocking read.
-        ssize_t nbytes = recvfrom(sockfd_, &pkt->data[0],
-                                  packet_size,  0,
-                                  (sockaddr*) &sender_address,
-                                  &sender_address_len);
+        ssize_t nbytes = ::recvfrom(sockfd_, &pkt->data[0],
+                                    packet_size,  0,
+                                    (sockaddr*) &sender_address,
+                                    &sender_address_len);
 
         if (nbytes < 0)
           {
             if (errno != EWOULDBLOCK)
               {
-                perror("recvfail");
+                ::perror("recvfail");
                 ROS_INFO("recvfail");
                 return -1;
               }
@@ -336,7 +336,7 @@ namespace velodyne_driver
                 packet_rate_.sleep();
               }
 
-            memcpy(&pkt->data[0], pkt_data+42, packet_size);
+            ::memcpy(&pkt->data[0], pkt_data+42, packet_size);
             pkt->stamp = ros::Time::now(); // time_offset not considered here, as no synchronization required
             empty_ = false;
             return 0;                   // success
@@ -359,7 +359,7 @@ namespace velodyne_driver
           {
             ROS_INFO("end of file reached -- delaying %.3f seconds.",
                      repeat_delay_);
-            usleep(rint(repeat_delay_ * 1000000.0));
+            ::usleep(::rint(repeat_delay_ * 1000000.0));
           }
 
         ROS_DEBUG("replaying Velodyne dump file");
