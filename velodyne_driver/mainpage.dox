@@ -3,7 +3,7 @@
 
 \htmlinclude manifest.html
 
-ROS device driver for Velodyne 3D LIDARs. 
+ROS device driver for Velodyne 3D LIDARs.
 
 \section read Velodyne device driver
 

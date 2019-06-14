@@ -87,9 +87,8 @@ namespace velodyne_pointcloud
                                                                &diag_max_freq_,
                                                                0.1, 10),
                                           TimeStampStatusParam()));
-
   }
-  
+
   void Transform::reconfigure_callback(
       velodyne_pointcloud::TransformNodeConfig &config, uint32_t level)
   {

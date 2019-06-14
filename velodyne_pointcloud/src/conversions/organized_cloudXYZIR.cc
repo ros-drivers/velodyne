@@ -1,4 +1,3 @@
-
 #include <velodyne_pointcloud/organized_cloudXYZIR.h>
 
 namespace velodyne_pointcloud
@@ -72,4 +71,3 @@ namespace velodyne_pointcloud
     }
   }
 }
-

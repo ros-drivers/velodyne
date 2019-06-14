@@ -40,7 +40,7 @@
  * correct. Velodyne only returns time since the top of the hour, so if the computer clock
  * and the velodyne clock (gps-synchronized) are a little off, there is a chance the wrong
  * hour may be associated with the timestamp
- * 
+ *
  * @param stamp timestamp recovered from velodyne
  * @param nominal_stamp time coming from computer's clock
  * @return timestamp from velodyne, possibly shifted by 1 hour if the function arguments

@@ -1,9 +1,6 @@
-
-
-
 #include <velodyne_pointcloud/pointcloudXYZIR.h>
 
-namespace velodyne_pointcloud 
+namespace velodyne_pointcloud
 {
 
   PointcloudXYZIR::PointcloudXYZIR(
@@ -57,4 +54,3 @@ namespace velodyne_pointcloud
     ++iter_intensity;
   }
 }
-

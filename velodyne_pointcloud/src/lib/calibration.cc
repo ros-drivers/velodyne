@@ -1,6 +1,6 @@
 /**
  * \file  calibration.cc
- * \brief  
+ * \brief
  *
  * \author  Piyush Khandelwal (piyushk@cs.utexas.edu)
  * Copyright (C) 2012, Austin Robot Technology,
@@ -33,7 +33,7 @@ namespace YAML {
 #include <ros/ros.h>
 #include <velodyne_pointcloud/calibration.h>
 
-namespace velodyne_pointcloud 
+namespace velodyne_pointcloud
 {
 
   const std::string NUM_LASERS = "num_lasers";
@@ -140,7 +140,7 @@ namespace velodyne_pointcloud
   }
 
   /** Read entire calibration file. */
-  void operator >> (const YAML::Node& node, Calibration& calibration) 
+  void operator >> (const YAML::Node& node, Calibration& calibration)
   {
     int num_lasers;
     node[NUM_LASERS] >> num_lasers;
@@ -241,7 +241,7 @@ namespace velodyne_pointcloud
            it = calibration.laser_corrections_map.begin();
          it != calibration.laser_corrections_map.end(); it++)
       {
-        out << *it; 
+        out << *it;
       }
     out << YAML::EndSeq;
     out << YAML::EndMap;
@@ -279,5 +279,5 @@ namespace velodyne_pointcloud
     fout << out.c_str();
     fout.close();
   }
-  
+
 } /* velodyne_pointcloud */

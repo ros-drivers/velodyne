@@ -27,4 +27,3 @@ target_link_libraries(test_system_node ${catkin_LIBRARIES})
 add_rostest_gtest(test_system_nodelet system_nodelet.test system.cpp)
 add_dependencies(test_system_nodelet ${catkin_EXPORTED_TARGETS})
 target_link_libraries(test_system_nodelet ${catkin_LIBRARIES})
-
