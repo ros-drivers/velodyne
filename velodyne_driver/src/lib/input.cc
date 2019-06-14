@@ -44,7 +44,9 @@
  *              PCAP dump
  */
 
+
 #include <unistd.h>
+#include <cmath>
 #include <string>
 #include <sstream>
 #include <sys/socket.h>
