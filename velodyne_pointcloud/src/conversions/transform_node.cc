@@ -12,20 +12,21 @@
 
 */
 
-#include <ros/ros.h>
+#include <memory>
+
+#include <rclcpp/rclcpp.hpp>
+
 #include "velodyne_pointcloud/transform.h"
 
 /** Main node entry point. */
 int main(int argc, char **argv)
 {
-  ros::init(argc, argv, "transform_node");
-
-  // create conversion class, which subscribes to raw data
-  velodyne_pointcloud::Transform transform(ros::NodeHandle(),
-                                           ros::NodeHandle("~"));
+  rclcpp::init(argc, argv);
 
   // handle callbacks until shut down
-  ros::spin();
+  rclcpp::spin(std::make_shared<velodyne_pointcloud::Transform>());
+
+  rclcpp::shutdown();
 
   return 0;
 }

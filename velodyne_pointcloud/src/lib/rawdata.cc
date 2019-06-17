@@ -25,13 +25,13 @@
  *  HDL-64E S2 calibration support provided by Nick Hillier
  */
 
-#include <fstream>
-#include <math.h>
+#include <cmath>
+#include <string>
 
-#include <ros/ros.h>
-#include <ros/package.h>
 #include <angles/angles.h>
 
+#include <velodyne_msgs/msg/velodyne_packet.hpp>
+#include <velodyne_pointcloud/datacontainerbase.h>
 #include <velodyne_pointcloud/rawdata.h>
 
 namespace velodyne_rawdata
@@ -44,7 +44,9 @@ namespace velodyne_rawdata
   //
   ////////////////////////////////////////////////////////////////////////
 
-  RawData::RawData() {}
+  RawData::RawData()
+  {
+  }
 
   /** Update parameters: conversions and update */
   void RawData::setParameters(double min_range,
@@ -89,38 +91,28 @@ namespace velodyne_rawdata
   }
 
   /** Set up for on-line operation. */
-  boost::optional<velodyne_pointcloud::Calibration> RawData::setup(ros::NodeHandle private_nh)
+  int RawData::setup(const std::string & calibrationFile)
   {
-    // get path to angles.config file for this device
-    if (!private_nh.getParam("calibration", config_.calibrationFile))
-      {
-        ROS_ERROR_STREAM("No calibration angles specified! Using test values!");
-
-        // have to use something: grab unit test version as a default
-        std::string pkgPath = ros::package::getPath("velodyne_pointcloud");
-        config_.calibrationFile = pkgPath + "/params/64e_utexas.yaml";
-      }
-
-    ROS_INFO_STREAM("correction angles: " << config_.calibrationFile);
+    config_.calibrationFile = calibrationFile;
 
     calibration_.read(config_.calibrationFile);
     if (!calibration_.initialized)
       {
-        ROS_ERROR_STREAM("Unable to open calibration file: " <<
-                         config_.calibrationFile);
-        return boost::none;
+        //RCLCPP_ERROR(this->get_logger(), "Unable to open calibration file: %s",
+        //             config_.calibrationFile);
+        return -1;
       }
 
-    ROS_INFO_STREAM("Number of lasers: " << calibration_.num_lasers << ".");
+    //RCLCPP_INFO(this->get_logger(), "Number of lasers: %d.",  calibration_.num_lasers);
 
     // Set up cached values for sin and cos of all the possible headings
     for (uint16_t rot_index = 0; rot_index < ROTATION_MAX_UNITS; ++rot_index)
       {
         float rotation = angles::from_degrees(ROTATION_RESOLUTION * rot_index);
-        cos_rot_table_[rot_index] = cosf(rotation);
-        sin_rot_table_[rot_index] = sinf(rotation);
+        cos_rot_table_[rot_index] = ::cosf(rotation);
+        sin_rot_table_[rot_index] = ::sinf(rotation);
       }
-   return calibration_;
+    return calibration_.num_lasers;
   }
 
 
@@ -129,19 +121,16 @@ namespace velodyne_rawdata
   {
     config_.max_range = max_range_;
     config_.min_range = min_range_;
-    ROS_INFO_STREAM("data ranges to publish: ["
-                    << config_.min_range << ", "
-                    << config_.max_range << "]");
+    //RCLCPP_INFO(get_logger(), "data ranges to publish: [%f, %f]", config_.min_range, config_.max_range);
 
     config_.calibrationFile = calibration_file;
 
-    ROS_INFO_STREAM("correction angles: " << config_.calibrationFile);
+    //RCLCPP_INFO(get_logger(), "correction angles: %s", config_.calibrationFile.c_str());
 
     calibration_.read(config_.calibrationFile);
     if (!calibration_.initialized)
       {
-        ROS_ERROR_STREAM("Unable to open calibration file: " <<
-                         config_.calibrationFile);
+        //RCLCPP_ERROR(get_logger(), "Unable to open calibration file: %s", config_.calibrationFile);
         return -1;
       }
 
@@ -161,10 +150,10 @@ namespace velodyne_rawdata
    *  @param pkt raw packet to unpack
    *  @param pc shared pointer to point cloud (points are appended)
    */
-  void RawData::unpack(const velodyne_msgs::VelodynePacket &pkt, DataContainerBase& data)
+  void RawData::unpack(const velodyne_msgs::msg::VelodynePacket &pkt, DataContainerBase& data)
   {
     using velodyne_pointcloud::LaserCorrection;
-    ROS_DEBUG_STREAM("Received packet, time: " << pkt.stamp);
+    //RCLCPP_DEBUG(this->get_logger(), "Received packet, time: %s", pkt.stamp);
 
     /** special parsing for the VLP16 **/
     if (calibration_.num_lasers == 16)
@@ -328,12 +317,12 @@ namespace velodyne_rawdata
    *  @param pkt raw packet to unpack
    *  @param pc shared pointer to point cloud (points are appended)
    */
-  void RawData::unpack_vlp16(const velodyne_msgs::VelodynePacket &pkt, DataContainerBase& data)
+  void RawData::unpack_vlp16(const velodyne_msgs::msg::VelodynePacket &pkt, DataContainerBase& data)
   {
     float azimuth;
     float azimuth_diff;
     int raw_azimuth_diff;
-    float last_azimuth_diff=0;
+    float last_azimuth_diff = 0.0f;
     float azimuth_corrected_f;
     int azimuth_corrected;
     float x, y, z;
@@ -348,9 +337,8 @@ namespace velodyne_rawdata
           {
             // Do not flood the log with messages, only issue at most one
             // of these warnings per minute.
-            ROS_WARN_STREAM_THROTTLE(60, "skipping invalid VLP-16 packet: block "
-                                     << block << " header value is "
-                                     << raw->blocks[block].header);
+            //RCLCPP_WARN(get_logger(), "skipping invalid VLP-16 packet: block %d header value is %u",
+            //            block, raw->blocks[block].header);
             return;                         // bad packet: skip the rest
           }
 
@@ -363,7 +351,7 @@ namespace velodyne_rawdata
             // some packets contain an angle overflow where azimuth_diff < 0
             if(raw_azimuth_diff < 0)//raw->blocks[block+1].rotation - raw->blocks[block].rotation < 0)
               {
-                ROS_WARN_STREAM_THROTTLE(60, "Packet containing angle overflow, first angle: " << raw->blocks[block].rotation << " second angle: " << raw->blocks[block+1].rotation);
+                //RCLCPP_WARN(get_logger(), "Packet containing angle overflow, first angle: %u second angle: %u", raw->blocks[block].rotation, raw->blocks[block+1].rotation);
                 // if last_azimuth_diff was not zero, we can assume that the velodyne's speed did not change very much and use the same difference
                 if (last_azimuth_diff > 0)
                   {
@@ -511,4 +499,5 @@ namespace velodyne_rawdata
           }
       }
   }
+
 } // namespace velodyne_rawdata

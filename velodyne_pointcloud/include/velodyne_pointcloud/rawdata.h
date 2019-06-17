@@ -42,14 +42,14 @@
 #ifndef VELODYNE_POINTCLOUD_RAWDATA_H
 #define VELODYNE_POINTCLOUD_RAWDATA_H
 
-#include <errno.h>
-#include <stdint.h>
+#include <memory>
 #include <string>
-#include <boost/format.hpp>
-#include <math.h>
 
-#include <ros/ros.h>
-#include <velodyne_msgs/VelodyneScan.h>
+#include <rclcpp/rclcpp.hpp>
+
+#include <pcl/point_cloud.h>
+
+#include <velodyne_msgs/msg/velodyne_packet.hpp>
 #include <velodyne_pointcloud/calibration.h>
 #include <velodyne_pointcloud/datacontainerbase.h>
 
@@ -145,9 +145,10 @@ public:
    *    - read device-specific angles calibration
    *
    *  @param private_nh private node handle for ROS parameters
-   *  @returns an optional calibration
+   *  @returns number of lasers if successful;
+   *           errno value for failure
    */
-  boost::optional<velodyne_pointcloud::Calibration> setup(ros::NodeHandle private_nh);
+  int setup(const std::string & calibrationFile);
 
   /** \brief Set up for data processing offline.
    * Performs the same initialization as in setup, in the abscence of a ros::NodeHandle.
@@ -162,7 +163,7 @@ public:
    */
   int setupOffline(std::string calibration_file, double max_range_, double min_range_);
 
-  void unpack(const velodyne_msgs::VelodynePacket& pkt, DataContainerBase& data);
+  void unpack(const velodyne_msgs::msg::VelodynePacket &pkt, DataContainerBase& data);
 
   void setParameters(double min_range, double max_range, double view_direction, double view_width);
 
@@ -192,7 +193,7 @@ private:
   float cos_rot_table_[ROTATION_MAX_UNITS];
 
   /** add private function to handle the VLP16 **/
-  void unpack_vlp16(const velodyne_msgs::VelodynePacket& pkt, DataContainerBase& data);
+  void unpack_vlp16(const velodyne_msgs::msg::VelodynePacket &pkt, DataContainerBase& data);
 };
 
 }  // namespace velodyne_rawdata

@@ -1,3 +1,11 @@
+#include <cmath>
+#include <memory>
+#include <string>
+
+#include <sensor_msgs/point_cloud2_iterator.hpp>
+#include <sensor_msgs/msg/point_field.hpp>
+#include <tf2/buffer_core.h>
+
 #include <velodyne_pointcloud/organized_cloudXYZIR.h>
 
 namespace velodyne_pointcloud
@@ -7,15 +15,15 @@ namespace velodyne_pointcloud
       const double max_range, const double min_range,
       const std::string& target_frame, const std::string& fixed_frame,
       const unsigned int num_lasers, const unsigned int scans_per_block,
-      boost::shared_ptr<tf::TransformListener> tf_ptr)
+      tf2::BufferCore & buffer)
     : DataContainerBase(
         max_range, min_range, target_frame, fixed_frame,
-        num_lasers, 0, false, scans_per_block, tf_ptr, 5,
-        "x", 1, sensor_msgs::PointField::FLOAT32,
-        "y", 1, sensor_msgs::PointField::FLOAT32,
-        "z", 1, sensor_msgs::PointField::FLOAT32,
-        "intensity", 1, sensor_msgs::PointField::FLOAT32,
-        "ring", 1, sensor_msgs::PointField::UINT16),
+        num_lasers, 0, false, scans_per_block, buffer, 5,
+        "x", 1, sensor_msgs::msg::PointField::FLOAT32,
+        "y", 1, sensor_msgs::msg::PointField::FLOAT32,
+        "z", 1, sensor_msgs::msg::PointField::FLOAT32,
+        "intensity", 1, sensor_msgs::msg::PointField::FLOAT32,
+        "ring", 1, sensor_msgs::msg::PointField::UINT16),
         iter_x(cloud, "x"), iter_y(cloud, "y"), iter_z(cloud, "z"),
         iter_intensity(cloud, "intensity"), iter_ring(cloud, "ring")
   {
@@ -31,7 +39,7 @@ namespace velodyne_pointcloud
     ++cloud.height;
   }
 
-  void OrganizedCloudXYZIR::setup(const velodyne_msgs::VelodyneScan::ConstPtr& scan_msg)
+  void OrganizedCloudXYZIR::setup(const velodyne_msgs::msg::VelodyneScan::SharedPtr scan_msg)
   {
     DataContainerBase::setup(scan_msg);
     iter_x = sensor_msgs::PointCloud2Iterator<float>(cloud, "x");
@@ -69,7 +77,7 @@ namespace velodyne_pointcloud
         *(iter_x+ring) = nanf("");
         *(iter_y+ring) = nanf("");
         *(iter_z+ring) = nanf("");
-        *(iter_intensity+ring) = nanf("");
+        *(iter_intensity+ring) = ::nanf("");
         *(iter_ring+ring) = ring;
       }
   }
