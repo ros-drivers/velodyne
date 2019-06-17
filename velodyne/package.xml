@@ -16,7 +16,7 @@
   <buildtool_depend>ament_cmake</buildtool_depend>
 
   <exec_depend>velodyne_driver</exec_depend>
-  <!-- <exec_depend>velodyne_laserscan</exec_depend> -->
+  <exec_depend>velodyne_laserscan</exec_depend>
   <exec_depend>velodyne_msgs</exec_depend>
   <exec_depend>velodyne_pointcloud</exec_depend>
 

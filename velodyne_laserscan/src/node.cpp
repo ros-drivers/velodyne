@@ -30,20 +30,18 @@
 // ANY WAY OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE
 // POSSIBILITY OF SUCH DAMAGE.
 
-#include <ros/ros.h>
+#include <rclcpp/rclcpp.hpp>
+
 #include "velodyne_laserscan/velodyne_laserscan.h"
 
 int main(int argc, char** argv)
 {
-  ros::init(argc, argv, "velodyne_laserscan_node");
-  ros::NodeHandle nh;
-  ros::NodeHandle nh_priv("~");
-
-  // create VelodyneLaserScan class
-  velodyne_laserscan::VelodyneLaserScan n(nh, nh_priv);
+  rclcpp::init(argc, argv);
 
   // handle callbacks until shut down
-  ros::spin();
+  rclcpp::spin(std::make_shared<velodyne_laserscan::VelodyneLaserScan>());
+
+  rclcpp::shutdown();
 
   return 0;
 }
