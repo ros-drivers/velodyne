@@ -83,7 +83,7 @@ public:
     cloud.width = config_.init_width;
     cloud.height = config_.init_height;
     cloud.is_dense = static_cast<uint8_t>(config_.is_dense);
-    cloud.row_step = cloud.width * cloud.point_step;
+    cloud.row_step = init_width * cloud.point_step;
   }
 
   virtual ~DataContainerBase() {}
