@@ -67,7 +67,7 @@ public:
     }
     va_end(vl);
     cloud.point_step = offset;
-    cloud.row_step = cloud.width * cloud.point_step;
+    cloud.row_step = init_width * cloud.point_step;
     if (config_.transform && !tf_ptr)
     {
       tf_ptr = boost::shared_ptr<tf::TransformListener>(new tf::TransformListener);
