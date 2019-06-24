@@ -50,8 +50,8 @@ add_subdirectory(src/conversions)
 #         DESTINATION ${CATKIN_PACKAGE_INCLUDE_DESTINATION})
 # install(DIRECTORY launch/
 #         DESTINATION ${CATKIN_PACKAGE_SHARE_DESTINATION}/launch)
-# install(DIRECTORY params/
-#         DESTINATION ${CATKIN_PACKAGE_SHARE_DESTINATION}/params)
+install(DIRECTORY params
+        DESTINATION share/${PROJECT_NAME})
 # install(PROGRAMS scripts/gen_calibration.py
 #         DESTINATION ${CATKIN_PACKAGE_BIN_DESTINATION})
 
