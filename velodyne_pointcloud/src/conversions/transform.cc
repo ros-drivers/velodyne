@@ -24,23 +24,22 @@
 namespace velodyne_pointcloud
 {
   /** @brief Constructor. */
-  Transform::Transform() :
-    rclcpp::Node("transform_node"),
-    data_(new velodyne_rawdata::RawData())
+  Transform::Transform(const rclcpp::NodeOptions & options) :
+    rclcpp::Node("transform_node", options),
+    buffer_(this->get_clock()),
+    tf2_filter_(velodyne_scan_, buffer_, config_.frame_id, 10, 0),
+    data_(new velodyne_rawdata::RawData(options))
   {
     // Read calibration.
-    data_->setup(private_nh);
+    data_->setup();
 
     // advertise output point cloud (before subscribing to input data)
     output_ = this->create_publisher<sensor_msgs::msg::PointCloud2>("velodyne_points", 10);
     
     // subscribe to VelodyneScan packets using transform filter
-    velodyne_scan_->create_subscription("velodyne_packets", 10);
-    tf_filter_ =
-    new tf2::MessageFilter<velodyne_msgs::msg::VelodyneScan>(velodyne_scan_,
-                                                         listener_,
-                                                         config_.frame_id, 10);
-    tf_filter_->registerCallback(std::bind(&Transform::processScan, this, std::placeholders::_1));
+    velodyne_scan_.subscribe(this->shared_from_this(), "velodyne_packets");
+    
+    tf2_filter_.registerCallback(std::bind(&Transform::processScan, this, std::placeholders::_1));
 
     // Diagnostics
     diagnostics_.setHardwareID("Velodyne Transform");
@@ -55,16 +54,6 @@ namespace velodyne_pointcloud
                                                                0.1, 10),
                                           TimeStampStatusParam()));
   }
-  
-  void Transform::reconfigure_callback(
-      velodyne_pointcloud::TransformNodeConfig &config, uint32_t level)
-  {
-    RCLCPP_INFO(this->get_logger(), "Reconfigure request.");
-    data_->setParameters(config.min_range, config.max_range, 
-                         config.view_direction, config.view_width);
-    config_.frame_id = tf::resolve(tf_prefix_, config.frame_id);
-    RCLCPP_INFO(this->get_logger(), "Fixed frame ID: %d", config_.frame_id);
-  }
 
   /** @brief Callback for raw scan messages.
    *
@@ -72,10 +61,10 @@ namespace velodyne_pointcloud
    *       the configured @c frame_id can succeed.
    */
   void
-    Transform::processScan(const velodyne_msgs::VelodyneScan::ConstPtr &scanMsg)
+  Transform::processScan(const velodyne_msgs::msg::VelodyneScan::ConstSharedPtr &scanMsg)
   {
-    if (output_.getNumSubscribers() == 0)         // no one listening?
-      return;                                     // avoid much work
+    //if (output_.getNumSubscribers() == 0)         // no one listening?
+    //  return;                                     // avoid much work
 
     // allocate an output point cloud with same time as raw data
     velodyne_rawdata::VPointCloud::Ptr outMsg(new velodyne_rawdata::VPointCloud());
@@ -90,7 +79,7 @@ namespace velodyne_pointcloud
         inPc_.pc->points.clear();
         inPc_.pc->width = 0;
         inPc_.pc->height = 1;
-        std_msgs::Header header;
+        std_msgs::msg::Header header;
         header.stamp = scanMsg->packets[next].stamp;
         header.frame_id = scanMsg->header.frame_id;
         pcl_conversions::toPCL(header, inPc_.pc->header);
@@ -109,7 +98,7 @@ namespace velodyne_pointcloud
         // transform the packet point cloud into the target frame
         try
           {
-            RCLCPP_DEBUG(this->get_logger(), "correcting distortion relative to %d", config_.frame_id);
+            RCLCPP_DEBUG(this->get_logger(), "correcting distortion relative to %d", config_.frame_id.c_str());
             // stamp in the header is microseconds unix time.
             rclcpp::Time stamp(outMsg->header.stamp / 1000000, (outMsg->header.stamp % 1000000)*1000);
             pcl_ros::transformPointCloud(inPc_.pc->header.frame_id,
@@ -117,12 +106,12 @@ namespace velodyne_pointcloud
                                          *(inPc_.pc),
                                          config_.frame_id,
                                          tfPc_,
-                                         listener_);
+                                         buffer_);
           }
         catch (tf2::TransformException &ex)
           {
             // only log tf error once every 100 times
-            ROS_WARN_THROTTLE(100, "%s", ex.what());
+          RCLCPP_WARN(this->get_logger(), "%s", ex.what());
             continue;                   // skip this packet
           }
 
@@ -142,3 +131,10 @@ namespace velodyne_pointcloud
   }
 
 } // namespace velodyne_pointcloud
+
+#include "rclcpp_components/register_node_macro.hpp"
+
+// Register the component with class_loader.
+// This acts as a sort of entry point, allowing the component to be discoverable when its library
+// is being loaded into a running process.
+RCLCPP_COMPONENTS_REGISTER_NODE(velodyne_pointcloud::Transform)

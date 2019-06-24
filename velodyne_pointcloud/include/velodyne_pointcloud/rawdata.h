@@ -139,7 +139,7 @@ raw_packet_t;
 class RawData : rclcpp::Node
 {
 public:
-  RawData();
+  RawData(const rclcpp::NodeOptions & options);
   ~RawData() {}
 
   /** \brief Set up for data processing.
@@ -149,11 +149,10 @@ public:
    *
    *    - read device-specific angles calibration
    *
-   *  @param private_nh private node handle for ROS parameters
    *  @returns 0 if successful;
    *           errno value for failure
    */
-  int setup(std::shared_ptr<rclcpp::Node> private_nh);
+  int setup();
 
   /** \brief Set up for data processing offline. 
     * Performs the same initialization as in setup, in the abscence of a ros::NodeHandle.

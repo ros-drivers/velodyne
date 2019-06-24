@@ -53,11 +53,11 @@ namespace velodyne_pointcloud
 class Convert : public rclcpp::Node
 {
 public:
-  Convert();
+  Convert(const rclcpp::NodeOptions & options);
   ~Convert() {}
 
 private:
-  void processScan(const velodyne_msgs::msg::VelodyneScan::SharedPtr &scanMsg);
+  void processScan(const velodyne_msgs::msg::VelodyneScan::ConstSharedPtr &scanMsg);
 
   std::shared_ptr<velodyne_rawdata::RawData> data_;
   rclcpp::Subscription<velodyne_msgs::msg::VelodyneScan>::SharedPtr velodyne_scan_;

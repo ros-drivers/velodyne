@@ -46,6 +46,7 @@
 #include <pcl_ros/point_cloud.h>
 #include <pcl/point_types.h>
 #include <velodyne_pointcloud/point_types.h>
+#include <velodyne_msgs/msg/velodyne_scan.hpp>
 
 namespace velodyne_pointcloud
 {
@@ -56,8 +57,8 @@ typedef pcl::PointCloud<VPoint> VPointCloud;
 class RingColors : public rclcpp::Node
 {
 public:
-  RingColors();
-  ~RingColors() {}
+  explicit RingColors(const rclcpp::NodeOptions & options);
+  ~RingColors() {};
 
 private:
   void convertPoints(const VPointCloud::ConstPtr &inMsg);

@@ -22,7 +22,8 @@ int main(int argc, char **argv)
   rclcpp::init(argc, argv);
   
   // create conversion class, which subscribes to raw data
-  auto colors = std::make_shared<velodyne_pointcloud::RingColors>();
+  rclcpp::NodeOptions options;
+  auto colors = std::make_shared<velodyne_pointcloud::RingColors>(options);
   
   // handle callbacks until shut down
   rclcpp::spin(colors);

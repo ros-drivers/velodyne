@@ -20,21 +20,20 @@
 namespace velodyne_pointcloud
 {
   /** @brief Constructor. */
-  Convert::Convert() : rclcpp::Node("convert"),
-    data_(new velodyne_rawdata::RawData())
+  Convert::Convert(const rclcpp::NodeOptions & options) : rclcpp::Node("convert_node", options),
+    data_(new velodyne_rawdata::RawData(options))
   {
     data_->setup();
 
 
     // advertise output point cloud (before subscribing to input data)
     output_ =
-    this->create_publisher<sensor_msgs::msg::PointCloud2>("velodyne_points", 10);
+      this->create_publisher<sensor_msgs::msg::PointCloud2>("velodyne_points", 10);
 
     // subscribe to VelodyneScan packets
     velodyne_scan_ =
-      this->create_subscription("velodyne_packets", 10,
-                     &Convert::processScan, (Convert *) this,
-                     ros::TransportHints().tcpNoDelay(true));
+      this->create_subscription("velodyne_packets", 10, std::bind(
+                     &Convert::processScan, this);
 
     // Diagnostics
     diagnostics_.setHardwareID("Velodyne Convert");
@@ -50,19 +49,12 @@ namespace velodyne_pointcloud
                                        TimeStampStatusParam()));
   }
 
-  void Convert::callback(velodyne_pointcloud::CloudNodeConfig &config,
-                uint32_t level)
-  {
-  RCLCPP_INFO(this->get_logger(), "Reconfigure Request");
-  data_->setParameters(config.min_range, config.max_range, config.view_direction,
-                       config.view_width);
-  }
-
   /** @brief Callback for raw scan messages. */
-  void Convert::processScan(const velodyne_msgs::VelodyneScan::ConstPtr &scanMsg)
+  void Convert::processScan(const velodyne_msgs::msg::VelodyneScan::ConstSharedPtr &scanMsg)
   {
-    if (output_.getNumSubscribers() == 0)         // no one listening?
-      return;                                     // avoid much work
+    // Not supported yet
+    //if (output_.getNumSubscribers() == 0)         // no one listening?
+    //  return;                                     // avoid much work
 
     // allocate a point cloud with same time and frame ID as raw data
     PointcloudXYZIR outMsg;
@@ -88,3 +80,10 @@ namespace velodyne_pointcloud
   }
 
 } // namespace velodyne_pointcloud
+
+#include "rclcpp_components/register_node_macro.hpp"
+                              
+// Register the component with class_loader.
+// This acts as a sort of entry point, allowing the component to be discoverable when its library
+// is being loaded into a running process.
+RCLCPP_COMPONENTS_REGISTER_NODE(velodyne_pointcloud::Convert)

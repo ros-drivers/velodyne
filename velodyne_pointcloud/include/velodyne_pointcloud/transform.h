@@ -69,17 +69,17 @@ namespace velodyne_pointcloud
 class Transform : public rclcpp::Node
 {
 public:
-  Transform();
+  Transform(const rclcpp::NodeOptions & options);
   ~Transform() {}
 
 private:
-  void processScan(const velodyne_msgs::msg::VelodyneScan::ConstPtr &scanMsg);
+  void processScan(const velodyne_msgs::msg::VelodyneScan::ConstSharedPtr &scanMsg);
 
   std::shared_ptr<velodyne_rawdata::RawData> data_;
   message_filters::Subscriber<velodyne_msgs::msg::VelodyneScan> velodyne_scan_;
-  tf2_ros::MessageFilter<velodyne_msgs::msg::VelodyneScan> *tf_filter_;
+  tf2_ros::MessageFilter<velodyne_msgs::msg::VelodyneScan> tf2_filter_;
   rclcpp::Publisher<sensor_msgs::msg::PointCloud2>::SharedPtr output_;
-  tf2_ros::TransformListener listener_;
+  tf2_ros::Buffer buffer_;
 
   /// configuration parameters
   typedef struct

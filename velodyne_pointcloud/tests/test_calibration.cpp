@@ -32,7 +32,6 @@
 
 #include <gtest/gtest.h>
 
-#include <ros/package.h>
 #include <velodyne_pointcloud/calibration.h>
 
 #include <string>
@@ -43,10 +42,10 @@ using namespace velodyne_pointcloud;  // NOLINT
 std::string g_package_name("velodyne_pointcloud");
 std::string g_package_path;
 
-void init_global_data(void)
+/*void init_global_data(void)
 {
   g_package_path = ros::package::getPath(g_package_name);
-}
+}*/
 
 ///////////////////////////////////////////////////////////////
 // Test cases
@@ -189,7 +188,7 @@ TEST(Calibration, hdl64e_s2_float_intensities)
 int main(int argc, char **argv)
 {
   testing::InitGoogleTest(&argc, argv);
-  init_global_data();
+  //init_global_data();
   return RUN_ALL_TESTS();
 }
 

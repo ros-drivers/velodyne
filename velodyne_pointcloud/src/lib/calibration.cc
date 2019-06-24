@@ -17,10 +17,12 @@
 #include <cmath>
 #include <limits>
 #include <yaml-cpp/yaml.h>
+#include <rclcpp/rclcpp.hpp>
+#include <velodyne_pointcloud/calibration.h>
 
-#ifdef HAVE_NEW_YAMLCPP
+
 namespace YAML {
-
+  
   // The >> operator disappeared in yaml-cpp 0.5, so this function is
   // added to provide support for code written under the yaml-cpp 0.3 API.
   template<typename T>
@@ -28,10 +30,7 @@ namespace YAML {
     i = node.as<T>();
   }
 } /* YAML */
-#endif // HAVE_NEW_YAMLCPP
 
-#include <rclcpp/rclcpp.hpp>
-#include <velodyne_pointcloud/calibration.h>
 
 namespace velodyne_pointcloud 
 {
@@ -62,40 +61,25 @@ namespace velodyne_pointcloud
     node[ROT_CORRECTION] >> correction.second.rot_correction;
     node[VERT_CORRECTION] >> correction.second.vert_correction;
     node[DIST_CORRECTION] >> correction.second.dist_correction;
-#ifdef HAVE_NEW_YAMLCPP
     if (node[TWO_PT_CORRECTION_AVAILABLE])
       node[TWO_PT_CORRECTION_AVAILABLE] >>
         correction.second.two_pt_correction_available;
-#else
-    if (const YAML::Node *pName = node.FindValue(TWO_PT_CORRECTION_AVAILABLE))
-      *pName >> correction.second.two_pt_correction_available;
-#endif
     else
       correction.second.two_pt_correction_available = false;
     node[DIST_CORRECTION_X] >> correction.second.dist_correction_x;
     node[DIST_CORRECTION_Y] >> correction.second.dist_correction_y;
     node[VERT_OFFSET_CORRECTION] >> correction.second.vert_offset_correction;
-#ifdef HAVE_NEW_YAMLCPP
     if (node[HORIZ_OFFSET_CORRECTION])
       node[HORIZ_OFFSET_CORRECTION] >>
         correction.second.horiz_offset_correction;
-#else
-    if (const YAML::Node *pName = node.FindValue(HORIZ_OFFSET_CORRECTION))
-      *pName >> correction.second.horiz_offset_correction;
-#endif
     else
       correction.second.horiz_offset_correction = 0;
 
     const YAML::Node * max_intensity_node = NULL;
-#ifdef HAVE_NEW_YAMLCPP
     if (node[MAX_INTENSITY]) {
       const YAML::Node max_intensity_node_ref = node[MAX_INTENSITY];
       max_intensity_node = &max_intensity_node_ref;
     }
-#else
-    if (const YAML::Node *pName = node.FindValue(MAX_INTENSITY))
-      max_intensity_node = pName;
-#endif
     if (max_intensity_node) {
       float max_intensity_float;
       *max_intensity_node >> max_intensity_float;
@@ -106,15 +90,10 @@ namespace velodyne_pointcloud
     }
 
     const YAML::Node * min_intensity_node = NULL;
-#ifdef HAVE_NEW_YAMLCPP
     if (node[MIN_INTENSITY]) {
       const YAML::Node min_intensity_node_ref = node[MIN_INTENSITY];
       min_intensity_node = &min_intensity_node_ref;
     }
-#else
-    if (const YAML::Node *pName = node.FindValue(MIN_INTENSITY))
-      min_intensity_node = pName;
-#endif
     if (min_intensity_node) {
       float min_intensity_float;
       *min_intensity_node >> min_intensity_float;
@@ -257,13 +236,8 @@ namespace velodyne_pointcloud
     initialized = true;
     try {
       YAML::Node doc;
-#ifdef HAVE_NEW_YAMLCPP
       fin.close();
       doc = YAML::LoadFile(calibration_file);
-#else
-      YAML::Parser parser(fin);
-      parser.GetNextDocument(doc);
-#endif
       doc >> *this;
     } catch (YAML::Exception &e) {
       std::cerr << "YAML Exception: " << e.what() << std::endl;

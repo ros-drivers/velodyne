@@ -231,7 +231,7 @@ bool VelodyneDriver::poll(void)
   RCLCPP_DEBUG(this->get_logger(), "Publishing a full Velodyne scan.");
   scan->header.stamp = scan->packets.back().stamp;
   scan->header.frame_id = config_.frame_id;
-  output_->publish(scan);
+  output_->publish(*scan);
 
   // notify diagnostics that a message has been published, updating
   // its status

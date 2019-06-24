@@ -44,17 +44,14 @@ namespace velodyne_pointcloud
   typedef pcl::PointCloud<RGBPoint> RGBPointCloud;
 
   /** @brief Constructor. */
-  RingColors::RingColors() : rclcpp::Node()
+  RingColors::RingColors(const rclcpp::NodeOptions & options) : rclcpp::Node("RingColors", options)
   {
     // advertise output point cloud (before subscribing to input data)
-    output_ =
-      self->advertise<sensor_msgs::PointCloud2>("velodyne_rings", 10);
+    output_ = this->create_publisher<sensor_msgs::msg::PointCloud2>("velodyne_rings", 10);
 
     // subscribe to VelodyneScan packets
-    input_ =
-      self->subscribe("velodyne_points", 10,
-                     &RingColors::convertPoints, this,
-                     ros::TransportHints().tcpNoDelay(true));
+    input_ = this->create_subscription<velodyne_msgs::msg::VelodyneScan>("velodyne_points", 10,
+                                 std::bind(&RingColors::convertPoints, this, std::placeholders::_1));
   }
 
 
@@ -62,9 +59,10 @@ namespace velodyne_pointcloud
   void
     RingColors::convertPoints(const VPointCloud::ConstPtr &inMsg)
   {
-    if (output_->getNumSubscribers() == 0)         // no one listening?
+    /* Not yet implemented */
+    /* if (output_->getNumSubscribers() == 0)         // no one listening?
       return;                                     // do nothing
-
+     */
     // allocate an PointXYZRGB message with same time and frame ID as
     // input data
     RGBPointCloud::Ptr outMsg(new RGBPointCloud());

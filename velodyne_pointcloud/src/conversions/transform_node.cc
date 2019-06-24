@@ -21,7 +21,8 @@ int main(int argc, char **argv)
   rclcpp::init(argc, argv);
 
   // create conversion class, which subscribes to raw data
-  auto transform = std::make_shared<velodyne_pointcloud::Transform>();
+  rclcpp::NodeOptions options;
+  auto transform = std::make_shared<velodyne_pointcloud::Transform>(options);
 
   // handle callbacks until shut down
   rclcpp::spin(transform);

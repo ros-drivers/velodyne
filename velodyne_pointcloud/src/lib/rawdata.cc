@@ -43,7 +43,7 @@ inline float SQR(float val) { return val*val; }
   //
   ////////////////////////////////////////////////////////////////////////
 
-  RawData::RawData() : rclcpp::Node("rawdata_node") {}
+  RawData::RawData(const rclcpp::NodeOptions & options) : rclcpp::Node("rawdata_node", options) {}
   
   /** Update parameters: conversions and update */
   void RawData::setParameters(double min_range,
@@ -95,16 +95,17 @@ inline float SQR(float val) { return val*val; }
         RCLCPP_ERROR(this->get_logger(), "No calibration angles specified! Using test values!");
 
         // have to use something: grab unit test version as a default
-        std::string pkgPath = ros::package::getPath("velodyne_pointcloud");
+        //std::string pkgPath = ros::package::getPath("velodyne_pointcloud");
+        std::string pkgPath = "./";
         config_.calibrationFile = pkgPath + "/params/64e_utexas.yaml";
       }
 
-    RCLCPP_INFO(this->get_logger(), "correction angles: %s", config_.calibrationFile);
+    RCLCPP_INFO(this->get_logger(), "correction angles: %s", config_.calibrationFile.c_str());
 
     calibration_.read(config_.calibrationFile);
     if (!calibration_.initialized) {
       RCLCPP_ERROR(this->get_logger(), "Unable to open calibration file: %s",
-          config_.calibrationFile);
+          config_.calibrationFile.c_str());
       return -1;
     }
     
@@ -126,18 +127,15 @@ inline float SQR(float val) { return val*val; }
 
       config_.max_range = max_range_;
       config_.min_range = min_range_;
-      ROS_INFO_STREAM("data ranges to publish: ["
-	      << config_.min_range << ", "
-	      << config_.max_range << "]");
+      RCLCPP_INFO(this->get_logger(), "data ranges to publish: [%d, %d]", config_.min_range, config_.max_range);
 
       config_.calibrationFile = calibration_file;
 
-      ROS_INFO_STREAM("correction angles: " << config_.calibrationFile);
+      RCLCPP_INFO(this->get_logger(), "correction angles: %s", config_.calibrationFile.c_str());
 
       calibration_.read(config_.calibrationFile);
       if (!calibration_.initialized) {
-	  ROS_ERROR_STREAM("Unable to open calibration file: " <<
-		  config_.calibrationFile);
+	  RCLCPP_ERROR(this->get_logger(), "Unable to open calibration file: %s", config_.calibrationFile.c_str());
 	  return -1;
       }
 
@@ -339,9 +337,7 @@ inline float SQR(float val) { return val*val; }
       if (UPPER_BANK != raw->blocks[block].header) {
         // Do not flood the log with messages, only issue at most one
         // of these warnings per minute.
-        ROS_WARN_STREAM_THROTTLE(60, "skipping invalid VLP-16 packet: block "
-                                 << block << " header value is "
-                                 << raw->blocks[block].header);
+        RCLCPP_WARN(this->get_logger(), "skipping invalid VLP-16 packet: block %d header value is %s", block, raw->blocks[block].header);
         return;                         // bad packet: skip the rest
       }
 
@@ -353,7 +349,7 @@ inline float SQR(float val) { return val*val; }
 	// some packets contain an angle overflow where azimuth_diff < 0 
 	if(raw_azimuth_diff < 0)//raw->blocks[block+1].rotation - raw->blocks[block].rotation < 0)
 	  {
-	    ROS_WARN_STREAM_THROTTLE(60, "Packet containing angle overflow, first angle: " << raw->blocks[block].rotation << " second angle: " << raw->blocks[block+1].rotation);
+	    RCLCPP_WARN(this->get_logger(), "Packet containing angle overflow, first angle: %d, second angle: %d", raw->blocks[block].rotation, raw->blocks[block+1].rotation);
 	    // if last_azimuth_diff was not zero, we can assume that the velodyne's speed did not change very much and use the same difference
 	    if(last_azimuth_diff > 0){
 	      azimuth_diff = last_azimuth_diff;
