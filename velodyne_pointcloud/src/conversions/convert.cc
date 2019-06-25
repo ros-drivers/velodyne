@@ -78,6 +78,9 @@ namespace velodyne_pointcloud
 
     config_.organize_cloud = this->declare_parameter("organize_cloud", false);
 
+    config_.target_frame = this->declare_parameter("target_frame", "");
+    config_.fixed_frame = this->declare_parameter("fixed_frame", "");
+
     RCLCPP_INFO(this->get_logger(), "correction angles: %s", calibrationFile.c_str());
 
     int success = data_->setup(calibrationFile);
@@ -90,8 +93,6 @@ namespace velodyne_pointcloud
       {
         RCLCPP_ERROR(get_logger(), "Could not load calibration file!");
       }
-
-    config_.target_frame = config_.fixed_frame = "velodyne";
 
     if (config_.organize_cloud)
       {
