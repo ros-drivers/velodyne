@@ -39,39 +39,35 @@
 #ifndef VELODYNE_POINTCLOUD_CONVERT_H
 #define VELODYNE_POINTCLOUD_CONVERT_H
 
+#include <memory>
 #include <string>
 
-#include <ros/ros.h>
-#include <diagnostic_updater/diagnostic_updater.h>
-#include <diagnostic_updater/publisher.h>
+//#include <diagnostic_updater/diagnostic_updater.hpp>
+//#include <diagnostic_updater/publisher.hpp>
+#include <rclcpp/rclcpp.hpp>
+#include <sensor_msgs/msg/point_cloud2.hpp>
+#include <tf2_ros/buffer.h>
 
-#include <sensor_msgs/PointCloud2.h>
+#include <velodyne_msgs/msg/velodyne_scan.hpp>
 #include <velodyne_pointcloud/rawdata.h>
-
-#include <dynamic_reconfigure/server.h>
-#include <velodyne_pointcloud/CloudNodeConfig.h>
+#include <velodyne_pointcloud/pointcloudXYZIR.h>
 
 namespace velodyne_pointcloud
 {
-class Convert
+class Convert : public rclcpp::Node
 {
   public:
-    Convert(ros::NodeHandle node, ros::NodeHandle private_nh);
+    Convert();
     ~Convert() {}
 
   private:
-    void callback(velodyne_pointcloud::CloudNodeConfig &config, uint32_t level);
-    void processScan(const velodyne_msgs::VelodyneScan::ConstPtr &scanMsg);
+    void processScan(const velodyne_msgs::msg::VelodyneScan::SharedPtr scanMsg);
 
-    boost::shared_ptr<dynamic_reconfigure::Server<velodyne_pointcloud::CloudNodeConfig> > srv_;
-
-    boost::shared_ptr<velodyne_rawdata::RawData> data_;
-    ros::Subscriber velodyne_scan_;
-    ros::Publisher output_;
-
-    boost::shared_ptr<velodyne_rawdata::DataContainerBase> container_ptr_;
-
-    boost::mutex reconfigure_mtx_;
+    std::shared_ptr<velodyne_rawdata::RawData> data_;
+    rclcpp::Subscription<velodyne_msgs::msg::VelodyneScan>::SharedPtr velodyne_scan_;
+    rclcpp::Publisher<sensor_msgs::msg::PointCloud2>::SharedPtr output_;
+    tf2_ros::Buffer tf_buffer_;
+    std::shared_ptr<velodyne_rawdata::DataContainerBase> container_ptr_;
 
     /// configuration parameters
     typedef struct
@@ -83,16 +79,17 @@ class Convert
       double min_range;              ///< minimum range to publish
       uint16_t num_lasers;           ///< number of lasers
       int npackets;                  ///< number of packets to combine
+      double view_direction;
+      double view_width;
     }
     Config;
     Config config_;
-    bool first_rcfg_call;
 
-  // diagnostics updater
-  diagnostic_updater::Updater diagnostics_;
-  double diag_min_freq_;
-  double diag_max_freq_;
-  boost::shared_ptr<diagnostic_updater::TopicDiagnostic> diag_topic_;
+    // diagnostics updater
+    //diagnostic_updater::Updater diagnostics_;
+    double diag_min_freq_;
+    double diag_max_freq_;
+    //std::shared_ptr<diagnostic_updater::TopicDiagnostic> diag_topic_;
 };
 }  // namespace velodyne_pointcloud
 

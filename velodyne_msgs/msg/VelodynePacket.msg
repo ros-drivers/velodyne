@@ -1,5 +1,4 @@
 # Raw Velodyne LIDAR packet.
 
-time stamp              # packet timestamp
+builtin_interfaces/Time stamp              # packet timestamp
 uint8[1206] data        # packet contents
-

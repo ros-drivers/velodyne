@@ -33,38 +33,27 @@
 #ifndef VELODYNE_LASERSCAN_VELODYNE_LASERSCAN_H
 #define VELODYNE_LASERSCAN_VELODYNE_LASERSCAN_H
 
-#include <ros/ros.h>
-#include <sensor_msgs/PointCloud2.h>
-#include <sensor_msgs/LaserScan.h>
-
-#include <boost/thread/mutex.hpp>
-#include <boost/thread/lock_guard.hpp>
-
-#include <dynamic_reconfigure/server.h>
-#include <velodyne_laserscan/VelodyneLaserScanConfig.h>
+#include <rclcpp/rclcpp.hpp>
+#include <sensor_msgs/msg/laser_scan.hpp>
+#include <sensor_msgs/msg/point_cloud2.hpp>
 
 namespace velodyne_laserscan
 {
 
-class VelodyneLaserScan
+class VelodyneLaserScan : public rclcpp::Node
 {
 public:
-  VelodyneLaserScan(ros::NodeHandle &nh, ros::NodeHandle &nh_priv);
+  VelodyneLaserScan();
 
 private:
-  boost::mutex connect_mutex_;
-  void connectCb();
-  void recvCallback(const sensor_msgs::PointCloud2ConstPtr& msg);
+  void recvCallback(const sensor_msgs::msg::PointCloud2::SharedPtr msg);
 
-  ros::NodeHandle nh_;
-  ros::Subscriber sub_;
-  ros::Publisher pub_;
+  rclcpp::Subscription<sensor_msgs::msg::PointCloud2>::SharedPtr sub_;
+  rclcpp::Publisher<sensor_msgs::msg::LaserScan>::SharedPtr pub_;
 
-  VelodyneLaserScanConfig cfg_;
-  dynamic_reconfigure::Server<VelodyneLaserScanConfig> srv_;
-  void reconfig(VelodyneLaserScanConfig& config, uint32_t level);
-
-  unsigned int ring_count_;
+  uint16_t ring_count_{0};
+  int ring_;
+  double resolution_;
 };
 
 }  // namespace velodyne_laserscan

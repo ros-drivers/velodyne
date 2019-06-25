@@ -14,18 +14,18 @@
         type="hztest" name="hztest_packets_nodelet_vlp16" >
     <param name="hz" value="10.0" />
     <param name="hzerror" value="3.0" />
-    <param name="test_duration" value="5.0" />    
-    <param name="topic" value="velodyne_packets" />  
-    <param name="wait_time" value="2.0" />  
+    <param name="test_duration" value="5.0" />
+    <param name="topic" value="velodyne_packets" />
+    <param name="wait_time" value="2.0" />
   </test>
 
   <test test-name="nodelet_diagnostics_test"
         pkg="rostest" type="hztest" name="hztest_diag_nodelet_vlp16" >
     <param name="hz" value="1.0" />
     <param name="hzerror" value="0.5" />
-    <param name="test_duration" value="5.0" />    
-    <param name="topic" value="diagnostics" />  
-    <param name="wait_time" value="2.0" />  
+    <param name="test_duration" value="5.0" />
+    <param name="topic" value="diagnostics" />
+    <param name="wait_time" value="2.0" />
   </test>
 
 </launch>

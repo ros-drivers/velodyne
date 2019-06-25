@@ -1,34 +1,29 @@
-cmake_minimum_required(VERSION 2.8.3)
+cmake_minimum_required(VERSION 3.5)
 project(velodyne_pointcloud)
 
-# Set minimum C++ standard to C++11
-if (NOT "${CMAKE_CXX_STANDARD_COMPUTED_DEFAULT}")
-  message(STATUS "Changing CXX_STANDARD from C++98 to C++11")
-  set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -std=c++11")
-elseif ("${CMAKE_CXX_STANDARD_COMPUTED_DEFAULT}" STREQUAL "98")
-  message(STATUS "Changing CXX_STANDARD from C++98 to C++11")
-  set(CMAKE_CXX_STANDARD 11)
+# Default to C++14
+if(NOT CMAKE_CXX_STANDARD)
+  set(CMAKE_CXX_STANDARD 14)
 endif()
 
-set(${PROJECT_NAME}_CATKIN_DEPS
-    angles
-    nodelet
-    roscpp
-    roslib
-    sensor_msgs
-    tf
-    velodyne_driver
-    velodyne_msgs
-    dynamic_reconfigure
-    diagnostic_updater
-)
+if(CMAKE_COMPILER_IS_GNUCXX OR CMAKE_CXX_COMPILER_ID MATCHES "Clang")
+  add_compile_options(-Wall -Wextra -Wpedantic)
+endif()
 
-find_package(catkin REQUIRED COMPONENTS
-             ${${PROJECT_NAME}_CATKIN_DEPS}
-             roslint)
-
-find_package(Boost COMPONENTS signals)
+find_package(ament_cmake REQUIRED)
+find_package(angles REQUIRED)
+# TODO(clalancette): not yet available
+#find_package(diagnostic_updater REQUIRED)
 find_package(Eigen3 REQUIRED)
+find_package(geometry_msgs REQUIRED)
+find_package(message_filters REQUIRED)
+find_package(PCL REQUIRED)
+find_package(rclcpp REQUIRED)
+find_package(sensor_msgs REQUIRED)
+find_package(tf2 REQUIRED)
+find_package(tf2_ros REQUIRED)
+find_package(velodyne_msgs REQUIRED)
+
 # Resolve system dependency on yaml-cpp, which apparently does not
 # provide a CMake find_package() module.
 find_package(PkgConfig REQUIRED)
@@ -42,45 +37,26 @@ find_library(YAML_CPP_LIBRARY
 
 link_directories(${YAML_CPP_LIBRARY_DIRS})
 
-generate_dynamic_reconfigure_options(
-  cfg/CloudNode.cfg cfg/TransformNode.cfg
-)
-
 if(NOT ${YAML_CPP_VERSION} VERSION_LESS "0.5")
   add_definitions(-DHAVE_NEW_YAMLCPP)
 endif(NOT ${YAML_CPP_VERSION} VERSION_LESS "0.5")
 
-include_directories(include ${catkin_INCLUDE_DIRS}
-  ${dynamic_reconfigure_PACKAGE_PATH}/cmake/cfgbuild.cmake
-  ${EIGEN3_INCLUDE_DIR}
-)
-
-catkin_package(
-    CATKIN_DEPENDS ${${PROJECT_NAME}_CATKIN_DEPS}
-    INCLUDE_DIRS include
-    LIBRARIES velodyne_rawdata)
-
-#add_executable(dynamic_reconfigure_node src/dynamic_reconfigure_node.cpp)
-#target_link_libraries(dynamic_reconfigure_node
-#   ${catkin_LIBRARIES}
-# )
+include_directories(include ${PCL_COMMON_INCLUDE_DIRS})
 
 add_subdirectory(src/lib)
 add_subdirectory(src/conversions)
 
-install(DIRECTORY include/${PROJECT_NAME}/
-        DESTINATION ${CATKIN_PACKAGE_INCLUDE_DESTINATION})
-install(FILES nodelets.xml
-        DESTINATION ${CATKIN_PACKAGE_SHARE_DESTINATION})
-install(DIRECTORY launch/
-        DESTINATION ${CATKIN_PACKAGE_SHARE_DESTINATION}/launch)
-install(DIRECTORY params/
-        DESTINATION ${CATKIN_PACKAGE_SHARE_DESTINATION}/params)
-install(PROGRAMS scripts/gen_calibration.py
-        DESTINATION ${CATKIN_PACKAGE_BIN_DESTINATION})
+# install(DIRECTORY include/${PROJECT_NAME}/
+#         DESTINATION ${CATKIN_PACKAGE_INCLUDE_DESTINATION})
+# install(DIRECTORY launch/
+#         DESTINATION ${CATKIN_PACKAGE_SHARE_DESTINATION}/launch)
+install(DIRECTORY params
+        DESTINATION share/${PROJECT_NAME})
+# install(PROGRAMS scripts/gen_calibration.py
+#         DESTINATION ${CATKIN_PACKAGE_BIN_DESTINATION})
 
-roslint_cpp()
+#if (CATKIN_ENABLE_TESTING)
+#  add_subdirectory(tests)
+#endif()
 
-if (CATKIN_ENABLE_TESTING)
-  add_subdirectory(tests)
-endif()
+ament_package()

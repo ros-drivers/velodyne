@@ -33,8 +33,14 @@
 #ifndef VELODYNE_POINTCLOUD_POINTCLOUDXYZIR_H
 #define VELODYNE_POINTCLOUD_POINTCLOUDXYZIR_H
 
-#include <velodyne_pointcloud/datacontainerbase.h>
+#include <memory>
 #include <string>
+
+#include <sensor_msgs/point_cloud2_iterator.hpp>
+#include <tf2/buffer_core.h>
+
+#include <velodyne_msgs/msg/velodyne_scan.hpp>
+#include <velodyne_pointcloud/datacontainerbase.h>
 
 namespace velodyne_pointcloud
 {
@@ -43,11 +49,11 @@ class PointcloudXYZIR : public velodyne_rawdata::DataContainerBase
 public:
   PointcloudXYZIR(const double max_range, const double min_range, const std::string& target_frame,
                   const std::string& fixed_frame, const unsigned int scans_per_block,
-                  boost::shared_ptr<tf::TransformListener> tf_ptr = boost::shared_ptr<tf::TransformListener>());
+                  tf2::BufferCore & buffer);
 
   virtual void newLine();
 
-  virtual void setup(const velodyne_msgs::VelodyneScan::ConstPtr& scan_msg);
+  virtual void setup(const velodyne_msgs::msg::VelodyneScan::SharedPtr scan_msg);
 
   virtual void addPoint(float x, float y, float z, uint16_t ring, uint16_t azimuth, float distance, float intensity);
 
