@@ -22,7 +22,7 @@ jobs:
           command: |
             source `find /opt/ros -maxdepth 2 -name setup.bash | sort | head -1`
             cd ..
-            colcon test --parallel-workers 4 --cmake-args -DCMAKE_BUILD_TYPE=Release
+            colcon test
             colcon test-result
     working_directory: ~/src
     environment:
