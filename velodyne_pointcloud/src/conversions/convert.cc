@@ -36,8 +36,6 @@ namespace velodyne_pointcloud
         ROS_ERROR_STREAM("Could not load calibration file!");
     }
 
-    config_.target_frame = config_.fixed_frame = "velodyne";
-
     if(config_.organize_cloud)
     {
       container_ptr_ = boost::shared_ptr<OrganizedCloudXYZIR>(
@@ -91,6 +89,8 @@ namespace velodyne_pointcloud
     ROS_INFO("Reconfigure Request");
     data_->setParameters(config.min_range, config.max_range, config.view_direction,
                          config.view_width);
+    config_.fixed_frame = config.fixed_frame;
+    config_.target_frame = config.target_frame;
     config_.min_range = config.min_range;
     config_.max_range = config.max_range;
 
