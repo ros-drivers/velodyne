@@ -76,7 +76,7 @@ VelodyneDriver::VelodyneDriver() : rclcpp::Node("velodyne_node")
   config_.model = this->declare_parameter("model", std::string("64E"));
   config_.rpm = this->declare_parameter("rpm", 600.0);
   std::string dump_file = this->declare_parameter("pcap", std::string(""));
-  double cut_angle = this->declare_parameter("cut_angle", -0.01);
+  double cut_angle = this->declare_parameter("cut_angle", 2.0*M_PI);
   int udp_port = this->declare_parameter("port", (int) DATA_PORT_NUMBER);
 
   future_ = exit_signal_.get_future();
@@ -127,14 +127,14 @@ VelodyneDriver::VelodyneDriver() : rclcpp::Node("velodyne_node")
 
   // default number of packets for each scan is a single revolution
   // (fractions rounded up)
-  config_.npackets = (int) std::ceil(packet_rate / frequency);
+  config_.npackets = static_cast<int>(std::ceil(packet_rate / frequency));
   RCLCPP_INFO(this->get_logger(), "publishing %d packets per scan", config_.npackets);
 
   if (cut_angle < 0.0)
     {
       RCLCPP_INFO(this->get_logger(), "Cut at specific angle feature deactivated.");
     }
-  else if (cut_angle < (2*M_PI))
+  else if (cut_angle <= (2.0*M_PI))
     {
       RCLCPP_INFO(this->get_logger(), "Cut at specific angle feature activated. "
                   "Cutting velodyne points always at " + std::to_string(cut_angle) + " rad.");
@@ -148,7 +148,7 @@ VelodyneDriver::VelodyneDriver() : rclcpp::Node("velodyne_node")
 
   // Convert cut_angle from radian to one-hundredth degree,
   // which is used in velodyne packets
-  config_.cut_angle = int((cut_angle*360/(2*M_PI))*100);
+  config_.cut_angle = static_cast<int>((cut_angle*360/(2*M_PI))*100);
 
   // initialize diagnostics
   //diagnostics_.setHardwareID(deviceName);
@@ -233,8 +233,8 @@ bool VelodyneDriver::poll(void)
               last_azimuth_ = azimuth;
               continue;
             }
-          if((last_azimuth_ < config_.cut_angle && config_.cut_angle <= azimuth)
-             || ( config_.cut_angle <= azimuth && azimuth < last_azimuth_)
+          if ((last_azimuth_ < config_.cut_angle && config_.cut_angle <= azimuth)
+             || (config_.cut_angle <= azimuth && azimuth < last_azimuth_)
              || (azimuth < last_azimuth_ && last_azimuth_ < config_.cut_angle))
             {
               last_azimuth_ = azimuth;
