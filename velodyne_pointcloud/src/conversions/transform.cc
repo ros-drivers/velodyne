@@ -37,7 +37,7 @@ namespace velodyne_pointcloud
 {
   /** @brief Constructor. */
   Transform::Transform() :
-    rclcpp::Node("transform_node"),
+    rclcpp::Node("velodyne_transform_node"),
     data_(new velodyne_rawdata::RawData()), velodyne_scan_(this, "velodyne_packets"), tf_buffer_(this->get_clock()), tf_filter_(velodyne_scan_, tf_buffer_, config_.target_frame, 10, 0)
   {
     std::string calibrationFile = this->declare_parameter("calibration", "");

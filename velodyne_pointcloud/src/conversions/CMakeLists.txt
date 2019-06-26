@@ -1,12 +1,12 @@
-add_executable(cloud_node cloud_node.cc convert.cc pointcloudXYZIR.cc organized_cloudXYZIR.cc)
-target_link_libraries(cloud_node velodyne_rawdata ${YAML_CPP_LIBRARIES})
-ament_target_dependencies(cloud_node
+add_executable(convert_node convert_node.cc convert.cc pointcloudXYZIR.cc organized_cloudXYZIR.cc)
+target_link_libraries(convert_node velodyne_rawdata ${YAML_CPP_LIBRARIES})
+ament_target_dependencies(convert_node
   Eigen3
   rclcpp
   tf2
   velodyne_msgs
 )
-install(TARGETS cloud_node
+install(TARGETS convert_node
         DESTINATION lib/${PROJECT_NAME})
 
 add_executable(transform_node transform_node.cc transform.cc pointcloudXYZIR.cc organized_cloudXYZIR.cc)
