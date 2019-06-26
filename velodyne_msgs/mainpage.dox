@@ -2,9 +2,9 @@
 \mainpage
 \htmlinclude manifest.html
 
-The @b velodyne_msgs package collects ROS messages specific to the
-Velodyne HDL-64E 3D and HDL-64E S2 LIDARs.
+The @b velodyne_msgs package collects ROS 2 messages specific to the
+Velodyne LIDARs.
 
-No other programming interfaces or ROS2 nodes are provided.
+No other programming interfaces or ROS 2 nodes are provided.
 
 */
