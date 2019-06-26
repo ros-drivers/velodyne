@@ -11,12 +11,14 @@
  * $ Id: 02/14/2012 11:36:36 AM piyushk $
  */
 
-#include <iostream>
+#include <cmath>
 #include <fstream>
+#include <iostream>
+#include <limits>
 #include <map>
 #include <string>
-#include <cmath>
-#include <limits>
+#include <utility>
+
 #include <yaml-cpp/yaml.h>
 
 #ifdef HAVE_NEW_YAMLCPP
@@ -99,53 +101,36 @@ namespace velodyne_pointcloud
         correction.second.horiz_offset_correction = 0;
       }
 
-    const YAML::Node * max_intensity_node = NULL;
+    float max_intensity_float = 255.0;
 #ifdef HAVE_NEW_YAMLCPP
     if (node[MAX_INTENSITY])
       {
-        const YAML::Node max_intensity_node_ref = node[MAX_INTENSITY];
-        max_intensity_node = &max_intensity_node_ref;
+        node[MAX_INTENSITY] >> max_intensity_float;
+        fprintf(stderr, "Got max intensity float of %f\n", max_intensity_float);
       }
 #else
     if (const YAML::Node *pName = node.FindValue(MAX_INTENSITY))
       {
-        max_intensity_node = pName;
+        *pName >> max_intensity_float;
       }
 #endif
-    if (max_intensity_node)
-      {
-        float max_intensity_float;
-        *max_intensity_node >> max_intensity_float;
-        correction.second.max_intensity = floor(max_intensity_float);
-      }
-    else
-      {
-        correction.second.max_intensity = 255;
-      }
+    correction.second.max_intensity = ::floor(max_intensity_float);
 
-    const YAML::Node * min_intensity_node = NULL;
+    float min_intensity_float = 0.0;
 #ifdef HAVE_NEW_YAMLCPP
     if (node[MIN_INTENSITY])
       {
-        const YAML::Node min_intensity_node_ref = node[MIN_INTENSITY];
-        min_intensity_node = &min_intensity_node_ref;
+        node[MIN_INTENSITY] >> min_intensity_float;
+        fprintf(stderr, "Got min intensity float of %f\n", min_intensity_float);
       }
 #else
     if (const YAML::Node *pName = node.FindValue(MIN_INTENSITY))
       {
-        min_intensity_node = pName;
+        *pName >> min_intensity_float;
       }
 #endif
-    if (min_intensity_node)
-      {
-        float min_intensity_float;
-        *min_intensity_node >> min_intensity_float;
-        correction.second.min_intensity = floor(min_intensity_float);
-      }
-    else
-      {
-        correction.second.min_intensity = 0;
-      }
+    correction.second.min_intensity = ::floor(min_intensity_float);
+
     node[FOCAL_DISTANCE] >> correction.second.focal_distance;
     node[FOCAL_SLOPE] >> correction.second.focal_slope;
 
