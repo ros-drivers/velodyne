@@ -106,7 +106,6 @@ namespace velodyne_pointcloud
     if (node[MAX_INTENSITY])
       {
         node[MAX_INTENSITY] >> max_intensity_float;
-        fprintf(stderr, "Got max intensity float of %f\n", max_intensity_float);
       }
 #else
     if (const YAML::Node *pName = node.FindValue(MAX_INTENSITY))
@@ -121,7 +120,6 @@ namespace velodyne_pointcloud
     if (node[MIN_INTENSITY])
       {
         node[MIN_INTENSITY] >> min_intensity_float;
-        fprintf(stderr, "Got min intensity float of %f\n", min_intensity_float);
       }
 #else
     if (const YAML::Node *pName = node.FindValue(MIN_INTENSITY))
