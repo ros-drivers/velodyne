@@ -84,7 +84,7 @@ namespace velodyne_pointcloud
 
     config_.target_frame = this->declare_parameter("frame_id", "map");
     config_.fixed_frame = this->declare_parameter("fixed_frame", "odom");
-    config_.organize_cloud = this->declare_parameter("organize_cloud", false);
+    config_.organize_cloud = this->declare_parameter("organize_cloud", true);
 
     RCLCPP_INFO(this->get_logger(), "correction angles: %s", calibrationFile.c_str());
 

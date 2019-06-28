@@ -76,7 +76,7 @@ namespace velodyne_pointcloud
     view_width_desc.floating_point_range.push_back(view_width_range);
     config_.view_width = this->declare_parameter("view_width", 2.0*M_PI, view_width_desc);
 
-    config_.organize_cloud = this->declare_parameter("organize_cloud", false);
+    config_.organize_cloud = this->declare_parameter("organize_cloud", true);
 
     config_.target_frame = this->declare_parameter("target_frame", "");
     config_.fixed_frame = this->declare_parameter("fixed_frame", "");
