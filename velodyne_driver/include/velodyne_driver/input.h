@@ -126,7 +126,10 @@ public:
             const std::string & devip,
             uint16_t port,
             double packet_rate,
-            const std::string & filename);
+            const std::string & filename,
+            bool read_once,
+            bool read_fast,
+            double repeat_delay);
   virtual ~InputPCAP();
 
   virtual int getPacket(velodyne_msgs::msg::VelodynePacket *pkt,

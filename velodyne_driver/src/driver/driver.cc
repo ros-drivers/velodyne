@@ -69,9 +69,9 @@ VelodyneDriver::VelodyneDriver() : rclcpp::Node("velodyne_driver_node")
   config_.time_offset = this->declare_parameter("time_offset", 0.0, offset_desc);
 
   config_.enabled = this->declare_parameter("enabled", true);
-  this->declare_parameter("read_once", false);
-  this->declare_parameter("read_fast", false);
-  this->declare_parameter("repeat_delay", 0.0);
+  bool read_once = this->declare_parameter("read_once", false);
+  bool read_fast = this->declare_parameter("read_fast", false);
+  double repeat_delay = this->declare_parameter("repeat_delay", 0.0);
   config_.frame_id = this->declare_parameter("frame_id", std::string("velodyne"));
   config_.model = this->declare_parameter("model", std::string("64E"));
   config_.rpm = this->declare_parameter("rpm", 600.0);
@@ -170,7 +170,7 @@ VelodyneDriver::VelodyneDriver() : rclcpp::Node("velodyne_driver_node")
     {
       // read data from packet capture file
       input_.reset(new velodyne_driver::InputPCAP(this, devip, udp_port,
-                                                  packet_rate, dump_file));
+                                                  packet_rate, dump_file, read_once, read_fast, repeat_delay));
     }
   else
     {

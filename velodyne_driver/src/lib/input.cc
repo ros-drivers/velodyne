@@ -269,20 +269,21 @@ namespace velodyne_driver
    *  @param port UDP port number.
    *  @param packet_rate expected device packet frequency (Hz).
    *  @param filename PCAP dump file name.
+   *  @param read_once Read the input file only once.
+   *  @param read_fast Output the data from the input file as fast as possible.
+   *  @param repeat_delay Seconds to wait between repeating input file.
    */
   InputPCAP::InputPCAP(rclcpp::Node * private_nh, const std::string & devip, uint16_t port,
-                       double packet_rate, const std::string & filename):
+                       double packet_rate, const std::string & filename, bool read_once, bool read_fast, double repeat_delay):
     Input(private_nh, devip, port),
     packet_rate_(packet_rate),
-    filename_(filename)
+    filename_(filename),
+    read_once_(read_once),
+    read_fast_(read_fast),
+    repeat_delay_(repeat_delay)
   {
     pcap_ = NULL;
     empty_ = true;
-
-    // get parameters using private node handle
-    private_nh->get_parameter("read_once", read_once_);
-    private_nh->get_parameter("read_fast", read_fast_);
-    private_nh->get_parameter("repeat_delay", repeat_delay_);
 
     if (read_once_)
       {
