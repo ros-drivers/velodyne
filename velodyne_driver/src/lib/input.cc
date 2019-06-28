@@ -73,13 +73,14 @@ namespace velodyne_driver
   /** @brief constructor
    *
    *  @param private_nh ROS node handle for calling node.
+   *  @param devip Device IP address.
    *  @param port UDP port number.
    */
-  Input::Input(rclcpp::Node * private_nh, uint16_t port):
+  Input::Input(rclcpp::Node * private_nh, const std::string & devip, uint16_t port):
     private_nh_(private_nh),
+    devip_str_(devip),
     port_(port)
   {
-    private_nh->get_parameter("device_ip", devip_str_);
     if (!devip_str_.empty())
       {
         RCLCPP_INFO(private_nh->get_logger(), "Only accepting packets from IP address: "
@@ -94,10 +95,11 @@ namespace velodyne_driver
   /** @brief constructor
    *
    *  @param private_nh ROS private handle for calling node.
-   *  @param port UDP port number
+   *  @param devip Device IP address.
+   *  @param port UDP port number.
    */
-  InputSocket::InputSocket(rclcpp::Node * private_nh, uint16_t port, bool gps_time):
-    Input(private_nh, port), gps_time_(gps_time)
+  InputSocket::InputSocket(rclcpp::Node * private_nh, const std::string & devip, uint16_t port, bool gps_time):
+    Input(private_nh, devip, port), gps_time_(gps_time)
   {
     sockfd_ = -1;
 
@@ -223,7 +225,7 @@ namespace velodyne_driver
             // read successful,
             // if packet is not from the lidar scanner we selected by IP,
             // continue otherwise we are done
-            if (devip_str_ != ""
+            if (!devip_str_.empty()
                 && sender_address.sin_addr.s_addr != devip_.s_addr)
               {
                 continue;
@@ -263,13 +265,14 @@ namespace velodyne_driver
   /** @brief constructor
    *
    *  @param private_nh ROS private handle for calling node.
-   *  @param port UDP port number
-   *  @param packet_rate expected device packet frequency (Hz)
-   *  @param filename PCAP dump file name
+   *  @param devip Device IP address.
+   *  @param port UDP port number.
+   *  @param packet_rate expected device packet frequency (Hz).
+   *  @param filename PCAP dump file name.
    */
-  InputPCAP::InputPCAP(rclcpp::Node * private_nh, uint16_t port,
+  InputPCAP::InputPCAP(rclcpp::Node * private_nh, const std::string & devip, uint16_t port,
                        double packet_rate, std::string filename):
-    Input(private_nh, port),
+    Input(private_nh, devip, port),
     packet_rate_(packet_rate),
     filename_(filename)
   {
@@ -304,7 +307,7 @@ namespace velodyne_driver
       }
 
     std::stringstream filter;
-    if (devip_str_ != "")              // using specific IP?
+    if (!devip_str_.empty())              // using specific IP?
       {
         filter << "src host " << devip_str_ << " && ";
       }

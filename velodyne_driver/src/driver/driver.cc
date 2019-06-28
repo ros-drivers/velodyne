@@ -55,7 +55,7 @@ namespace velodyne_driver
 
 VelodyneDriver::VelodyneDriver() : rclcpp::Node("velodyne_driver_node")
 {
-  this->declare_parameter("device_ip", std::string(""));
+  std::string devip = this->declare_parameter("device_ip", std::string(""));
   bool gps_time = this->declare_parameter("gps_time", false);
 
   rcl_interfaces::msg::ParameterDescriptor offset_desc;
@@ -169,13 +169,13 @@ VelodyneDriver::VelodyneDriver() : rclcpp::Node("velodyne_driver_node")
   if (dump_file != "")                  // have PCAP file?
     {
       // read data from packet capture file
-      input_.reset(new velodyne_driver::InputPCAP(this, udp_port,
+      input_.reset(new velodyne_driver::InputPCAP(this, devip, udp_port,
                                                   packet_rate, dump_file));
     }
   else
     {
       // read data from live socket
-      input_.reset(new velodyne_driver::InputSocket(this, udp_port, gps_time));
+      input_.reset(new velodyne_driver::InputSocket(this, devip, udp_port, gps_time));
     }
 
   // raw packet output topic
