@@ -278,11 +278,11 @@ namespace velodyne_driver
     Input(private_nh, devip, port),
     packet_rate_(packet_rate),
     filename_(filename),
+    pcap_(nullptr),
     read_once_(read_once),
     read_fast_(read_fast),
     repeat_delay_(repeat_delay)
   {
-    pcap_ = NULL;
     empty_ = true;
 
     if (read_once_)
@@ -301,7 +301,7 @@ namespace velodyne_driver
 
     // Open the PCAP dump file
     RCLCPP_INFO(private_nh->get_logger(), "Opening PCAP file \"%s\"", filename_.c_str());
-    if ((pcap_ = pcap_open_offline(filename_.c_str(), errbuf_) ) == NULL)
+    if ((pcap_ = pcap_open_offline(filename_.c_str(), errbuf_) ) == nullptr)
       {
         RCLCPP_FATAL(private_nh->get_logger(), "Error opening Velodyne socket dump file.");
         return;

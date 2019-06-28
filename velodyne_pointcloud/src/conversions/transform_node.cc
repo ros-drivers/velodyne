@@ -21,6 +21,9 @@
 /** Main node entry point. */
 int main(int argc, char **argv)
 {
+  // Force flush of the stdout buffer.
+  setvbuf(stdout, nullptr, _IONBF, BUFSIZ);
+
   rclcpp::init(argc, argv);
 
   // handle callbacks until shut down
