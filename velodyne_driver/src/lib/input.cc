@@ -80,7 +80,6 @@ namespace velodyne_driver
     port_(port)
   {
     private_nh->get_parameter("device_ip", devip_str_);
-    private_nh->get_parameter("gps_time", gps_time_);
     if (!devip_str_.empty())
       {
         RCLCPP_INFO(private_nh->get_logger(), "Only accepting packets from IP address: "
@@ -97,8 +96,8 @@ namespace velodyne_driver
    *  @param private_nh ROS private handle for calling node.
    *  @param port UDP port number
    */
-  InputSocket::InputSocket(rclcpp::Node * private_nh, uint16_t port):
-    Input(private_nh, port)
+  InputSocket::InputSocket(rclcpp::Node * private_nh, uint16_t port, bool gps_time):
+    Input(private_nh, port), gps_time_(gps_time)
   {
     sockfd_ = -1;
 

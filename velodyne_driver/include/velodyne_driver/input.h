@@ -93,7 +93,6 @@ protected:
   rclcpp::Node * private_nh_;
   uint16_t port_;
   std::string devip_str_;
-  bool gps_time_;
 };
 
 /** @brief Live Velodyne input from socket. */
@@ -101,7 +100,7 @@ class InputSocket: public Input
 {
 public:
   InputSocket(rclcpp::Node * private_nh,
-              uint16_t port);
+              uint16_t port, bool gps_time);
   virtual ~InputSocket();
 
   virtual int getPacket(velodyne_msgs::msg::VelodynePacket *pkt,
@@ -111,6 +110,7 @@ public:
 private:
   int sockfd_;
   in_addr devip_;
+  bool gps_time_;
 };
 
 
