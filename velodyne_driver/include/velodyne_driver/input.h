@@ -69,7 +69,7 @@
 namespace velodyne_driver
 {
 
-static uint16_t DATA_PORT_NUMBER = 2368;      // default data port
+constexpr uint16_t DATA_PORT_NUMBER = 2368;      // default data port
 
 /** @brief Velodyne input base class */
 class Input
@@ -101,7 +101,7 @@ class InputSocket: public Input
 {
 public:
   InputSocket(rclcpp::Node * private_nh,
-              uint16_t port = DATA_PORT_NUMBER);
+              uint16_t port);
   virtual ~InputSocket();
 
   virtual int getPacket(velodyne_msgs::msg::VelodynePacket *pkt,
@@ -123,9 +123,9 @@ class InputPCAP: public Input
 {
 public:
   InputPCAP(rclcpp::Node * private_nh,
-            uint16_t port = DATA_PORT_NUMBER,
-            double packet_rate = 0.0,
-            std::string filename = "");
+            uint16_t port,
+            double packet_rate,
+            std::string filename);
   virtual ~InputPCAP();
 
   virtual int getPacket(velodyne_msgs::msg::VelodynePacket *pkt,
