@@ -271,7 +271,7 @@ namespace velodyne_driver
    *  @param filename PCAP dump file name.
    */
   InputPCAP::InputPCAP(rclcpp::Node * private_nh, const std::string & devip, uint16_t port,
-                       double packet_rate, std::string filename):
+                       double packet_rate, const std::string & filename):
     Input(private_nh, devip, port),
     packet_rate_(packet_rate),
     filename_(filename)
