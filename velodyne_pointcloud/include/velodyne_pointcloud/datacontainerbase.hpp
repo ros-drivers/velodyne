@@ -127,9 +127,6 @@ public:
     cloud.data.resize(scan_msg->packets.size() * config_.scans_per_packet * cloud.point_step);
     // Clear out the last data; this is important in the organized cloud case
     std::fill(cloud.data.begin(), cloud.data.end(), 0);
-    if (config_.transform) {
-      computeTransformation(scan_msg->header.stamp);
-    }
   }
 
   virtual void addPoint(
@@ -161,7 +158,6 @@ public:
     config_.transform = fixed_frame != target_frame;
   }
 
-protected:
   sensor_msgs::msg::PointCloud2 cloud;
 
   inline void vectorTfToEigen(tf2::Vector3 & tf_vec, Eigen::Vector3f & eigen_vec)
@@ -214,6 +210,7 @@ protected:
     return range >= config_.min_range && range <= config_.max_range;
   }
 
+protected:
   Config config_;
   tf2::BufferCore & tf_buffer_;
   Eigen::Affine3f transformation;
