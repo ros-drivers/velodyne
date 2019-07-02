@@ -113,13 +113,6 @@ public:
     cloud.width = config_.init_width;
     cloud.height = config_.init_height;
     cloud.is_dense = static_cast<uint8_t>(config_.is_dense);
-    if (config_.transform)
-    {
-      if (!computeTransformation(scan_msg->header.stamp))
-      {
-        ROS_ERROR_STREAM("Could not transform points!");
-      }
-    }
   }
 
   virtual void addPoint(float x, float y, float z, const uint16_t ring, const uint16_t azimuth, const float distance,
@@ -157,7 +150,6 @@ public:
 
   sensor_msgs::PointCloud2 cloud;
 
-protected:
   inline void vectorTfToEigen(tf::Vector3& tf_vec, Eigen::Vector3f& eigen_vec)
   {
     eigen_vec(0) = tf_vec[0];
@@ -206,6 +198,7 @@ protected:
     return (range >= config_.min_range && range <= config_.max_range);
   }
 
+protected:
   Config config_;
   boost::shared_ptr<tf::TransformListener> tf_ptr;  ///< transform listener
   Eigen::Affine3f transformation;
