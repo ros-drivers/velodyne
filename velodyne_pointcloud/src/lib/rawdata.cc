@@ -57,21 +57,21 @@ namespace velodyne_rawdata
     config_.min_range = min_range;
     config_.max_range = max_range;
 
-    //converting angle parameters into the velodyne reference (rad)
+    // converting angle parameters into the velodyne reference (rad)
     config_.tmp_min_angle = view_direction + view_width/2;
     config_.tmp_max_angle = view_direction - view_width/2;
 
-    //computing positive modulo to keep theses angles into [0;2*M_PI]
-    config_.tmp_min_angle = fmod(fmod(config_.tmp_min_angle,2*M_PI) + 2*M_PI,2*M_PI);
-    config_.tmp_max_angle = fmod(fmod(config_.tmp_max_angle,2*M_PI) + 2*M_PI,2*M_PI);
+    // computing positive modulo to keep theses angles into [0;2*M_PI]
+    config_.tmp_min_angle = ::fmod(::fmod(config_.tmp_min_angle, 2*M_PI) + 2*M_PI, 2*M_PI);
+    config_.tmp_max_angle = ::fmod(::fmod(config_.tmp_max_angle, 2*M_PI) + 2*M_PI, 2*M_PI);
 
-    //converting into the hardware velodyne ref (negative yaml and degrees)
-    //adding 0.5 perfomrs a centered double to int conversion
+    // converting into the hardware velodyne ref (negative yaml and degrees)
+    // adding 0.5 perfomrs a centered double to int conversion
     config_.min_angle = 100 * (2*M_PI - config_.tmp_min_angle) * 180 / M_PI + 0.5;
     config_.max_angle = 100 * (2*M_PI - config_.tmp_max_angle) * 180 / M_PI + 0.5;
     if (config_.min_angle == config_.max_angle)
       {
-        //avoid returning empty cloud if min_angle = max_angle
+        // avoid returning empty cloud if min_angle = max_angle
         config_.min_angle = 0;
         config_.max_angle = 36000;
       }
@@ -138,8 +138,8 @@ namespace velodyne_rawdata
     for (uint16_t rot_index = 0; rot_index < ROTATION_MAX_UNITS; ++rot_index)
       {
         float rotation = angles::from_degrees(ROTATION_RESOLUTION * rot_index);
-        cos_rot_table_[rot_index] = cosf(rotation);
-        sin_rot_table_[rot_index] = sinf(rotation);
+        cos_rot_table_[rot_index] = ::cosf(rotation);
+        sin_rot_table_[rot_index] = ::sinf(rotation);
       }
     return 0;
   }
@@ -193,9 +193,6 @@ namespace velodyne_rawdata
             {
               continue;
             }
-
-          float distance = tmp.uint * calibration_.distance_resolution_m;
-          distance += corrections.dist_correction;
 
           /*condition added to avoid calculating points which are not
             in the interesting defined area (min_angle < area < max_angle)*/

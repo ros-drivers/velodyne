@@ -45,7 +45,7 @@ namespace velodyne_pointcloud
   const std::string LASER_ID = "laser_id";
   const std::string ROT_CORRECTION = "rot_correction";
   const std::string VERT_CORRECTION = "vert_correction";
-   const std::string DIST_CORRECTION = "dist_correction";
+  const std::string DIST_CORRECTION = "dist_correction";
   const std::string TWO_PT_CORRECTION_AVAILABLE =
     "two_pt_correction_available";
   const std::string DIST_CORRECTION_X = "dist_correction_x";
