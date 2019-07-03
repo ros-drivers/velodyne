@@ -200,9 +200,6 @@ inline float SQR(float val) { return val*val; }
           continue;
         }
 
-        float distance = tmp.uint * calibration_.distance_resolution_m;
-        distance += corrections.dist_correction;
-
         /*condition added to avoid calculating points which are not
           in the interesting defined area (min_angle < area < max_angle)*/
         if ((block.rotation >= config_.min_angle
