@@ -173,8 +173,8 @@ protected:
     geometry_msgs::msg::TransformStamped transform;
     try
       {
-        std::chrono::nanoseconds dur(time.nanoseconds());
-        std::chrono::time_point<std::chrono::system_clock> time(dur);
+        const std::chrono::nanoseconds dur(time.nanoseconds());
+        std::chrono::time_point<std::chrono::system_clock, std::chrono::nanoseconds> time(dur);
         transform = tf_buffer_.lookupTransform(config_.target_frame, cloud.header.frame_id, time);
       }
     catch (tf2::LookupException& e)
