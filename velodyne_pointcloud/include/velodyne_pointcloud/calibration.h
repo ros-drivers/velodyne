@@ -79,7 +79,6 @@ class Calibration final
 {
 public:
   float distance_resolution_m;
-  std::map<int, LaserCorrection> laser_corrections_map;
   std::vector<LaserCorrection> laser_corrections;
   int num_lasers;
 
