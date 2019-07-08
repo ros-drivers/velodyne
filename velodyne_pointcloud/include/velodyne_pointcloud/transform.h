@@ -69,7 +69,7 @@ public:
 private:
   void processScan(const std::shared_ptr<const velodyne_msgs::msg::VelodyneScan> & scanMsg);
 
-  std::shared_ptr<velodyne_rawdata::RawData> data_;
+  std::unique_ptr<velodyne_rawdata::RawData> data_;
   rclcpp::Publisher<sensor_msgs::msg::PointCloud2>::SharedPtr output_;
   std::shared_ptr<tf2_ros::TransformListener> tf_ptr_;
   message_filters::Subscriber<velodyne_msgs::msg::VelodyneScan> velodyne_scan_;

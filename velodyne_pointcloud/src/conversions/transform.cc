@@ -38,7 +38,7 @@ namespace velodyne_pointcloud
   /** @brief Constructor. */
   Transform::Transform() :
     rclcpp::Node("velodyne_transform_node"),
-    data_(new velodyne_rawdata::RawData()), velodyne_scan_(this, "velodyne_packets"), tf_buffer_(this->get_clock()), tf_filter_(velodyne_scan_, tf_buffer_, config_.target_frame, 10, 0)
+    velodyne_scan_(this, "velodyne_packets"), tf_buffer_(this->get_clock()), tf_filter_(velodyne_scan_, tf_buffer_, config_.target_frame, 10, 0)
   {
     std::string calibrationFile = this->declare_parameter("calibration", "");
 
@@ -88,16 +88,8 @@ namespace velodyne_pointcloud
 
     RCLCPP_INFO(this->get_logger(), "correction angles: %s", calibrationFile.c_str());
 
-    int success = data_->setup(calibrationFile);
-    if (success >= 0)
-      {
-        RCLCPP_DEBUG(get_logger(), "Calibration file loaded.");
-        config_.num_lasers = data_->numLasers();
-      }
-    else
-      {
-        RCLCPP_ERROR(get_logger(), "Could not load calibration file!");
-      }
+    data_ = std::make_unique<velodyne_rawdata::RawData>(calibrationFile);
+    config_.num_lasers = data_->numLasers();
 
     tf_ptr_ = std::make_shared<tf2_ros::TransformListener>(tf_buffer_);
 
