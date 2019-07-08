@@ -151,9 +151,6 @@ private:
     double min_range;             ///< minimum range to publish
     int min_angle;                ///< minimum angle to publish
     int max_angle;                ///< maximum angle to publish
-
-    double tmp_min_angle;
-    double tmp_max_angle;
   }
   Config;
   Config config_;
