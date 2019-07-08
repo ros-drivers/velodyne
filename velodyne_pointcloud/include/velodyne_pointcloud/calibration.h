@@ -75,7 +75,7 @@ struct LaserCorrection
 };
 
 /** \brief Calibration information for the entire device. */
-class Calibration
+class Calibration final
 {
 public:
   float distance_resolution_m;
@@ -101,7 +101,6 @@ public:
   }
 
   void read(const std::string& calibration_file);
-  void write(const std::string& calibration_file);
 };
 
 }  // namespace velodyne_pointcloud
