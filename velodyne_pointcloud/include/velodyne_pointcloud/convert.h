@@ -77,7 +77,6 @@ class Convert : public rclcpp::Node
       bool organize_cloud;           ///< enable/disable organized cloud structure
       double max_range;              ///< maximum range to publish
       double min_range;              ///< minimum range to publish
-      uint16_t num_lasers;           ///< number of lasers
       int npackets;                  ///< number of packets to combine
       double view_direction;
       double view_width;
