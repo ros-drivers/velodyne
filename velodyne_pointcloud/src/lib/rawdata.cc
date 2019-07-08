@@ -90,6 +90,11 @@ namespace velodyne_rawdata
       }
   }
 
+  int RawData::numLasers() const
+  {
+    return calibration_->num_lasers;
+  }
+
   /** Set up for on-line operation. */
   int RawData::setup(const std::string & calibration_file)
   {
@@ -104,7 +109,7 @@ namespace velodyne_rawdata
         cos_rot_table_[rot_index] = ::cosf(rotation);
         sin_rot_table_[rot_index] = ::sinf(rotation);
       }
-    return calibration_->num_lasers;
+    return 0;
   }
 
   /** @brief convert raw packet to point cloud

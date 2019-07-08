@@ -156,6 +156,8 @@ public:
 
   int scansPerPacket() const;
 
+  int numLasers() const;
+
 private:
   /** configuration parameters */
   typedef struct

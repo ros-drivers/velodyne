@@ -87,7 +87,7 @@ namespace velodyne_pointcloud
     if (success >= 0)
       {
         RCLCPP_DEBUG(get_logger(), "Calibration file loaded.");
-        config_.num_lasers = success;
+        config_.num_lasers = data_->numLasers();
       }
     else
       {
