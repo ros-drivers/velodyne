@@ -167,7 +167,6 @@ namespace velodyne_pointcloud
             calibration.laser_corrections.resize(index+1);
           }
         calibration.laser_corrections[index] = (correction.second);
-        calibration.laser_corrections_map.insert(correction);
       }
 
     // For each laser ring, find the next-smallest vertical angle.
