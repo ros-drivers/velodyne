@@ -82,12 +82,9 @@ public:
   std::map<int, LaserCorrection> laser_corrections_map;
   std::vector<LaserCorrection> laser_corrections;
   int num_lasers;
-  bool initialized;
 
 public:
   explicit Calibration(const std::string& calibration_file);
-
-  void read(const std::string& calibration_file);
 };
 
 }  // namespace velodyne_pointcloud

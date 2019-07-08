@@ -57,12 +57,6 @@ namespace velodyne_pointcloud
   const std::string FOCAL_DISTANCE = "focal_distance";
   const std::string FOCAL_SLOPE = "focal_slope";
 
-  Calibration::Calibration(const std::string& calibration_file)
-    : distance_resolution_m(0.002f)
-  {
-    read(calibration_file);
-  }
-
   /** Read calibration for a single laser. */
   void operator >> (const YAML::Node& node,
                     std::pair<int, LaserCorrection>& correction)
@@ -206,15 +200,14 @@ namespace velodyne_pointcloud
       }
   }
 
-  void Calibration::read(const std::string& calibration_file)
+  Calibration::Calibration(const std::string& calibration_file)
+    : distance_resolution_m(0.002f)
   {
     std::ifstream fin(calibration_file.c_str());
     if (!fin.is_open())
       {
-        initialized = false;
-        return;
+        throw std::runtime_error("Failed to open calibration file");
       }
-    initialized = true;
     try
       {
         YAML::Node doc;
@@ -229,8 +222,8 @@ namespace velodyne_pointcloud
       }
     catch (YAML::Exception &e)
       {
-        std::cerr << "YAML Exception: " << e.what() << std::endl;
-        initialized = false;
+        fin.close();
+        throw std::runtime_error("YAML Exception: " + std::string(e.what()));
       }
     fin.close();
   }
