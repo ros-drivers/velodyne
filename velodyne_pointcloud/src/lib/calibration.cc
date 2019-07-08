@@ -205,59 +205,6 @@ namespace velodyne_pointcloud
       }
   }
 
-  YAML::Emitter& operator << (YAML::Emitter& out,
-                              const std::pair<int, LaserCorrection> correction)
-  {
-    out << YAML::BeginMap;
-    out << YAML::Key << LASER_ID << YAML::Value << correction.first;
-    out << YAML::Key << ROT_CORRECTION <<
-      YAML::Value << correction.second.rot_correction;
-    out << YAML::Key << VERT_CORRECTION <<
-      YAML::Value << correction.second.vert_correction;
-    out << YAML::Key << DIST_CORRECTION <<
-      YAML::Value << correction.second.dist_correction;
-    out << YAML::Key << TWO_PT_CORRECTION_AVAILABLE <<
-      YAML::Value << correction.second.two_pt_correction_available;
-    out << YAML::Key << DIST_CORRECTION_X <<
-      YAML::Value << correction.second.dist_correction_x;
-    out << YAML::Key << DIST_CORRECTION_Y <<
-      YAML::Value << correction.second.dist_correction_y;
-    out << YAML::Key << VERT_OFFSET_CORRECTION <<
-      YAML::Value << correction.second.vert_offset_correction;
-    out << YAML::Key << HORIZ_OFFSET_CORRECTION <<
-      YAML::Value << correction.second.horiz_offset_correction;
-    out << YAML::Key << MAX_INTENSITY <<
-      YAML::Value << correction.second.max_intensity;
-    out << YAML::Key << MIN_INTENSITY <<
-      YAML::Value << correction.second.min_intensity;
-    out << YAML::Key << FOCAL_DISTANCE <<
-      YAML::Value << correction.second.focal_distance;
-    out << YAML::Key << FOCAL_SLOPE <<
-      YAML::Value << correction.second.focal_slope;
-    out << YAML::EndMap;
-    return out;
-  }
-
-  YAML::Emitter& operator <<
-  (YAML::Emitter& out, const Calibration& calibration)
-  {
-    out << YAML::BeginMap;
-    out << YAML::Key << NUM_LASERS <<
-      YAML::Value << calibration.laser_corrections.size();
-    out << YAML::Key << DISTANCE_RESOLUTION <<
-      YAML::Value << calibration.distance_resolution_m;
-    out << YAML::Key << LASERS << YAML::Value << YAML::BeginSeq;
-    for (std::map<int, LaserCorrection>::const_iterator
-           it = calibration.laser_corrections_map.begin();
-         it != calibration.laser_corrections_map.end(); it++)
-      {
-        out << *it;
-      }
-    out << YAML::EndSeq;
-    out << YAML::EndMap;
-    return out;
-  }
-
   void Calibration::read(const std::string& calibration_file)
   {
     std::ifstream fin(calibration_file.c_str());
@@ -285,15 +232,6 @@ namespace velodyne_pointcloud
         initialized = false;
       }
     fin.close();
-  }
-
-  void Calibration::write(const std::string& calibration_file)
-  {
-    std::ofstream fout(calibration_file.c_str());
-    YAML::Emitter out;
-    out << *this;
-    fout << out.c_str();
-    fout.close();
   }
 
 }  // namespace velodyne_pointcloud
