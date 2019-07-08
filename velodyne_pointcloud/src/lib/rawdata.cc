@@ -73,17 +73,17 @@ namespace velodyne_rawdata
     config_.max_range = max_range;
 
     // converting angle parameters into the velodyne reference (rad)
-    config_.tmp_min_angle = view_direction + view_width/2;
-    config_.tmp_max_angle = view_direction - view_width/2;
+    double tmp_min_angle = view_direction + view_width/2;
+    double tmp_max_angle = view_direction - view_width/2;
 
     // computing positive modulo to keep theses angles into [0;2*M_PI]
-    config_.tmp_min_angle = ::fmod(::fmod(config_.tmp_min_angle, 2*M_PI) + 2*M_PI, 2*M_PI);
-    config_.tmp_max_angle = ::fmod(::fmod(config_.tmp_max_angle, 2*M_PI) + 2*M_PI, 2*M_PI);
+    tmp_min_angle = ::fmod(::fmod(tmp_min_angle, 2*M_PI) + 2*M_PI, 2*M_PI);
+    tmp_max_angle = ::fmod(::fmod(tmp_max_angle, 2*M_PI) + 2*M_PI, 2*M_PI);
 
     // converting into the hardware velodyne ref (negative yaml and degrees)
     // adding 0.5 performs a centered double to int conversion
-    config_.min_angle = 100 * (2*M_PI - config_.tmp_min_angle) * 180 / M_PI + 0.5;
-    config_.max_angle = 100 * (2*M_PI - config_.tmp_max_angle) * 180 / M_PI + 0.5;
+    config_.min_angle = 100 * (2*M_PI - tmp_min_angle) * 180 / M_PI + 0.5;
+    config_.max_angle = 100 * (2*M_PI - tmp_max_angle) * 180 / M_PI + 0.5;
     if (config_.min_angle == config_.max_angle)
       {
         // avoid returning empty cloud if min_angle = max_angle
