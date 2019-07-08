@@ -147,8 +147,8 @@ public:
     return cloud;
   }
 
-  void configure(const double min_range, const double max_range, const std::string fixed_frame,
-                 const std::string target_frame)
+  void configure(const double min_range, const double max_range, const std::string & fixed_frame,
+                 const std::string & target_frame)
   {
     config_.min_range = min_range;
     config_.max_range = max_range;
