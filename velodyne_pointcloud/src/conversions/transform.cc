@@ -90,8 +90,6 @@ namespace velodyne_pointcloud
 
     data_ = std::make_unique<velodyne_rawdata::RawData>(calibrationFile);
 
-    tf_ptr_ = std::make_shared<tf2_ros::TransformListener>(tf_buffer_);
-
     if (config_.organize_cloud)
       {
         container_ptr_ = std::unique_ptr<OrganizedCloudXYZIR>(
