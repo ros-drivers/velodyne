@@ -57,6 +57,12 @@ namespace velodyne_pointcloud
   const std::string FOCAL_DISTANCE = "focal_distance";
   const std::string FOCAL_SLOPE = "focal_slope";
 
+  Calibration::Calibration(const std::string& calibration_file)
+    : distance_resolution_m(0.002f)
+  {
+    read(calibration_file);
+  }
+
   /** Read calibration for a single laser. */
   void operator >> (const YAML::Node& node,
                     std::pair<int, LaserCorrection>& correction)

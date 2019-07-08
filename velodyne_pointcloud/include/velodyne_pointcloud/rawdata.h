@@ -174,7 +174,7 @@ private:
   /**
    * Calibration file
    */
-  velodyne_pointcloud::Calibration calibration_;
+  std::unique_ptr<velodyne_pointcloud::Calibration> calibration_;
   float sin_rot_table_[ROTATION_MAX_UNITS];
   float cos_rot_table_[ROTATION_MAX_UNITS];
 

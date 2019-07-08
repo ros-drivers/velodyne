@@ -85,18 +85,7 @@ public:
   bool initialized;
 
 public:
-  Calibration()
-  : distance_resolution_m(0.002f),
-    num_lasers(0),
-    initialized(false)
-  {
-  }
-
-  explicit Calibration(const std::string& calibration_file)
-  : distance_resolution_m(0.002f)
-  {
-    read(calibration_file);
-  }
+  explicit Calibration(const std::string& calibration_file);
 
   void read(const std::string& calibration_file);
 };
