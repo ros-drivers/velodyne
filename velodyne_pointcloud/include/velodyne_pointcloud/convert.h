@@ -63,7 +63,7 @@ class Convert : public rclcpp::Node
   private:
     void processScan(const velodyne_msgs::msg::VelodyneScan::SharedPtr scanMsg);
 
-    std::shared_ptr<velodyne_rawdata::RawData> data_;
+    std::unique_ptr<velodyne_rawdata::RawData> data_;
     rclcpp::Subscription<velodyne_msgs::msg::VelodyneScan>::SharedPtr velodyne_scan_;
     rclcpp::Publisher<sensor_msgs::msg::PointCloud2>::SharedPtr output_;
     tf2_ros::Buffer tf_buffer_;

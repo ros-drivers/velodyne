@@ -129,26 +129,11 @@ typedef struct raw_packet
 raw_packet_t;
 
 /** \brief Velodyne data conversion class */
-class RawData
+class RawData final
 {
 public:
-  RawData();
-  ~RawData()
-  {
-  }
-
-  /** \brief Set up for data processing.
-   *
-   *  Perform initializations needed before data processing can
-   *  begin:
-   *
-   *    - read device-specific angles calibration
-   *
-   *  @param private_nh private node handle for ROS parameters
-   *  @returns number of lasers if successful;
-   *           errno value for failure
-   */
-  int setup(const std::string & calibration_file);
+  explicit RawData(const std::string & calibration_file);
+  ~RawData();
 
   void unpack(const velodyne_msgs::msg::VelodynePacket &pkt, DataContainerBase& data);
 

@@ -44,7 +44,22 @@ namespace velodyne_rawdata
   //
   ////////////////////////////////////////////////////////////////////////
 
-  RawData::RawData()
+  RawData::RawData(const std::string & calibration_file)
+  {
+    calibration_ = std::make_unique<velodyne_pointcloud::Calibration>(calibration_file);
+
+    //RCLCPP_INFO(this->get_logger(), "Number of lasers: %d.",  calibration_->num_lasers);
+
+    // Set up cached values for sin and cos of all the possible headings
+    for (uint16_t rot_index = 0; rot_index < ROTATION_MAX_UNITS; ++rot_index)
+      {
+        float rotation = angles::from_degrees(ROTATION_RESOLUTION * rot_index);
+        cos_rot_table_[rot_index] = ::cosf(rotation);
+        sin_rot_table_[rot_index] = ::sinf(rotation);
+      }
+  }
+
+  RawData::~RawData()
   {
   }
 
@@ -66,7 +81,7 @@ namespace velodyne_rawdata
     config_.tmp_max_angle = ::fmod(::fmod(config_.tmp_max_angle, 2*M_PI) + 2*M_PI, 2*M_PI);
 
     // converting into the hardware velodyne ref (negative yaml and degrees)
-    // adding 0.5 perfomrs a centered double to int conversion
+    // adding 0.5 performs a centered double to int conversion
     config_.min_angle = 100 * (2*M_PI - config_.tmp_min_angle) * 180 / M_PI + 0.5;
     config_.max_angle = 100 * (2*M_PI - config_.tmp_max_angle) * 180 / M_PI + 0.5;
     if (config_.min_angle == config_.max_angle)
@@ -93,23 +108,6 @@ namespace velodyne_rawdata
   int RawData::numLasers() const
   {
     return calibration_->num_lasers;
-  }
-
-  /** Set up for on-line operation. */
-  int RawData::setup(const std::string & calibration_file)
-  {
-    calibration_ = std::make_unique<velodyne_pointcloud::Calibration>(calibration_file);
-
-    //RCLCPP_INFO(this->get_logger(), "Number of lasers: %d.",  calibration_->num_lasers);
-
-    // Set up cached values for sin and cos of all the possible headings
-    for (uint16_t rot_index = 0; rot_index < ROTATION_MAX_UNITS; ++rot_index)
-      {
-        float rotation = angles::from_degrees(ROTATION_RESOLUTION * rot_index);
-        cos_rot_table_[rot_index] = ::cosf(rotation);
-        sin_rot_table_[rot_index] = ::sinf(rotation);
-      }
-    return 0;
   }
 
   /** @brief convert raw packet to point cloud
