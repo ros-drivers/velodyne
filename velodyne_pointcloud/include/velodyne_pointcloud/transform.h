@@ -81,8 +81,6 @@ private:
     std::string target_frame;  ///< target frame
     std::string fixed_frame;   ///< fixed frame
     bool organize_cloud;       ///< enable/disable organized cloud structure
-    double view_direction;
-    double view_width;
   }
   Config;
   Config config_;

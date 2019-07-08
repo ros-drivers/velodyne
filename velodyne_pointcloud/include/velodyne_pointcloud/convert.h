@@ -76,8 +76,6 @@ class Convert : public rclcpp::Node
       std::string fixed_frame;       ///< fixed frame
       bool organize_cloud;           ///< enable/disable organized cloud structure
       int npackets;                  ///< number of packets to combine
-      double view_direction;
-      double view_width;
     }
     Config;
     Config config_;
