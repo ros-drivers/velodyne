@@ -44,7 +44,7 @@ namespace velodyne_pointcloud
     min_range_range.from_value = 0.1;
     min_range_range.to_value = 10.0;
     min_range_desc.floating_point_range.push_back(min_range_range);
-    config_.min_range = this->declare_parameter("min_range", 0.9, min_range_desc);
+    double min_range = this->declare_parameter("min_range", 0.9, min_range_desc);
 
     rcl_interfaces::msg::ParameterDescriptor max_range_desc;
     max_range_desc.name = "max_range";
@@ -54,7 +54,7 @@ namespace velodyne_pointcloud
     max_range_range.from_value = 0.1;
     max_range_range.to_value = 200.0;
     max_range_desc.floating_point_range.push_back(max_range_range);
-    config_.max_range = this->declare_parameter("max_range", 130.0, max_range_desc);
+    double max_range = this->declare_parameter("max_range", 130.0, max_range_desc);
 
     rcl_interfaces::msg::ParameterDescriptor view_direction_desc;
     view_direction_desc.name = "view_direction";
@@ -88,14 +88,14 @@ namespace velodyne_pointcloud
     if (config_.organize_cloud)
       {
         container_ptr_ = std::unique_ptr<OrganizedCloudXYZIR>(
-          new OrganizedCloudXYZIR(config_.min_range, config_.max_range,
+          new OrganizedCloudXYZIR(min_range, max_range,
             config_.target_frame, config_.fixed_frame,
             data_->numLasers(), data_->scansPerPacket(), tf_buffer_));
       }
     else
       {
         container_ptr_ = std::unique_ptr<PointcloudXYZIR>(
-          new PointcloudXYZIR(config_.min_range, config_.max_range,
+          new PointcloudXYZIR(min_range, max_range,
             config_.target_frame, config_.fixed_frame,
             data_->scansPerPacket(), tf_buffer_));
       }
@@ -122,8 +122,8 @@ namespace velodyne_pointcloud
     //                                                         0.1, 10),
     //                                    TimeStampStatusParam()));
 
-    data_->setParameters(config_.min_range, config_.max_range, config_.view_direction, config_.view_width);
-    container_ptr_->configure(config_.min_range, config_.max_range, config_.fixed_frame, config_.target_frame);
+    data_->setParameters(min_range, max_range, config_.view_direction, config_.view_width);
+    container_ptr_->configure(min_range, max_range, config_.fixed_frame, config_.target_frame);
   }
 
   /** @brief Callback for raw scan messages. */
