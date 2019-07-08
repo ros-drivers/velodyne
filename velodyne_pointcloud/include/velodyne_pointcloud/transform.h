@@ -73,17 +73,7 @@ private:
   rclcpp::Publisher<sensor_msgs::msg::PointCloud2>::SharedPtr output_;
   message_filters::Subscriber<velodyne_msgs::msg::VelodyneScan> velodyne_scan_;
   tf2_ros::Buffer tf_buffer_;
-  tf2_ros::MessageFilter<velodyne_msgs::msg::VelodyneScan> tf_filter_;
-
-  /// configuration parameters
-  typedef struct
-  {
-    std::string target_frame;  ///< target frame
-    std::string fixed_frame;   ///< fixed frame
-    bool organize_cloud;       ///< enable/disable organized cloud structure
-  }
-  Config;
-  Config config_;
+  std::unique_ptr<tf2_ros::MessageFilter<velodyne_msgs::msg::VelodyneScan>> tf_filter_;
 
   std::unique_ptr<velodyne_rawdata::DataContainerBase> container_ptr_;
 
