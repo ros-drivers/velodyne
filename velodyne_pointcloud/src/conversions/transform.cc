@@ -89,7 +89,6 @@ namespace velodyne_pointcloud
     RCLCPP_INFO(this->get_logger(), "correction angles: %s", calibrationFile.c_str());
 
     data_ = std::make_unique<velodyne_rawdata::RawData>(calibrationFile);
-    config_.num_lasers = data_->numLasers();
 
     tf_ptr_ = std::make_shared<tf2_ros::TransformListener>(tf_buffer_);
 
@@ -97,7 +96,7 @@ namespace velodyne_pointcloud
       {
         container_ptr = std::shared_ptr<OrganizedCloudXYZIR>(
           new OrganizedCloudXYZIR(config_.max_range, config_.min_range, config_.target_frame, config_.fixed_frame,
-                                  config_.num_lasers, data_->scansPerPacket(), tf_buffer_));
+                                  data_->numLasers(), data_->scansPerPacket(), tf_buffer_));
       }
     else
       {
