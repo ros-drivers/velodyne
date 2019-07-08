@@ -67,7 +67,7 @@ class Convert : public rclcpp::Node
     rclcpp::Subscription<velodyne_msgs::msg::VelodyneScan>::SharedPtr velodyne_scan_;
     rclcpp::Publisher<sensor_msgs::msg::PointCloud2>::SharedPtr output_;
     tf2_ros::Buffer tf_buffer_;
-    std::shared_ptr<velodyne_rawdata::DataContainerBase> container_ptr_;
+    std::unique_ptr<velodyne_rawdata::DataContainerBase> container_ptr_;
 
     /// configuration parameters
     typedef struct
