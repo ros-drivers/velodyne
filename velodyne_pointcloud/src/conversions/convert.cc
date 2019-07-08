@@ -87,14 +87,14 @@ namespace velodyne_pointcloud
 
     if (config_.organize_cloud)
       {
-        container_ptr_ = std::shared_ptr<OrganizedCloudXYZIR>(
+        container_ptr_ = std::unique_ptr<OrganizedCloudXYZIR>(
           new OrganizedCloudXYZIR(config_.max_range, config_.min_range,
             config_.target_frame, config_.fixed_frame,
             data_->numLasers(), data_->scansPerPacket(), tf_buffer_));
       }
     else
       {
-        container_ptr_ = std::shared_ptr<PointcloudXYZIR>(
+        container_ptr_ = std::unique_ptr<PointcloudXYZIR>(
           new PointcloudXYZIR(config_.max_range, config_.min_range,
             config_.target_frame, config_.fixed_frame,
             data_->scansPerPacket(), tf_buffer_));

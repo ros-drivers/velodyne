@@ -90,7 +90,7 @@ private:
   Config;
   Config config_;
 
-  std::shared_ptr<velodyne_rawdata::DataContainerBase> container_ptr_;
+  std::unique_ptr<velodyne_rawdata::DataContainerBase> container_ptr_;
 
   // diagnostics updater
   //diagnostic_updater::Updater diagnostics_;
