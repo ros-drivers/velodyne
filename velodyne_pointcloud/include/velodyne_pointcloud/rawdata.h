@@ -150,19 +150,6 @@ public:
    */
   int setup(const std::string & calibration_file);
 
-  /** \brief Set up for data processing offline.
-   * Performs the same initialization as in setup, in the abscence of a ros::NodeHandle.
-   * this method is useful if unpacking data directly from bag files, without passing
-   * through a communication overhead.
-   *
-   * @param calibration_file path to the calibration file
-   * @param max_range_ cutoff for maximum range
-   * @param min_range_ cutoff for minimum range
-   * @returns 0 if successful;
-   *           errno value for failure
-   */
-  int setupOffline(const std::string & calibration_file, double max_range, double min_range);
-
   void unpack(const velodyne_msgs::msg::VelodynePacket &pkt, DataContainerBase& data);
 
   void setParameters(double min_range, double max_range, double view_direction, double view_width);
