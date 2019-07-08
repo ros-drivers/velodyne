@@ -79,7 +79,7 @@ namespace velodyne_rawdata
 
   int RawData::scansPerPacket() const
   {
-    if (calibration_.num_lasers == 16)
+    if (calibration_->num_lasers == 16)
       {
         return BLOCKS_PER_PACKET * VLP16_FIRINGS_PER_BLOCK *
           VLP16_SCANS_PER_FIRING;
@@ -93,15 +93,15 @@ namespace velodyne_rawdata
   /** Set up for on-line operation. */
   int RawData::setup(const std::string & calibration_file)
   {
-    calibration_.read(calibration_file);
-    if (!calibration_.initialized)
+    calibration_ = std::make_unique<velodyne_pointcloud::Calibration>(calibration_file);
+    if (!calibration_->initialized)
       {
         //RCLCPP_ERROR(this->get_logger(), "Unable to open calibration file: %s",
         //             calibration_file);
         return -1;
       }
 
-    //RCLCPP_INFO(this->get_logger(), "Number of lasers: %d.",  calibration_.num_lasers);
+    //RCLCPP_INFO(this->get_logger(), "Number of lasers: %d.",  calibration_->num_lasers);
 
     // Set up cached values for sin and cos of all the possible headings
     for (uint16_t rot_index = 0; rot_index < ROTATION_MAX_UNITS; ++rot_index)
@@ -110,7 +110,7 @@ namespace velodyne_rawdata
         cos_rot_table_[rot_index] = ::cosf(rotation);
         sin_rot_table_[rot_index] = ::sinf(rotation);
       }
-    return calibration_.num_lasers;
+    return calibration_->num_lasers;
   }
 
   /** @brief convert raw packet to point cloud
@@ -124,7 +124,7 @@ namespace velodyne_rawdata
     //RCLCPP_DEBUG(this->get_logger(), "Received packet, time: %s", pkt.stamp);
 
     /** special parsing for the VLP16 **/
-    if (calibration_.num_lasers == 16)
+    if (calibration_->num_lasers == 16)
       {
         unpack_vlp16(pkt, data);
         return;
@@ -150,7 +150,7 @@ namespace velodyne_rawdata
           float intensity;
           const uint8_t laser_number  = j + bank_origin;
 
-          const LaserCorrection &corrections = calibration_.laser_corrections[laser_number];
+          const LaserCorrection &corrections = calibration_->laser_corrections[laser_number];
 
           /** Position Calculation */
           const raw_block_t &block = raw->blocks[i];
@@ -171,7 +171,7 @@ namespace velodyne_rawdata
                  && (raw->blocks[i].rotation <= config_.max_angle
                      || raw->blocks[i].rotation >= config_.min_angle)))
             {
-              float distance = tmp.uint * calibration_.distance_resolution_m;
+              float distance = tmp.uint * calibration_->distance_resolution_m;
               distance += corrections.dist_correction;
 
               float cos_vert_angle = corrections.cos_vert_correction;
@@ -340,7 +340,7 @@ namespace velodyne_rawdata
           {
             for (int dsr = 0; dsr < VLP16_SCANS_PER_FIRING; dsr++, k += RAW_SCAN_SIZE)
               {
-                velodyne_pointcloud::LaserCorrection &corrections = calibration_.laser_corrections[dsr];
+                velodyne_pointcloud::LaserCorrection &corrections = calibration_->laser_corrections[dsr];
 
                 /** Position Calculation */
                 union two_bytes tmp;
@@ -362,7 +362,7 @@ namespace velodyne_rawdata
                   {
 
                     // convert polar coordinates to Euclidean XYZ
-                    float distance = tmp.uint * calibration_.distance_resolution_m;
+                    float distance = tmp.uint * calibration_->distance_resolution_m;
                     distance += corrections.dist_correction;
 
                     float cos_vert_angle = corrections.cos_vert_correction;
