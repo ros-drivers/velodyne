@@ -113,34 +113,6 @@ namespace velodyne_rawdata
     return calibration_.num_lasers;
   }
 
-
-  /** Set up for offline operation */
-  int RawData::setupOffline(const std::string & calibration_file, double max_range, double min_range)
-  {
-    config_.max_range = max_range;
-    config_.min_range = min_range;
-    //RCLCPP_INFO(get_logger(), "data ranges to publish: [%f, %f]", config_.min_range, config_.max_range);
-
-    //RCLCPP_INFO(get_logger(), "correction angles: %s", config_.calibrationFile.c_str());
-
-    calibration_.read(calibration_file);
-    if (!calibration_.initialized)
-      {
-        //RCLCPP_ERROR(get_logger(), "Unable to open calibration file: %s", config_.calibrationFile);
-        return -1;
-      }
-
-    // Set up cached values for sin and cos of all the possible headings
-    for (uint16_t rot_index = 0; rot_index < ROTATION_MAX_UNITS; ++rot_index)
-      {
-        float rotation = angles::from_degrees(ROTATION_RESOLUTION * rot_index);
-        cos_rot_table_[rot_index] = ::cosf(rotation);
-        sin_rot_table_[rot_index] = ::sinf(rotation);
-      }
-    return 0;
-  }
-
-
   /** @brief convert raw packet to point cloud
    *
    *  @param pkt raw packet to unpack
