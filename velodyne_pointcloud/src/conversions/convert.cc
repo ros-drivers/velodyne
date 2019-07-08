@@ -76,27 +76,27 @@ namespace velodyne_pointcloud
     view_width_desc.floating_point_range.push_back(view_width_range);
     double view_width = this->declare_parameter("view_width", 2.0*M_PI, view_width_desc);
 
-    config_.organize_cloud = this->declare_parameter("organize_cloud", true);
+    bool organize_cloud = this->declare_parameter("organize_cloud", true);
 
-    config_.target_frame = this->declare_parameter("target_frame", "");
-    config_.fixed_frame = this->declare_parameter("fixed_frame", "");
+    std::string target_frame = this->declare_parameter("target_frame", "");
+    std::string fixed_frame = this->declare_parameter("fixed_frame", "");
 
     RCLCPP_INFO(this->get_logger(), "correction angles: %s", calibrationFile.c_str());
 
     data_ = std::make_unique<velodyne_rawdata::RawData>(calibrationFile);
 
-    if (config_.organize_cloud)
+    if (organize_cloud)
       {
         container_ptr_ = std::unique_ptr<OrganizedCloudXYZIR>(
           new OrganizedCloudXYZIR(min_range, max_range,
-            config_.target_frame, config_.fixed_frame,
+            target_frame, fixed_frame,
             data_->numLasers(), data_->scansPerPacket(), tf_buffer_));
       }
     else
       {
         container_ptr_ = std::unique_ptr<PointcloudXYZIR>(
           new PointcloudXYZIR(min_range, max_range,
-            config_.target_frame, config_.fixed_frame,
+            target_frame, fixed_frame,
             data_->scansPerPacket(), tf_buffer_));
       }
 
@@ -123,7 +123,7 @@ namespace velodyne_pointcloud
     //                                    TimeStampStatusParam()));
 
     data_->setParameters(min_range, max_range, view_direction, view_width);
-    container_ptr_->configure(min_range, max_range, config_.fixed_frame, config_.target_frame);
+    container_ptr_->configure(min_range, max_range, target_frame, fixed_frame);
   }
 
   /** @brief Callback for raw scan messages. */

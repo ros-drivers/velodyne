@@ -72,9 +72,6 @@ class Convert : public rclcpp::Node
     /// configuration parameters
     typedef struct
     {
-      std::string target_frame;      ///< target frame
-      std::string fixed_frame;       ///< fixed frame
-      bool organize_cloud;           ///< enable/disable organized cloud structure
       int npackets;                  ///< number of packets to combine
     }
     Config;
