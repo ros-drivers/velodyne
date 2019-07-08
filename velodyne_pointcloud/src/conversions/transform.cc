@@ -94,13 +94,13 @@ namespace velodyne_pointcloud
 
     if (config_.organize_cloud)
       {
-        container_ptr = std::shared_ptr<OrganizedCloudXYZIR>(
+        container_ptr_ = std::shared_ptr<OrganizedCloudXYZIR>(
           new OrganizedCloudXYZIR(config_.max_range, config_.min_range, config_.target_frame, config_.fixed_frame,
                                   data_->numLasers(), data_->scansPerPacket(), tf_buffer_));
       }
     else
       {
-        container_ptr = std::shared_ptr<PointcloudXYZIR>(
+        container_ptr_ = std::shared_ptr<PointcloudXYZIR>(
           new PointcloudXYZIR(config_.max_range, config_.min_range,
                               config_.target_frame, config_.fixed_frame,
                               data_->scansPerPacket(), tf_buffer_));
@@ -126,7 +126,7 @@ namespace velodyne_pointcloud
     //                                       TimeStampStatusParam()));
 
     data_->setParameters(config_.min_range, config_.max_range, config_.view_direction, config_.view_width);
-    container_ptr->configure(config_.max_range, config_.min_range, config_.fixed_frame, config_.target_frame);
+    container_ptr_->configure(config_.max_range, config_.min_range, config_.fixed_frame, config_.target_frame);
   }
 
   /** @brief Callback for raw scan messages.
@@ -143,16 +143,16 @@ namespace velodyne_pointcloud
       }
 
     velodyne_msgs::msg::VelodyneScan* raw = const_cast<velodyne_msgs::msg::VelodyneScan*>(scanMsg.get());
-    container_ptr->setup(std::shared_ptr<velodyne_msgs::msg::VelodyneScan>(raw));
+    container_ptr_->setup(std::shared_ptr<velodyne_msgs::msg::VelodyneScan>(raw));
 
     // process each packet provided by the driver
     for (size_t i = 0; i < scanMsg->packets.size(); ++i)
       {
-        data_->unpack(scanMsg->packets[i], *container_ptr);
+        data_->unpack(scanMsg->packets[i], *container_ptr_);
       }
 
     // publish the accumulated cloud message
-    output_->publish(container_ptr->finishCloud());
+    output_->publish(container_ptr_->finishCloud());
     //diag_topic_->tick(scanMsg->header.stamp);
     //diagnostics_.update();
   }
