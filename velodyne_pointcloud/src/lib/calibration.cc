@@ -196,11 +196,6 @@ namespace velodyne_pointcloud
             // store this ring number with its corresponding laser number
             calibration.laser_corrections[next_index].laser_ring = ring;
             next_angle = min_seen;
-            if (calibration.ros_info)
-              {
-                //ROS_INFO("laser_ring[%2u] = %2u, angle = %+.6f",
-                //         next_index, ring, next_angle);
-              }
           }
       }
   }

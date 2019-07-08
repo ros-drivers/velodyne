@@ -83,19 +83,17 @@ public:
   std::vector<LaserCorrection> laser_corrections;
   int num_lasers;
   bool initialized;
-  bool ros_info;
 
 public:
-  explicit Calibration(bool info = true)
+  Calibration()
   : distance_resolution_m(0.002f),
     num_lasers(0),
-    initialized(false),
-    ros_info(info) {}
-  explicit Calibration(
-    const std::string& calibration_file,
-    bool info = true)
-  : distance_resolution_m(0.002f),
-    ros_info(info)
+    initialized(false)
+  {
+  }
+
+  explicit Calibration(const std::string& calibration_file)
+  : distance_resolution_m(0.002f)
   {
     read(calibration_file);
   }
