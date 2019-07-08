@@ -64,7 +64,7 @@ namespace velodyne_pointcloud
     view_direction_range.from_value = -M_PI;
     view_direction_range.to_value = M_PI;
     view_direction_desc.floating_point_range.push_back(view_direction_range);
-    config_.view_direction = this->declare_parameter("view_direction", 0.0, view_direction_desc);
+    double view_direction = this->declare_parameter("view_direction", 0.0, view_direction_desc);
 
     rcl_interfaces::msg::ParameterDescriptor view_width_desc;
     view_width_desc.name = "view_width";
@@ -74,7 +74,7 @@ namespace velodyne_pointcloud
     view_width_range.from_value = 0.0;
     view_width_range.to_value = 2.0*M_PI;
     view_width_desc.floating_point_range.push_back(view_width_range);
-    config_.view_width = this->declare_parameter("view_width", 2.0*M_PI, view_width_desc);
+    double view_width = this->declare_parameter("view_width", 2.0*M_PI, view_width_desc);
 
     config_.organize_cloud = this->declare_parameter("organize_cloud", true);
 
@@ -122,7 +122,7 @@ namespace velodyne_pointcloud
     //                                                         0.1, 10),
     //                                    TimeStampStatusParam()));
 
-    data_->setParameters(min_range, max_range, config_.view_direction, config_.view_width);
+    data_->setParameters(min_range, max_range, view_direction, view_width);
     container_ptr_->configure(min_range, max_range, config_.fixed_frame, config_.target_frame);
   }
 
