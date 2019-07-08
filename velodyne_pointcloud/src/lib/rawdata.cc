@@ -94,12 +94,6 @@ namespace velodyne_rawdata
   int RawData::setup(const std::string & calibration_file)
   {
     calibration_ = std::make_unique<velodyne_pointcloud::Calibration>(calibration_file);
-    if (!calibration_->initialized)
-      {
-        //RCLCPP_ERROR(this->get_logger(), "Unable to open calibration file: %s",
-        //             calibration_file);
-        return -1;
-      }
 
     //RCLCPP_INFO(this->get_logger(), "Number of lasers: %d.",  calibration_->num_lasers);
 
