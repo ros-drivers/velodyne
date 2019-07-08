@@ -55,11 +55,11 @@ namespace velodyne_rawdata
 class DataContainerBase
 {
 public:
-  DataContainerBase(const double max_range, const double min_range, const std::string& target_frame,
+  DataContainerBase(const double min_range, const double max_range, const std::string& target_frame,
                     const std::string& fixed_frame, const unsigned int init_width, const unsigned int init_height,
                     const bool is_dense, const unsigned int scans_per_packet,
                     tf2::BufferCore & buffer, int fields, ...)
-    : config_(max_range, min_range, target_frame, fixed_frame, init_width, init_height, is_dense, scans_per_packet)
+    : config_(min_range, max_range, target_frame, fixed_frame, init_width, init_height, is_dense, scans_per_packet)
     , tf_buffer_(buffer)
   {
     va_list vl;
@@ -82,8 +82,8 @@ public:
 
   struct Config
   {
-    double max_range;          ///< maximum range to publish
     double min_range;          ///< minimum range to publish
+    double max_range;          ///< maximum range to publish
     std::string target_frame;  ///< target frame to transform a point
     std::string fixed_frame;   ///< fixed frame used for transform
     unsigned int init_width;
@@ -92,10 +92,10 @@ public:
     unsigned int scans_per_packet;
     bool transform;  ///< enable / disable transform points
 
-    Config(double max_range, double min_range, std::string target_frame, std::string fixed_frame,
+    Config(double min_range, double max_range, std::string target_frame, std::string fixed_frame,
            unsigned int init_width, unsigned int init_height, bool is_dense, unsigned int scans_per_packet)
-      : max_range(max_range)
-      , min_range(min_range)
+      : min_range(min_range)
+      , max_range(max_range)
       , target_frame(target_frame)
       , fixed_frame(fixed_frame)
       , init_width(init_width)
@@ -147,11 +147,11 @@ public:
     return cloud;
   }
 
-  void configure(const double max_range, const double min_range, const std::string fixed_frame,
+  void configure(const double min_range, const double max_range, const std::string fixed_frame,
                  const std::string target_frame)
   {
-    config_.max_range = max_range;
     config_.min_range = min_range;
+    config_.max_range = max_range;
     config_.fixed_frame = fixed_frame;
     config_.target_frame = target_frame;
 

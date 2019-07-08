@@ -12,12 +12,12 @@ namespace velodyne_pointcloud
 {
 
   OrganizedCloudXYZIR::OrganizedCloudXYZIR(
-      const double max_range, const double min_range,
+      const double min_range, const double max_range,
       const std::string& target_frame, const std::string& fixed_frame,
       const unsigned int num_lasers, const unsigned int scans_per_block,
       tf2::BufferCore & buffer)
     : DataContainerBase(
-        max_range, min_range, target_frame, fixed_frame,
+        min_range, max_range, target_frame, fixed_frame,
         num_lasers, 0, false, scans_per_block, buffer, 5,
         "x", 1, sensor_msgs::msg::PointField::FLOAT32,
         "y", 1, sensor_msgs::msg::PointField::FLOAT32,
@@ -49,7 +49,6 @@ namespace velodyne_pointcloud
     iter_ring = sensor_msgs::PointCloud2Iterator<uint16_t >(cloud, "ring");
   }
 
-
   void OrganizedCloudXYZIR::addPoint(float x, float y, float z,
       const uint16_t ring, const uint16_t /*azimuth*/, const float distance, const float intensity)
   {
@@ -61,7 +60,7 @@ namespace velodyne_pointcloud
      */
     if (pointInRange(distance))
       {
-        if(config_.transform)
+        if (config_.transform)
           {
             transformPoint(x, y, z);
           }
@@ -81,4 +80,4 @@ namespace velodyne_pointcloud
         *(iter_ring+ring) = ring;
       }
   }
-}
+}  // namespace velodyne_pointcloud

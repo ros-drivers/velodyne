@@ -47,7 +47,7 @@ namespace velodyne_pointcloud
 class OrganizedCloudXYZIR : public velodyne_rawdata::DataContainerBase
 {
 public:
-  OrganizedCloudXYZIR(const double max_range, const double min_range, const std::string& target_frame,
+  OrganizedCloudXYZIR(const double min_range, const double max_range, const std::string& target_frame,
                       const std::string& fixed_frame, const unsigned int num_lasers, const unsigned int scans_per_block,
                       tf2::BufferCore & buffer);
 
