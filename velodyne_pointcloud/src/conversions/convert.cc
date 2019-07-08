@@ -88,14 +88,14 @@ namespace velodyne_pointcloud
     if (config_.organize_cloud)
       {
         container_ptr_ = std::unique_ptr<OrganizedCloudXYZIR>(
-          new OrganizedCloudXYZIR(config_.max_range, config_.min_range,
+          new OrganizedCloudXYZIR(config_.min_range, config_.max_range,
             config_.target_frame, config_.fixed_frame,
             data_->numLasers(), data_->scansPerPacket(), tf_buffer_));
       }
     else
       {
         container_ptr_ = std::unique_ptr<PointcloudXYZIR>(
-          new PointcloudXYZIR(config_.max_range, config_.min_range,
+          new PointcloudXYZIR(config_.min_range, config_.max_range,
             config_.target_frame, config_.fixed_frame,
             data_->scansPerPacket(), tf_buffer_));
       }
@@ -123,7 +123,7 @@ namespace velodyne_pointcloud
     //                                    TimeStampStatusParam()));
 
     data_->setParameters(config_.min_range, config_.max_range, config_.view_direction, config_.view_width);
-    container_ptr_->configure(config_.max_range, config_.min_range, config_.fixed_frame, config_.target_frame);
+    container_ptr_->configure(config_.min_range, config_.max_range, config_.fixed_frame, config_.target_frame);
   }
 
   /** @brief Callback for raw scan messages. */

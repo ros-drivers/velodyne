@@ -75,8 +75,8 @@ class Convert : public rclcpp::Node
       std::string target_frame;      ///< target frame
       std::string fixed_frame;       ///< fixed frame
       bool organize_cloud;           ///< enable/disable organized cloud structure
-      double max_range;              ///< maximum range to publish
       double min_range;              ///< minimum range to publish
+      double max_range;              ///< maximum range to publish
       int npackets;                  ///< number of packets to combine
       double view_direction;
       double view_width;
