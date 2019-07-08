@@ -148,7 +148,7 @@ public:
    *  @returns number of lasers if successful;
    *           errno value for failure
    */
-  int setup(const std::string & calibrationFile);
+  int setup(const std::string & calibration_file);
 
   /** \brief Set up for data processing offline.
    * Performs the same initialization as in setup, in the abscence of a ros::NodeHandle.
@@ -161,7 +161,7 @@ public:
    * @returns 0 if successful;
    *           errno value for failure
    */
-  int setupOffline(std::string calibration_file, double max_range_, double min_range_);
+  int setupOffline(const std::string & calibration_file, double max_range, double min_range);
 
   void unpack(const velodyne_msgs::msg::VelodynePacket &pkt, DataContainerBase& data);
 
@@ -173,7 +173,6 @@ private:
   /** configuration parameters */
   typedef struct
   {
-    std::string calibrationFile;  ///< calibration file name
     double max_range;             ///< maximum range to publish
     double min_range;             ///< minimum range to publish
     int min_angle;                ///< minimum angle to publish

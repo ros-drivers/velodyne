@@ -91,15 +91,13 @@ namespace velodyne_rawdata
   }
 
   /** Set up for on-line operation. */
-  int RawData::setup(const std::string & calibrationFile)
+  int RawData::setup(const std::string & calibration_file)
   {
-    config_.calibrationFile = calibrationFile;
-
-    calibration_.read(config_.calibrationFile);
+    calibration_.read(calibration_file);
     if (!calibration_.initialized)
       {
         //RCLCPP_ERROR(this->get_logger(), "Unable to open calibration file: %s",
-        //             config_.calibrationFile);
+        //             calibration_file);
         return -1;
       }
 
@@ -117,17 +115,15 @@ namespace velodyne_rawdata
 
 
   /** Set up for offline operation */
-  int RawData::setupOffline(std::string calibration_file, double max_range_, double min_range_)
+  int RawData::setupOffline(const std::string & calibration_file, double max_range, double min_range)
   {
-    config_.max_range = max_range_;
-    config_.min_range = min_range_;
+    config_.max_range = max_range;
+    config_.min_range = min_range;
     //RCLCPP_INFO(get_logger(), "data ranges to publish: [%f, %f]", config_.min_range, config_.max_range);
-
-    config_.calibrationFile = calibration_file;
 
     //RCLCPP_INFO(get_logger(), "correction angles: %s", config_.calibrationFile.c_str());
 
-    calibration_.read(config_.calibrationFile);
+    calibration_.read(calibration_file);
     if (!calibration_.initialized)
       {
         //RCLCPP_ERROR(get_logger(), "Unable to open calibration file: %s", config_.calibrationFile);
