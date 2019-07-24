@@ -78,12 +78,11 @@ struct LaserCorrection
 class Calibration final
 {
 public:
+  explicit Calibration(const std::string& calibration_file);
+
   float distance_resolution_m;
   std::vector<LaserCorrection> laser_corrections;
   int num_lasers;
-
-public:
-  explicit Calibration(const std::string& calibration_file);
 };
 
 }  // namespace velodyne_pointcloud

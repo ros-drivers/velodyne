@@ -54,34 +54,34 @@
 
 namespace velodyne_pointcloud
 {
-class Convert : public rclcpp::Node
+class Convert final : public rclcpp::Node
 {
-  public:
-    Convert();
-    ~Convert() {}
+public:
+  Convert();
+  ~Convert() {}
 
-  private:
-    void processScan(const velodyne_msgs::msg::VelodyneScan::SharedPtr scanMsg);
+private:
+  void processScan(const velodyne_msgs::msg::VelodyneScan::SharedPtr scanMsg);
 
-    std::unique_ptr<velodyne_rawdata::RawData> data_;
-    rclcpp::Subscription<velodyne_msgs::msg::VelodyneScan>::SharedPtr velodyne_scan_;
-    rclcpp::Publisher<sensor_msgs::msg::PointCloud2>::SharedPtr output_;
-    tf2_ros::Buffer tf_buffer_;
-    std::unique_ptr<velodyne_rawdata::DataContainerBase> container_ptr_;
+  std::unique_ptr<velodyne_rawdata::RawData> data_;
+  rclcpp::Subscription<velodyne_msgs::msg::VelodyneScan>::SharedPtr velodyne_scan_;
+  rclcpp::Publisher<sensor_msgs::msg::PointCloud2>::SharedPtr output_;
+  tf2_ros::Buffer tf_buffer_;
+  std::unique_ptr<velodyne_rawdata::DataContainerBase> container_ptr_;
 
-    /// configuration parameters
-    typedef struct
-    {
-      int npackets;                  ///< number of packets to combine
-    }
-    Config;
-    Config config_;
+  /// configuration parameters
+  typedef struct
+  {
+    int npackets;                  ///< number of packets to combine
+  }
+  Config;
+  Config config_;
 
-    // diagnostics updater
-    //diagnostic_updater::Updater diagnostics_;
-    double diag_min_freq_;
-    double diag_max_freq_;
-    //std::shared_ptr<diagnostic_updater::TopicDiagnostic> diag_topic_;
+  // diagnostics updater
+  //diagnostic_updater::Updater diagnostics_;
+  double diag_min_freq_;
+  double diag_max_freq_;
+  //std::shared_ptr<diagnostic_updater::TopicDiagnostic> diag_topic_;
 };
 }  // namespace velodyne_pointcloud
 

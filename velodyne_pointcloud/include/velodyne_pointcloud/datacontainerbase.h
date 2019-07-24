@@ -55,10 +55,10 @@ namespace velodyne_rawdata
 class DataContainerBase
 {
 public:
-  DataContainerBase(const double min_range, const double max_range, const std::string& target_frame,
-                    const std::string& fixed_frame, const unsigned int init_width, const unsigned int init_height,
-                    const bool is_dense, const unsigned int scans_per_packet,
-                    tf2::BufferCore & buffer, int fields, ...)
+  explicit DataContainerBase(const double min_range, const double max_range, const std::string& target_frame,
+                             const std::string& fixed_frame, const unsigned int init_width, const unsigned int init_height,
+                             const bool is_dense, const unsigned int scans_per_packet,
+                             tf2::BufferCore & buffer, int fields, ...)
     : config_(min_range, max_range, target_frame, fixed_frame, init_width, init_height, is_dense, scans_per_packet)
     , tf_buffer_(buffer)
   {
@@ -80,7 +80,7 @@ public:
     cloud.row_step = cloud.width * cloud.point_step;
   }
 
-  struct Config
+  struct Config final
   {
     double min_range;          ///< minimum range to publish
     double max_range;          ///< maximum range to publish
@@ -92,8 +92,8 @@ public:
     unsigned int scans_per_packet;
     bool transform;  ///< enable / disable transform points
 
-    Config(double min_range, double max_range, std::string target_frame, std::string fixed_frame,
-           unsigned int init_width, unsigned int init_height, bool is_dense, unsigned int scans_per_packet)
+    explicit Config(double min_range, double max_range, std::string target_frame, std::string fixed_frame,
+                    unsigned int init_width, unsigned int init_height, bool is_dense, unsigned int scans_per_packet)
       : min_range(min_range)
       , max_range(max_range)
       , target_frame(target_frame)

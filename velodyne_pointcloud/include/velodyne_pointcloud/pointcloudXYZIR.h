@@ -44,19 +44,20 @@
 
 namespace velodyne_pointcloud
 {
-class PointcloudXYZIR : public velodyne_rawdata::DataContainerBase
+class PointcloudXYZIR final : public velodyne_rawdata::DataContainerBase
 {
 public:
-  PointcloudXYZIR(const double min_range, const double max_range, const std::string& target_frame,
-                  const std::string& fixed_frame, const unsigned int scans_per_block,
-                  tf2::BufferCore & buffer);
+  explicit PointcloudXYZIR(const double min_range, const double max_range, const std::string& target_frame,
+                           const std::string& fixed_frame, const unsigned int scans_per_block,
+                           tf2::BufferCore & buffer);
 
-  virtual void newLine();
+  void newLine() override;
 
-  virtual void setup(const velodyne_msgs::msg::VelodyneScan::SharedPtr scan_msg);
+  void setup(const velodyne_msgs::msg::VelodyneScan::SharedPtr scan_msg) override;
 
-  virtual void addPoint(float x, float y, float z, uint16_t ring, uint16_t azimuth, float distance, float intensity);
+  void addPoint(float x, float y, float z, uint16_t ring, uint16_t azimuth, float distance, float intensity) override;
 
+private:
   sensor_msgs::PointCloud2Iterator<float> iter_x, iter_y, iter_z, iter_intensity;
   sensor_msgs::PointCloud2Iterator<uint16_t> iter_ring;
 };
