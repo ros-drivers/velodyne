@@ -40,7 +40,7 @@
 namespace velodyne_laserscan
 {
 
-class VelodyneLaserScan : public rclcpp::Node
+class VelodyneLaserScan final : public rclcpp::Node
 {
 public:
   VelodyneLaserScan();

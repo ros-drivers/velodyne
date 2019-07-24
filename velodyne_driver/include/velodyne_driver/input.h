@@ -75,7 +75,7 @@ constexpr uint16_t DATA_PORT_NUMBER = 2368;      // default data port
 class Input
 {
 public:
-  Input(rclcpp::Node * private_nh, const std::string & devip, uint16_t port);
+  explicit Input(rclcpp::Node * private_nh, const std::string & devip, uint16_t port);
   virtual ~Input() {}
 
   /** @brief Read one Velodyne packet.
@@ -96,15 +96,15 @@ protected:
 };
 
 /** @brief Live Velodyne input from socket. */
-class InputSocket: public Input
+class InputSocket final : public Input
 {
 public:
-  InputSocket(rclcpp::Node * private_nh,
+  explicit InputSocket(rclcpp::Node * private_nh,
               const std::string & devip, uint16_t port, bool gps_time);
-  virtual ~InputSocket();
+  ~InputSocket();
 
-  virtual int getPacket(velodyne_msgs::msg::VelodynePacket *pkt,
-                        const double time_offset);
+  int getPacket(velodyne_msgs::msg::VelodynePacket *pkt,
+                const double time_offset) override;
   void setDeviceIP(const std::string& ip);
 
 private:
@@ -119,21 +119,21 @@ private:
  * Dump files can be grabbed by libpcap, Velodyne's DSR software,
  * ethereal, wireshark, tcpdump, or the \ref vdump_command.
  */
-class InputPCAP: public Input
+class InputPCAP final : public Input
 {
 public:
-  InputPCAP(rclcpp::Node * private_nh,
-            const std::string & devip,
-            uint16_t port,
-            double packet_rate,
-            const std::string & filename,
-            bool read_once,
-            bool read_fast,
-            double repeat_delay);
-  virtual ~InputPCAP();
+  explicit InputPCAP(rclcpp::Node * private_nh,
+                     const std::string & devip,
+                     uint16_t port,
+                     double packet_rate,
+                     const std::string & filename,
+                     bool read_once,
+                     bool read_fast,
+                     double repeat_delay);
+  ~InputPCAP();
 
-  virtual int getPacket(velodyne_msgs::msg::VelodynePacket *pkt,
-                        const double time_offset);
+  int getPacket(velodyne_msgs::msg::VelodynePacket *pkt,
+                const double time_offset) override;
   void setDeviceIP(const std::string& ip);
 
 private:
