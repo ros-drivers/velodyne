@@ -223,7 +223,13 @@ void VelodyneLaserScan::recvCallback(const sensor_msgs::msg::PointCloud2::Shared
         }
       else
         {
-          RCLCPP_WARN(get_logger(), "VelodyneLaserScan: PointCloud2 fields in unexpected order. Using slower generic method.");
+          // TODO(clalancette): This can be simplified when RCLCPP_WARN_ONCE is available
+          static bool warned = false;
+          if (!warned)
+            {
+              RCLCPP_WARN(get_logger(), "VelodyneLaserScan: PointCloud2 fields in unexpected order. Using slower generic method.");
+              warned = true;
+            }
 
           if (offset_i >= 0)
             {
