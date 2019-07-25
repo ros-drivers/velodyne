@@ -105,7 +105,7 @@ VelodyneDriver::VelodyneDriver() : rclcpp::Node("velodyne_driver_node")
       packet_rate = 1808.0;
       model_full_name = std::string("HDL-") + config_.model;
     }
-    else if (config_.model == "32C")
+  else if (config_.model == "32C")
     {
       packet_rate = 1507.0;
       model_full_name = std::string("VLP-") + config_.model;
@@ -117,9 +117,9 @@ VelodyneDriver::VelodyneDriver() : rclcpp::Node("velodyne_driver_node")
     }
   else
     {
-      RCLCPP_ERROR(this->get_logger(), "unknown Velodyne LIDAR model: " + config_.model);
-      packet_rate = 2600.0;
+      throw std::runtime_error("Unknown Velodyne LIDAR model: " + config_.model);
     }
+
   std::string deviceName(std::string("Velodyne ") + model_full_name);
 
   RCLCPP_INFO(this->get_logger(), "%s rotating at %f RPM", deviceName.c_str(), config_.rpm);
