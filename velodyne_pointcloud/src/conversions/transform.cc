@@ -145,7 +145,7 @@ namespace velodyne_pointcloud
     for (size_t i = 0; i < scanMsg->packets.size(); ++i)
     {
       container_ptr->computeTransformation(scanMsg->packets[i].stamp);
-      data_->unpack(scanMsg->packets[i], *container_ptr);
+      data_->unpack(scanMsg->packets[i], *container_ptr,  scanMsg->header.stamp);
     }
     // publish the accumulated cloud message
     output_.publish(container_ptr->finishCloud());

@@ -149,6 +149,9 @@ public:
    */
   boost::optional<velodyne_pointcloud::Calibration> setup(ros::NodeHandle private_nh);
 
+  bool buildTimings();
+  std::vector< std::vector<float> > timing_offsets;
+
   /** \brief Set up for data processing offline.
    * Performs the same initialization as in setup, in the abscence of a ros::NodeHandle.
    * this method is useful if unpacking data directly from bag files, without passing
@@ -162,7 +165,7 @@ public:
    */
   int setupOffline(std::string calibration_file, double max_range_, double min_range_);
 
-  void unpack(const velodyne_msgs::VelodynePacket& pkt, DataContainerBase& data);
+  void unpack(const velodyne_msgs::VelodynePacket& pkt, DataContainerBase& data, const ros::Time& scan_start_time);
 
   void setParameters(double min_range, double max_range, double view_direction, double view_width);
 
@@ -172,6 +175,7 @@ private:
   /** configuration parameters */
   typedef struct
   {
+    std::string model;
     std::string calibrationFile;  ///< calibration file name
     double max_range;             ///< maximum range to publish
     double min_range;             ///< minimum range to publish
@@ -192,7 +196,7 @@ private:
   float cos_rot_table_[ROTATION_MAX_UNITS];
 
   /** add private function to handle the VLP16 **/
-  void unpack_vlp16(const velodyne_msgs::VelodynePacket& pkt, DataContainerBase& data);
+  void unpack_vlp16(const velodyne_msgs::VelodynePacket& pkt, DataContainerBase& data, const ros::Time& scan_start_time);
 };
 
 }  // namespace velodyne_rawdata
