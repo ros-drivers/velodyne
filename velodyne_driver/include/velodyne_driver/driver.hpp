@@ -71,6 +71,7 @@ private:
     int cut_angle;                   // cutting angle in 1/100°
     double time_offset;              // time in seconds added to each velodyne time stamp
     bool enabled;                    // polling is enabled
+    bool timestamp_first_packet;     // timestamp based on first packet instead of last one
   }
   config_;
 
