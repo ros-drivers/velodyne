@@ -88,7 +88,7 @@ inline float SQR(float val) { return val*val; }
   }
 
   /** Set up for on-line operation. */
-  int RawData::setup(ros::NodeHandle private_nh)
+  boost::optional<velodyne_pointcloud::Calibration> RawData::setup(ros::NodeHandle private_nh)
   {
     // get path to angles.config file for this device
     if (!private_nh.getParam("calibration", config_.calibrationFile))
@@ -104,20 +104,20 @@ inline float SQR(float val) { return val*val; }
 
     calibration_.read(config_.calibrationFile);
     if (!calibration_.initialized) {
-      ROS_ERROR_STREAM("Unable to open calibration file: " << 
+      ROS_ERROR_STREAM("Unable to open calibration file: " <<
           config_.calibrationFile);
-      return -1;
+      return boost::none;
     }
-    
+
     ROS_INFO_STREAM("Number of lasers: " << calibration_.num_lasers << ".");
-    
+
     // Set up cached values for sin and cos of all the possible headings
     for (uint16_t rot_index = 0; rot_index < ROTATION_MAX_UNITS; ++rot_index) {
       float rotation = angles::from_degrees(ROTATION_RESOLUTION * rot_index);
       cos_rot_table_[rot_index] = cosf(rotation);
       sin_rot_table_[rot_index] = sinf(rotation);
     }
-   return 0;
+   return calibration_;
   }
 
 
@@ -199,10 +199,6 @@ inline float SQR(float val) { return val*val; }
         {
           continue;
         }
-
-        float distance = tmp.uint * calibration_.distance_resolution_m;
-        distance += corrections.dist_correction;
-        if (!pointInRange(distance)) continue;
 
         /*condition added to avoid calculating points which are not
           in the interesting defined area (min_angle < area < max_angle)*/
@@ -309,10 +305,11 @@ inline float SQR(float val) { return val*val; }
             SQR(1 - static_cast<float>(tmp.uint)/65535)));
           intensity = (intensity < min_intensity) ? min_intensity : intensity;
           intensity = (intensity > max_intensity) ? max_intensity : intensity;
-  
+
           data.addPoint(x_coord, y_coord, z_coord, corrections.laser_ring, raw->blocks[i].rotation, distance, intensity);
         }
       }
+      data.newLine();
     }
   }
   
@@ -379,12 +376,6 @@ inline float SQR(float val) { return val*val; }
           tmp.bytes[0] = raw->blocks[block].data[k];
           tmp.bytes[1] = raw->blocks[block].data[k+1];
           
-          float distance = tmp.uint * calibration_.distance_resolution_m;
-          distance += corrections.dist_correction;
-
-          // skip the point if out of range
-          if ( !pointInRange(distance)) continue;
-
           /** correct for the laser rotation as a function of timing during the firings **/
           azimuth_corrected_f = azimuth + (azimuth_diff * ((dsr*VLP16_DSR_TOFFSET) + (firing*VLP16_FIRING_TOFFSET)) / VLP16_BLOCK_TDURATION);
           azimuth_corrected = ((int)round(azimuth_corrected_f)) % 36000;
@@ -497,8 +488,8 @@ inline float SQR(float val) { return val*val; }
             data.addPoint(x_coord, y_coord, z_coord, corrections.laser_ring, azimuth_corrected, distance, intensity);
           }
         }
+        data.newLine();
       }
     }
-  }  
-
+  }
 } // namespace velodyne_rawdata

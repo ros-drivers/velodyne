@@ -1,4 +1,4 @@
-// Copyright (C) 2012, 2019 Austin Robot Technology, Jesse Vera, Jack O'Quin, Piyush Khandelwal, Joshua Whitley
+// Copyright (C) 2012, 2019 Austin Robot Technology, Jack O'Quin, Joshua Whitley, Sebastian Pütz
 // All rights reserved.
 //
 // Software License Agreement (BSD License 2.0)
@@ -30,38 +30,32 @@
 // ANY WAY OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE
 // POSSIBILITY OF SUCH DAMAGE.
 
-/** \file
- *
- *  Point Cloud Library point structures for Velodyne data.
- *
- *  @author Jesse Vera
- *  @author Jack O'Quin
- *  @author Piyush Khandelwal
- */
+#ifndef VELODYNE_POINTCLOUD_ORGANIZED_CLOUDXYZIR_H
+#define VELODYNE_POINTCLOUD_ORGANIZED_CLOUDXYZIR_H
 
-#ifndef VELODYNE_POINTCLOUD_POINT_TYPES_H
-#define VELODYNE_POINTCLOUD_POINT_TYPES_H
-
-#include <pcl/point_types.h>
+#include <velodyne_pointcloud/datacontainerbase.h>
+#include <sensor_msgs/point_cloud2_iterator.h>
+#include <string>
 
 namespace velodyne_pointcloud
 {
-/** Euclidean Velodyne coordinate, including intensity and ring number. */
-struct PointXYZIR
+class OrganizedCloudXYZIR : public velodyne_rawdata::DataContainerBase
 {
-  PCL_ADD_POINT4D;                    // quad-word XYZ
-  float    intensity;                 ///< laser intensity reading
-  uint16_t ring;                      ///< laser ring number
-  EIGEN_MAKE_ALIGNED_OPERATOR_NEW     // ensure proper alignment
-}
-EIGEN_ALIGN16;
-}  // namespace velodyne_pointcloud
+public:
+  OrganizedCloudXYZIR(const double max_range, const double min_range, const std::string& target_frame,
+                      const std::string& fixed_frame, const unsigned int num_lasers, const unsigned int scans_per_block,
+                      boost::shared_ptr<tf::TransformListener> tf_ptr = boost::shared_ptr<tf::TransformListener>());
 
-POINT_CLOUD_REGISTER_POINT_STRUCT(velodyne_pointcloud::PointXYZIR,
-                                  (float, x, x)
-                                  (float, y, y)
-                                  (float, z, z)
-                                  (float, intensity, intensity)
-                                  (uint16_t, ring, ring))
+  virtual void newLine();
 
-#endif  // VELODYNE_POINTCLOUD_POINT_TYPES_H
+  virtual void setup(const velodyne_msgs::VelodyneScan::ConstPtr& scan_msg);
+
+  virtual void addPoint(float x, float y, float z, const uint16_t ring, const uint16_t azimuth, const float distance,
+                        const float intensity);
+
+private:
+  sensor_msgs::PointCloud2Iterator<float> iter_x, iter_y, iter_z, iter_intensity;
+  sensor_msgs::PointCloud2Iterator<uint16_t> iter_ring;
+};
+} /* namespace velodyne_pointcloud */
+#endif  // VELODYNE_POINTCLOUD_ORGANIZED_CLOUDXYZIR_H
