@@ -58,6 +58,7 @@ Convert::Convert(const rclcpp::NodeOptions & options)
 {
   // get path to angles.config file for this device
   std::string calibration_file = this->declare_parameter("calibration", "");
+  const auto model = this->declare_parameter("model", "64E");
 
   rcl_interfaces::msg::ParameterDescriptor min_range_desc;
   min_range_desc.name = "min_range";
@@ -106,7 +107,7 @@ Convert::Convert(const rclcpp::NodeOptions & options)
 
   RCLCPP_INFO(this->get_logger(), "correction angles: %s", calibration_file.c_str());
 
-  data_ = std::make_unique<velodyne_rawdata::RawData>(calibration_file);
+  data_ = std::make_unique<velodyne_rawdata::RawData>(calibration_file, model);
 
   if (organize_cloud) {
     container_ptr_ = std::make_unique<OrganizedCloudXYZIR>(
@@ -158,7 +159,7 @@ void Convert::processScan(const velodyne_msgs::msg::VelodyneScan::SharedPtr scan
 
   // process each packet provided by the driver
   for (size_t i = 0; i < scanMsg->packets.size(); ++i) {
-    data_->unpack(scanMsg->packets[i], *container_ptr_);
+    data_->unpack(scanMsg->packets[i], *container_ptr_, scanMsg->header.stamp);
   }
 
   // publish the accumulated cloud message

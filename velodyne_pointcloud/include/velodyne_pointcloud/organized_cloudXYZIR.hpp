@@ -59,10 +59,10 @@ public:
 
   void addPoint(
     float x, float y, float z, const uint16_t ring,
-    const float distance, const float intensity) override;
+    const float distance, const float intensity, const float time) override;
 
 private:
-  sensor_msgs::PointCloud2Iterator<float> iter_x_, iter_y_, iter_z_, iter_intensity_;
+  sensor_msgs::PointCloud2Iterator<float> iter_x_, iter_y_, iter_z_, iter_intensity_, iter_time_;
   sensor_msgs::PointCloud2Iterator<uint16_t> iter_ring_;
 };
 }  // namespace velodyne_pointcloud

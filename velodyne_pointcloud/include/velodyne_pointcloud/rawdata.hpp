@@ -120,9 +120,14 @@ struct raw_packet
 class RawData final
 {
 public:
-  explicit RawData(const std::string & calibration_file);
+  RawData(const std::string & calibration_file, const std::string & model);
 
-  void unpack(const velodyne_msgs::msg::VelodynePacket & pkt, DataContainerBase & data);
+  bool buildTimings();
+  std::vector<std::vector<float>> timing_offsets_;
+
+  void unpack(
+    const velodyne_msgs::msg::VelodynePacket & pkt, DataContainerBase & data,
+    const rclcpp::Time & scan_start_time);
 
   void setParameters(double min_range, double max_range, double view_direction, double view_width);
 
@@ -134,6 +139,7 @@ private:
   /** configuration parameters */
   struct Config
   {
+    std::string model;
     double min_range;             ///< minimum range to publish
     double max_range;             ///< maximum range to publish
     int min_angle;                ///< minimum angle to publish
@@ -149,7 +155,9 @@ private:
   float cos_rot_table_[ROTATION_MAX_UNITS]{};
 
   /** add private function to handle the VLP16 **/
-  void unpack_vlp16(const velodyne_msgs::msg::VelodynePacket & pkt, DataContainerBase & data);
+  void unpack_vlp16(
+    const velodyne_msgs::msg::VelodynePacket & pkt, DataContainerBase & data,
+    const rclcpp::Time & scan_start_time);
 };
 
 }  // namespace velodyne_rawdata

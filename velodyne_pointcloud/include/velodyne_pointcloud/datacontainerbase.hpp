@@ -131,7 +131,7 @@ public:
 
   virtual void addPoint(
     float x, float y, float z, const uint16_t ring, const float distance,
-    const float intensity) = 0;
+    const float intensity, const float time) = 0;
   virtual void newLine() = 0;
 
   const sensor_msgs::msg::PointCloud2 & finishCloud()
