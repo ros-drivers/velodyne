@@ -15,6 +15,7 @@
   <arg name="rpm" default="600.0" />
   <arg name="gps_time" default="false" />
   <arg name="cut_angle" default="-0.01" />
+  <arg name="timestamp_first_packet" default="false" />
 
   <!-- start nodelet manager -->
   <node pkg="nodelet" type="nodelet" name="$(arg manager)" args="manager" output="screen"/>
@@ -33,6 +34,7 @@
     <param name="rpm" value="$(arg rpm)"/>
     <param name="gps_time" value="$(arg gps_time)"/>
     <param name="cut_angle" value="$(arg cut_angle)"/>
+    <param name="timestamp_first_packet" value="$(arg timestamp_first_packet)"/>
   </node>    
 
 </launch>
