@@ -87,9 +87,118 @@ inline float SQR(float val) { return val*val; }
     }
   }
 
+  /**
+   * Build a timing table for each block/firing. Stores in timing_offsets vector
+   */
+  bool RawData::buildTimings(){
+    // vlp16    
+    if (config_.model == "VLP16"){
+      // timing table calculation, from velodyne user manual
+      timing_offsets.resize(12);
+      for (size_t i=0; i < timing_offsets.size(); ++i){
+        timing_offsets[i].resize(32);
+      }
+      // constants
+      double full_firing_cycle = 55.296 * 1e-6; // seconds
+      double single_firing = 2.304 * 1e-6; // seconds
+      double dataBlockIndex, dataPointIndex;
+      bool dual_mode = false;
+      // compute timing offsets
+      for (size_t x = 0; x < timing_offsets.size(); ++x){
+        for (size_t y = 0; y < timing_offsets[x].size(); ++y){
+          if (dual_mode){
+            dataBlockIndex = (x - (x % 2)) + (y / 16);
+          }
+          else{
+            dataBlockIndex = (x * 2) + (y / 16);
+          }
+          dataPointIndex = y % 16;
+          //timing_offsets[block][firing]
+          timing_offsets[x][y] = (full_firing_cycle * dataBlockIndex) + (single_firing * dataPointIndex);
+        }
+      }
+    }
+    // vlp32
+    else if (config_.model == "32C"){
+      // timing table calculation, from velodyne user manual
+      timing_offsets.resize(12);
+      for (size_t i=0; i < timing_offsets.size(); ++i){
+        timing_offsets[i].resize(32);
+      }
+      // constants
+      double full_firing_cycle = 55.296 * 1e-6; // seconds
+      double single_firing = 2.304 * 1e-6; // seconds
+      double dataBlockIndex, dataPointIndex;
+      bool dual_mode = false;
+      // compute timing offsets
+      for (size_t x = 0; x < timing_offsets.size(); ++x){
+        for (size_t y = 0; y < timing_offsets[x].size(); ++y){
+          if (dual_mode){
+            dataBlockIndex = x / 2;
+          }
+          else{
+            dataBlockIndex = x;
+          }
+          dataPointIndex = y / 2;
+          timing_offsets[x][y] = (full_firing_cycle * dataBlockIndex) + (single_firing * dataPointIndex);
+        }
+      }
+    }
+    // hdl32
+    else if (config_.model == "32E"){
+      // timing table calculation, from velodyne user manual
+      timing_offsets.resize(12);
+      for (size_t i=0; i < timing_offsets.size(); ++i){
+        timing_offsets[i].resize(32);
+      }
+      // constants
+      double full_firing_cycle = 46.080 * 1e-6; // seconds
+      double single_firing = 1.152 * 1e-6; // seconds
+      double dataBlockIndex, dataPointIndex;
+      bool dual_mode = false;
+      // compute timing offsets
+      for (size_t x = 0; x < timing_offsets.size(); ++x){
+        for (size_t y = 0; y < timing_offsets[x].size(); ++y){
+          if (dual_mode){
+            dataBlockIndex = x / 2;
+          }
+          else{
+            dataBlockIndex = x;
+          }
+          dataPointIndex = y / 2;
+          timing_offsets[x][y] = (full_firing_cycle * dataBlockIndex) + (single_firing * dataPointIndex);
+        }
+      }
+    }
+    else{
+      timing_offsets.clear();
+      ROS_WARN("Timings not supported for model %s", config_.model.c_str());
+    }
+
+    if (timing_offsets.size()){
+      // ROS_INFO("VELODYNE TIMING TABLE:");
+      for (size_t x = 0; x < timing_offsets.size(); ++x){
+        for (size_t y = 0; y < timing_offsets[x].size(); ++y){
+          printf("%04.3f ", timing_offsets[x][y] * 1e6);
+        }
+        printf("\n");
+      }
+      return true;
+    }
+    else{
+      ROS_WARN("NO TIMING OFFSETS CALCULATED. ARE YOU USING A SUPPORTED VELODYNE SENSOR?");
+    }
+    return false;
+  }
+
   /** Set up for on-line operation. */
   boost::optional<velodyne_pointcloud::Calibration> RawData::setup(ros::NodeHandle private_nh)
   {
+    // ros::NodeHandle nh_driver("private_nh.getNamespace().substr(0, private_nh.getNamespace().length()-6)+"_driver"");
+    ros::NodeHandle nh_driver("/velodyne_nodelet_manager_driver");
+    nh_driver.param("model", config_.model, std::string("64E"));
+    buildTimings();
+
     // get path to angles.config file for this device
     if (!private_nh.getParam("calibration", config_.calibrationFile))
       {
@@ -120,35 +229,34 @@ inline float SQR(float val) { return val*val; }
    return calibration_;
   }
 
-
   /** Set up for offline operation */
   int RawData::setupOffline(std::string calibration_file, double max_range_, double min_range_)
   {
 
-      config_.max_range = max_range_;
-      config_.min_range = min_range_;
-      ROS_INFO_STREAM("data ranges to publish: ["
-	      << config_.min_range << ", "
-	      << config_.max_range << "]");
+    config_.max_range = max_range_;
+    config_.min_range = min_range_;
+    ROS_INFO_STREAM("data ranges to publish: ["
+      << config_.min_range << ", "
+      << config_.max_range << "]");
 
-      config_.calibrationFile = calibration_file;
+    config_.calibrationFile = calibration_file;
 
-      ROS_INFO_STREAM("correction angles: " << config_.calibrationFile);
+    ROS_INFO_STREAM("correction angles: " << config_.calibrationFile);
 
-      calibration_.read(config_.calibrationFile);
-      if (!calibration_.initialized) {
-	  ROS_ERROR_STREAM("Unable to open calibration file: " <<
-		  config_.calibrationFile);
-	  return -1;
-      }
+    calibration_.read(config_.calibrationFile);
+    if (!calibration_.initialized) {
+      ROS_ERROR_STREAM("Unable to open calibration file: " <<
+      config_.calibrationFile);
+      return -1;
+    }
 
-      // Set up cached values for sin and cos of all the possible headings
-      for (uint16_t rot_index = 0; rot_index < ROTATION_MAX_UNITS; ++rot_index) {
-	  float rotation = angles::from_degrees(ROTATION_RESOLUTION * rot_index);
-	  cos_rot_table_[rot_index] = cosf(rotation);
-	  sin_rot_table_[rot_index] = sinf(rotation);
-      }
-      return 0;
+    // Set up cached values for sin and cos of all the possible headings
+    for (uint16_t rot_index = 0; rot_index < ROTATION_MAX_UNITS; ++rot_index) {
+      float rotation = angles::from_degrees(ROTATION_RESOLUTION * rot_index);
+      cos_rot_table_[rot_index] = cosf(rotation);
+      sin_rot_table_[rot_index] = sinf(rotation);
+    }
+    return 0;
   }
 
 
@@ -157,7 +265,7 @@ inline float SQR(float val) { return val*val; }
    *  @param pkt raw packet to unpack
    *  @param pc shared pointer to point cloud (points are appended)
    */
-  void RawData::unpack(const velodyne_msgs::VelodynePacket &pkt, DataContainerBase& data)
+  void RawData::unpack(const velodyne_msgs::VelodynePacket &pkt, DataContainerBase& data, const ros::Time& scan_start_time)
   {
     using velodyne_pointcloud::LaserCorrection;
     ROS_DEBUG_STREAM("Received packet, time: " << pkt.stamp);
@@ -165,9 +273,11 @@ inline float SQR(float val) { return val*val; }
     /** special parsing for the VLP16 **/
     if (calibration_.num_lasers == 16)
     {
-      unpack_vlp16(pkt, data);
+      unpack_vlp16(pkt, data, scan_start_time);
       return;
     }
+
+    float time_diff_start_to_this_packet = (pkt.stamp - scan_start_time).toSec();
     
     const raw_packet_t *raw = (const raw_packet_t *) &pkt.data[0];
 
@@ -306,7 +416,11 @@ inline float SQR(float val) { return val*val; }
           intensity = (intensity < min_intensity) ? min_intensity : intensity;
           intensity = (intensity > max_intensity) ? max_intensity : intensity;
 
-          data.addPoint(x_coord, y_coord, z_coord, corrections.laser_ring, raw->blocks[i].rotation, distance, intensity);
+          float time = 0;
+          if (timing_offsets.size())
+            time = timing_offsets[i][j] + time_diff_start_to_this_packet;
+
+          data.addPoint(x_coord, y_coord, z_coord, corrections.laser_ring, raw->blocks[i].rotation, distance, intensity, time);
         }
       }
       data.newLine();
@@ -318,7 +432,7 @@ inline float SQR(float val) { return val*val; }
    *  @param pkt raw packet to unpack
    *  @param pc shared pointer to point cloud (points are appended)
    */
-  void RawData::unpack_vlp16(const velodyne_msgs::VelodynePacket &pkt, DataContainerBase& data)
+  void RawData::unpack_vlp16(const velodyne_msgs::VelodynePacket &pkt, DataContainerBase& data, const ros::Time& scan_start_time)
   {
     float azimuth;
     float azimuth_diff;
@@ -328,6 +442,8 @@ inline float SQR(float val) { return val*val; }
     int azimuth_corrected;
     float x, y, z;
     float intensity;
+
+    float time_diff_start_to_this_packet = (pkt.stamp - scan_start_time).toSec();
 
     const raw_packet_t *raw = (const raw_packet_t *) &pkt.data[0];
 
@@ -484,8 +600,12 @@ inline float SQR(float val) { return val*val; }
               SQR(1 - tmp.uint/65535)));
             intensity = (intensity < min_intensity) ? min_intensity : intensity;
             intensity = (intensity > max_intensity) ? max_intensity : intensity;
-    
-            data.addPoint(x_coord, y_coord, z_coord, corrections.laser_ring, azimuth_corrected, distance, intensity);
+  
+            float time = 0;
+            if (timing_offsets.size())
+              time = timing_offsets[block][firing * 16 + dsr] + time_diff_start_to_this_packet;
+
+            data.addPoint(x_coord, y_coord, z_coord, corrections.laser_ring, azimuth_corrected, distance, intensity, time);
           }
         }
         data.newLine();
