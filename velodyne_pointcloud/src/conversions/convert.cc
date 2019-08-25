@@ -21,8 +21,9 @@
 namespace velodyne_pointcloud
 {
   /** @brief Constructor. */
-  Convert::Convert(ros::NodeHandle node, ros::NodeHandle private_nh):
-    data_(new velodyne_rawdata::RawData()), first_rcfg_call(true)
+  Convert::Convert(ros::NodeHandle node, ros::NodeHandle private_nh, std::string const & node_name):
+    data_(new velodyne_rawdata::RawData()), first_rcfg_call(true),
+    diagnostics_(node, private_nh, node_name)
   {
 
     boost::optional<velodyne_pointcloud::Calibration> calibration = data_->setup(private_nh);
