@@ -48,7 +48,9 @@ namespace velodyne_driver
 {
 
 VelodyneDriver::VelodyneDriver(ros::NodeHandle node,
-                               ros::NodeHandle private_nh)
+                               ros::NodeHandle private_nh,
+                               std::string const & node_name)
+  : diagnostics_(node, private_nh, node_name)
 {
   // use private node handle to get parameters
   private_nh.param("frame_id", config_.frame_id, std::string("velodyne"));
