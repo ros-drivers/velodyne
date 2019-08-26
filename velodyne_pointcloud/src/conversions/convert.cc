@@ -51,6 +51,10 @@ namespace velodyne_pointcloud
               data_->scansPerPacket()));
     }
 
+    // Initilize all parameters used for data block azimuth difference calculation
+    last_azimuth_ = -1;
+    current_azimuth_diff_ = -1;
+    prev_azimuth_diff_ = -1;
 
     // advertise output point cloud (before subscribing to input data)
     output_ =
@@ -131,11 +135,56 @@ namespace velodyne_pointcloud
     // process each packet provided by the driver
     for (size_t i = 0; i < scanMsg->packets.size(); ++i)
     {
-      data_->unpack(scanMsg->packets[i], *container_ptr_);
+        velodyne_msgs::VelodynePacket tmp_packet = scanMsg->packets[i];
+
+        // Extract base rotation of first block in packet
+        std::size_t azimuth_data_pos = 100*0+2;
+        int azimuth = *( (u_int16_t*) (&tmp_packet.data[azimuth_data_pos]));
+
+        //if first packet in scan, there is no "valid" last_azimuth_
+        if (last_azimuth_ == -1)
+        {
+            last_azimuth_ = azimuth;
+            continue;
+        }
+        if (current_azimuth_diff_ == -1)
+        {
+            current_azimuth_diff_ = azimuth - last_azimuth_;
+            continue;
+        }
+        if (prev_azimuth_diff_ == -1)
+        {
+            prev_azimuth_diff_ = current_azimuth_diff_;
+            continue;
+        }
+        current_azimuth_diff_ = azimuth - last_azimuth_;
+
+        adjusted_vel_msg_ptr->packets.push_back(tmp_packet);
+
+        if ((current_azimuth_diff_ < 0) && (prev_azimuth_diff_ >= 0))
+        {
+            // Current and previous azimuth differences have the same sign indicating the current packet was taken at 0 deg
+            adjusted_vel_msg_ptr->header.stamp = tmp_packet.stamp;
+
+            // allocate a point cloud with same time and frame ID as raw data
+            container_ptr_->setup(adjusted_vel_msg_ptr);
+            container_ptr_->offloadResidualPoint();
+
+            // process each packet
+            for (size_t j = 0; j < adjusted_vel_msg_ptr->packets.size(); ++j)
+            {
+              data_->unpack(adjusted_vel_msg_ptr->packets[j], *container_ptr_);
+            }
+
+            // Clear all the converted packets
+            adjusted_vel_msg_ptr->packets.clear();
+        }
+        last_azimuth_ = azimuth;
+        prev_azimuth_diff_ = current_azimuth_diff_;
     }
 
     // publish the accumulated cloud message
-    diag_topic_->tick(scanMsg->header.stamp);
+    diag_topic_->tick(adjusted_vel_msg_ptr->header.stamp);
     diagnostics_.update();
     output_.publish(container_ptr_->finishCloud());
   }
