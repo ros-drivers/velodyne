@@ -56,6 +56,10 @@ namespace velodyne_pointcloud
     current_azimuth_diff_ = -1;
     prev_azimuth_diff_ = -1;
 
+    container_ptr_->last_azimuth_corrected = -1;
+    container_ptr_->current_corrected_azimuth_diff = -1;
+    container_ptr_->prev_corrected_azimuth_diff = -1;
+
     // advertise output point cloud (before subscribing to input data)
     output_ =
       node.advertise<sensor_msgs::PointCloud2>("velodyne_points", 10);

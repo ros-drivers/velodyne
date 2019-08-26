@@ -379,7 +379,23 @@ inline float SQR(float val) { return val*val; }
           /** correct for the laser rotation as a function of timing during the firings **/
           azimuth_corrected_f = azimuth + (azimuth_diff * ((dsr*VLP16_DSR_TOFFSET) + (firing*VLP16_FIRING_TOFFSET)) / VLP16_BLOCK_TDURATION);
           azimuth_corrected = ((int)round(azimuth_corrected_f)) % 36000;
-                 
+
+          // Calculate azimuth difference of three consecutive scan points
+          if (data.last_azimuth_corrected == -1)
+          {
+            data.last_azimuth_corrected = azimuth_corrected;
+          }
+          else if (data.current_corrected_azimuth_diff == -1)
+          {
+          	data.current_corrected_azimuth_diff = azimuth_corrected - data.last_azimuth_corrected;
+          }
+          else if (data.prev_corrected_azimuth_diff == -1)
+      	  {
+          	data.prev_corrected_azimuth_diff = data.current_corrected_azimuth_diff;
+          }
+
+          data.current_corrected_azimuth_diff = azimuth_corrected - data.last_azimuth_corrected;
+
           /*condition added to avoid calculating points which are not
             in the interesting defined area (min_angle < area < max_angle)*/
           if ((azimuth_corrected >= config_.min_angle 
@@ -484,8 +500,26 @@ inline float SQR(float val) { return val*val; }
               SQR(1 - tmp.uint/65535)));
             intensity = (intensity < min_intensity) ? min_intensity : intensity;
             intensity = (intensity > max_intensity) ? max_intensity : intensity;
-    
-            data.addPoint(x_coord, y_coord, z_coord, corrections.laser_ring, azimuth_corrected, distance, intensity);
+
+            if ((data.current_corrected_azimuth_diff < 0) && (data.prev_corrected_azimuth_diff) >= 0)
+            {
+                data.is_newscan = true;
+            }
+            data.last_azimuth_corrected = azimuth_corrected;
+            data.prev_corrected_azimuth_diff = data.current_corrected_azimuth_diff;
+
+            if (data.is_newscan)
+            {
+                data.addResidualPoint(x_coord, y_coord, z_coord, corrections.laser_ring, azimuth_corrected, distance, intensity);
+            }
+            else
+            {
+                data.addPoint(x_coord, y_coord, z_coord, corrections.laser_ring, azimuth_corrected, distance, intensity);
+                // Update timestamp
+                ros::Duration first_block_time_offset(0, block*((dsr * VLP16_DSR_TOFFSET) +
+                                                                 (firing * VLP16_FIRING_TOFFSET))); // [µs]
+                data.addOffsetDuration(first_block_time_offset);
+            }
           }
         }
         data.newLine();

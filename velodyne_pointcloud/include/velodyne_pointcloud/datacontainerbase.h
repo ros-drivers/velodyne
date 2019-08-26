@@ -113,6 +113,7 @@ public:
     cloud.width = config_.init_width;
     cloud.height = config_.init_height;
     cloud.is_dense = static_cast<uint8_t>(config_.is_dense);
+    is_newscan = false;
   }
 
   virtual void addPoint(float x, float y, float z, const uint16_t ring, const uint16_t azimuth, const float distance,
@@ -149,6 +150,47 @@ public:
   }
 
   sensor_msgs::PointCloud2 cloud;
+
+  bool is_newscan;
+  int last_azimuth_corrected;
+  int current_corrected_azimuth_diff;
+  int prev_corrected_azimuth_diff;
+
+  // Struct for residual points
+  struct RPoint
+  {
+  	float x;
+  	float y;
+  	float z;
+  	uint16_t ring;
+  	uint16_t azimuth;
+  	float distance;
+  	float intensity;
+  };
+
+  std::vector<RPoint> residual_cloud_;
+
+  void addResidualPoint(float x, float y, float z, const uint16_t ring, const uint16_t azimuth, const float distance,
+                        const float intensity)
+  {
+    RPoint point = {x, y, z, ring, azimuth, distance, intensity};
+    residual_cloud_.push_back(point);
+  }
+
+  void offloadResidualPoint()
+  {
+    // Add residual points from the previous scan
+    for (size_t p = 0; p < residual_cloud_.size(); ++p)
+    {
+        addPoint(residual_cloud_[p].x, residual_cloud_[p].y, residual_cloud_[p].z, residual_cloud_[p].ring, residual_cloud_[p].azimuth, residual_cloud_[p].distance, residual_cloud_[p].intensity);
+    }
+    residual_cloud_.clear();
+  }
+
+  void addOffsetDuration(ros::Duration offset)
+  {
+    cloud.header.stamp = cloud.header.stamp + offset;
+  }
 
   inline void vectorTfToEigen(tf::Vector3& tf_vec, Eigen::Vector3f& eigen_vec)
   {
