@@ -39,6 +39,7 @@
 #include <string>
 #include <algorithm>
 #include <cstdarg>
+#include <vector>
 
 namespace velodyne_rawdata
 {
@@ -159,13 +160,13 @@ public:
   // Struct for residual points
   struct RPoint
   {
-  	float x;
-  	float y;
-  	float z;
-  	uint16_t ring;
-  	uint16_t azimuth;
-  	float distance;
-  	float intensity;
+      float x;
+      float y;
+      float z;
+      uint16_t ring;
+      uint16_t azimuth;
+      float distance;
+      float intensity;
   };
 
   std::vector<RPoint> residual_cloud_;
@@ -182,7 +183,9 @@ public:
     // Add residual points from the previous scan
     for (size_t p = 0; p < residual_cloud_.size(); ++p)
     {
-        addPoint(residual_cloud_[p].x, residual_cloud_[p].y, residual_cloud_[p].z, residual_cloud_[p].ring, residual_cloud_[p].azimuth, residual_cloud_[p].distance, residual_cloud_[p].intensity);
+        addPoint(residual_cloud_[p].x, residual_cloud_[p].y, residual_cloud_[p].z,
+                residual_cloud_[p].ring, residual_cloud_[p].azimuth, residual_cloud_[p].distance,
+                residual_cloud_[p].intensity);
     }
     residual_cloud_.clear();
   }
