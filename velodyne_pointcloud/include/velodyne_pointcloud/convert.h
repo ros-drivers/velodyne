@@ -91,6 +91,12 @@ class Convert
     Config config_;
     bool first_rcfg_call;
 
+    // Additional parameters for checking azimuth differences between consecutive data blocks
+    velodyne_msgs::VelodyneScanPtr adjusted_vel_msg_ptr {new velodyne_msgs::VelodyneScan};
+    int last_azimuth_;
+    int current_azimuth_diff_;
+    int prev_azimuth_diff_;
+
   // diagnostics updater
   diagnostic_updater::Updater diagnostics_;
   double diag_min_freq_;
