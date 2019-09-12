@@ -90,6 +90,9 @@ inline float SQR(float val) { return val*val; }
   /** Set up for on-line operation. */
   boost::optional<velodyne_pointcloud::Calibration> RawData::setup(ros::NodeHandle private_nh)
   {
+    // get organize cloud flag
+    private_nh.param("organize_cloud", config_.organize_cloud, false);
+
     // get path to angles.config file for this device
     if (!private_nh.getParam("calibration", config_.calibrationFile))
       {
@@ -197,6 +200,10 @@ inline float SQR(float val) { return val*val; }
         tmp.bytes[1] = block.data[k+1];
         if (tmp.bytes[0]==0 &&tmp.bytes[1]==0 ) //no laser beam return
         {
+          if (config_.organize_cloud)
+          {
+            data.addPoint(nanf(""), nanf(""), nanf(""), corrections.laser_ring, raw->blocks[i].rotation, nanf(""), nanf(""));
+          }
           continue;
         }
 

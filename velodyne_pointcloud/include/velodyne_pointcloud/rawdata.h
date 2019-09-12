@@ -180,6 +180,7 @@ private:
 
     double tmp_min_angle;
     double tmp_max_angle;
+    bool organize_cloud;
   }
   Config;
   Config config_;
