@@ -61,7 +61,7 @@ namespace velodyne_pointcloud
 class Transform final : public rclcpp::Node
 {
 public:
-  Transform();
+  explicit Transform(const rclcpp::NodeOptions& options);
   ~Transform()
   {
   }

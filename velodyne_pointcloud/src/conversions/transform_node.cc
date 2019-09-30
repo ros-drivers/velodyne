@@ -27,7 +27,7 @@ int main(int argc, char **argv)
   rclcpp::init(argc, argv);
 
   // handle callbacks until shut down
-  rclcpp::spin(std::make_shared<velodyne_pointcloud::Transform>());
+  rclcpp::spin(std::make_shared<velodyne_pointcloud::Transform>(rclcpp::NodeOptions()));
 
   rclcpp::shutdown();
 

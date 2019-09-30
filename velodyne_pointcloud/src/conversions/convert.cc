@@ -30,7 +30,7 @@
 namespace velodyne_pointcloud
 {
   /** @brief Constructor. */
-  Convert::Convert() : rclcpp::Node("velodyne_convert_node"),
+  Convert::Convert(const rclcpp::NodeOptions& options) : rclcpp::Node("velodyne_convert_node", options),
     tf_buffer_(this->get_clock())
   {
     // get path to angles.config file for this device
