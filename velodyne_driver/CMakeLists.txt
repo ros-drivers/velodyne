@@ -14,6 +14,7 @@ find_package(ament_cmake_ros REQUIRED)
 find_package(diagnostic_msgs REQUIRED)
 #find_package(diagnostic_updater REQUIRED)
 find_package(rclcpp REQUIRED)
+find_package(rclcpp_components REQUIRED)
 find_package(tf2_ros REQUIRED)
 find_package(velodyne_msgs REQUIRED)
 
@@ -24,15 +25,44 @@ include_directories(include)
 
 # compile the driver and input library
 add_subdirectory(src/lib)
-add_subdirectory(src/driver)
+
+# build the driver node
+add_library(velodyne_driver SHARED src/driver/driver.cc)
+ament_target_dependencies(velodyne_driver
+  diagnostic_msgs
+  rclcpp
+  rclcpp_components
+  tf2_ros
+  velodyne_msgs
+)
+target_link_libraries(velodyne_driver velodyne_input)
+
+add_executable(velodyne_node src/driver/velodyne_node.cc)
+ament_target_dependencies(velodyne_node
+  rclcpp
+)
+target_link_libraries(velodyne_node velodyne_driver)
+
+# install runtime and library files
+install(TARGETS velodyne_driver
+  ARCHIVE DESTINATION lib
+  LIBRARY DESTINATION lib
+  RUNTIME DESTINATION bin
+)
+install(TARGETS velodyne_node
+  DESTINATION lib/${PROJECT_NAME}
+)
+
+rclcpp_components_register_nodes(velodyne_driver
+  "velodyne_driver::VelodyneDriver")
 
 install(DIRECTORY include/${PROJECT_NAME}/
-        DESTINATION include/${PROJECT_NAME})
+  DESTINATION include/${PROJECT_NAME})
 
 install(DIRECTORY launch/
-        DESTINATION share/${PROJECT_NAME}/launch)
+  DESTINATION share/${PROJECT_NAME}/launch)
 install(PROGRAMS src/vdump
-        DESTINATION lib/${PROJECT_NAME})
+  DESTINATION lib/${PROJECT_NAME})
 
 
 if (BUILD_TESTING)

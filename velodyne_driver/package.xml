@@ -26,6 +26,7 @@
   <!-- <depend>diagnostic_updater</depend> -->
   <depend>libpcap</depend>
   <depend>rclcpp</depend>
+  <depend>rclcpp_components</depend>
   <depend>tf2_ros</depend>
   <depend>velodyne_msgs</depend>
 
