@@ -92,7 +92,7 @@ public:
     unsigned int scans_per_packet;
     bool transform;  ///< enable / disable transform points
 
-    explicit Config(double min_range, double max_range, std::string target_frame, std::string fixed_frame,
+    explicit Config(double min_range, double max_range, const std::string& target_frame, const std::string& fixed_frame,
                     unsigned int init_width, unsigned int init_height, bool is_dense, unsigned int scans_per_packet)
       : min_range(min_range)
       , max_range(max_range)
@@ -158,9 +158,9 @@ public:
     config_.transform = fixed_frame.compare(target_frame) != 0;
   }
 
+protected:
   sensor_msgs::msg::PointCloud2 cloud;
 
-protected:
   inline void vectorTfToEigen(tf2::Vector3& tf_vec, Eigen::Vector3f& eigen_vec)
   {
     eigen_vec(0) = tf_vec[0];
