@@ -25,6 +25,7 @@
 #include <rcl_interfaces/msg/floating_point_range.hpp>
 #include <rcl_interfaces/msg/parameter_descriptor.hpp>
 #include <rclcpp/rclcpp.hpp>
+#include <rclcpp_components/register_node_macro.hpp>
 #include <tf2_ros/message_filter.h>
 #include <tf2_ros/transform_listener.h>
 
@@ -157,3 +158,5 @@ namespace velodyne_pointcloud
   }
 
 } // namespace velodyne_pointcloud
+
+RCLCPP_COMPONENTS_REGISTER_NODE(velodyne_pointcloud::Transform)

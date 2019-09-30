@@ -20,6 +20,7 @@
 #include <rcl_interfaces/msg/floating_point_range.hpp>
 #include <rcl_interfaces/msg/parameter_descriptor.hpp>
 #include <rclcpp/rclcpp.hpp>
+#include <rclcpp_components/register_node_macro.hpp>
 
 #include <velodyne_msgs/msg/velodyne_scan.hpp>
 #include <velodyne_pointcloud/convert.h>
@@ -148,3 +149,5 @@ namespace velodyne_pointcloud
   }
 
 } // namespace velodyne_pointcloud
+
+RCLCPP_COMPONENTS_REGISTER_NODE(velodyne_pointcloud::Convert)

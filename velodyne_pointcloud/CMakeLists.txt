@@ -19,6 +19,7 @@ find_package(geometry_msgs REQUIRED)
 find_package(message_filters REQUIRED)
 find_package(PCL REQUIRED COMPONENTS common)
 find_package(rclcpp REQUIRED)
+find_package(rclcpp_components REQUIRED)
 find_package(sensor_msgs REQUIRED)
 find_package(tf2 REQUIRED)
 find_package(tf2_ros REQUIRED)
@@ -44,7 +45,57 @@ endif(NOT ${YAML_CPP_VERSION} VERSION_LESS "0.5")
 include_directories(include ${PCL_COMMON_INCLUDE_DIRS})
 
 add_subdirectory(src/lib)
-add_subdirectory(src/conversions)
+
+add_library(convert SHARED src/conversions/convert.cc src/conversions/pointcloudXYZIR.cc src/conversions/organized_cloudXYZIR.cc)
+ament_target_dependencies(convert
+  Eigen3
+  rclcpp
+  rclcpp_components
+  tf2
+  velodyne_msgs
+)
+target_link_libraries(convert velodyne_rawdata ${YAML_CPP_LIBRARIES})
+install(TARGETS convert
+  ARCHIVE DESTINATION lib
+  LIBRARY DESTINATION lib
+  RUNTIME DESTINATION bin
+)
+rclcpp_components_register_nodes(convert
+  "velodyne_pointcloud::Convert")
+
+add_executable(convert_node src/conversions/convert_node.cc)
+ament_target_dependencies(convert_node
+  rclcpp
+)
+target_link_libraries(convert_node convert)
+install(TARGETS convert_node
+  DESTINATION lib/${PROJECT_NAME}
+)
+
+add_library(transform SHARED src/conversions/transform.cc src/conversions/pointcloudXYZIR.cc src/conversions/organized_cloudXYZIR.cc)
+ament_target_dependencies(transform
+  message_filters
+  rclcpp
+  rclcpp_components
+  tf2
+  tf2_ros
+)
+target_link_libraries(transform velodyne_rawdata ${YAML_CPP_LIBRARIES})
+install(TARGETS transform
+  ARCHIVE DESTINATION lib
+  LIBRARY DESTINATION lib
+  RUNTIME DESTINATION bin
+)
+rclcpp_components_register_nodes(transform
+  "velodyne_pointcloud::Transform")
+
+add_executable(transform_node src/conversions/transform_node.cc)
+ament_target_dependencies(transform_node
+  rclcpp
+)
+target_link_libraries(transform_node transform)
+install(TARGETS transform_node
+        DESTINATION lib/${PROJECT_NAME})
 
 # install(DIRECTORY include/${PROJECT_NAME}/
 #         DESTINATION ${CATKIN_PACKAGE_INCLUDE_DESTINATION})
