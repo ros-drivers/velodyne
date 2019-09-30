@@ -43,7 +43,7 @@ namespace velodyne_laserscan
 class VelodyneLaserScan final : public rclcpp::Node
 {
 public:
-  VelodyneLaserScan();
+  explicit VelodyneLaserScan(const rclcpp::NodeOptions& options);
 
 private:
   void recvCallback(const sensor_msgs::msg::PointCloud2::SharedPtr msg);

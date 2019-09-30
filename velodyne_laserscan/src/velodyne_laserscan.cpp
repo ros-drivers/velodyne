@@ -48,7 +48,7 @@
 namespace velodyne_laserscan
 {
 
-VelodyneLaserScan::VelodyneLaserScan() : rclcpp::Node("velodyne_laserscan_node")
+VelodyneLaserScan::VelodyneLaserScan(const rclcpp::NodeOptions& options) : rclcpp::Node("velodyne_laserscan_node", options)
 {
   rcl_interfaces::msg::ParameterDescriptor ring_desc;
   ring_desc.name = "ring";

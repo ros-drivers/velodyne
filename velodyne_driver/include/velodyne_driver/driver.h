@@ -50,7 +50,7 @@ namespace velodyne_driver
 class VelodyneDriver final : public rclcpp::Node
 {
 public :
-  VelodyneDriver();
+  explicit VelodyneDriver(const rclcpp::NodeOptions& options);
   ~VelodyneDriver() override;
 
 private:

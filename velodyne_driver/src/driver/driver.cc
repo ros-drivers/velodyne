@@ -53,7 +53,7 @@ using namespace std::chrono_literals;
 namespace velodyne_driver
 {
 
-VelodyneDriver::VelodyneDriver() : rclcpp::Node("velodyne_driver_node")
+VelodyneDriver::VelodyneDriver(const rclcpp::NodeOptions& options) : rclcpp::Node("velodyne_driver_node", options)
 {
   std::string devip = this->declare_parameter("device_ip", std::string(""));
   bool gps_time = this->declare_parameter("gps_time", false);

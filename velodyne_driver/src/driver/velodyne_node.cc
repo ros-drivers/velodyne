@@ -45,7 +45,7 @@ int main(int argc, char** argv)
 
   rclcpp::init(argc, argv);
 
-  rclcpp::spin(std::make_shared<velodyne_driver::VelodyneDriver>());
+  rclcpp::spin(std::make_shared<velodyne_driver::VelodyneDriver>(rclcpp::NodeOptions()));
 
   rclcpp::shutdown();
 

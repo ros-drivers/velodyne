@@ -57,7 +57,7 @@ namespace velodyne_pointcloud
 class Convert final : public rclcpp::Node
 {
 public:
-  Convert();
+  explicit Convert(const rclcpp::NodeOptions& options);
   ~Convert() {}
 
 private:
