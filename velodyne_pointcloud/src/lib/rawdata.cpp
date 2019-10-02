@@ -1,4 +1,4 @@
-// Copyright 2007, 2009, 2010, 2012, 2019 Austin Robot Technology, Patrick Beeson, Jack O'Quin, Joshua Whitley  // NOLINT
+// Copyright 2007, 2009, 2010, 2012, 2019 Austin Robot Technology, Patrick Beeson, Jack O'Quin, Kaarta Inc, Shawn Hanna, Joshua Whitley  // NOLINT
 // All rights reserved.
 //
 // Software License Agreement (BSD License 2.0)
