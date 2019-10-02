@@ -36,7 +36,7 @@ namespace velodyne_pointcloud
   /** @brief Nodelet initialization. */
   void TransformNodelet::onInit()
   {
-    tf_.reset(new Transform(getNodeHandle(), getPrivateNodeHandle()));
+    tf_.reset(new Transform(getNodeHandle(), getPrivateNodeHandle(), getName()));
   }
 
 } // namespace velodyne_pointcloud

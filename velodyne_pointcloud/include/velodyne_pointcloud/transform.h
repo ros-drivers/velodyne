@@ -61,7 +61,10 @@ using TransformNodeCfg = velodyne_pointcloud::TransformNodeConfig;
 class Transform
 {
 public:
-  Transform(ros::NodeHandle node, ros::NodeHandle private_nh);
+  Transform(
+      ros::NodeHandle node,
+      ros::NodeHandle private_nh,
+      std::string const & node_name = ros::this_node::getName());
   ~Transform()
   {
   }

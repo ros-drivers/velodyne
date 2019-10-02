@@ -48,7 +48,9 @@ namespace velodyne_driver
 {
 
 VelodyneDriver::VelodyneDriver(ros::NodeHandle node,
-                               ros::NodeHandle private_nh)
+                               ros::NodeHandle private_nh,
+                               std::string const & node_name)
+  : diagnostics_(node, private_nh, node_name)
 {
   // use private node handle to get parameters
   private_nh.param("frame_id", config_.frame_id, std::string("velodyne"));
@@ -107,6 +109,11 @@ VelodyneDriver::VelodyneDriver(ros::NodeHandle node,
   config_.npackets = (int) ceil(packet_rate / frequency);
   private_nh.getParam("npackets", config_.npackets);
   ROS_INFO_STREAM("publishing " << config_.npackets << " packets per scan");
+
+  // if we are timestamping based on the first or last packet in the scan
+  private_nh.param("timestamp_first_packet", config_.timestamp_first_packet, false);
+  if (config_.timestamp_first_packet)
+    ROS_INFO("Setting velodyne scan start time to timestamp of first packet");
 
   std::string dump_file;
   private_nh.param("pcap", dump_file, std::string(""));
@@ -249,7 +256,12 @@ bool VelodyneDriver::poll(void)
 
   // publish message using time of last packet read
   ROS_DEBUG("Publishing a full Velodyne scan.");
-  scan->header.stamp = scan->packets.back().stamp;
+  if (config_.timestamp_first_packet){
+    scan->header.stamp = scan->packets.front().stamp;
+  }
+  else{
+    scan->header.stamp = scan->packets.back().stamp;
+  }
   scan->header.frame_id = config_.frame_id;
   output_.publish(scan);
 

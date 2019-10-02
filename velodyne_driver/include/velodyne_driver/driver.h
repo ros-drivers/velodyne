@@ -49,7 +49,8 @@ class VelodyneDriver
 {
 public:
   VelodyneDriver(ros::NodeHandle node,
-                 ros::NodeHandle private_nh);
+                 ros::NodeHandle private_nh,
+                 std::string const & node_name = ros::this_node::getName());
   ~VelodyneDriver() {}
 
   bool poll(void);
@@ -75,6 +76,7 @@ private:
     int cut_angle;                   // cutting angle in 1/100°
     double time_offset;              // time in seconds added to each velodyne time stamp
     bool enabled;                    // polling is enabled
+    bool timestamp_first_packet;
   }
   config_;
 
