@@ -40,6 +40,7 @@
 
 #include <memory>
 #include <string>
+#include <vector>
 
 #include "velodyne_pointcloud/calibration.hpp"
 #include "velodyne_pointcloud/datacontainerbase.hpp"
