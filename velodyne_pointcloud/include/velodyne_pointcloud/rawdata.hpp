@@ -122,9 +122,6 @@ class RawData final
 public:
   RawData(const std::string & calibration_file, const std::string & model);
 
-  bool buildTimings();
-  std::vector<std::vector<float>> timing_offsets_;
-
   void unpack(
     const velodyne_msgs::msg::VelodynePacket & pkt, DataContainerBase & data,
     const rclcpp::Time & scan_start_time);
@@ -153,6 +150,17 @@ private:
   std::unique_ptr<velodyne_pointcloud::Calibration> calibration_;
   float sin_rot_table_[ROTATION_MAX_UNITS]{};
   float cos_rot_table_[ROTATION_MAX_UNITS]{};
+
+  // timing offset lookup table
+  std::vector<std::vector<float>> timing_offsets_;
+
+  /** \brief setup per-point timing offsets
+   *
+   *  Runs during initialization and determines the firing time for each point in the scan
+   *
+   *  NOTE: Does not support all sensors yet (vlp16, vlp32, and hdl32 are currently supported)
+   */
+  bool buildTimings();
 
   /** add private function to handle the VLP16 **/
   void unpack_vlp16(
