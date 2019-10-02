@@ -2,7 +2,7 @@
 <!-- run velodyne_pointcloud/TransformNodelet in a nodelet manager -->
 
 <launch>
-  <arg name="model" />
+  <arg name="model" default="" />
   <arg name="calibration" default="" />
   <arg name="frame_id" default="map" />
   <arg name="manager" default="velodyne_nodelet_manager" />
