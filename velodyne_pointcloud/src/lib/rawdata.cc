@@ -1,6 +1,7 @@
 /*
  *  Copyright (C) 2007 Austin Robot Technology, Patrick Beeson
  *  Copyright (C) 2009, 2010, 2012 Austin Robot Technology, Jack O'Quin
+ *  Copyright (C) 2019, Kaarta Inc, Shawn Hanna
  *
  *  License: Modified BSD Software License Agreement
  *
@@ -21,6 +22,7 @@
  *
  *  @author Patrick Beeson
  *  @author Jack O'Quin
+ *  @author Shawn Hanna
  *
  *  HDL-64E S2 calibration support provided by Nick Hillier
  */
@@ -245,8 +247,7 @@ inline float SQR(float val) { return val*val; }
 
     calibration_.read(config_.calibrationFile);
     if (!calibration_.initialized) {
-      ROS_ERROR_STREAM("Unable to open calibration file: " <<
-      config_.calibrationFile);
+      ROS_ERROR_STREAM("Unable to open calibration file: " << config_.calibrationFile);
       return -1;
     }
 
