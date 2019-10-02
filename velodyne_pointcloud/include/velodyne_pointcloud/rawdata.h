@@ -47,6 +47,7 @@
 #include <string>
 #include <boost/format.hpp>
 #include <math.h>
+#include <vector>
 
 #include <ros/ros.h>
 #include <velodyne_msgs/VelodyneScan.h>
