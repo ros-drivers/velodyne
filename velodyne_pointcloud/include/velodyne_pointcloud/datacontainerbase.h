@@ -101,8 +101,8 @@ public:
       ROS_INFO_STREAM("Initialized container with "
                       << "min_range: " << min_range << ", max_range: " << max_range
                       << ", target_frame: " << target_frame << ", fixed_frame: " << fixed_frame
-                      << ", init_width: " << init_width << ", init_height: " << init_height << ", is_dense: " << is_dense
-                      << ", scans_per_packet: " << scans_per_packet);
+                      << ", init_width: " << init_width << ", init_height: " << init_height
+                      << ", is_dense: " << is_dense << ", scans_per_packet: " << scans_per_packet);
     }
   };
 
