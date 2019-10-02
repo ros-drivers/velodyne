@@ -80,7 +80,7 @@ private:
 void DriverNodelet::onInit()
 {
   // start the driver
-  dvr_.reset(new VelodyneDriver(getNodeHandle(), getPrivateNodeHandle()));
+  dvr_.reset(new VelodyneDriver(getNodeHandle(), getPrivateNodeHandle(), getName()));
 
   // spawn device poll thread
   running_ = true;

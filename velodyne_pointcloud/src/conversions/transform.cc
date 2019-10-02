@@ -26,10 +26,11 @@
 namespace velodyne_pointcloud
 {
   /** @brief Constructor. */
-  Transform::Transform(ros::NodeHandle node, ros::NodeHandle private_nh):
+  Transform::Transform(ros::NodeHandle node, ros::NodeHandle private_nh, std::string const & node_name):
     tf_prefix_(tf::getPrefixParam(private_nh)),
     data_(new velodyne_rawdata::RawData),
-    first_rcfg_call(true)
+    first_rcfg_call(true),
+    diagnostics_(node, private_nh, node_name)
   {
     boost::optional<velodyne_pointcloud::Calibration> calibration = data_->setup(private_nh);
     if(calibration)

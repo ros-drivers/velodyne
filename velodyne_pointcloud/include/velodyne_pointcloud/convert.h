@@ -56,7 +56,10 @@ namespace velodyne_pointcloud
 class Convert
 {
   public:
-    Convert(ros::NodeHandle node, ros::NodeHandle private_nh);
+    Convert(
+        ros::NodeHandle node,
+        ros::NodeHandle private_nh,
+        std::string const & node_name = ros::this_node::getName());
     ~Convert() {}
 
   private:

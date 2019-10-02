@@ -48,8 +48,13 @@ int main(int argc, char** argv)
   velodyne_driver::VelodyneDriver dvr(node, private_nh);
 
   // loop until shut down or end of file
-  while(ros::ok() && dvr.poll())
+  while(ros::ok())
     {
+      // poll device until end of file
+      bool polled_ = dvr.poll();
+      if (!polled_)
+        ROS_ERROR_THROTTLE(1.0, "Velodyne - Failed to poll device.");
+
       ros::spinOnce();
     }
 
