@@ -52,6 +52,10 @@ class VelodyneDriver final : public rclcpp::Node
 public :
   explicit VelodyneDriver(const rclcpp::NodeOptions& options);
   ~VelodyneDriver() override;
+  VelodyneDriver(VelodyneDriver && c) = delete;
+  VelodyneDriver &operator=(VelodyneDriver && c) = delete;
+  VelodyneDriver(const VelodyneDriver & c) = delete;
+  VelodyneDriver &operator=(const VelodyneDriver & c) = delete;
 
 private:
   bool poll(void);

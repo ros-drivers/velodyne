@@ -59,6 +59,10 @@ class Convert final : public rclcpp::Node
 public:
   explicit Convert(const rclcpp::NodeOptions& options);
   ~Convert() {}
+  Convert(Convert && c) = delete;
+  Convert &operator=(Convert && c) = delete;
+  Convert(const Convert & c) = delete;
+  Convert &operator=(const Convert & c) = delete;
 
 private:
   void processScan(const velodyne_msgs::msg::VelodyneScan::SharedPtr scanMsg);
