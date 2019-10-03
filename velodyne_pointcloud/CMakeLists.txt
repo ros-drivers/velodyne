@@ -55,8 +55,8 @@ install(DIRECTORY params
 # install(PROGRAMS scripts/gen_calibration.py
 #         DESTINATION ${CATKIN_PACKAGE_BIN_DESTINATION})
 
-#if (CATKIN_ENABLE_TESTING)
-#  add_subdirectory(tests)
-#endif()
+if(BUILD_TESTING)
+  add_subdirectory(tests)
+endif()
 
 ament_package()
