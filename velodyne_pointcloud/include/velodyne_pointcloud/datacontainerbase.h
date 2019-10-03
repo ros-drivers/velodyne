@@ -77,6 +77,9 @@ public:
       }
     va_end(vl);
     cloud.point_step = offset;
+    cloud.width = config_.init_width;
+    cloud.height = config_.init_height;
+    cloud.is_dense = static_cast<uint8_t>(config_.is_dense);
     cloud.row_step = cloud.width * cloud.point_step;
   }
 
@@ -116,9 +119,6 @@ public:
   {
     cloud.header = scan_msg->header;
     cloud.data.resize(scan_msg->packets.size() * config_.scans_per_packet * cloud.point_step);
-    cloud.width = config_.init_width;
-    cloud.height = config_.init_height;
-    cloud.is_dense = static_cast<uint8_t>(config_.is_dense);
     if (config_.transform)
       {
         if (!computeTransformation(scan_msg->header.stamp))
