@@ -44,6 +44,11 @@ class VelodyneLaserScan final : public rclcpp::Node
 {
 public:
   explicit VelodyneLaserScan(const rclcpp::NodeOptions& options);
+  ~VelodyneLaserScan() {}
+  VelodyneLaserScan(VelodyneLaserScan && c) = delete;
+  VelodyneLaserScan &operator=(VelodyneLaserScan && c) = delete;
+  VelodyneLaserScan(const VelodyneLaserScan & c) = delete;
+  VelodyneLaserScan &operator=(const VelodyneLaserScan & c) = delete;
 
 private:
   void recvCallback(const sensor_msgs::msg::PointCloud2::SharedPtr msg);

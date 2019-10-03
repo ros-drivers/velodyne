@@ -62,9 +62,11 @@ class Transform final : public rclcpp::Node
 {
 public:
   explicit Transform(const rclcpp::NodeOptions& options);
-  ~Transform()
-  {
-  }
+  ~Transform() {}
+  Transform(Transform && c) = delete;
+  Transform &operator=(Transform && c) = delete;
+  Transform(const Transform & c) = delete;
+  Transform &operator=(const Transform & c) = delete;
 
 private:
   void processScan(const std::shared_ptr<const velodyne_msgs::msg::VelodyneScan> & scanMsg);
