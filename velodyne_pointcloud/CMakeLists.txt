@@ -46,8 +46,8 @@ include_directories(include ${PCL_COMMON_INCLUDE_DIRS})
 add_subdirectory(src/lib)
 add_subdirectory(src/conversions)
 
-# install(DIRECTORY include/${PROJECT_NAME}/
-#         DESTINATION ${CATKIN_PACKAGE_INCLUDE_DESTINATION})
+install(DIRECTORY include/${PROJECT_NAME}/
+        DESTINATION include/${PROJECT_NAME})
 # install(DIRECTORY launch/
 #         DESTINATION ${CATKIN_PACKAGE_SHARE_DESTINATION}/launch)
 install(DIRECTORY params
