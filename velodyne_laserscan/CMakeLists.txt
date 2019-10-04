@@ -29,6 +29,9 @@ install(TARGETS ${PROJECT_NAME}
   DESTINATION lib/${PROJECT_NAME}
 )
 
+install(DIRECTORY include/${PROJECT_NAME}/
+        DESTINATION include/${PROJECT_NAME})
+
 # if (CATKIN_ENABLE_TESTING)
 #   add_subdirectory(tests)
 # endif()
