@@ -37,11 +37,11 @@ ament_target_dependencies(velodyne_driver
 )
 target_link_libraries(velodyne_driver velodyne_input)
 
-add_executable(velodyne_node src/driver/velodyne_node.cc)
-ament_target_dependencies(velodyne_node
+add_executable(velodyne_driver_node src/driver/velodyne_node.cc)
+ament_target_dependencies(velodyne_driver_node
   rclcpp
 )
-target_link_libraries(velodyne_node velodyne_driver)
+target_link_libraries(velodyne_driver_node velodyne_driver)
 
 # install runtime and library files
 install(TARGETS velodyne_driver
@@ -49,7 +49,7 @@ install(TARGETS velodyne_driver
   LIBRARY DESTINATION lib
   RUNTIME DESTINATION bin
 )
-install(TARGETS velodyne_node
+install(TARGETS velodyne_driver_node
   DESTINATION lib/${PROJECT_NAME}
 )
 
@@ -59,8 +59,8 @@ rclcpp_components_register_nodes(velodyne_driver
 install(DIRECTORY include/${PROJECT_NAME}/
   DESTINATION include/${PROJECT_NAME})
 
-install(DIRECTORY launch/
-  DESTINATION share/${PROJECT_NAME}/launch)
+install(DIRECTORY config launch
+  DESTINATION share/${PROJECT_NAME})
 install(PROGRAMS src/vdump
   DESTINATION lib/${PROJECT_NAME})
 

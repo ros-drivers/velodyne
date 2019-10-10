@@ -48,7 +48,10 @@ install(TARGETS ${PROJECT_NAME}_node
 )
 
 install(DIRECTORY include/${PROJECT_NAME}/
-        DESTINATION include/${PROJECT_NAME})
+  DESTINATION include/${PROJECT_NAME})
+
+install(DIRECTORY config launch
+  DESTINATION share/${PROJECT_NAME})
 
 # if (CATKIN_ENABLE_TESTING)
 #   add_subdirectory(tests)
