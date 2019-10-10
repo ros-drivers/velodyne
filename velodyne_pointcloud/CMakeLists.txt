@@ -63,12 +63,12 @@ install(TARGETS convert
 rclcpp_components_register_nodes(convert
   "velodyne_pointcloud::Convert")
 
-add_executable(convert_node src/conversions/convert_node.cc)
-ament_target_dependencies(convert_node
+add_executable(velodyne_convert_node src/conversions/convert_node.cc)
+ament_target_dependencies(velodyne_convert_node
   rclcpp
 )
-target_link_libraries(convert_node convert)
-install(TARGETS convert_node
+target_link_libraries(velodyne_convert_node convert)
+install(TARGETS velodyne_convert_node
   DESTINATION lib/${PROJECT_NAME}
 )
 
@@ -89,20 +89,18 @@ install(TARGETS transform
 rclcpp_components_register_nodes(transform
   "velodyne_pointcloud::Transform")
 
-add_executable(transform_node src/conversions/transform_node.cc)
-ament_target_dependencies(transform_node
+add_executable(velodyne_transform_node src/conversions/transform_node.cc)
+ament_target_dependencies(velodyne_transform_node
   rclcpp
 )
-target_link_libraries(transform_node transform)
-install(TARGETS transform_node
-        DESTINATION lib/${PROJECT_NAME})
+target_link_libraries(velodyne_transform_node transform)
+install(TARGETS velodyne_transform_node
+  DESTINATION lib/${PROJECT_NAME})
 
 install(DIRECTORY include/${PROJECT_NAME}/
-        DESTINATION include/${PROJECT_NAME})
-# install(DIRECTORY launch/
-#         DESTINATION ${CATKIN_PACKAGE_SHARE_DESTINATION}/launch)
-install(DIRECTORY params
-        DESTINATION share/${PROJECT_NAME})
+  DESTINATION include/${PROJECT_NAME})
+install(DIRECTORY config launch params
+  DESTINATION share/${PROJECT_NAME})
 # install(PROGRAMS scripts/gen_calibration.py
 #         DESTINATION ${CATKIN_PACKAGE_BIN_DESTINATION})
 

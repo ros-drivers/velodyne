@@ -1,0 +1,4 @@
+velodyne_laserscan_node:
+    ros__parameters:
+        ring: -1
+        resolution: 0.007
