@@ -183,17 +183,17 @@ void VelodyneLaserScan::recvCallback(const sensor_msgs::msg::PointCloud2::Shared
   // Construct LaserScan message
   if ((offset_x >= 0) && (offset_y >= 0) && (offset_r >= 0))
     {
-      const float resolution = std::abs(resolution_);
-      const size_t size = 2.0 * M_PI / resolution;
+      const float kResolution = std::abs(resolution_);
+      const size_t kSize = 2.0 * M_PI / kResolution;
       auto scan = std::make_unique<sensor_msgs::msg::LaserScan>();
       scan->header = msg->header;
-      scan->angle_increment = resolution;
+      scan->angle_increment = kResolution;
       scan->angle_min = -M_PI;
       scan->angle_max = M_PI;
       scan->range_min = 0.0;
       scan->range_max = 200.0;
       scan->time_increment = 0.0;
-      scan->ranges.resize(size, INFINITY);
+      scan->ranges.resize(kSize, INFINITY);
 
       if ((offset_x == 0) &&
           (offset_y == 4) &&
@@ -201,7 +201,7 @@ void VelodyneLaserScan::recvCallback(const sensor_msgs::msg::PointCloud2::Shared
           (offset_i == 16) &&
           (offset_r == 20))
         {
-          scan->intensities.resize(size);
+          scan->intensities.resize(kSize);
 
           for (sensor_msgs::PointCloud2ConstIterator<float> it(*msg, "x"); it != it.end(); ++it)
             {
@@ -212,9 +212,9 @@ void VelodyneLaserScan::recvCallback(const sensor_msgs::msg::PointCloud2::Shared
                   const float x = it[0];  // x
                   const float y = it[1];  // y
                   const float i = it[4];  // intensity
-                  const int bin = (::atan2f(y, x) + static_cast<float>(M_PI)) / resolution;
+                  const int bin = (::atan2f(y, x) + static_cast<float>(M_PI)) / kResolution;
 
-                  if ((bin >= 0) && (bin < static_cast<int>(size)))
+                  if ((bin >= 0) && (bin < static_cast<int>(kSize)))
                     {
                       scan->ranges[bin] = ::sqrtf(x * x + y * y);
                       scan->intensities[bin] = i;
@@ -228,7 +228,7 @@ void VelodyneLaserScan::recvCallback(const sensor_msgs::msg::PointCloud2::Shared
 
           if (offset_i >= 0)
             {
-              scan->intensities.resize(size);
+              scan->intensities.resize(kSize);
               sensor_msgs::PointCloud2ConstIterator<uint16_t> iter_r(*msg, "ring");
               sensor_msgs::PointCloud2ConstIterator<float> iter_x(*msg, "x");
               sensor_msgs::PointCloud2ConstIterator<float> iter_y(*msg, "y");
@@ -242,9 +242,9 @@ void VelodyneLaserScan::recvCallback(const sensor_msgs::msg::PointCloud2::Shared
                       const float x = *iter_x;  // x
                       const float y = *iter_y;  // y
                       const float i = *iter_i;  // intensity
-                      const int bin = (::atan2f(y, x) + static_cast<float>(M_PI)) / resolution;
+                      const int bin = (::atan2f(y, x) + static_cast<float>(M_PI)) / kResolution;
 
-                      if ((bin >= 0) && (bin < static_cast<int>(size)))
+                      if ((bin >= 0) && (bin < static_cast<int>(kSize)))
                         {
                           scan->ranges[bin] = ::sqrtf(x * x + y * y);
                           scan->intensities[bin] = i;
@@ -266,9 +266,9 @@ void VelodyneLaserScan::recvCallback(const sensor_msgs::msg::PointCloud2::Shared
                     {
                       const float x = *iter_x;  // x
                       const float y = *iter_y;  // y
-                      const int bin = (::atan2f(y, x) + static_cast<float>(M_PI)) / resolution;
+                      const int bin = (::atan2f(y, x) + static_cast<float>(M_PI)) / kResolution;
 
-                      if ((bin >= 0) && (bin < static_cast<int>(size)))
+                      if ((bin >= 0) && (bin < static_cast<int>(kSize)))
                         {
                           scan->ranges[bin] = ::sqrtf(x * x + y * y);
                         }
