@@ -130,9 +130,10 @@ namespace velodyne_pointcloud
   /** @brief Callback for raw scan messages. */
   void Convert::processScan(const velodyne_msgs::msg::VelodyneScan::SharedPtr scanMsg)
   {
-    if (output_->get_subscription_count() == 0)   // no one listening?
+    if (output_->get_subscription_count() == 0 && output_->get_intra_process_subscription_count() == 0)   // no one listening?
+    {
       return;                                     // avoid much work
-
+    }
     // allocate a point cloud with same time and frame ID as raw data
     container_ptr_->setup(scanMsg);
 
