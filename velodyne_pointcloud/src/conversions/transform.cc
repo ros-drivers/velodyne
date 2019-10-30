@@ -137,7 +137,7 @@ namespace velodyne_pointcloud
   void
     Transform::processScan(const std::shared_ptr<const velodyne_msgs::msg::VelodyneScan> & scanMsg)
   {
-    if (output_->get_subscription_count() == 0)    // no one listening?
+    if (output_->get_subscription_count() == 0 && output_->get_intra_process_subscription_count() == 0)    // no one listening?
       {
         return;                                     // avoid much work
       }
