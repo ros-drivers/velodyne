@@ -17,10 +17,16 @@ find_package(rosidl_default_generators REQUIRED)
 find_package(std_msgs REQUIRED)
 
 rosidl_generate_interfaces(${PROJECT_NAME}
-   "msg/VelodynePacket.msg"
-   "msg/VelodyneScan.msg"
-   DEPENDENCIES std_msgs
-   DEPENDENCIES builtin_interfaces
+  "msg/VelodynePacket.msg"
+  "msg/VelodyneScan.msg"
+  DEPENDENCIES std_msgs
+  DEPENDENCIES builtin_interfaces
+  ADD_LINTER_TESTS
 )
+
+if(BUILD_TESTING)
+  find_package(ament_lint_auto REQUIRED)
+  ament_lint_auto_find_test_dependencies()
+endif()
 
 ament_package()
