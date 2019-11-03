@@ -179,9 +179,9 @@ void VelodyneLaserScan::recvCallback(const sensor_msgs::msg::PointCloud2::Shared
       scan->intensities.resize(kSize);
 
       for (sensor_msgs::PointCloud2ConstIterator<float> it(*msg, "x"); it != it.end(); ++it) {
-        uint16_t r = 0;  // ring
-        r = &it[5] << 8;
-        r |= &it[6];
+        const uint16_t r =
+          (static_cast<const uint16_t>(it[5]) << 8) |
+          static_cast<const uint16_t>(it[6]);
 
         if (r == ring) {
           const float x = it[0];  // x
