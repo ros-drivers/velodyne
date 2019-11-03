@@ -56,8 +56,8 @@ OrganizedCloudXYZIR::OrganizedCloudXYZIR(
     "z", 1, sensor_msgs::msg::PointField::FLOAT32,
     "intensity", 1, sensor_msgs::msg::PointField::FLOAT32,
     "ring", 1, sensor_msgs::msg::PointField::UINT16),
-    iter_x(cloud, "x"), iter_y(cloud, "y"), iter_z(cloud, "z"),
-    iter_intensity(cloud, "intensity"), iter_ring(cloud, "ring")
+  iter_4(cloud, "x"), iter_y(cloud, "y"), iter_z(cloud, "z"),
+  iter_intensity(cloud, "intensity"), iter_ring(cloud, "ring")
 {
 }
 
@@ -78,7 +78,7 @@ void OrganizedCloudXYZIR::setup(const velodyne_msgs::msg::VelodyneScan::SharedPt
   iter_y = sensor_msgs::PointCloud2Iterator<float>(cloud, "y");
   iter_z = sensor_msgs::PointCloud2Iterator<float>(cloud, "z");
   iter_intensity = sensor_msgs::PointCloud2Iterator<float>(cloud, "intensity");
-  iter_ring = sensor_msgs::PointCloud2Iterator<uint16_t >(cloud, "ring");
+  iter_ring = sensor_msgs::PointCloud2Iterator<uint16_t>(cloud, "ring");
 }
 
 void OrganizedCloudXYZIR::addPoint(
@@ -96,17 +96,17 @@ void OrganizedCloudXYZIR::addPoint(
       transformPoint(x, y, z);
     }
 
-    *(iter_x+ring) = x;
-    *(iter_y+ring) = y;
-    *(iter_z+ring) = z;
-    *(iter_intensity+ring) = intensity;
-    *(iter_ring+ring) = ring;
+    *(iter_x + ring) = x;
+    *(iter_y + ring) = y;
+    *(iter_z + ring) = z;
+    *(iter_intensity + ring) = intensity;
+    *(iter_ring + ring) = ring;
   } else {
-    *(iter_x+ring) = nanf("");
-    *(iter_y+ring) = nanf("");
-    *(iter_z+ring) = nanf("");
-    *(iter_intensity+ring) = ::nanf("");
-    *(iter_ring+ring) = ring;
+    *(iter_x + ring) = nanf("");
+    *(iter_y + ring) = nanf("");
+    *(iter_z + ring) = nanf("");
+    *(iter_intensity + ring) = ::nanf("");
+    *(iter_ring + ring) = ring;
   }
 }
 

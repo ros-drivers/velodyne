@@ -52,7 +52,7 @@ namespace velodyne_pointcloud
 
 /** @brief Constructor. */
 Convert::Convert(const rclcpp::NodeOptions & options)
-  : rclcpp::Node("velodyne_convert_node", options),
+: rclcpp::Node("velodyne_convert_node", options),
   tf_buffer_(this->get_clock()),
   diagnostics_(this)
 {
@@ -95,9 +95,9 @@ Convert::Convert(const rclcpp::NodeOptions & options)
   view_width_desc.description = "angle defining the view width";
   rcl_interfaces::msg::FloatingPointRange view_width_range;
   view_width_range.from_value = 0.0;
-  view_width_range.to_value = 2.0*M_PI;
+  view_width_range.to_value = 2.0 * M_PI;
   view_width_desc.floating_point_range.push_back(view_width_range);
-  double view_width = this->declare_parameter("view_width", 2.0*M_PI, view_width_desc);
+  double view_width = this->declare_parameter("view_width", 2.0 * M_PI, view_width_desc);
 
   bool organize_cloud = this->declare_parameter("organize_cloud", true);
 
@@ -110,13 +110,13 @@ Convert::Convert(const rclcpp::NodeOptions & options)
 
   if (organize_cloud) {
     container_ptr_ = std::unique_ptr<OrganizedCloudXYZIR>(
-      new OrganizedCloudXYZIR(min_range, max_range,
-        target_frame, fixed_frame,
+      new OrganizedCloudXYZIR(
+        min_range, max_range, target_frame, fixed_frame,
         data_->numLasers(), data_->scansPerPacket(), tf_buffer_));
   } else {
     container_ptr_ = std::unique_ptr<PointcloudXYZIR>(
-      new PointcloudXYZIR(min_range, max_range,
-        target_frame, fixed_frame,
+      new PointcloudXYZIR(
+        min_range, max_range, target_frame, fixed_frame,
         data_->scansPerPacket(), tf_buffer_));
   }
 
@@ -127,8 +127,8 @@ Convert::Convert(const rclcpp::NodeOptions & options)
   // subscribe to VelodyneScan packets
   velodyne_scan_ =
     this->create_subscription<velodyne_msgs::msg::VelodyneScan>(
-      "velodyne_packets", rclcpp::QoS(10),
-      std::bind(&Convert::processScan, this, std::placeholders::_1));
+    "velodyne_packets", rclcpp::QoS(10),
+    std::bind(&Convert::processScan, this, std::placeholders::_1));
 
   // Diagnostics
   diagnostics_.setHardwareID("Velodyne Convert");

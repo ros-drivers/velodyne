@@ -94,9 +94,9 @@ Transform::Transform(const rclcpp::NodeOptions & options)
   view_width_desc.description = "angle defining the view width";
   rcl_interfaces::msg::FloatingPointRange view_width_range;
   view_width_range.from_value = 0.0;
-  view_width_range.to_value = 2.0*M_PI;
+  view_width_range.to_value = 2.0 * M_PI;
   view_width_desc.floating_point_range.push_back(view_width_range);
-  double view_width = this->declare_parameter("view_width", 2.0*M_PI, view_width_desc);
+  double view_width = this->declare_parameter("view_width", 2.0 * M_PI, view_width_desc);
 
   std::string target_frame = this->declare_parameter("frame_id", "map");
   std::string fixed_frame = this->declare_parameter("fixed_frame", "odom");
@@ -124,8 +124,8 @@ Transform::Transform(const rclcpp::NodeOptions & options)
   // subscribe to VelodyneScan packets using transform filter
   tf_filter_ =
     std::make_unique<tf2_ros::MessageFilter<velodyne_msgs::msg::VelodyneScan>>(
-      velodyne_scan_, tf_buffer_, target_frame, 10,
-      this->get_node_logging_interface(), this->get_node_clock_interface());
+    velodyne_scan_, tf_buffer_, target_frame, 10,
+    this->get_node_logging_interface(), this->get_node_clock_interface());
   tf_filter_->registerCallback(
     std::bind(&Transform::processScan, this, std::placeholders::_1));
 
@@ -161,7 +161,7 @@ void Transform::processScan(
   }
 
   velodyne_msgs::msg::VelodyneScan * raw =
-    const_cast<velodyne_msgs::msg::VelodyneScan*>(scanMsg.get());
+    const_cast<velodyne_msgs::msg::VelodyneScan *>(scanMsg.get());
   container_ptr_->setup(std::shared_ptr<velodyne_msgs::msg::VelodyneScan>(raw));
 
   // process each packet provided by the driver

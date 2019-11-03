@@ -44,7 +44,7 @@
 namespace velodyne_rawdata
 {
 
-inline float SQR(float val) { return val * val; }
+inline float SQR(float val) {return val * val;}
 
 ////////////////////////////////////////////////////////////////////////
 //
@@ -97,7 +97,7 @@ int RawData::scansPerPacket() const
 {
   if (calibration_->num_lasers == 16) {
     return BLOCKS_PER_PACKET * VLP16_FIRINGS_PER_BLOCK *
-      VLP16_SCANS_PER_FIRING;
+           VLP16_SCANS_PER_FIRING;
   } else {
     return BLOCKS_PER_PACKET * SCANS_PER_BLOCK;
   }
@@ -124,7 +124,7 @@ void RawData::unpack(const velodyne_msgs::msg::VelodynePacket & pkt, DataContain
     return;
   }
 
-  const raw_packet_t *raw = (const raw_packet_t *) &pkt.data[0];
+  const raw_packet_t * raw = (const raw_packet_t *) &pkt.data[0];
 
   for (int i = 0; i < BLOCKS_PER_PACKET; i++) {
     // upper bank lasers are numbered [0..31]
@@ -140,15 +140,15 @@ void RawData::unpack(const velodyne_msgs::msg::VelodynePacket & pkt, DataContain
     for (int j = 0, k = 0; j < SCANS_PER_BLOCK; j++, k += RAW_SCAN_SIZE) {
       float x, y, z;
       float intensity;
-      const uint8_t laser_number  = j + bank_origin;
+      const uint8_t laser_number = j + bank_origin;
 
-      const LaserCorrection &corrections = calibration_->laser_corrections[laser_number];
+      const LaserCorrection & corrections = calibration_->laser_corrections[laser_number];
 
       /** Position Calculation */
-      const raw_block_t &block = raw->blocks[i];
+      const raw_block_t & block = raw->blocks[i];
       union two_bytes tmp;
       tmp.bytes[0] = block.data[k];
-      tmp.bytes[1] = block.data[k+1];
+      tmp.bytes[1] = block.data[k + 1];
 
       if (tmp.bytes[0] == 0 && tmp.bytes[1] == 0) {  // no laser beam return
         continue;
@@ -227,12 +227,12 @@ void RawData::unpack(const velodyne_msgs::msg::VelodynePacket & pkt, DataContain
          * was added to the expression due to the mathemathical
          * model we used.
          */
-        xy_distance = distance_x * cos_vert_angle - vert_offset * sin_vert_angle ;
+        xy_distance = distance_x * cos_vert_angle - vert_offset * sin_vert_angle;
         // the expression wiht '-' is proved to be better than the one with '+'
         x = xy_distance * sin_rot_angle - horiz_offset * cos_rot_angle;
 
         float distance_y = distance + distance_corr_y;
-        xy_distance = distance_y * cos_vert_angle - vert_offset * sin_vert_angle ;
+        xy_distance = distance_y * cos_vert_angle - vert_offset * sin_vert_angle;
         /**the new term of 'vert_offset * sin_vert_angle'
          * was added to the expression due to the mathemathical
          * model we used.
@@ -245,7 +245,7 @@ void RawData::unpack(const velodyne_msgs::msg::VelodynePacket & pkt, DataContain
          * was added to the expression due to the mathemathical
          * model we used.
          */
-        z = distance_y * sin_vert_angle + vert_offset*cos_vert_angle;
+        z = distance_y * sin_vert_angle + vert_offset * cos_vert_angle;
 
         /** Use standard ROS coordinate system (right-hand rule) */
         float x_coord = y;
@@ -257,7 +257,7 @@ void RawData::unpack(const velodyne_msgs::msg::VelodynePacket & pkt, DataContain
         float min_intensity = corrections.min_intensity;
         float max_intensity = corrections.max_intensity;
 
-        intensity = raw->blocks[i].data[k+2];
+        intensity = raw->blocks[i].data[k + 2];
 
         float focal_offset = 256 *
           (1 - corrections.focal_distance / 13100) *
@@ -265,7 +265,7 @@ void RawData::unpack(const velodyne_msgs::msg::VelodynePacket & pkt, DataContain
         float focal_slope = corrections.focal_slope;
         intensity +=
           focal_slope * (std::abs(focal_offset - 256 *
-            SQR(1 - static_cast<float>(tmp.uint) / 65535)));
+          SQR(1 - static_cast<float>(tmp.uint) / 65535)));
         intensity = (intensity < min_intensity) ? min_intensity : intensity;
         intensity = (intensity > max_intensity) ? max_intensity : intensity;
 
@@ -306,8 +306,8 @@ void RawData::unpack_vlp16(const velodyne_msgs::msg::VelodynePacket & pkt, DataC
     // Calculate difference between current and next block's azimuth angle.
     azimuth = static_cast<float>(raw->blocks[block].rotation);
 
-    if (block < (BLOCKS_PER_PACKET-1)) {
-      raw_azimuth_diff = raw->blocks[block+1].rotation - raw->blocks[block].rotation;
+    if (block < (BLOCKS_PER_PACKET - 1)) {
+      raw_azimuth_diff = raw->blocks[block + 1].rotation - raw->blocks[block].rotation;
       azimuth_diff = static_cast<float>((36000 + raw_azimuth_diff) % 36000);
 
       // some packets contain an angle overflow where azimuth_diff < 0
@@ -321,8 +321,8 @@ void RawData::unpack_vlp16(const velodyne_msgs::msg::VelodynePacket & pkt, DataC
         if (last_azimuth_diff > 0) {
           azimuth_diff = last_azimuth_diff;
         } else {
-        // otherwise we are not able to use this data
-        // TODO(somebody): we might just not use the second 16 firings
+          // otherwise we are not able to use this data
+          // TODO(somebody): we might just not use the second 16 firings
           continue;
         }
       }
@@ -334,7 +334,7 @@ void RawData::unpack_vlp16(const velodyne_msgs::msg::VelodynePacket & pkt, DataC
 
     for (int firing = 0, k = 0; firing < VLP16_FIRINGS_PER_BLOCK; firing++) {
       for (int dsr = 0; dsr < VLP16_SCANS_PER_FIRING; dsr++, k += RAW_SCAN_SIZE) {
-        velodyne_pointcloud::LaserCorrection &corrections = calibration_->laser_corrections[dsr];
+        velodyne_pointcloud::LaserCorrection & corrections = calibration_->laser_corrections[dsr];
 
         /** Position Calculation */
         union two_bytes tmp;
@@ -343,8 +343,8 @@ void RawData::unpack_vlp16(const velodyne_msgs::msg::VelodynePacket & pkt, DataC
 
         /** correct for the laser rotation as a function of timing during the firings **/
         azimuth_corrected_f =
-          azimuth + (azimuth_diff * ((dsr*VLP16_DSR_TOFFSET) +
-          (firing*VLP16_FIRING_TOFFSET)) / VLP16_BLOCK_TDURATION);
+          azimuth + (azimuth_diff * ((dsr * VLP16_DSR_TOFFSET) +
+          (firing * VLP16_FIRING_TOFFSET)) / VLP16_BLOCK_TDURATION);
         azimuth_corrected = (static_cast<int>(std::round(azimuth_corrected_f)) % 36000);
 
         /*condition added to avoid calculating points which are not
@@ -419,7 +419,7 @@ void RawData::unpack_vlp16(const velodyne_msgs::msg::VelodynePacket & pkt, DataC
            * was added to the expression due to the mathemathical
            * model we used.
            */
-          xy_distance = distance_x * cos_vert_angle - vert_offset * sin_vert_angle ;
+          xy_distance = distance_x * cos_vert_angle - vert_offset * sin_vert_angle;
           x = xy_distance * sin_rot_angle - horiz_offset * cos_rot_angle;
 
           float distance_y = distance + distance_corr_y;
@@ -427,7 +427,7 @@ void RawData::unpack_vlp16(const velodyne_msgs::msg::VelodynePacket & pkt, DataC
            * was added to the expression due to the mathemathical
            * model we used.
            */
-          xy_distance = distance_y * cos_vert_angle - vert_offset * sin_vert_angle ;
+          xy_distance = distance_y * cos_vert_angle - vert_offset * sin_vert_angle;
           y = xy_distance * cos_rot_angle + horiz_offset * sin_rot_angle;
 
           // Using distance_y is not symmetric, but the velodyne manual
@@ -436,7 +436,7 @@ void RawData::unpack_vlp16(const velodyne_msgs::msg::VelodynePacket & pkt, DataC
            * was added to the expression due to the mathemathical
            * model we used.
            */
-          z = distance_y * sin_vert_angle + vert_offset*cos_vert_angle;
+          z = distance_y * sin_vert_angle + vert_offset * cos_vert_angle;
 
           /** Use standard ROS coordinate system (right-hand rule) */
           float x_coord = y;
@@ -451,8 +451,8 @@ void RawData::unpack_vlp16(const velodyne_msgs::msg::VelodynePacket & pkt, DataC
 
           float focal_offset = 256 * SQR(1 - corrections.focal_distance / 13100);
           float focal_slope = corrections.focal_slope;
-          intensity += focal_slope * (std::abs(
-            focal_offset - 256 * SQR(1 - tmp.uint/65535)));
+          intensity += focal_slope *
+            (std::abs(focal_offset - 256 * SQR(1 - tmp.uint / 65535)));
           intensity = (intensity < min_intensity) ? min_intensity : intensity;
           intensity = (intensity > max_intensity) ? max_intensity : intensity;
 

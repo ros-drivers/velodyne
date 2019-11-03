@@ -48,13 +48,15 @@
 
 namespace YAML
 {
-  // The >> operator disappeared in yaml-cpp 0.5, so this function is
-  // added to provide support for code written under the yaml-cpp 0.3 API.
-  template<typename T>
-  void operator >> (const YAML::Node& node, T& i)
-  {
-    i = node.as<T>();
-  }
+
+// The >> operator disappeared in yaml-cpp 0.5, so this function is
+// added to provide support for code written under the yaml-cpp 0.3 API.
+template<typename T>
+void operator>>(const YAML::Node & node, T & i)
+{
+  i = node.as<T>();
+}
+
 }  // namespace YAML
 
 #endif  // HAVE_NEW_YAMLCPP
@@ -81,9 +83,7 @@ constexpr char FOCAL_DISTANCE[] = "focal_distance";
 constexpr char FOCAL_SLOPE[] = "focal_slope";
 
 /** Read calibration for a single laser. */
-void operator >> (
-  const YAML::Node& node,
-  std::pair<int, LaserCorrection> & correction)
+void operator>>(const YAML::Node & node, std::pair<int, LaserCorrection> & correction)
 {
   node[LASER_ID] >> correction.first;
   node[ROT_CORRECTION] >> correction.second.rot_correction;
@@ -94,7 +94,7 @@ void operator >> (
 
   if (node[TWO_PT_CORRECTION_AVAILABLE]) {
     node[TWO_PT_CORRECTION_AVAILABLE] >>
-      correction.second.two_pt_correction_available;
+    correction.second.two_pt_correction_available;
   } else {
 #else
 
@@ -113,11 +113,11 @@ void operator >> (
 
   if (node[HORIZ_OFFSET_CORRECTION]) {
     node[HORIZ_OFFSET_CORRECTION] >>
-      correction.second.horiz_offset_correction;
+    correction.second.horiz_offset_correction;
   } else {
 #else
 
-  if (const YAML::Node *pName = node.FindValue(HORIZ_OFFSET_CORRECTION)) {
+  if (const YAML::Node * pName = node.FindValue(HORIZ_OFFSET_CORRECTION)) {
     *pName >> correction.second.horiz_offset_correction;
   } else {
 #endif
@@ -177,13 +177,13 @@ void operator >> (
 }
 
 /** Read entire calibration file. */
-void operator >> (const YAML::Node & node, Calibration & calibration)
+void operator>>(const YAML::Node & node, Calibration & calibration)
 {
   int num_lasers;
   node[NUM_LASERS] >> num_lasers;
   float distance_resolution_m;
   node[DISTANCE_RESOLUTION] >> distance_resolution_m;
-  const YAML::Node& lasers = node[LASERS];
+  const YAML::Node & lasers = node[LASERS];
   calibration.laser_corrections.clear();
   calibration.num_lasers = num_lasers;
   calibration.distance_resolution_m = distance_resolution_m;
@@ -195,7 +195,7 @@ void operator >> (const YAML::Node & node, Calibration & calibration)
     const int index = correction.first;
 
     if (static_cast<size_t>(index) >= calibration.laser_corrections.size()) {
-      calibration.laser_corrections.resize(index+1);
+      calibration.laser_corrections.resize(index + 1);
     }
 
     calibration.laser_corrections[index] = (correction.second);
@@ -229,14 +229,16 @@ void operator >> (const YAML::Node & node, Calibration & calibration)
   }
 }
 
-Calibration::Calibration(const std::string& calibration_file)
+Calibration::Calibration(const std::string & calibration_file)
 : distance_resolution_m(0.002f)
 {
   std::ifstream fin(calibration_file.c_str());
 
   if (!fin.is_open()) {
     throw std::runtime_error("Failed to open calibration file");
-  } try {
+  }
+
+  try {
     YAML::Node doc;
 
 #ifdef HAVE_NEW_YAMLCPP

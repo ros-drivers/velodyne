@@ -39,13 +39,13 @@
 #include "velodyne_pointcloud/datacontainerbase.hpp"
 
 class TestContainer final
-: public velodyne_rawdata::DataContainerBase
+  : public velodyne_rawdata::DataContainerBase
 {
 public:
   TestContainer(unsigned int width, tf2::BufferCore & buffer)
-    : velodyne_rawdata::DataContainerBase(
-        0, 0, "target", "fixed", width, 0, false, 0,
-        buffer, 1, "x", 1, sensor_msgs::msg::PointField::FLOAT32)
+  : velodyne_rawdata::DataContainerBase(
+      0, 0, "target", "fixed", width, 0, false, 0,
+      buffer, 1, "x", 1, sensor_msgs::msg::PointField::FLOAT32)
   {
   }
 

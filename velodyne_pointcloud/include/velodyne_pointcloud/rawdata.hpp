@@ -88,8 +88,7 @@ raw_block_t;
  *  They are packed into the actual data stream misaligned.  I doubt
  *  this works on big endian machines.
  */
-union two_bytes
-{
+union two_bytes {
   uint16_t uint;
   uint8_t bytes[2];
 };

@@ -46,16 +46,16 @@ PointcloudXYZIR::PointcloudXYZIR(
   const double min_range, const double max_range,
   const std::string & target_frame, const std::string & fixed_frame,
   const unsigned int scans_per_block, tf2::BufferCore & tf_buffer)
-  : DataContainerBase(
-      min_range, max_range, target_frame, fixed_frame,
-      0, 1, true, scans_per_block, tf_buffer, 5,
-      "x", 1, sensor_msgs::msg::PointField::FLOAT32,
-      "y", 1, sensor_msgs::msg::PointField::FLOAT32,
-      "z", 1, sensor_msgs::msg::PointField::FLOAT32,
-      "intensity", 1, sensor_msgs::msg::PointField::FLOAT32,
-      "ring", 1, sensor_msgs::msg::PointField::UINT16),
-      iter_x(cloud, "x"), iter_y(cloud, "y"), iter_z(cloud, "z"),
-      iter_intensity(cloud, "intensity"), iter_ring(cloud, "ring")
+: DataContainerBase(
+    min_range, max_range, target_frame, fixed_frame,
+    0, 1, true, scans_per_block, tf_buffer, 5,
+    "x", 1, sensor_msgs::msg::PointField::FLOAT32,
+    "y", 1, sensor_msgs::msg::PointField::FLOAT32,
+    "z", 1, sensor_msgs::msg::PointField::FLOAT32,
+    "intensity", 1, sensor_msgs::msg::PointField::FLOAT32,
+    "ring", 1, sensor_msgs::msg::PointField::UINT16),
+  iter_x(cloud, "x"), iter_y(cloud, "y"), iter_z(cloud, "z"),
+  iter_intensity(cloud, "intensity"), iter_ring(cloud, "ring")
 {}
 
 void PointcloudXYZIR::setup(const velodyne_msgs::msg::VelodyneScan::SharedPtr scan_msg)
@@ -65,7 +65,7 @@ void PointcloudXYZIR::setup(const velodyne_msgs::msg::VelodyneScan::SharedPtr sc
   iter_y = sensor_msgs::PointCloud2Iterator<float>(cloud, "y");
   iter_z = sensor_msgs::PointCloud2Iterator<float>(cloud, "z");
   iter_intensity = sensor_msgs::PointCloud2Iterator<float>(cloud, "intensity");
-  iter_ring = sensor_msgs::PointCloud2Iterator<uint16_t >(cloud, "ring");
+  iter_ring = sensor_msgs::PointCloud2Iterator<uint16_t>(cloud, "ring");
 }
 
 void PointcloudXYZIR::newLine()

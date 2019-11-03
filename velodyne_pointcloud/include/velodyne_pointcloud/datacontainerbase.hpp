@@ -56,13 +56,13 @@ class DataContainerBase
 {
 public:
   explicit DataContainerBase(
-    const double min_range, const double max_range, const std::string& target_frame,
-    const std::string& fixed_frame, const unsigned int init_width, const unsigned int init_height,
+    const double min_range, const double max_range, const std::string & target_frame,
+    const std::string & fixed_frame, const unsigned int init_width, const unsigned int init_height,
     const bool is_dense, const unsigned int scans_per_packet,
     tf2::BufferCore & buffer, int fields, ...)
-    : config_(min_range, max_range, target_frame, fixed_frame,
-        init_width, init_height, is_dense, scans_per_packet),
-      tf_buffer_(buffer)
+  : config_(min_range, max_range, target_frame, fixed_frame,
+      init_width, init_height, is_dense, scans_per_packet),
+    tf_buffer_(buffer)
   {
     va_list vl;
     cloud.fields.clear();
@@ -72,7 +72,7 @@ public:
 
     for (int i = 0; i < fields; ++i) {
       // Create the corresponding PointField
-      std::string name(va_arg(vl, char*));
+      std::string name(va_arg(vl, char *));
       int count(va_arg(vl, int));
       int datatype(va_arg(vl, int));
       offset = addPointField(cloud, name, count, datatype, offset);
@@ -99,18 +99,18 @@ public:
     bool transform;  ///< enable / disable transform points
 
     explicit Config(
-      double min_range, double max_range, const std::string& target_frame,
-      const std::string& fixed_frame, unsigned int init_width,
+      double min_range, double max_range, const std::string & target_frame,
+      const std::string & fixed_frame, unsigned int init_width,
       unsigned int init_height, bool is_dense, unsigned int scans_per_packet)
-      : min_range(min_range),
-        max_range(max_range),
-        target_frame(target_frame),
-        fixed_frame(fixed_frame),
-        init_width(init_width),
-        init_height(init_height),
-        is_dense(is_dense),
-        scans_per_packet(scans_per_packet),
-        transform(fixed_frame != target_frame)
+    : min_range(min_range),
+      max_range(max_range),
+      target_frame(target_frame),
+      fixed_frame(fixed_frame),
+      init_width(init_width),
+      init_height(init_height),
+      is_dense(is_dense),
+      scans_per_packet(scans_per_packet),
+      transform(fixed_frame != target_frame)
     {
     }
   };
@@ -167,9 +167,9 @@ protected:
       const std::chrono::nanoseconds dur(time.nanoseconds());
       std::chrono::time_point<std::chrono::system_clock, std::chrono::nanoseconds> time(dur);
       transform = tf_buffer_.lookupTransform(config_.target_frame, cloud.header.frame_id, time);
-    } catch (tf2::LookupException& e) {
+    } catch (tf2::LookupException & e) {
       return false;
-    } catch (tf2::ExtrapolationException& e) {
+    } catch (tf2::ExtrapolationException & e) {
       return false;
     }
 
@@ -201,7 +201,7 @@ protected:
 
   inline bool pointInRange(float range)
   {
-    return (range >= config_.min_range && range <= config_.max_range);
+    return range >= config_.min_range && range <= config_.max_range;
   }
 
   Config config_;
