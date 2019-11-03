@@ -57,9 +57,9 @@
 #include <fcntl.h>
 #include <sys/file.h>
 
-#include <velodyne_driver/input.h>
-#include <velodyne_driver/time_conversion.hpp>
 #include <velodyne_msgs/msg/velodyne_packet.hpp>
+#include "velodyne_driver/input.hpp"
+#include "velodyne_driver/time_conversion.hpp"
 
 namespace velodyne_driver
 {

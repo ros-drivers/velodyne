@@ -36,7 +36,7 @@
  */
 
 #include <rclcpp/rclcpp.hpp>
-#include "velodyne_driver/driver.h"
+#include "velodyne_driver/driver.hpp"
 
 int main(int argc, char** argv)
 {

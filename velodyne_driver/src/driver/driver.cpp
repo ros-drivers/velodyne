@@ -47,7 +47,7 @@
 #include <tf2_ros/transform_listener.h>
 
 #include <velodyne_msgs/msg/velodyne_scan.hpp>
-#include "velodyne_driver/driver.h"
+#include "velodyne_driver/driver.hpp"
 
 using namespace std::chrono_literals;
 

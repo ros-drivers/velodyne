@@ -50,8 +50,8 @@
  *                      from a PCAP dump file
  */
 
-#ifndef VELODYNE_DRIVER_INPUT_H
-#define VELODYNE_DRIVER_INPUT_H
+#ifndef VELODYNE_DRIVER__INPUT_HPP_
+#define VELODYNE_DRIVER__INPUT_HPP_
 
 #include <memory>
 #include <string>
@@ -150,4 +150,4 @@ private:
 
 }  // namespace velodyne_driver
 
-#endif  // VELODYNE_DRIVER_INPUT_H
+#endif  // VELODYNE_DRIVER__INPUT_HPP_

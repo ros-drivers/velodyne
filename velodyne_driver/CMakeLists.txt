@@ -27,7 +27,7 @@ include_directories(include)
 add_subdirectory(src/lib)
 
 # build the driver node
-add_library(velodyne_driver SHARED src/driver/driver.cc)
+add_library(velodyne_driver SHARED src/driver/driver.cpp)
 ament_target_dependencies(velodyne_driver
   diagnostic_msgs
   rclcpp
@@ -37,7 +37,7 @@ ament_target_dependencies(velodyne_driver
 )
 target_link_libraries(velodyne_driver velodyne_input)
 
-add_executable(velodyne_driver_node src/driver/velodyne_node.cc)
+add_executable(velodyne_driver_node src/driver/velodyne_node.cpp)
 ament_target_dependencies(velodyne_driver_node
   rclcpp
 )
@@ -66,6 +66,9 @@ install(PROGRAMS src/vdump
 
 
 if (BUILD_TESTING)
+  find_package(ament_lint_auto REQUIRED)
+  ament_lint_auto_find_test_dependencies()
+
   find_package(ament_cmake_gtest REQUIRED)
 
   # unit test

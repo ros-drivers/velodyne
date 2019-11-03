@@ -30,8 +30,8 @@
 // ANY WAY OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE
 // POSSIBILITY OF SUCH DAMAGE.
 
-#ifndef VELODYNE_DRIVER_DRIVER_H
-#define VELODYNE_DRIVER_DRIVER_H
+#ifndef VELODYNE_DRIVER__DRIVER_HPP_
+#define VELODYNE_DRIVER__DRIVER_HPP_
 
 #include <future>
 #include <memory>
@@ -42,7 +42,7 @@
 //#include <diagnostic_updater/diagnostic_updater.hpp>
 //#include <diagnostic_updater/publisher.hpp>
 
-#include <velodyne_driver/input.h>
+#include "velodyne_driver/input.hpp"
 
 namespace velodyne_driver
 {
@@ -99,4 +99,4 @@ private:
 
 }  // namespace velodyne_driver
 
-#endif  // VELODYNE_DRIVER_DRIVER_H
+#endif  // VELODYNE_DRIVER__DRIVER_HPP_

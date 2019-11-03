@@ -30,8 +30,8 @@
 // ANY WAY OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE
 // POSSIBILITY OF SUCH DAMAGE.
 
-#ifndef VELODYNE_DRIVER_TIME_CONVERSION_HPP
-#define VELODYNE_DRIVER_TIME_CONVERSION_HPP
+#ifndef VELODYNE_DRIVER__TIME_CONVERSION_HPP_
+#define VELODYNE_DRIVER__TIME_CONVERSION_HPP_
 
 #include <rclcpp/time.hpp>
 
@@ -79,4 +79,4 @@ rclcpp::Time rosTimeFromGpsTimestamp(rclcpp::Time & time_nom, const uint8_t * co
   return resolveHourAmbiguity(stamp, time_nom);
 }
 
-#endif  // VELODYNE_DRIVER_TIME_CONVERSION_HPP
+#endif  // VELODYNE_DRIVER__TIME_CONVERSION_HPP_
