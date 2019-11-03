@@ -119,8 +119,29 @@ install(DIRECTORY config launch params
 #         DESTINATION ${CATKIN_PACKAGE_BIN_DESTINATION})
 
 if(BUILD_TESTING)
+  # Remove empty.xml from lint
+  list(APPEND AMENT_LINT_AUTO_EXCLUDE
+    ament_cmake_xmllint
+  )
+
   find_package(ament_lint_auto REQUIRED)
   ament_lint_auto_find_test_dependencies()
+
+  file(GLOB_RECURSE XML_FILES
+    "*.xml"
+  )
+
+  get_filename_component(
+    EMPTY_XML_ABS
+    "tests/empty.xml"
+    ABSOLUTE
+  )
+
+  list(REMOVE_ITEM XML_FILES ${EMPTY_XML_ABS})
+
+  find_package(ament_cmake_xmllint REQUIRED)
+
+  ament_xmllint(${XML_FILES})
 
   add_subdirectory(tests)
 endif()

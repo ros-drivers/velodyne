@@ -56,7 +56,7 @@ OrganizedCloudXYZIR::OrganizedCloudXYZIR(
     "z", 1, sensor_msgs::msg::PointField::FLOAT32,
     "intensity", 1, sensor_msgs::msg::PointField::FLOAT32,
     "ring", 1, sensor_msgs::msg::PointField::UINT16),
-  iter_4(cloud, "x"), iter_y(cloud, "y"), iter_z(cloud, "z"),
+  iter_x(cloud, "x"), iter_y(cloud, "y"), iter_z(cloud, "z"),
   iter_intensity(cloud, "intensity"), iter_ring(cloud, "ring")
 {
 }
