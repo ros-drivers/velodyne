@@ -34,16 +34,24 @@
 
 #include <tf2/buffer_core.h>
 
+#include <memory>
+
 #include "velodyne_pointcloud/datacontainerbase.hpp"
 
-class TestContainer final : public velodyne_rawdata::DataContainerBase
+class TestContainer final
+: public velodyne_rawdata::DataContainerBase
 {
- public:
-  TestContainer(unsigned int width, tf2::BufferCore & buffer) : velodyne_rawdata::DataContainerBase(0, 0, "target", "fixed", width, 0, false, 0, buffer, 1, "x", 1, sensor_msgs::msg::PointField::FLOAT32)
+public:
+  TestContainer(unsigned int width, tf2::BufferCore & buffer)
+    : velodyne_rawdata::DataContainerBase(
+        0, 0, "target", "fixed", width, 0, false, 0,
+        buffer, 1, "x", 1, sensor_msgs::msg::PointField::FLOAT32)
   {
   }
 
-  void addPoint(float x, float y, float z, const uint16_t ring, const uint16_t azimuth, const float distance, const float intensity)
+  void addPoint(
+    float x, float y, float z, const uint16_t ring,
+    const uint16_t azimuth, const float distance, const float intensity)
   {
     (void)x;
     (void)y;
@@ -101,4 +109,11 @@ TEST(datacontainerbase, row_step_one_width_after_setup)
   ASSERT_EQ(cont.getCloudWidth(), 1U);
   ASSERT_EQ(cont.getCloudPointStep(), 4U);
   ASSERT_EQ(cont.getCloudRowStep(), 4U);
+}
+
+// Run all the tests that were declared with TEST()
+int main(int argc, char ** argv)
+{
+  testing::InitGoogleTest(&argc, argv);
+  return RUN_ALL_TESTS();
 }

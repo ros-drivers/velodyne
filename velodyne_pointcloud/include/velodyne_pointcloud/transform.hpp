@@ -30,8 +30,8 @@
 // ANY WAY OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE
 // POSSIBILITY OF SUCH DAMAGE.
 
-#ifndef VELODYNE_POINTCLOUD_TRANSFORM_H
-#define VELODYNE_POINTCLOUD_TRANSFORM_H
+#ifndef VELODYNE_POINTCLOUD__TRANSFORM_HPP_
+#define VELODYNE_POINTCLOUD__TRANSFORM_HPP_
 
 #include <rclcpp/rclcpp.hpp>
 #include <diagnostic_updater/diagnostic_updater.hpp>
@@ -41,25 +41,26 @@
 #include <tf2_ros/buffer.h>
 #include <tf2_ros/message_filter.h>
 #include <tf2_ros/transform_listener.h>
+#include <velodyne_msgs/msg/velodyne_scan.hpp>
 
 #include <memory>
 #include <string>
 
-#include <velodyne_msgs/msg/velodyne_scan.hpp>
 #include "velodyne_pointcloud/rawdata.hpp"
 #include "velodyne_pointcloud/pointcloudXYZIR.hpp"
 
 namespace velodyne_pointcloud
 {
-class Transform final : public rclcpp::Node
+class Transform final
+  : public rclcpp::Node
 {
 public:
-  explicit Transform(const rclcpp::NodeOptions& options);
+  explicit Transform(const rclcpp::NodeOptions & options);
   ~Transform() {}
   Transform(Transform && c) = delete;
-  Transform &operator=(Transform && c) = delete;
+  Transform & operator=(Transform && c) = delete;
   Transform(const Transform & c) = delete;
-  Transform &operator=(const Transform & c) = delete;
+  Transform & operator=(const Transform & c) = delete;
 
 private:
   void processScan(const std::shared_ptr<const velodyne_msgs::msg::VelodyneScan> & scanMsg);
@@ -73,11 +74,11 @@ private:
   std::unique_ptr<velodyne_rawdata::DataContainerBase> container_ptr_;
 
   // diagnostics updater
-  //diagnostic_updater::Updater diagnostics_;
+  diagnostic_updater::Updater diagnostics_;
   double diag_min_freq_;
   double diag_max_freq_;
-  //std::shared_ptr<diagnostic_updater::TopicDiagnostic> diag_topic_;
+  std::shared_ptr<diagnostic_updater::TopicDiagnostic> diag_topic_;
 };
 }  // namespace velodyne_pointcloud
 
-#endif  // VELODYNE_POINTCLOUD_TRANSFORM_H
+#endif  // VELODYNE_POINTCLOUD__TRANSFORM_HPP_

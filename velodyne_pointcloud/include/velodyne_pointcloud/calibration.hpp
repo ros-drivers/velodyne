@@ -30,8 +30,8 @@
 // ANY WAY OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE
 // POSSIBILITY OF SUCH DAMAGE.
 
-#ifndef VELODYNE_POINTCLOUD_CALIBRATION_H
-#define VELODYNE_POINTCLOUD_CALIBRATION_H
+#ifndef VELODYNE_POINTCLOUD__CALIBRATION_HPP_
+#define VELODYNE_POINTCLOUD__CALIBRATION_HPP_
 
 #include <map>
 #include <string>
@@ -78,7 +78,7 @@ struct LaserCorrection
 class Calibration final
 {
 public:
-  explicit Calibration(const std::string& calibration_file);
+  explicit Calibration(const std::string & calibration_file);
 
   float distance_resolution_m;
   std::vector<LaserCorrection> laser_corrections;
@@ -87,4 +87,4 @@ public:
 
 }  // namespace velodyne_pointcloud
 
-#endif  // VELODYNE_POINTCLOUD_CALIBRATION_H
+#endif  // VELODYNE_POINTCLOUD__CALIBRATION_HPP_

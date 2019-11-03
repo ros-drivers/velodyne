@@ -30,51 +30,54 @@
 // ANY WAY OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE
 // POSSIBILITY OF SUCH DAMAGE.
 
-#ifndef VELODYNE_POINTCLOUD_DATACONTAINERBASE_H
-#define VELODYNE_POINTCLOUD_DATACONTAINERBASE_H
+#ifndef VELODYNE_POINTCLOUD__DATACONTAINERBASE_HPP_
+#define VELODYNE_POINTCLOUD__DATACONTAINERBASE_HPP_
 
 #include <rclcpp/time.hpp>
-#include <sensor_msgs/point_cloud2_iterator.hpp>
 #include <sensor_msgs/msg/point_cloud2.hpp>
-#include <tf2/buffer_core.h>
-#include <tf2/exceptions.h>
+#include <sensor_msgs/point_cloud2_iterator.hpp>
 #include <tf2/LinearMath/Quaternion.h>
 #include <tf2/LinearMath/Vector3.h>
-
-#include <cstdint>
-#include <memory>
-#include <string>
+#include <tf2/buffer_core.h>
+#include <tf2/exceptions.h>
+#include <velodyne_msgs/msg/velodyne_scan.hpp>
 
 #include <Eigen/Core>
 #include <Eigen/Geometry>
 
-#include <velodyne_msgs/msg/velodyne_scan.hpp>
+#include <algorithm>
+#include <cstdint>
+#include <memory>
+#include <string>
 
 namespace velodyne_rawdata
 {
 class DataContainerBase
 {
 public:
-  explicit DataContainerBase(const double min_range, const double max_range, const std::string& target_frame,
-                             const std::string& fixed_frame, const unsigned int init_width, const unsigned int init_height,
-                             const bool is_dense, const unsigned int scans_per_packet,
-                             tf2::BufferCore & buffer, int fields, ...)
-    : config_(min_range, max_range, target_frame, fixed_frame, init_width, init_height, is_dense, scans_per_packet)
-    , tf_buffer_(buffer)
+  explicit DataContainerBase(
+    const double min_range, const double max_range, const std::string& target_frame,
+    const std::string& fixed_frame, const unsigned int init_width, const unsigned int init_height,
+    const bool is_dense, const unsigned int scans_per_packet,
+    tf2::BufferCore & buffer, int fields, ...)
+    : config_(min_range, max_range, target_frame, fixed_frame,
+        init_width, init_height, is_dense, scans_per_packet),
+      tf_buffer_(buffer)
   {
     va_list vl;
     cloud.fields.clear();
     cloud.fields.reserve(fields);
     va_start(vl, fields);
     int offset = 0;
-    for (int i = 0; i < fields; ++i)
-      {
-        // Create the corresponding PointField
-        std::string name(va_arg(vl, char*));
-        int count(va_arg(vl, int));
-        int datatype(va_arg(vl, int));
-        offset = addPointField(cloud, name, count, datatype, offset);
-      }
+
+    for (int i = 0; i < fields; ++i) {
+      // Create the corresponding PointField
+      std::string name(va_arg(vl, char*));
+      int count(va_arg(vl, int));
+      int datatype(va_arg(vl, int));
+      offset = addPointField(cloud, name, count, datatype, offset);
+    }
+
     va_end(vl);
     cloud.point_step = offset;
     cloud.width = config_.init_width;
@@ -95,23 +98,20 @@ public:
     unsigned int scans_per_packet;
     bool transform;  ///< enable / disable transform points
 
-    explicit Config(double min_range, double max_range, const std::string& target_frame, const std::string& fixed_frame,
-                    unsigned int init_width, unsigned int init_height, bool is_dense, unsigned int scans_per_packet)
-      : min_range(min_range)
-      , max_range(max_range)
-      , target_frame(target_frame)
-      , fixed_frame(fixed_frame)
-      , init_width(init_width)
-      , init_height(init_height)
-      , is_dense(is_dense)
-      , scans_per_packet(scans_per_packet)
-      , transform(fixed_frame != target_frame)
+    explicit Config(
+      double min_range, double max_range, const std::string& target_frame,
+      const std::string& fixed_frame, unsigned int init_width,
+      unsigned int init_height, bool is_dense, unsigned int scans_per_packet)
+      : min_range(min_range),
+        max_range(max_range),
+        target_frame(target_frame),
+        fixed_frame(fixed_frame),
+        init_width(init_width),
+        init_height(init_height),
+        is_dense(is_dense),
+        scans_per_packet(scans_per_packet),
+        transform(fixed_frame != target_frame)
     {
-      // ROS_INFO_STREAM("Initialized container with "
-      //                 << "min_range: " << min_range << ", max_range: " << max_range
-      //                 << ", target_frame: " << target_frame << ", fixed_frame: " << fixed_frame
-      //                 << ", init_with: " << init_width << ", init_height: " << init_height << ", is_dense: " << is_dense
-      //                 << ", scans_per_packet: " << scans_per_packet);
     }
   };
 
@@ -119,36 +119,28 @@ public:
   {
     cloud.header = scan_msg->header;
     cloud.data.resize(scan_msg->packets.size() * config_.scans_per_packet * cloud.point_step);
-    if (config_.transform)
-      {
-        if (!computeTransformation(scan_msg->header.stamp))
-          {
-            //ROS_ERROR_STREAM("Could not transform points!");
-          }
-      }
   }
 
-  virtual void addPoint(float x, float y, float z, const uint16_t ring, const uint16_t azimuth, const float distance,
-                        const float intensity) = 0;
+  virtual void addPoint(
+    float x, float y, float z, const uint16_t ring, const uint16_t azimuth, const float distance,
+    const float intensity) = 0;
   virtual void newLine() = 0;
 
-  const sensor_msgs::msg::PointCloud2& finishCloud()
+  const sensor_msgs::msg::PointCloud2 & finishCloud()
   {
     cloud.data.resize(cloud.point_step * cloud.width * cloud.height);
     // If config_.target_frame is empty (the default), we use the frame_id that
     // came in during the initial VelodyneScan (set by setup()).  If it is
     // set to something, then we override that value.
-    if (!config_.target_frame.empty())
-      {
-        cloud.header.frame_id = config_.target_frame;
-      }
-    // ROS_DEBUG_STREAM("Prepared cloud width" << cloud.height * cloud.width
-    //                                         << " Velodyne points, time: " << cloud.header.stamp);
+    if (!config_.target_frame.empty()) {
+      cloud.header.frame_id = config_.target_frame;
+    }
     return cloud;
   }
 
-  void configure(const double min_range, const double max_range, const std::string & fixed_frame,
-                 const std::string & target_frame)
+  void configure(
+    const double min_range, const double max_range, const std::string & fixed_frame,
+    const std::string & target_frame)
   {
     config_.min_range = min_range;
     config_.max_range = max_range;
@@ -161,45 +153,45 @@ public:
 protected:
   sensor_msgs::msg::PointCloud2 cloud;
 
-  inline void vectorTfToEigen(tf2::Vector3& tf_vec, Eigen::Vector3f& eigen_vec)
+  inline void vectorTfToEigen(tf2::Vector3 & tf_vec, Eigen::Vector3f & eigen_vec)
   {
     eigen_vec(0) = tf_vec[0];
     eigen_vec(1) = tf_vec[1];
     eigen_vec(2) = tf_vec[2];
   }
 
-  inline bool computeTransformation(const rclcpp::Time& time)
+  inline bool computeTransformation(const rclcpp::Time & time)
   {
     geometry_msgs::msg::TransformStamped transform;
-    try
-      {
-        const std::chrono::nanoseconds dur(time.nanoseconds());
-        std::chrono::time_point<std::chrono::system_clock, std::chrono::nanoseconds> time(dur);
-        transform = tf_buffer_.lookupTransform(config_.target_frame, cloud.header.frame_id, time);
-      }
-    catch (tf2::LookupException& e)
-      {
-        //ROS_ERROR("%s", e.what());
-        return false;
-      }
-    catch (tf2::ExtrapolationException& e)
-      {
-        //ROS_ERROR("%s", e.what());
-        return false;
-      }
+    try {
+      const std::chrono::nanoseconds dur(time.nanoseconds());
+      std::chrono::time_point<std::chrono::system_clock, std::chrono::nanoseconds> time(dur);
+      transform = tf_buffer_.lookupTransform(config_.target_frame, cloud.header.frame_id, time);
+    } catch (tf2::LookupException& e) {
+      return false;
+    } catch (tf2::ExtrapolationException& e) {
+      return false;
+    }
 
-    tf2::Quaternion quaternion(transform.transform.rotation.x, transform.transform.rotation.y, transform.transform.rotation.z, transform.transform.rotation.w);
+    tf2::Quaternion quaternion(
+      transform.transform.rotation.x,
+      transform.transform.rotation.y,
+      transform.transform.rotation.z,
+      transform.transform.rotation.w);
     Eigen::Quaternionf rotation(quaternion.w(), quaternion.x(), quaternion.y(), quaternion.z());
 
     Eigen::Vector3f eigen_origin;
-    tf2::Vector3 origin(transform.transform.translation.x, transform.transform.translation.y, transform.transform.translation.z);
+    tf2::Vector3 origin(
+      transform.transform.translation.x,
+      transform.transform.translation.y,
+      transform.transform.translation.z);
     vectorTfToEigen(origin, eigen_origin);
     Eigen::Translation3f translation(eigen_origin);
     transformation = translation * rotation;
     return true;
   }
 
-  inline void transformPoint(float& x, float& y, float& z)
+  inline void transformPoint(float & x, float & y, float & z)
   {
     Eigen::Vector3f p = transformation * Eigen::Vector3f(x, y, z);
     x = p.x();
@@ -211,10 +203,11 @@ protected:
   {
     return (range >= config_.min_range && range <= config_.max_range);
   }
+
   Config config_;
   tf2::BufferCore & tf_buffer_;
   Eigen::Affine3f transformation;
 };
 }  // namespace velodyne_rawdata
 
-#endif  // VELODYNE_POINTCLOUD_DATACONTAINERBASE_H
+#endif  // VELODYNE_POINTCLOUD__DATACONTAINERBASE_HPP_

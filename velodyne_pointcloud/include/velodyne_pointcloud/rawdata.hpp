@@ -30,17 +30,17 @@
 // ANY WAY OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE
 // POSSIBILITY OF SUCH DAMAGE.
 
-#ifndef VELODYNE_POINTCLOUD_RAWDATA_H
-#define VELODYNE_POINTCLOUD_RAWDATA_H
+#ifndef VELODYNE_POINTCLOUD__RAWDATA_HPP_
+#define VELODYNE_POINTCLOUD__RAWDATA_HPP_
+
+#include <pcl/point_cloud.h>
 
 #include <rclcpp/rclcpp.hpp>
+#include <velodyne_msgs/msg/velodyne_packet.hpp>
 
 #include <memory>
 #include <string>
 
-#include <pcl/point_cloud.h>
-
-#include <velodyne_msgs/msg/velodyne_packet.hpp>
 #include "velodyne_pointcloud/calibration.hpp"
 #include "velodyne_pointcloud/datacontainerbase.hpp"
 
@@ -124,9 +124,8 @@ class RawData final
 {
 public:
   explicit RawData(const std::string & calibration_file);
-  ~RawData();
 
-  void unpack(const velodyne_msgs::msg::VelodynePacket &pkt, DataContainerBase& data);
+  void unpack(const velodyne_msgs::msg::VelodynePacket & pkt, DataContainerBase & data);
 
   void setParameters(double min_range, double max_range, double view_direction, double view_width);
 
@@ -154,9 +153,9 @@ private:
   float cos_rot_table_[ROTATION_MAX_UNITS];
 
   /** add private function to handle the VLP16 **/
-  void unpack_vlp16(const velodyne_msgs::msg::VelodynePacket &pkt, DataContainerBase& data);
+  void unpack_vlp16(const velodyne_msgs::msg::VelodynePacket & pkt, DataContainerBase & data);
 };
 
 }  // namespace velodyne_rawdata
 
-#endif  // VELODYNE_POINTCLOUD_RAWDATA_H
+#endif  // VELODYNE_POINTCLOUD__RAWDATA_HPP_
