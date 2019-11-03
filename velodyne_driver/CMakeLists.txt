@@ -12,7 +12,7 @@ endif()
 
 find_package(ament_cmake_ros REQUIRED)
 find_package(diagnostic_msgs REQUIRED)
-#find_package(diagnostic_updater REQUIRED)
+find_package(diagnostic_updater REQUIRED)
 find_package(rclcpp REQUIRED)
 find_package(rclcpp_components REQUIRED)
 find_package(tf2_ros REQUIRED)
@@ -30,6 +30,7 @@ add_subdirectory(src/lib)
 add_library(velodyne_driver SHARED src/driver/driver.cpp)
 ament_target_dependencies(velodyne_driver
   diagnostic_msgs
+  diagnostic_updater
   rclcpp
   rclcpp_components
   tf2_ros
@@ -65,7 +66,7 @@ install(PROGRAMS src/vdump
   DESTINATION lib/${PROJECT_NAME})
 
 
-if (BUILD_TESTING)
+if(BUILD_TESTING)
   find_package(ament_lint_auto REQUIRED)
   ament_lint_auto_find_test_dependencies()
 

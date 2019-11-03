@@ -30,12 +30,13 @@
 // ANY WAY OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE
 // POSSIBILITY OF SUCH DAMAGE.
 
+#include <gtest/gtest.h>
+
 #include <cmath>
 #include <memory>
 
-#include "velodyne_driver/time_conversion.hpp"
 #include <rclcpp/rclcpp.hpp>
-#include <gtest/gtest.h>
+#include "velodyne_driver/time_conversion.hpp"
 
 TEST(TimeConversion, BytesToTimestamp)
 {

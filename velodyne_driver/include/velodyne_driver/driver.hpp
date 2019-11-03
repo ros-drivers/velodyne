@@ -1,4 +1,4 @@
-// Copyright (C) 2012 Austin Robot Technology, Jack O'Quin
+// Copyright (C) 2012, 2019 Austin Robot Technology, Jack O'Quin, AutonomouStuff
 // All rights reserved.
 //
 // Software License Agreement (BSD License 2.0)
@@ -7,15 +7,15 @@
 // modification, are permitted provided that the following conditions
 // are met:
 //
-//  * Redistributions of source code must retain the above copyright
-//    notice, this list of conditions and the following disclaimer.
-//  * Redistributions in binary form must reproduce the above
-//    copyright notice, this list of conditions and the following
-//    disclaimer in the documentation and/or other materials provided
-//    with the distribution.
-//  * Neither the name of {copyright_holder} nor the names of its
-//    contributors may be used to endorse or promote products derived
-//    from this software without specific prior written permission.
+// * Redistributions of source code must retain the above copyright
+//   notice, this list of conditions and the following disclaimer.
+// * Redistributions in binary form must reproduce the above
+//   copyright notice, this list of conditions and the following
+//   disclaimer in the documentation and/or other materials provided
+//   with the distribution.
+// * Neither the name of {copyright_holder} nor the names of its
+//   contributors may be used to endorse or promote products derived
+//   from this software without specific prior written permission.
 //
 // THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS
 // "AS IS" AND ANY EXPRESS OR IMPLIED WARRANTIES, INCLUDING, BUT NOT
@@ -33,14 +33,14 @@
 #ifndef VELODYNE_DRIVER__DRIVER_HPP_
 #define VELODYNE_DRIVER__DRIVER_HPP_
 
+#include <rclcpp/rclcpp.hpp>
+
 #include <future>
 #include <memory>
 #include <string>
 
-#include <rclcpp/rclcpp.hpp>
-
-//#include <diagnostic_updater/diagnostic_updater.hpp>
-//#include <diagnostic_updater/publisher.hpp>
+#include <diagnostic_updater/diagnostic_updater.hpp>
+#include <diagnostic_updater/publisher.hpp>
 
 #include "velodyne_driver/input.hpp"
 
@@ -62,9 +62,6 @@ private:
 
   void pollThread(void);
 
-  // Callback for diagnostics update for lost communication with vlp
-  void diagTimerCallback();
-
   // configuration parameters
   struct
   {
@@ -83,11 +80,10 @@ private:
   int last_azimuth_;
 
   /* diagnostics updater */
-  rclcpp::TimerBase::SharedPtr diag_timer_;
-  //diagnostic_updater::Updater diagnostics_;
+  diagnostic_updater::Updater diagnostics_;
   double diag_min_freq_;
   double diag_max_freq_;
-  //std::shared_ptr<diagnostic_updater::TopicDiagnostic> diag_topic_;
+  std::shared_ptr<diagnostic_updater::TopicDiagnostic> diag_topic_;
 
   // We use this future/promise pair to notify threads that we are shutting down
   std::shared_future<void> future_;
