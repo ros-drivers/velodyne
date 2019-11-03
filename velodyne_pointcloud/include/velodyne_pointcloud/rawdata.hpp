@@ -42,16 +42,16 @@
 #ifndef VELODYNE_POINTCLOUD_RAWDATA_H
 #define VELODYNE_POINTCLOUD_RAWDATA_H
 
+#include <rclcpp/rclcpp.hpp>
+
 #include <memory>
 #include <string>
-
-#include <rclcpp/rclcpp.hpp>
 
 #include <pcl/point_cloud.h>
 
 #include <velodyne_msgs/msg/velodyne_packet.hpp>
-#include <velodyne_pointcloud/calibration.h>
-#include <velodyne_pointcloud/datacontainerbase.h>
+#include "velodyne_pointcloud/calibration.hpp"
+#include "velodyne_pointcloud/datacontainerbase.hpp"
 
 namespace velodyne_rawdata
 {

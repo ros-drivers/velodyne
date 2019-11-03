@@ -34,7 +34,7 @@
 
 #include <tf2/buffer_core.h>
 
-#include "velodyne_pointcloud/datacontainerbase.h"
+#include "velodyne_pointcloud/datacontainerbase.hpp"
 
 class TestContainer final : public velodyne_rawdata::DataContainerBase
 {

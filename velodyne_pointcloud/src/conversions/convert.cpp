@@ -9,38 +9,33 @@
 
 /** @file
 
-    This class transforms raw Velodyne 3D LIDAR packets to PointCloud2
-    in the /map frame of reference.
-
-    @author Jack O'Quin
-    @author Jesse Vera
-    @author Sebastian Pütz
+    This class converts raw Velodyne 3D LIDAR packets to PointCloud2.
 
 */
+
+#include <velodyne_pointcloud/convert.hpp>
+
+#include <rclcpp/rclcpp.hpp>
+#include <rcl_interfaces/msg/floating_point_range.hpp>
+#include <rcl_interfaces/msg/parameter_descriptor.hpp>
+#include <rclcpp_components/register_node_macro.hpp>
 
 #include <cmath>
 #include <functional>
 #include <memory>
 
-#include <rcl_interfaces/msg/floating_point_range.hpp>
-#include <rcl_interfaces/msg/parameter_descriptor.hpp>
-#include <rclcpp/rclcpp.hpp>
-#include <rclcpp_components/register_node_macro.hpp>
-#include <tf2_ros/message_filter.h>
-#include <tf2_ros/transform_listener.h>
-
-#include <velodyne_pointcloud/organized_cloudXYZIR.h>
-#include <velodyne_pointcloud/pointcloudXYZIR.h>
-#include <velodyne_pointcloud/rawdata.h>
-#include "velodyne_pointcloud/transform.h"
+#include "velodyne_msgs/msg/velodyne_scan.hpp"
+#include "velodyne_pointcloud/organized_cloudXYZIR.hpp"
+#include "velodyne_pointcloud/pointcloudXYZIR.hpp"
+#include "velodyne_pointcloud/rawdata.hpp"
 
 namespace velodyne_pointcloud
 {
   /** @brief Constructor. */
-  Transform::Transform(const rclcpp::NodeOptions& options) :
-    rclcpp::Node("velodyne_transform_node", options),
-    velodyne_scan_(this, "velodyne_packets"), tf_buffer_(this->get_clock())
+  Convert::Convert(const rclcpp::NodeOptions& options) : rclcpp::Node("velodyne_convert_node", options),
+    tf_buffer_(this->get_clock())
   {
+    // get path to angles.config file for this device
     std::string calibrationFile = this->declare_parameter("calibration", "");
 
     rcl_interfaces::msg::ParameterDescriptor min_range_desc;
@@ -83,9 +78,10 @@ namespace velodyne_pointcloud
     view_width_desc.floating_point_range.push_back(view_width_range);
     double view_width = this->declare_parameter("view_width", 2.0*M_PI, view_width_desc);
 
-    std::string target_frame = this->declare_parameter("frame_id", "map");
-    std::string fixed_frame = this->declare_parameter("fixed_frame", "odom");
     bool organize_cloud = this->declare_parameter("organize_cloud", true);
+
+    std::string target_frame = this->declare_parameter("target_frame", "");
+    std::string fixed_frame = this->declare_parameter("fixed_frame", "");
 
     RCLCPP_INFO(this->get_logger(), "correction angles: %s", calibrationFile.c_str());
 
@@ -94,56 +90,53 @@ namespace velodyne_pointcloud
     if (organize_cloud)
       {
         container_ptr_ = std::unique_ptr<OrganizedCloudXYZIR>(
-          new OrganizedCloudXYZIR(min_range, max_range, target_frame, fixed_frame,
-                                  data_->numLasers(), data_->scansPerPacket(), tf_buffer_));
+          new OrganizedCloudXYZIR(min_range, max_range,
+            target_frame, fixed_frame,
+            data_->numLasers(), data_->scansPerPacket(), tf_buffer_));
       }
     else
       {
         container_ptr_ = std::unique_ptr<PointcloudXYZIR>(
           new PointcloudXYZIR(min_range, max_range,
-                              target_frame, fixed_frame,
-                              data_->scansPerPacket(), tf_buffer_));
+            target_frame, fixed_frame,
+            data_->scansPerPacket(), tf_buffer_));
       }
 
     // advertise output point cloud (before subscribing to input data)
-    output_ = this->create_publisher<sensor_msgs::msg::PointCloud2>("velodyne_points", 10);
+    output_ =
+      this->create_publisher<sensor_msgs::msg::PointCloud2>("velodyne_points", 10);
 
-    // subscribe to VelodyneScan packets using transform filter
-    tf_filter_ = std::make_unique<tf2_ros::MessageFilter<velodyne_msgs::msg::VelodyneScan>>(velodyne_scan_, tf_buffer_, target_frame, 10, this->get_node_logging_interface(), this->get_node_clock_interface());
-    tf_filter_->registerCallback(std::bind(&Transform::processScan, this, std::placeholders::_1));
+    // subscribe to VelodyneScan packets
+    velodyne_scan_ =
+      this->create_subscription<velodyne_msgs::msg::VelodyneScan>("velodyne_packets", rclcpp::QoS(10),
+                                                                  std::bind(&Convert::processScan, this, std::placeholders::_1));
 
     // Diagnostics
-    //diagnostics_.setHardwareID("Velodyne Transform");
+    //diagnostics_.setHardwareID("Velodyne Convert");
     // Arbitrary frequencies since we don't know which RPM is used, and are only
     // concerned about monitoring the frequency.
     diag_min_freq_ = 2.0;
     diag_max_freq_ = 20.0;
     // using namespace diagnostic_updater;
     // diag_topic_.reset(new TopicDiagnostic("velodyne_points", diagnostics_,
-    //                                       FrequencyStatusParam(&diag_min_freq_,
-    //                                                            &diag_max_freq_,
-    //                                                            0.1, 10),
-    //                                       TimeStampStatusParam()));
+    //                                    FrequencyStatusParam(&diag_min_freq_,
+    //                                                         &diag_max_freq_,
+    //                                                         0.1, 10),
+    //                                    TimeStampStatusParam()));
 
     data_->setParameters(min_range, max_range, view_direction, view_width);
     container_ptr_->configure(min_range, max_range, target_frame, fixed_frame);
   }
 
-  /** @brief Callback for raw scan messages.
-   *
-   *  @pre TF message filter has already waited until the transform to
-   *       the configured @c frame_id can succeed.
-   */
-  void
-    Transform::processScan(const std::shared_ptr<const velodyne_msgs::msg::VelodyneScan> & scanMsg)
+  /** @brief Callback for raw scan messages. */
+  void Convert::processScan(const velodyne_msgs::msg::VelodyneScan::SharedPtr scanMsg)
   {
-    if (output_->get_subscription_count() == 0 && output_->get_intra_process_subscription_count() == 0)    // no one listening?
-      {
-        return;                                     // avoid much work
-      }
-
-    velodyne_msgs::msg::VelodyneScan* raw = const_cast<velodyne_msgs::msg::VelodyneScan*>(scanMsg.get());
-    container_ptr_->setup(std::shared_ptr<velodyne_msgs::msg::VelodyneScan>(raw));
+    if (output_->get_subscription_count() == 0 && output_->get_intra_process_subscription_count() == 0)   // no one listening?
+    {
+      return;                                     // avoid much work
+    }
+    // allocate a point cloud with same time and frame ID as raw data
+    container_ptr_->setup(scanMsg);
 
     // process each packet provided by the driver
     for (size_t i = 0; i < scanMsg->packets.size(); ++i)
@@ -152,11 +145,11 @@ namespace velodyne_pointcloud
       }
 
     // publish the accumulated cloud message
-    output_->publish(container_ptr_->finishCloud());
     //diag_topic_->tick(scanMsg->header.stamp);
     //diagnostics_.update();
+    output_->publish(container_ptr_->finishCloud());
   }
 
 } // namespace velodyne_pointcloud
 
-RCLCPP_COMPONENTS_REGISTER_NODE(velodyne_pointcloud::Transform)
+RCLCPP_COMPONENTS_REGISTER_NODE(velodyne_pointcloud::Convert)

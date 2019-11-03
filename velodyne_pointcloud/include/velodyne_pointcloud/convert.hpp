@@ -39,18 +39,18 @@
 #ifndef VELODYNE_POINTCLOUD_CONVERT_H
 #define VELODYNE_POINTCLOUD_CONVERT_H
 
-#include <memory>
-#include <string>
-
-//#include <diagnostic_updater/diagnostic_updater.hpp>
-//#include <diagnostic_updater/publisher.hpp>
 #include <rclcpp/rclcpp.hpp>
+#include <diagnostic_updater/diagnostic_updater.hpp>
+#include <diagnostic_updater/publisher.hpp>
 #include <sensor_msgs/msg/point_cloud2.hpp>
 #include <tf2_ros/buffer.h>
 
+#include <memory>
+#include <string>
+
 #include <velodyne_msgs/msg/velodyne_scan.hpp>
-#include <velodyne_pointcloud/rawdata.h>
-#include <velodyne_pointcloud/pointcloudXYZIR.h>
+#include "velodyne_pointcloud/rawdata.hpp"
+#include "velodyne_pointcloud/pointcloudXYZIR.hpp"
 
 namespace velodyne_pointcloud
 {

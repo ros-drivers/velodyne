@@ -33,13 +33,6 @@
 #ifndef VELODYNE_POINTCLOUD_DATACONTAINERBASE_H
 #define VELODYNE_POINTCLOUD_DATACONTAINERBASE_H
 
-#include <cstdint>
-#include <memory>
-#include <string>
-
-#include <Eigen/Core>
-#include <Eigen/Geometry>
-
 #include <rclcpp/time.hpp>
 #include <sensor_msgs/point_cloud2_iterator.hpp>
 #include <sensor_msgs/msg/point_cloud2.hpp>
@@ -47,6 +40,13 @@
 #include <tf2/exceptions.h>
 #include <tf2/LinearMath/Quaternion.h>
 #include <tf2/LinearMath/Vector3.h>
+
+#include <cstdint>
+#include <memory>
+#include <string>
+
+#include <Eigen/Core>
+#include <Eigen/Geometry>
 
 #include <velodyne_msgs/msg/velodyne_scan.hpp>
 

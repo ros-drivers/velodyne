@@ -19,10 +19,10 @@
   <buildtool_depend>ament_cmake</buildtool_depend>
 
   <depend>angles</depend>
-  <!-- <depend>diagnostic_updater</depend> -->
+  <depend>diagnostic_updater</depend>
   <depend>geometry_msgs</depend>
-  <depend>message_filters</depend>
   <depend>libpcl-all-dev</depend>
+  <depend>message_filters</depend>
   <depend>rclcpp</depend>
   <depend>rclcpp_components</depend>
   <depend>sensor_msgs</depend>

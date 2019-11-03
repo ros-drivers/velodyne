@@ -11,14 +11,14 @@
 
 */
 
-#include <memory>
-
 #include <rclcpp/rclcpp.hpp>
 
-#include "velodyne_pointcloud/convert.h"
+#include <memory>
+
+#include "velodyne_pointcloud/convert.hpp"
 
 /** Main node entry point. */
-int main(int argc, char **argv)
+int main(int argc, char ** argv)
 {
   // Force flush of the stdout buffer.
   setvbuf(stdout, nullptr, _IONBF, BUFSIZ);
@@ -26,7 +26,9 @@ int main(int argc, char **argv)
   rclcpp::init(argc, argv);
 
   // handle callbacks until shut down
-  rclcpp::spin(std::make_shared<velodyne_pointcloud::Convert>(rclcpp::NodeOptions()));
+  rclcpp::spin(
+    std::make_shared<velodyne_pointcloud::Convert>(
+      rclcpp::NodeOptions()));
 
   rclcpp::shutdown();
 

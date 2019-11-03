@@ -1,4 +1,6 @@
-add_library(velodyne_rawdata SHARED rawdata.cc calibration.cc)
+add_library(velodyne_rawdata SHARED
+  rawdata.cpp
+  calibration.cpp)
 ament_target_dependencies(velodyne_rawdata
   angles
   geometry_msgs

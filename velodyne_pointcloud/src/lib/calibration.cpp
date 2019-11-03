@@ -22,6 +22,7 @@
 #include <yaml-cpp/yaml.h>
 
 #ifdef HAVE_NEW_YAMLCPP
+
 namespace YAML
 {
   // The >> operator disappeared in yaml-cpp 0.5, so this function is
@@ -31,11 +32,12 @@ namespace YAML
   {
     i = node.as<T>();
   }
-} /* YAML */
-#endif // HAVE_NEW_YAMLCPP
+}  // namespace YAML
+
+#endif  // HAVE_NEW_YAMLCPP
 
 #include <rclcpp/rclcpp.hpp>
-#include <velodyne_pointcloud/calibration.h>
+#include "velodyne_pointcloud/calibration.hpp"
 
 namespace velodyne_pointcloud
 {

@@ -31,8 +31,8 @@
 #include <angles/angles.h>
 
 #include <velodyne_msgs/msg/velodyne_packet.hpp>
-#include <velodyne_pointcloud/datacontainerbase.h>
-#include <velodyne_pointcloud/rawdata.h>
+#include "velodyne_pointcloud/datacontainerbase.hpp"
+#include "velodyne_pointcloud/rawdata.hpp"
 
 namespace velodyne_rawdata
 {
