@@ -44,7 +44,7 @@
 #include <sensor_msgs/msg/point_field.hpp>
 #include <sensor_msgs/point_cloud2_iterator.hpp>
 
-#include "velodyne_laserscan/velodyne_laserscan.h"
+#include "velodyne_laserscan/velodyne_laserscan.hpp"
 
 namespace velodyne_laserscan
 {

@@ -32,7 +32,7 @@
 
 #include <rclcpp/rclcpp.hpp>
 
-#include "velodyne_laserscan/velodyne_laserscan.h"
+#include "velodyne_laserscan/velodyne_laserscan.hpp"
 
 int main(int argc, char** argv)
 {
