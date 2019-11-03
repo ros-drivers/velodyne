@@ -1,4 +1,4 @@
-// Copyright (C) 2012, 2019 Austin Robot Technology, Jack O'Quin, AutonomouStuff
+// Copyright 2012, 2019 Austin Robot Technology, Jack O'Quin, AutonomouStuff
 // All rights reserved.
 //
 // Software License Agreement (BSD License 2.0)
@@ -36,17 +36,21 @@
  */
 
 #include <rclcpp/rclcpp.hpp>
+
+#include <memory>
+
 #include "velodyne_driver/driver.hpp"
 
-int main(int argc, char** argv)
+int main(int argc, char ** argv)
 {
   // Force flush of the stdout buffer.
   setvbuf(stdout, nullptr, _IONBF, BUFSIZ);
 
   rclcpp::init(argc, argv);
 
-  rclcpp::spin(std::make_shared<velodyne_driver::VelodyneDriver>(
-    rclcpp::NodeOptions()));
+  rclcpp::spin(
+    std::make_shared<velodyne_driver::VelodyneDriver>(
+      rclcpp::NodeOptions()));
 
   rclcpp::shutdown();
 

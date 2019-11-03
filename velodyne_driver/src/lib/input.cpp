@@ -1,4 +1,4 @@
-// Copyright (C) 2007, 2009, 2010, 2015, 2019 Austin Robot Technology, Patrick Beeson, Jack O'Quin, AutonomouStuff
+// Copyright 2007, 2009, 2010, 2015, 2019 Austin Robot Technology, Patrick Beeson, Jack O'Quin, AutonomouStuff  // NOLINT
 // All rights reserved.
 //
 // Software License Agreement (BSD License 2.0)
@@ -44,20 +44,21 @@
  *              PCAP dump
  */
 
-#include <unistd.h>
-#include <sys/socket.h>
+#include <velodyne_msgs/msg/velodyne_packet.hpp>
+
 #include <arpa/inet.h>
-#include <poll.h>
 #include <errno.h>
 #include <fcntl.h>
+#include <poll.h>
 #include <sys/file.h>
+#include <sys/socket.h>
+#include <unistd.h>
 
 #include <cmath>
 #include <memory>
 #include <sstream>
 #include <string>
 
-#include <velodyne_msgs/msg/velodyne_packet.hpp>
 #include "velodyne_driver/input.hpp"
 #include "velodyne_driver/time_conversion.hpp"
 
@@ -77,8 +78,8 @@ static const size_t packet_size =
  *  @param devip Device IP address.
  *  @param port UDP port number.
  */
-Input::Input(rclcpp::Node * private_nh, const std::string & devip, uint16_t port):
-  private_nh_(private_nh),
+Input::Input(rclcpp::Node * private_nh, const std::string & devip, uint16_t port)
+: private_nh_(private_nh),
   devip_str_(devip),
   port_(port)
 {
@@ -126,13 +127,14 @@ InputSocket::InputSocket(
   my_addr.sin_port = htons(port);          // port in network byte order
   my_addr.sin_addr.s_addr = INADDR_ANY;    // automatically fill in my IP
 
-  if (::bind(sockfd_, (sockaddr *)&my_addr, sizeof(sockaddr)) == -1) {
+  if (::bind(sockfd_, reinterpret_cast<sockaddr *>(&my_addr), sizeof(sockaddr)) == -1) {
     RCLCPP_ERROR(private_nh->get_logger(), "Error binding to socket: %s", ::strerror(errno));
     return;
   }
 
-  if (::fcntl(sockfd_, F_SETFL, O_NONBLOCK|FASYNC) < 0) {
-    RCLCPP_ERROR(private_nh->get_logger(), "Error settign socket to non-blocking: %s", ::strerror(errno));
+  if (::fcntl(sockfd_, F_SETFL, O_NONBLOCK | FASYNC) < 0) {
+    RCLCPP_ERROR(private_nh->get_logger(),
+      "Error settign socket to non-blocking: %s", ::strerror(errno));
     return;
   }
 
@@ -146,14 +148,14 @@ InputSocket::~InputSocket(void)
 }
 
 /** @brief Get one velodyne packet. */
-int InputSocket::getPacket(velodyne_msgs::msg::VelodynePacket *pkt, const double time_offset)
+int InputSocket::getPacket(velodyne_msgs::msg::VelodynePacket * pkt, const double time_offset)
 {
   rclcpp::Time time1;
 
   struct pollfd fds[1];
   fds[0].fd = sockfd_;
   fds[0].events = POLLIN;
-  static const int POLL_TIMEOUT = 1000; // one second (in msec)
+  static const int POLL_TIMEOUT = 1000;  // one second (in msec)
 
   sockaddr_in sender_address;
   socklen_t sender_address_len = sizeof(sender_address);
@@ -192,9 +194,10 @@ int InputSocket::getPacket(velodyne_msgs::msg::VelodynePacket *pkt, const double
         return -1;
       }
 
-      if ((fds[0].revents & POLLERR)
-          || (fds[0].revents & POLLHUP)
-          || (fds[0].revents & POLLNVAL)) { // device error?
+      if ((fds[0].revents & POLLERR) ||
+        (fds[0].revents & POLLHUP) ||
+        (fds[0].revents & POLLNVAL))  // device error?
+      {
         RCLCPP_ERROR(private_nh_->get_logger(), "poll() reports Velodyne error");
         return -1;
       }
@@ -206,8 +209,8 @@ int InputSocket::getPacket(velodyne_msgs::msg::VelodynePacket *pkt, const double
     // socket using a blocking read.
     ssize_t nbytes = ::recvfrom(
       sockfd_, &pkt->data[0],
-      packet_size,  0,
-      (sockaddr*) &sender_address,
+      packet_size, 0,
+      reinterpret_cast<sockaddr *>(&sender_address),
       &sender_address_len);
 
     if (nbytes < 0) {
@@ -220,15 +223,16 @@ int InputSocket::getPacket(velodyne_msgs::msg::VelodynePacket *pkt, const double
       // if packet is not from the lidar scanner we selected by IP,
       // continue otherwise we are done
       if (!devip_str_.empty() &&
-          sender_address.sin_addr.s_addr != devip_.s_addr) {
+        sender_address.sin_addr.s_addr != devip_.s_addr)
+      {
         continue;
       } else {
-        break; // done
+        break;  // done
       }
     }
 
     RCLCPP_DEBUG(private_nh_->get_logger(),
-        "incomplete Velodyne packet read: " + std::to_string(nbytes) + " bytes");
+      "incomplete Velodyne packet read: " + std::to_string(nbytes) + " bytes");
   }
 
   rclcpp::Time time2 = private_nh_->get_clock()->now();
@@ -246,9 +250,9 @@ int InputSocket::getPacket(velodyne_msgs::msg::VelodynePacket *pkt, const double
   return 0;
 }
 
-////////////////////////////////////////////////////////////////////////
+////////////////////////////////////////////////////////////////
 // InputPCAP class implementation
-////////////////////////////////////////////////////////////////////////
+////////////////////////////////////////////////////////////////
 
 /** @brief constructor
  *
@@ -300,7 +304,7 @@ InputPCAP::InputPCAP(
 
   filter << "udp dst port " << port;
   pcap_compile(pcap_, &pcap_packet_filter_,
-               filter.str().c_str(), 1, PCAP_NETMASK_UNKNOWN);
+    filter.str().c_str(), 1, PCAP_NETMASK_UNKNOWN);
 }
 
 /** destructor */
@@ -310,10 +314,10 @@ InputPCAP::~InputPCAP(void)
 }
 
 /** @brief Get one velodyne packet. */
-int InputPCAP::getPacket(velodyne_msgs::msg::VelodynePacket *pkt, const double time_offset)
+int InputPCAP::getPacket(velodyne_msgs::msg::VelodynePacket * pkt, const double time_offset)
 {
-  struct pcap_pkthdr *header;
-  const u_char *pkt_data;
+  struct pcap_pkthdr * header;
+  const u_char * pkt_data;
 
   while (true) {
     int res;
@@ -322,8 +326,9 @@ int InputPCAP::getPacket(velodyne_msgs::msg::VelodynePacket *pkt, const double t
       // Skip packets not for the correct port and from the
       // selected IP address.
       if (0 == pcap_offline_filter(
-            &pcap_packet_filter_,
-            header, pkt_data)) {
+          &pcap_packet_filter_,
+          header, pkt_data))
+      {
         continue;
       }
 
@@ -332,16 +337,17 @@ int InputPCAP::getPacket(velodyne_msgs::msg::VelodynePacket *pkt, const double t
         packet_rate_.sleep();
       }
 
-      ::memcpy(&pkt->data[0], pkt_data+42, packet_size);
+      ::memcpy(&pkt->data[0], pkt_data + 42, packet_size);
       (void)time_offset;
-      pkt->stamp = private_nh_->get_clock()->now(); // time_offset not considered here, as no synchronization required
+      // time_offset not considered here, as no synchronization required
+      pkt->stamp = private_nh_->get_clock()->now();
       empty_ = false;
       return 0;                   // success
     }
 
     if (empty_) {               // no data in file?
       RCLCPP_WARN(private_nh_->get_logger(), "Error %d reading Velodyne packet: %s",
-                  res, pcap_geterr(pcap_));
+        res, pcap_geterr(pcap_));
       return -1;
     }
 
@@ -352,7 +358,7 @@ int InputPCAP::getPacket(velodyne_msgs::msg::VelodynePacket *pkt, const double t
 
     if (repeat_delay_ > 0.0) {
       RCLCPP_INFO(private_nh_->get_logger(), "end of file reached -- delaying %.3f seconds.",
-                  repeat_delay_);
+        repeat_delay_);
       ::usleep(::rint(repeat_delay_ * 1000000.0));
     }
 
@@ -363,7 +369,7 @@ int InputPCAP::getPacket(velodyne_msgs::msg::VelodynePacket *pkt, const double t
     pcap_close(pcap_);
     pcap_ = pcap_open_offline(filename_.c_str(), errbuf_);
     empty_ = true;              // maybe the file disappeared?
-  } // loop back and try again
+  }  // loop back and try again
 }
 
-} // velodyne namespace
+}  // namespace velodyne_driver

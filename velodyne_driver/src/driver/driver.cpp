@@ -1,4 +1,4 @@
-// Copyright (C) 2007, 2009-2012, 2019 Austin Robot Technology, Patrick Beeson, Jack O'Quin, AutonomouStuff  // NOLINT
+// Copyright 2007, 2009-2012, 2019 Austin Robot Technology, Patrick Beeson, Jack O'Quin, AutonomouStuff  // NOLINT
 // All rights reserved.
 //
 // Software License Agreement (BSD License 2.0)
@@ -40,23 +40,24 @@
 #include <rcl_interfaces/msg/parameter_descriptor.hpp>
 #include <rclcpp_components/register_node_macro.hpp>
 #include <tf2_ros/transform_listener.h>
+#include <velodyne_msgs/msg/velodyne_scan.hpp>
 
 #include <chrono>
 #include <cmath>
 #include <memory>
 #include <string>
+#include <utility>
 
-#include <velodyne_msgs/msg/velodyne_scan.hpp>
 #include "velodyne_driver/driver.hpp"
 
-using namespace std::chrono_literals;
+using namespace std::chrono_literals;  // NOLINT
 
 namespace velodyne_driver
 {
 
-VelodyneDriver::VelodyneDriver(const rclcpp::NodeOptions& options)
-  : rclcpp::Node("velodyne_driver_node", options),
-    diagnostics_(this, 0.2)
+VelodyneDriver::VelodyneDriver(const rclcpp::NodeOptions & options)
+: rclcpp::Node("velodyne_driver_node", options),
+  diagnostics_(this, 0.2)
 {
   std::string devip = this->declare_parameter("device_ip", std::string(""));
   bool gps_time = this->declare_parameter("gps_time", false);
@@ -79,8 +80,8 @@ VelodyneDriver::VelodyneDriver(const rclcpp::NodeOptions& options)
   config_.model = this->declare_parameter("model", std::string("64E"));
   config_.rpm = this->declare_parameter("rpm", 600.0);
   std::string dump_file = this->declare_parameter("pcap", std::string(""));
-  double cut_angle = this->declare_parameter("cut_angle", 2.0*M_PI);
-  int udp_port = this->declare_parameter("port", (int) DATA_PORT_NUMBER);
+  double cut_angle = this->declare_parameter("cut_angle", 2.0 * M_PI);
+  int udp_port = this->declare_parameter("port", static_cast<int>(DATA_PORT_NUMBER));
 
   future_ = exit_signal_.get_future();
 
@@ -88,14 +89,15 @@ VelodyneDriver::VelodyneDriver(const rclcpp::NodeOptions& options)
   double packet_rate;                   // packet frequency (Hz)
   std::string model_full_name;
   if ((config_.model == "64E_S2") ||
-      (config_.model == "64E_S2.1")) {  // generates 1333312 points per second
+    (config_.model == "64E_S2.1"))
+  {                                     // generates 1333312 points per second
     packet_rate = 3472.17;              // 1 packet holds 384 points - 1333312 / 384
     model_full_name = std::string("HDL-") + config_.model;
   } else if (config_.model == "64E") {
     packet_rate = 2600.0;
     model_full_name = std::string("HDL-") + config_.model;
-  } else if (config_.model == "64E_S3") { // generates 2222220 points per second (half for strongest and half for lastest)
-    packet_rate = 5787.03;                // 1 packet holds 384 points - 2222220 / 384
+  } else if (config_.model == "64E_S3") {  // generates 2222220 points per second
+    packet_rate = 5787.03;                 // 1 packet holds 384 points - 2222220 / 384
     model_full_name = std::string("HDL-") + config_.model;
   } else if (config_.model == "32E") {
     packet_rate = 1808.0;
@@ -104,7 +106,7 @@ VelodyneDriver::VelodyneDriver(const rclcpp::NodeOptions& options)
     packet_rate = 1507.0;
     model_full_name = std::string("VLP-") + config_.model;
   } else if (config_.model == "VLP16") {
-    packet_rate = 754;             // 754 Packets/Second for Last or Strongest mode 1508 for dual (VLP-16 User Manual)
+    packet_rate = 754;             // 754 Packets/Second for Last or Strongest mode 1508 for dual
     model_full_name = "VLP-16";
   } else {
     throw std::runtime_error("Unknown Velodyne LIDAR model: " + config_.model);
@@ -122,9 +124,9 @@ VelodyneDriver::VelodyneDriver(const rclcpp::NodeOptions& options)
 
   if (cut_angle < 0.0) {
     RCLCPP_INFO(this->get_logger(), "Cut at specific angle feature deactivated.");
-  } else if (cut_angle <= (2.0*M_PI)) {
+  } else if (cut_angle <= (2.0 * M_PI)) {
     RCLCPP_INFO(this->get_logger(), "Cut at specific angle feature activated. "
-                "Cutting velodyne points always at " + std::to_string(cut_angle) + " rad.");
+      "Cutting velodyne points always at " + std::to_string(cut_angle) + " rad.");
   } else {
     RCLCPP_ERROR(
       this->get_logger(), "cut_angle parameter is out of range."
@@ -134,11 +136,11 @@ VelodyneDriver::VelodyneDriver(const rclcpp::NodeOptions& options)
 
   // Convert cut_angle from radian to one-hundredth degree,
   // which is used in velodyne packets
-  config_.cut_angle = static_cast<int>((cut_angle*360/(2*M_PI))*100);
+  config_.cut_angle = static_cast<int>((cut_angle * 360 / (2 * M_PI)) * 100);
 
   // initialize diagnostics
   diagnostics_.setHardwareID(deviceName);
-  const double diag_freq = packet_rate/config_.npackets;
+  const double diag_freq = packet_rate / config_.npackets;
   diag_max_freq_ = diag_freq;
   diag_min_freq_ = diag_freq;
 
@@ -195,22 +197,28 @@ bool VelodyneDriver::poll(void)
   std::unique_ptr<velodyne_msgs::msg::VelodyneScan> scan =
     std::make_unique<velodyne_msgs::msg::VelodyneScan>();
 
-  if (config_.cut_angle >= 0) { // Cut at specific angle feature enabled
+  if (config_.cut_angle >= 0) {  // Cut at specific angle feature enabled
     scan->packets.reserve(config_.npackets);
     velodyne_msgs::msg::VelodynePacket tmp_packet;
 
-    while(true) {
-      while(true) {
+    while (true) {
+      while (true) {
         int rc = input_->getPacket(&tmp_packet, config_.time_offset);
-        if (rc == 0) break;       // got a full packet?
-        if (rc < 0) return false; // end of file reached?
+        if (rc == 0) {  // got a full packet?
+          break;
+        }
+
+        if (rc < 0) {  // end of file reached?
+          return false;
+        }
       }
 
       scan->packets.push_back(tmp_packet);
 
       // Extract base rotation of first block in packet
-      std::size_t azimuth_data_pos = 100*0+2;
-      int azimuth = *( (uint16_t*) (&tmp_packet.data[azimuth_data_pos]));
+      size_t azimuth_data_pos = 100 * 0 + 2;
+      uint16_t azimuth = tmp_packet.data[azimuth_data_pos] << 8;
+      azimuth |= tmp_packet.data[azimuth_data_pos + 1];
 
       // if first packet in scan, there is no "valid" last_azimuth_
       if (last_azimuth_ == -1) {
@@ -218,17 +226,17 @@ bool VelodyneDriver::poll(void)
         continue;
       }
 
-      if ((last_azimuth_ < config_.cut_angle && config_.cut_angle <= azimuth)
-         || (config_.cut_angle <= azimuth && azimuth < last_azimuth_)
-         || (azimuth < last_azimuth_ && last_azimuth_ < config_.cut_angle))
+      if ((last_azimuth_ < config_.cut_angle && config_.cut_angle <= azimuth) ||
+        (config_.cut_angle <= azimuth && azimuth < last_azimuth_) ||
+        (azimuth < last_azimuth_ && last_azimuth_ < config_.cut_angle))
       {
         last_azimuth_ = azimuth;
-        break; // Cut angle passed, one full revolution collected
+        break;  // Cut angle passed, one full revolution collected
       }
 
       last_azimuth_ = azimuth;
     }
-  } else { // standard behaviour
+  } else {  // standard behaviour
     // Since the velodyne delivers data at a very high rate, keep
     // reading and publishing scans as fast as possible.
     scan->packets.resize(config_.npackets);
@@ -237,8 +245,13 @@ bool VelodyneDriver::poll(void)
       while (true) {
         // keep reading until full packet received
         int rc = input_->getPacket(&scan->packets[i], config_.time_offset);
-        if (rc == 0) break;       // got a full packet?
-        if (rc < 0) return false; // end of file reached?
+        if (rc == 0) {  // got a full packet?
+          break;
+        }
+
+        if (rc < 0) {  // end of file reached?
+          return false;
+        }
       }
     }
   }
@@ -266,6 +279,6 @@ void VelodyneDriver::pollThread()
   } while (status == std::future_status::timeout);
 }
 
-} // namespace velodyne_driver
+}  // namespace velodyne_driver
 
 RCLCPP_COMPONENTS_REGISTER_NODE(velodyne_driver::VelodyneDriver)

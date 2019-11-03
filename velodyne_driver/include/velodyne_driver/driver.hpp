@@ -1,4 +1,4 @@
-// Copyright (C) 2012, 2019 Austin Robot Technology, Jack O'Quin, AutonomouStuff
+// Copyright 2012, 2019 Austin Robot Technology, Jack O'Quin, AutonomouStuff
 // All rights reserved.
 //
 // Software License Agreement (BSD License 2.0)
@@ -34,13 +34,12 @@
 #define VELODYNE_DRIVER__DRIVER_HPP_
 
 #include <rclcpp/rclcpp.hpp>
+#include <diagnostic_updater/diagnostic_updater.hpp>
+#include <diagnostic_updater/publisher.hpp>
 
 #include <future>
 #include <memory>
 #include <string>
-
-#include <diagnostic_updater/diagnostic_updater.hpp>
-#include <diagnostic_updater/publisher.hpp>
 
 #include "velodyne_driver/input.hpp"
 
@@ -49,13 +48,13 @@ namespace velodyne_driver
 
 class VelodyneDriver final : public rclcpp::Node
 {
-public :
-  explicit VelodyneDriver(const rclcpp::NodeOptions& options);
+public:
+  explicit VelodyneDriver(const rclcpp::NodeOptions & options);
   ~VelodyneDriver() override;
   VelodyneDriver(VelodyneDriver && c) = delete;
-  VelodyneDriver &operator=(VelodyneDriver && c) = delete;
+  VelodyneDriver & operator=(VelodyneDriver && c) = delete;
   VelodyneDriver(const VelodyneDriver & c) = delete;
-  VelodyneDriver &operator=(const VelodyneDriver & c) = delete;
+  VelodyneDriver & operator=(const VelodyneDriver & c) = delete;
 
 private:
   bool poll(void);
@@ -67,7 +66,7 @@ private:
   {
     std::string frame_id;            // tf frame ID
     std::string model;               // device model name
-    int    npackets;                 // number of packets to collect
+    int npackets;                    // number of packets to collect
     double rpm;                      // device rotation rate (RPMs)
     int cut_angle;                   // cutting angle in 1/100°
     double time_offset;              // time in seconds added to each velodyne time stamp
