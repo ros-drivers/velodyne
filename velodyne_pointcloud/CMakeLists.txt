@@ -46,9 +46,7 @@ include_directories(include ${PCL_COMMON_INCLUDE_DIRS})
 add_subdirectory(src/lib)
 
 add_library(convert SHARED
-  src/conversions/convert.cpp
-  src/conversions/pointcloudXYZIR.cpp
-  src/conversions/organized_cloudXYZIR.cpp)
+  src/conversions/convert.cpp)
 ament_target_dependencies(convert
   diagnostic_updater
   Eigen3
@@ -58,6 +56,7 @@ ament_target_dependencies(convert
   velodyne_msgs
 )
 target_link_libraries(convert
+  velodyne_cloud_types
   velodyne_rawdata
   ${YAML_CPP_LIBRARIES})
 install(TARGETS convert
@@ -79,9 +78,7 @@ install(TARGETS velodyne_convert_node
 )
 
 add_library(transform SHARED
-  src/conversions/transform.cpp
-  src/conversions/pointcloudXYZIR.cpp
-  src/conversions/organized_cloudXYZIR.cpp)
+  src/conversions/transform.cpp)
 ament_target_dependencies(transform
   diagnostic_updater
   message_filters
@@ -91,6 +88,7 @@ ament_target_dependencies(transform
   tf2_ros
 )
 target_link_libraries(transform
+  velodyne_cloud_types
   velodyne_rawdata
   ${YAML_CPP_LIBRARIES})
 install(TARGETS transform
