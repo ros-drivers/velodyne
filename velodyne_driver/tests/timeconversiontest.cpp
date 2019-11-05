@@ -1,4 +1,4 @@
-// Copyright (C) 2019 Matthew Pitropov, Joshua Whitley
+// Copyright 2019 Matthew Pitropov, Joshua Whitley
 // All rights reserved.
 //
 // Software License Agreement (BSD License 2.0)
@@ -30,12 +30,13 @@
 // ANY WAY OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE
 // POSSIBILITY OF SUCH DAMAGE.
 
+#include <gtest/gtest.h>
+#include <rclcpp/rclcpp.hpp>
+
 #include <cmath>
 #include <memory>
 
 #include "velodyne_driver/time_conversion.hpp"
-#include <rclcpp/rclcpp.hpp>
-#include <gtest/gtest.h>
 
 TEST(TimeConversion, BytesToTimestamp)
 {
@@ -60,7 +61,7 @@ TEST(TimeConversion, BytesToTimestamp)
   ASSERT_NEAR(ros_stamp_converted.nanoseconds(), ros_stamp.nanoseconds(), 2000);
 }
 
-int main(int argc, char **argv)
+int main(int argc, char ** argv)
 {
   ::testing::InitGoogleTest(&argc, argv);
   int ret = RUN_ALL_TESTS();

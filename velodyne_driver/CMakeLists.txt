@@ -12,7 +12,7 @@ endif()
 
 find_package(ament_cmake_ros REQUIRED)
 find_package(diagnostic_msgs REQUIRED)
-#find_package(diagnostic_updater REQUIRED)
+find_package(diagnostic_updater REQUIRED)
 find_package(rclcpp REQUIRED)
 find_package(rclcpp_components REQUIRED)
 find_package(tf2_ros REQUIRED)
@@ -27,9 +27,10 @@ include_directories(include)
 add_subdirectory(src/lib)
 
 # build the driver node
-add_library(velodyne_driver SHARED src/driver/driver.cc)
+add_library(velodyne_driver SHARED src/driver/driver.cpp)
 ament_target_dependencies(velodyne_driver
   diagnostic_msgs
+  diagnostic_updater
   rclcpp
   rclcpp_components
   tf2_ros
@@ -37,7 +38,7 @@ ament_target_dependencies(velodyne_driver
 )
 target_link_libraries(velodyne_driver velodyne_input)
 
-add_executable(velodyne_driver_node src/driver/velodyne_node.cc)
+add_executable(velodyne_driver_node src/driver/velodyne_node.cpp)
 ament_target_dependencies(velodyne_driver_node
   rclcpp
 )
@@ -65,7 +66,10 @@ install(PROGRAMS src/vdump
   DESTINATION lib/${PROJECT_NAME})
 
 
-if (BUILD_TESTING)
+if(BUILD_TESTING)
+  find_package(ament_lint_auto REQUIRED)
+  ament_lint_auto_find_test_dependencies()
+
   find_package(ament_cmake_gtest REQUIRED)
 
   # unit test

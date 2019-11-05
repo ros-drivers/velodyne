@@ -1,4 +1,4 @@
-// Copyright (C) 2007, 2009, 2010, 2012, 2015Yaxin Liu, Patrick Beeson, Austin Robot Technology, Jack O'Quin
+// Copyright 2007, 2009, 2010, 2012, 2015, 2019 Yaxin Liu, Patrick Beeson, Austin Robot Technology, Jack O'Quin, AutonomouStuff  // NOLINT
 // All rights reserved.
 //
 // Software License Agreement (BSD License 2.0)
@@ -7,15 +7,15 @@
 // modification, are permitted provided that the following conditions
 // are met:
 //
-//  * Redistributions of source code must retain the above copyright
-//    notice, this list of conditions and the following disclaimer.
-//  * Redistributions in binary form must reproduce the above
-//    copyright notice, this list of conditions and the following
-//    disclaimer in the documentation and/or other materials provided
-//    with the distribution.
-//  * Neither the name of {copyright_holder} nor the names of its
-//    contributors may be used to endorse or promote products derived
-//    from this software without specific prior written permission.
+// * Redistributions of source code must retain the above copyright
+//   notice, this list of conditions and the following disclaimer.
+// * Redistributions in binary form must reproduce the above
+//   copyright notice, this list of conditions and the following
+//   disclaimer in the documentation and/or other materials provided
+//   with the distribution.
+// * Neither the name of {copyright_holder} nor the names of its
+//   contributors may be used to endorse or promote products derived
+//   from this software without specific prior written permission.
 //
 // THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS
 // "AS IS" AND ANY EXPRESS OR IMPLIED WARRANTIES, INCLUDING, BUT NOT
@@ -50,11 +50,8 @@
  *                      from a PCAP dump file
  */
 
-#ifndef VELODYNE_DRIVER_INPUT_H
-#define VELODYNE_DRIVER_INPUT_H
-
-#include <memory>
-#include <string>
+#ifndef VELODYNE_DRIVER__INPUT_HPP_
+#define VELODYNE_DRIVER__INPUT_HPP_
 
 #include <unistd.h>
 #include <stdio.h>
@@ -62,9 +59,11 @@
 #include <netinet/in.h>
 
 #include <rclcpp/rclcpp.hpp>
-
 #include <velodyne_msgs/msg/velodyne_packet.hpp>
 #include <velodyne_msgs/msg/velodyne_scan.hpp>
+
+#include <memory>
+#include <string>
 
 namespace velodyne_driver
 {
@@ -86,8 +85,9 @@ public:
    *          -1 if end of file
    *          > 0 if incomplete packet (is this possible?)
    */
-  virtual int getPacket(velodyne_msgs::msg::VelodynePacket *pkt,
-                        const double time_offset) = 0;
+  virtual int getPacket(
+    velodyne_msgs::msg::VelodynePacket * pkt,
+    const double time_offset) = 0;
 
 protected:
   rclcpp::Node * private_nh_;
@@ -99,13 +99,15 @@ protected:
 class InputSocket final : public Input
 {
 public:
-  explicit InputSocket(rclcpp::Node * private_nh,
-              const std::string & devip, uint16_t port, bool gps_time);
+  explicit InputSocket(
+    rclcpp::Node * private_nh,
+    const std::string & devip, uint16_t port, bool gps_time);
   ~InputSocket();
 
-  int getPacket(velodyne_msgs::msg::VelodynePacket *pkt,
-                const double time_offset) override;
-  void setDeviceIP(const std::string& ip);
+  int getPacket(
+    velodyne_msgs::msg::VelodynePacket * pkt,
+    const double time_offset) override;
+  void setDeviceIP(const std::string & ip);
 
 private:
   int sockfd_;
@@ -122,24 +124,26 @@ private:
 class InputPCAP final : public Input
 {
 public:
-  explicit InputPCAP(rclcpp::Node * private_nh,
-                     const std::string & devip,
-                     uint16_t port,
-                     double packet_rate,
-                     const std::string & filename,
-                     bool read_once,
-                     bool read_fast,
-                     double repeat_delay);
+  explicit InputPCAP(
+    rclcpp::Node * private_nh,
+    const std::string & devip,
+    uint16_t port,
+    double packet_rate,
+    const std::string & filename,
+    bool read_once,
+    bool read_fast,
+    double repeat_delay);
   ~InputPCAP();
 
-  int getPacket(velodyne_msgs::msg::VelodynePacket *pkt,
-                const double time_offset) override;
-  void setDeviceIP(const std::string& ip);
+  int getPacket(
+    velodyne_msgs::msg::VelodynePacket * pkt,
+    const double time_offset) override;
+  void setDeviceIP(const std::string & ip);
 
 private:
   rclcpp::Rate packet_rate_;
   std::string filename_;
-  pcap_t *pcap_;
+  pcap_t * pcap_;
   bpf_program pcap_packet_filter_;
   char errbuf_[PCAP_ERRBUF_SIZE];
   bool empty_;
@@ -150,4 +154,4 @@ private:
 
 }  // namespace velodyne_driver
 
-#endif  // VELODYNE_DRIVER_INPUT_H
+#endif  // VELODYNE_DRIVER__INPUT_HPP_

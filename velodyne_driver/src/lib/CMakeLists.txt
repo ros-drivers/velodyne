@@ -1,4 +1,4 @@
-add_library(velodyne_input SHARED input.cc)
+add_library(velodyne_input SHARED input.cpp)
 ament_target_dependencies(velodyne_input
   rclcpp
   velodyne_msgs

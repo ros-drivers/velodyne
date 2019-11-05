@@ -8,22 +8,22 @@
   </description>
   <maintainer email="jwhitley@autonomoustuff.com">Josh Whitley</maintainer>
   <maintainer email="brice.rebsamen@gmail.com">Brice Rebsamen</maintainer>
+
+  <license>BSD</license>
+  <url type="website">http://www.ros.org/wiki/velodyne_driver</url>
+  <url type="repository">https://github.com/ros-drivers/velodyne</url>
+  <url type="bugtracker">https://github.com/ros-drivers/velodyne/issues</url>
+
   <author>Jack O'Quin</author>
   <author>Patrick Beeson</author>
   <author>Michael Quinlan</author>
   <author>Yaxin Liu</author>
   <author>Andreas Klintberg</author>
 
-  <license>BSD</license>
-
-  <url type="website">http://www.ros.org/wiki/velodyne_driver</url>
-  <url type="repository">https://github.com/ros-drivers/velodyne</url>
-  <url type="bugtracker">https://github.com/ros-drivers/velodyne/issues</url>
-
-  <buildtool_depend>ament_cmake_ros</buildtool_depend>
+  <buildtool_depend>ament_cmake</buildtool_depend>
 
   <depend>diagnostic_msgs</depend>
-  <!-- <depend>diagnostic_updater</depend> -->
+  <depend>diagnostic_updater</depend>
   <depend>libpcap</depend>
   <depend>rclcpp</depend>
   <depend>rclcpp_components</depend>
@@ -31,6 +31,8 @@
   <depend>velodyne_msgs</depend>
 
   <test_depend>ament_cmake_gtest</test_depend>
+  <test_depend>ament_lint_auto</test_depend>
+  <test_depend>ament_lint_common</test_depend>
 
   <export>
     <build_type>ament_cmake</build_type>
