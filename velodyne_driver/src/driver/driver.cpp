@@ -50,8 +50,6 @@
 
 #include "velodyne_driver/driver.hpp"
 
-using namespace std::chrono_literals;  // NOLINT
-
 namespace velodyne_driver
 {
 
