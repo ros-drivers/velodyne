@@ -1,4 +1,4 @@
-// Copyright 2019 Open Source Robotics Foundation
+// Copyright 2012, 2019 Austin Robot Technology, Jack O'Quin, Joshua Whitley, Sebastian Pütz  // NOLINT
 // All rights reserved.
 //
 // Software License Agreement (BSD License 2.0)
@@ -30,90 +30,41 @@
 // ANY WAY OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE
 // POSSIBILITY OF SUCH DAMAGE.
 
-#include <gtest/gtest.h>
+#ifndef VELODYNE_POINTCLOUD__ORGANIZED_CLOUDXYZIR_HPP_
+#define VELODYNE_POINTCLOUD__ORGANIZED_CLOUDXYZIR_HPP_
 
+#include <sensor_msgs/point_cloud2_iterator.hpp>
 #include <tf2/buffer_core.h>
+#include <velodyne_msgs/msg/velodyne_scan.hpp>
 
 #include <memory>
+#include <string>
 
 #include "velodyne_pointcloud/datacontainerbase.hpp"
 
-class TestContainer final
+namespace velodyne_pointcloud
+{
+class OrganizedCloudXYZIR final
   : public velodyne_rawdata::DataContainerBase
 {
 public:
-  TestContainer(unsigned int width, tf2::BufferCore & buffer)
-  : velodyne_rawdata::DataContainerBase(
-      0, 0, "target", "fixed", width, 0, false, 0,
-      buffer, 1, "x", 1, sensor_msgs::msg::PointField::FLOAT32)
-  {
-  }
+  explicit OrganizedCloudXYZIR(
+    const double min_range, const double max_range, const std::string & target_frame,
+    const std::string & fixed_frame, const unsigned int num_lasers,
+    const unsigned int scans_per_block, tf2::BufferCore & buffer);
+
+  void newLine() override;
+
+  void setup(const velodyne_msgs::msg::VelodyneScan::SharedPtr scan_msg) override;
 
   void addPoint(
-    float x, float y, float z, const uint16_t ring,
-    const uint16_t azimuth, const float distance, const float intensity)
-  {
-    (void)x;
-    (void)y;
-    (void)z;
-    (void)ring;
-    (void)azimuth;
-    (void)distance;
-    (void)intensity;
-  }
+    float x, float y, float z, const uint16_t ring, const uint16_t azimuth,
+    const float distance, const float intensity) override;
 
-  void newLine()
-  {
-  }
-
-  uint32_t getCloudWidth()
-  {
-    return cloud.width;
-  }
-
-  uint32_t getCloudPointStep()
-  {
-    return cloud.point_step;
-  }
-
-  uint32_t getCloudRowStep()
-  {
-    return cloud.row_step;
-  }
+private:
+  sensor_msgs::PointCloud2Iterator<float> iter_x, iter_y, iter_z, iter_intensity;
+  sensor_msgs::PointCloud2Iterator<uint16_t> iter_ring;
 };
+}  // namespace velodyne_pointcloud
 
-TEST(datacontainerbase, row_step_zero_width_constructor)
-{
-  tf2::BufferCore core;
-  TestContainer cont(0, core);
-  ASSERT_EQ(cont.getCloudWidth(), 0U);
-  ASSERT_EQ(cont.getCloudPointStep(), 4U);
-  ASSERT_EQ(cont.getCloudRowStep(), 0U);
-}
-
-TEST(datacontainerbase, row_step_one_width_constructor)
-{
-  tf2::BufferCore core;
-  TestContainer cont(1, core);
-  ASSERT_EQ(cont.getCloudWidth(), 1U);
-  ASSERT_EQ(cont.getCloudPointStep(), 4U);
-  ASSERT_EQ(cont.getCloudRowStep(), 4U);
-}
-
-TEST(datacontainerbase, row_step_one_width_after_setup)
-{
-  tf2::BufferCore core;
-  TestContainer cont(1, core);
-  auto msg = std::make_shared<velodyne_msgs::msg::VelodyneScan>();
-  cont.setup(msg);
-  ASSERT_EQ(cont.getCloudWidth(), 1U);
-  ASSERT_EQ(cont.getCloudPointStep(), 4U);
-  ASSERT_EQ(cont.getCloudRowStep(), 4U);
-}
-
-// Run all the tests that were declared with TEST()
-int main(int argc, char ** argv)
-{
-  testing::InitGoogleTest(&argc, argv);
-  return RUN_ALL_TESTS();
-}
+#endif  // VELODYNE_POINTCLOUD__ORGANIZED_CLOUDXYZIR_HPP_

@@ -7,22 +7,22 @@
     Point cloud conversions for Velodyne 3D LIDARs.
   </description>
   <maintainer email="jwhitley@autonomoustuff.com">Josh Whitley</maintainer>
-  <author>Jack O'Quin</author>
-  <author>Piyush Khandelwal</author>
-  <author>Jesse Vera</author>
-  <author>Andreas Klintberg</author>
   <license>BSD</license>
   <url type="website">http://ros.org/wiki/velodyne_pointcloud</url>
   <url type="repository">https://github.com/ros-drivers/velodyne</url>
   <url type="bugtracker">https://github.com/ros-drivers/velodyne/issues</url>
+  <author>Jack O'Quin</author>
+  <author>Piyush Khandelwal</author>
+  <author>Jesse Vera</author>
+  <author>Andreas Klintberg</author>
 
   <buildtool_depend>ament_cmake</buildtool_depend>
 
   <depend>angles</depend>
-  <!-- <depend>diagnostic_updater</depend> -->
+  <depend>diagnostic_updater</depend>
   <depend>geometry_msgs</depend>
-  <depend>message_filters</depend>
   <depend>libpcl-all-dev</depend>
+  <depend>message_filters</depend>
   <depend>rclcpp</depend>
   <depend>rclcpp_components</depend>
   <depend>sensor_msgs</depend>

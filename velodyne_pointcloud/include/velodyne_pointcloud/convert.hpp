@@ -1,4 +1,4 @@
-// Copyright (C) 2009, 2010, 2011, 2012, 2019 Austin Robot Technology, Jack O'Quin, Jesse Vera, Joshua Whitley
+// Copyright 2009, 2010, 2011, 2012, 2019 Austin Robot Technology, Jack O'Quin, Jesse Vera, Joshua Whitley  // NOLINT
 // All rights reserved.
 //
 // Software License Agreement (BSD License 2.0)
@@ -7,15 +7,15 @@
 // modification, are permitted provided that the following conditions
 // are met:
 //
-//  * Redistributions of source code must retain the above copyright
-//    notice, this list of conditions and the following disclaimer.
-//  * Redistributions in binary form must reproduce the above
-//    copyright notice, this list of conditions and the following
-//    disclaimer in the documentation and/or other materials provided
-//    with the distribution.
-//  * Neither the name of {copyright_holder} nor the names of its
-//    contributors may be used to endorse or promote products derived
-//    from this software without specific prior written permission.
+// * Redistributions of source code must retain the above copyright
+//   notice, this list of conditions and the following disclaimer.
+// * Redistributions in binary form must reproduce the above
+//   copyright notice, this list of conditions and the following
+//   disclaimer in the documentation and/or other materials provided
+//   with the distribution.
+// * Neither the name of {copyright_holder} nor the names of its
+//   contributors may be used to endorse or promote products derived
+//   from this software without specific prior written permission.
 //
 // THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS
 // "AS IS" AND ANY EXPRESS OR IMPLIED WARRANTIES, INCLUDING, BUT NOT
@@ -30,39 +30,34 @@
 // ANY WAY OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE
 // POSSIBILITY OF SUCH DAMAGE.
 
-/** @file
+#ifndef VELODYNE_POINTCLOUD__CONVERT_HPP_
+#define VELODYNE_POINTCLOUD__CONVERT_HPP_
 
-    This class converts raw Velodyne 3D LIDAR packets to PointCloud2.
-
-*/
-
-#ifndef VELODYNE_POINTCLOUD_CONVERT_H
-#define VELODYNE_POINTCLOUD_CONVERT_H
+#include <rclcpp/rclcpp.hpp>
+#include <diagnostic_updater/diagnostic_updater.hpp>
+#include <diagnostic_updater/publisher.hpp>
+#include <sensor_msgs/msg/point_cloud2.hpp>
+#include <tf2_ros/buffer.h>
+#include <velodyne_msgs/msg/velodyne_scan.hpp>
 
 #include <memory>
 #include <string>
 
-//#include <diagnostic_updater/diagnostic_updater.hpp>
-//#include <diagnostic_updater/publisher.hpp>
-#include <rclcpp/rclcpp.hpp>
-#include <sensor_msgs/msg/point_cloud2.hpp>
-#include <tf2_ros/buffer.h>
-
-#include <velodyne_msgs/msg/velodyne_scan.hpp>
-#include <velodyne_pointcloud/rawdata.h>
-#include <velodyne_pointcloud/pointcloudXYZIR.h>
+#include "velodyne_pointcloud/rawdata.hpp"
+#include "velodyne_pointcloud/pointcloudXYZIR.hpp"
 
 namespace velodyne_pointcloud
 {
-class Convert final : public rclcpp::Node
+class Convert final
+  : public rclcpp::Node
 {
 public:
-  explicit Convert(const rclcpp::NodeOptions& options);
+  explicit Convert(const rclcpp::NodeOptions & options);
   ~Convert() {}
   Convert(Convert && c) = delete;
-  Convert &operator=(Convert && c) = delete;
+  Convert & operator=(Convert && c) = delete;
   Convert(const Convert & c) = delete;
-  Convert &operator=(const Convert & c) = delete;
+  Convert & operator=(const Convert & c) = delete;
 
 private:
   void processScan(const velodyne_msgs::msg::VelodyneScan::SharedPtr scanMsg);
@@ -76,17 +71,17 @@ private:
   /// configuration parameters
   typedef struct
   {
-    int npackets;                  ///< number of packets to combine
+    int npackets;  // number of packets to combine
   }
   Config;
   Config config_;
 
   // diagnostics updater
-  //diagnostic_updater::Updater diagnostics_;
+  diagnostic_updater::Updater diagnostics_;
   double diag_min_freq_;
   double diag_max_freq_;
-  //std::shared_ptr<diagnostic_updater::TopicDiagnostic> diag_topic_;
+  std::shared_ptr<diagnostic_updater::TopicDiagnostic> diag_topic_;
 };
 }  // namespace velodyne_pointcloud
 
-#endif  // VELODYNE_POINTCLOUD_CONVERT_H
+#endif  // VELODYNE_POINTCLOUD__CONVERT_HPP_

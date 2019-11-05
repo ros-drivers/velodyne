@@ -1,4 +1,4 @@
-// Copyright (C) 2012, 2019 Austin Robot Technology, Piyush Khandelwal, Joshua Whitley
+// Copyright 2012, 2019 Austin Robot Technology, Piyush Khandelwal, Joshua Whitley
 // All rights reserved.
 //
 // Software License Agreement (BSD License 2.0)
@@ -7,15 +7,15 @@
 // modification, are permitted provided that the following conditions
 // are met:
 //
-//  * Redistributions of source code must retain the above copyright
-//    notice, this list of conditions and the following disclaimer.
-//  * Redistributions in binary form must reproduce the above
-//    copyright notice, this list of conditions and the following
-//    disclaimer in the documentation and/or other materials provided
-//    with the distribution.
-//  * Neither the name of {copyright_holder} nor the names of its
-//    contributors may be used to endorse or promote products derived
-//    from this software without specific prior written permission.
+// * Redistributions of source code must retain the above copyright
+//   notice, this list of conditions and the following disclaimer.
+// * Redistributions in binary form must reproduce the above
+//   copyright notice, this list of conditions and the following
+//   disclaimer in the documentation and/or other materials provided
+//   with the distribution.
+// * Neither the name of {copyright_holder} nor the names of its
+//   contributors may be used to endorse or promote products derived
+//   from this software without specific prior written permission.
 //
 // THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS
 // "AS IS" AND ANY EXPRESS OR IMPLIED WARRANTIES, INCLUDING, BUT NOT
@@ -30,8 +30,8 @@
 // ANY WAY OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE
 // POSSIBILITY OF SUCH DAMAGE.
 
-#ifndef VELODYNE_POINTCLOUD_CALIBRATION_H
-#define VELODYNE_POINTCLOUD_CALIBRATION_H
+#ifndef VELODYNE_POINTCLOUD__CALIBRATION_HPP_
+#define VELODYNE_POINTCLOUD__CALIBRATION_HPP_
 
 #include <map>
 #include <string>
@@ -78,7 +78,7 @@ struct LaserCorrection
 class Calibration final
 {
 public:
-  explicit Calibration(const std::string& calibration_file);
+  explicit Calibration(const std::string & calibration_file);
 
   float distance_resolution_m;
   std::vector<LaserCorrection> laser_corrections;
@@ -87,4 +87,4 @@ public:
 
 }  // namespace velodyne_pointcloud
 
-#endif  // VELODYNE_POINTCLOUD_CALIBRATION_H
+#endif  // VELODYNE_POINTCLOUD__CALIBRATION_HPP_

@@ -1,4 +1,4 @@
-// Copyright (C) 2012, 2019 Austin Robot Technology, Jack O'Quin, Joshua Whitley
+// Copyright 2012, 2019 Austin Robot Technology, Jack O'Quin, Joshua Whitley
 // All rights reserved.
 //
 // Software License Agreement (BSD License 2.0)
@@ -7,15 +7,15 @@
 // modification, are permitted provided that the following conditions
 // are met:
 //
-//  * Redistributions of source code must retain the above copyright
-//    notice, this list of conditions and the following disclaimer.
-//  * Redistributions in binary form must reproduce the above
-//    copyright notice, this list of conditions and the following
-//    disclaimer in the documentation and/or other materials provided
-//    with the distribution.
-//  * Neither the name of {copyright_holder} nor the names of its
-//    contributors may be used to endorse or promote products derived
-//    from this software without specific prior written permission.
+// * Redistributions of source code must retain the above copyright
+//   notice, this list of conditions and the following disclaimer.
+// * Redistributions in binary form must reproduce the above
+//   copyright notice, this list of conditions and the following
+//   disclaimer in the documentation and/or other materials provided
+//   with the distribution.
+// * Neither the name of {copyright_holder} nor the names of its
+//   contributors may be used to endorse or promote products derived
+//   from this software without specific prior written permission.
 //
 // THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS
 // "AS IS" AND ANY EXPRESS OR IMPLIED WARRANTIES, INCLUDING, BUT NOT
@@ -33,20 +33,11 @@
 #include <gtest/gtest.h>
 
 #include <ros/package.h>
-#include <velodyne_pointcloud/calibration.h>
+#include <velodyne_pointcloud/calibration.hpp>
 
 #include <string>
 
 using namespace velodyne_pointcloud;  // NOLINT
-
-// global test data
-std::string g_package_name("velodyne_pointcloud");
-std::string g_package_path;
-
-void init_global_data(void)
-{
-  g_package_path = ros::package::getPath(g_package_name);
-}
 
 ///////////////////////////////////////////////////////////////
 // Test cases
@@ -61,6 +52,7 @@ TEST(Calibration, missing_file)
 
 TEST(Calibration, vlp16)
 {
+  std::string g_package_path = ros::package::getPath("velodyne_pointcloud");
   Calibration calibration(g_package_path + "/params/VLP16db.yaml", false);
   EXPECT_TRUE(calibration.initialized);
   ASSERT_EQ(calibration.num_lasers, 16);
@@ -84,6 +76,7 @@ TEST(Calibration, vlp16)
 
 TEST(Calibration, hdl32e)
 {
+  std::string g_package_path = ros::package::getPath("velodyne_pointcloud");
   Calibration calibration(g_package_path + "/params/32db.yaml", false);
   EXPECT_TRUE(calibration.initialized);
   ASSERT_EQ(calibration.num_lasers, 32);
@@ -107,6 +100,7 @@ TEST(Calibration, hdl32e)
 
 TEST(Calibration, hdl64e)
 {
+  std::string g_package_path = ros::package::getPath("velodyne_pointcloud");
   Calibration calibration(g_package_path + "/params/64e_utexas.yaml", false);
   EXPECT_TRUE(calibration.initialized);
   ASSERT_EQ(calibration.num_lasers, 64);
@@ -130,8 +124,9 @@ TEST(Calibration, hdl64e)
 
 TEST(Calibration, hdl64e_s21)
 {
-  Calibration calibration(g_package_path + "/params/64e_s2.1-sztaki.yaml",
-                          false);
+  std::string g_package_path = ros::package::getPath("velodyne_pointcloud");
+  Calibration calibration(
+    g_package_path + "/params/64e_s2.1-sztaki.yaml", false);
   EXPECT_TRUE(calibration.initialized);
   ASSERT_EQ(calibration.num_lasers, 64);
 
@@ -154,9 +149,9 @@ TEST(Calibration, hdl64e_s21)
 
 TEST(Calibration, hdl64e_s2_float_intensities)
 {
-  Calibration calibration(g_package_path +
-                          "/tests/issue_84_float_intensities.yaml",
-                          false);
+  std::string g_package_path = ros::package::getPath("velodyne_pointcloud");
+  Calibration calibration(
+    g_package_path + "/tests/issue_84_float_intensities.yaml", false);
   EXPECT_TRUE(calibration.initialized);
   ASSERT_EQ(calibration.num_lasers, 64);
 
@@ -186,10 +181,9 @@ TEST(Calibration, hdl64e_s2_float_intensities)
 }
 
 // Run all the tests that were declared with TEST()
-int main(int argc, char **argv)
+int main(int argc, char ** argv)
 {
   testing::InitGoogleTest(&argc, argv);
   init_global_data();
   return RUN_ALL_TESTS();
 }
-

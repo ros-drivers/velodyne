@@ -1,4 +1,4 @@
-// Copyright (C) 2007, 2009, 2010, 2012, 2019 Yaxin Liu, Patrick Beeson, Jack O'Quin, Joshua Whitley
+// Copyright 2007, 2009, 2010, 2012, 2019 Yaxin Liu, Patrick Beeson, Jack O'Quin, Joshua Whitley  // NOLINT
 // All rights reserved.
 //
 // Software License Agreement (BSD License 2.0)
@@ -7,15 +7,15 @@
 // modification, are permitted provided that the following conditions
 // are met:
 //
-//  * Redistributions of source code must retain the above copyright
-//    notice, this list of conditions and the following disclaimer.
-//  * Redistributions in binary form must reproduce the above
-//    copyright notice, this list of conditions and the following
-//    disclaimer in the documentation and/or other materials provided
-//    with the distribution.
-//  * Neither the name of {copyright_holder} nor the names of its
-//    contributors may be used to endorse or promote products derived
-//    from this software without specific prior written permission.
+// * Redistributions of source code must retain the above copyright
+//   notice, this list of conditions and the following disclaimer.
+// * Redistributions in binary form must reproduce the above
+//   copyright notice, this list of conditions and the following
+//   disclaimer in the documentation and/or other materials provided
+//   with the distribution.
+// * Neither the name of {copyright_holder} nor the names of its
+//   contributors may be used to endorse or promote products derived
+//   from this software without specific prior written permission.
 //
 // THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS
 // "AS IS" AND ANY EXPRESS OR IMPLIED WARRANTIES, INCLUDING, BUT NOT
@@ -30,28 +30,19 @@
 // ANY WAY OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE
 // POSSIBILITY OF SUCH DAMAGE.
 
-/** @file
- *
- *  @brief Interfaces for interpreting raw packets from the Velodyne 3D LIDAR.
- *
- *  @author Yaxin Liu
- *  @author Patrick Beeson
- *  @author Jack O'Quin
- */
+#ifndef VELODYNE_POINTCLOUD__RAWDATA_HPP_
+#define VELODYNE_POINTCLOUD__RAWDATA_HPP_
 
-#ifndef VELODYNE_POINTCLOUD_RAWDATA_H
-#define VELODYNE_POINTCLOUD_RAWDATA_H
+#include <pcl/point_cloud.h>
+
+#include <rclcpp/rclcpp.hpp>
+#include <velodyne_msgs/msg/velodyne_packet.hpp>
 
 #include <memory>
 #include <string>
 
-#include <rclcpp/rclcpp.hpp>
-
-#include <pcl/point_cloud.h>
-
-#include <velodyne_msgs/msg/velodyne_packet.hpp>
-#include <velodyne_pointcloud/calibration.h>
-#include <velodyne_pointcloud/datacontainerbase.h>
+#include "velodyne_pointcloud/calibration.hpp"
+#include "velodyne_pointcloud/datacontainerbase.hpp"
 
 namespace velodyne_rawdata
 {
@@ -97,8 +88,7 @@ raw_block_t;
  *  They are packed into the actual data stream misaligned.  I doubt
  *  this works on big endian machines.
  */
-union two_bytes
-{
+union two_bytes {
   uint16_t uint;
   uint8_t bytes[2];
 };
@@ -133,9 +123,8 @@ class RawData final
 {
 public:
   explicit RawData(const std::string & calibration_file);
-  ~RawData();
 
-  void unpack(const velodyne_msgs::msg::VelodynePacket &pkt, DataContainerBase& data);
+  void unpack(const velodyne_msgs::msg::VelodynePacket & pkt, DataContainerBase & data);
 
   void setParameters(double min_range, double max_range, double view_direction, double view_width);
 
@@ -163,9 +152,9 @@ private:
   float cos_rot_table_[ROTATION_MAX_UNITS];
 
   /** add private function to handle the VLP16 **/
-  void unpack_vlp16(const velodyne_msgs::msg::VelodynePacket &pkt, DataContainerBase& data);
+  void unpack_vlp16(const velodyne_msgs::msg::VelodynePacket & pkt, DataContainerBase & data);
 };
 
 }  // namespace velodyne_rawdata
 
-#endif  // VELODYNE_POINTCLOUD_RAWDATA_H
+#endif  // VELODYNE_POINTCLOUD__RAWDATA_HPP_

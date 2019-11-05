@@ -12,8 +12,7 @@ endif()
 
 find_package(ament_cmake REQUIRED)
 find_package(angles REQUIRED)
-# TODO(clalancette): not yet available
-#find_package(diagnostic_updater REQUIRED)
+find_package(diagnostic_updater REQUIRED)
 find_package(Eigen3 REQUIRED)
 find_package(geometry_msgs REQUIRED)
 find_package(message_filters REQUIRED)
@@ -30,31 +29,36 @@ find_package(velodyne_msgs REQUIRED)
 find_package(PkgConfig REQUIRED)
 pkg_check_modules(YAML_CPP REQUIRED yaml-cpp)
 find_path(YAML_CPP_INCLUDE_DIR
-          NAMES yaml_cpp.h
-          PATHS ${YAML_CPP_INCLUDE_DIRS})
+  NAMES yaml_cpp.h
+  PATHS ${YAML_CPP_INCLUDE_DIRS})
 find_library(YAML_CPP_LIBRARY
-             NAMES YAML_CPP
-             PATHS ${YAML_CPP_LIBRARY_DIRS})
+  NAMES YAML_CPP
+  PATHS ${YAML_CPP_LIBRARY_DIRS})
 
 link_directories(${YAML_CPP_LIBRARY_DIRS})
 
 if(NOT ${YAML_CPP_VERSION} VERSION_LESS "0.5")
   add_definitions(-DHAVE_NEW_YAMLCPP)
-endif(NOT ${YAML_CPP_VERSION} VERSION_LESS "0.5")
+endif()
 
 include_directories(include ${PCL_COMMON_INCLUDE_DIRS})
 
 add_subdirectory(src/lib)
 
-add_library(convert SHARED src/conversions/convert.cc src/conversions/pointcloudXYZIR.cc src/conversions/organized_cloudXYZIR.cc)
+add_library(convert SHARED
+  src/conversions/convert.cpp)
 ament_target_dependencies(convert
+  diagnostic_updater
   Eigen3
   rclcpp
   rclcpp_components
   tf2
   velodyne_msgs
 )
-target_link_libraries(convert velodyne_rawdata ${YAML_CPP_LIBRARIES})
+target_link_libraries(convert
+  velodyne_cloud_types
+  velodyne_rawdata
+  ${YAML_CPP_LIBRARIES})
 install(TARGETS convert
   ARCHIVE DESTINATION lib
   LIBRARY DESTINATION lib
@@ -63,7 +67,8 @@ install(TARGETS convert
 rclcpp_components_register_nodes(convert
   "velodyne_pointcloud::Convert")
 
-add_executable(velodyne_convert_node src/conversions/convert_node.cc)
+add_executable(velodyne_convert_node
+  src/conversions/convert_node.cpp)
 ament_target_dependencies(velodyne_convert_node
   rclcpp
 )
@@ -72,15 +77,20 @@ install(TARGETS velodyne_convert_node
   DESTINATION lib/${PROJECT_NAME}
 )
 
-add_library(transform SHARED src/conversions/transform.cc src/conversions/pointcloudXYZIR.cc src/conversions/organized_cloudXYZIR.cc)
+add_library(transform SHARED
+  src/conversions/transform.cpp)
 ament_target_dependencies(transform
+  diagnostic_updater
   message_filters
   rclcpp
   rclcpp_components
   tf2
   tf2_ros
 )
-target_link_libraries(transform velodyne_rawdata ${YAML_CPP_LIBRARIES})
+target_link_libraries(transform
+  velodyne_cloud_types
+  velodyne_rawdata
+  ${YAML_CPP_LIBRARIES})
 install(TARGETS transform
   ARCHIVE DESTINATION lib
   LIBRARY DESTINATION lib
@@ -89,11 +99,13 @@ install(TARGETS transform
 rclcpp_components_register_nodes(transform
   "velodyne_pointcloud::Transform")
 
-add_executable(velodyne_transform_node src/conversions/transform_node.cc)
+add_executable(velodyne_transform_node
+  src/conversions/transform_node.cpp)
 ament_target_dependencies(velodyne_transform_node
   rclcpp
 )
-target_link_libraries(velodyne_transform_node transform)
+target_link_libraries(velodyne_transform_node
+  transform)
 install(TARGETS velodyne_transform_node
   DESTINATION lib/${PROJECT_NAME})
 
@@ -105,6 +117,30 @@ install(DIRECTORY config launch params
 #         DESTINATION ${CATKIN_PACKAGE_BIN_DESTINATION})
 
 if(BUILD_TESTING)
+  # Remove empty.xml from lint
+  list(APPEND AMENT_LINT_AUTO_EXCLUDE
+    ament_cmake_xmllint
+  )
+
+  find_package(ament_lint_auto REQUIRED)
+  ament_lint_auto_find_test_dependencies()
+
+  file(GLOB_RECURSE XML_FILES
+    "*.xml"
+  )
+
+  get_filename_component(
+    EMPTY_XML_ABS
+    "tests/empty.xml"
+    ABSOLUTE
+  )
+
+  list(REMOVE_ITEM XML_FILES ${EMPTY_XML_ABS})
+
+  find_package(ament_cmake_xmllint REQUIRED)
+
+  ament_xmllint(${XML_FILES})
+
   add_subdirectory(tests)
 endif()
 
