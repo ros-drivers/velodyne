@@ -53,8 +53,10 @@ install(DIRECTORY include/${PROJECT_NAME}/
 install(DIRECTORY config launch
   DESTINATION share/${PROJECT_NAME})
 
-# if (CATKIN_ENABLE_TESTING)
+if(BUILD_TESTING)
+  find_package(ament_lint_auto REQUIRED)
+  ament_lint_auto_find_test_dependencies()
 #   add_subdirectory(tests)
-# endif()
+endif()
 
 ament_package()
