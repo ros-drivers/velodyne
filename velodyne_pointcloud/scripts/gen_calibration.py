@@ -42,14 +42,16 @@ standards [REP-0103].
 """
 
 import math
+from optparse import OptionParser
 import os
 import sys
-import yaml
-from optparse import OptionParser
 from xml.etree import ElementTree
+
+import yaml
 
 
 class GenCalibration:
+
     def __init__(self):
         self.calibration_good = True
 
@@ -223,5 +225,5 @@ class GenCalibration:
             f.close()
 
 
-if __name__ == "__main__":
+if __name__ == '__main__':
     GenCalibration()
