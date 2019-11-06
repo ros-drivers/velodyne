@@ -252,13 +252,14 @@ bool VelodyneDriver::poll(void)
 
   // publish message using time of last packet read
   RCLCPP_DEBUG(this->get_logger(), "Publishing a full Velodyne scan.");
-  scan->header.stamp = scan->packets.back().stamp;
+  builtin_interfaces::msg::Time stamp = scan->packets.back().stamp;
+  scan->header.stamp = stamp;
   scan->header.frame_id = config_.frame_id;
   output_->publish(std::move(scan));
 
   // notify diagnostics that a message has been published, updating
   // its status
-  diag_topic_->tick(scan->header.stamp);
+  diag_topic_->tick(stamp);
 
   return true;
 }
