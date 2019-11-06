@@ -212,8 +212,7 @@ bool VelodyneDriver::poll(void)
 
       // Extract base rotation of first block in packet
       size_t azimuth_data_pos = 100 * 0 + 2;
-      uint16_t azimuth = tmp_packet.data[azimuth_data_pos] << 8;
-      azimuth |= tmp_packet.data[azimuth_data_pos + 1];
+      int azimuth = *(reinterpret_cast<uint16_t *>(&tmp_packet.data[azimuth_data_pos]));
 
       // if first packet in scan, there is no "valid" last_azimuth_
       if (last_azimuth_ == -1) {
