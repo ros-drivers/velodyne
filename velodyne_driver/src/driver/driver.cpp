@@ -144,23 +144,20 @@ VelodyneDriver::VelodyneDriver(const rclcpp::NodeOptions & options)
 
   RCLCPP_INFO(this->get_logger(), "expected frequency: %.3f (Hz)", diag_freq);
 
-  namespace du = diagnostic_updater;
-  diag_topic_.reset(
-    new du::TopicDiagnostic(
-      "velodyne_packets", diagnostics_, du::FrequencyStatusParam(
-        &diag_min_freq_, &diag_max_freq_, 0.1, 10),
-      du::TimeStampStatusParam()));
+  diag_topic_ = std::make_unique<diagnostic_updater::TopicDiagnostic>(
+    "velodyne_packets", diagnostics_, diagnostic_updater::FrequencyStatusParam(
+      &diag_min_freq_, &diag_max_freq_, 0.1, 10),
+    diagnostic_updater::TimeStampStatusParam());
 
   // open Velodyne input device or file
   if (dump_file != "") {                // have PCAP file?
     // read data from packet capture file
-    input_.reset(
-      new velodyne_driver::InputPCAP(
-        this, devip, udp_port, packet_rate,
-        dump_file, read_once, read_fast, repeat_delay));
+    input_ = std::make_unique<velodyne_driver::InputPCAP>(
+      this, devip, udp_port, packet_rate,
+      dump_file, read_once, read_fast, repeat_delay);
   } else {
     // read data from live socket
-    input_.reset(new velodyne_driver::InputSocket(this, devip, udp_port, gps_time));
+    input_ = std::make_unique<velodyne_driver::InputSocket>(this, devip, udp_port, gps_time);
   }
 
   // raw packet output topic
@@ -215,8 +212,7 @@ bool VelodyneDriver::poll(void)
 
       // Extract base rotation of first block in packet
       size_t azimuth_data_pos = 100 * 0 + 2;
-      uint16_t azimuth = tmp_packet.data[azimuth_data_pos] << 8;
-      azimuth |= tmp_packet.data[azimuth_data_pos + 1];
+      int azimuth = *(reinterpret_cast<uint16_t *>(&tmp_packet.data[azimuth_data_pos]));
 
       // if first packet in scan, there is no "valid" last_azimuth_
       if (last_azimuth_ == -1) {
@@ -256,13 +252,14 @@ bool VelodyneDriver::poll(void)
 
   // publish message using time of last packet read
   RCLCPP_DEBUG(this->get_logger(), "Publishing a full Velodyne scan.");
-  scan->header.stamp = scan->packets.back().stamp;
+  builtin_interfaces::msg::Time stamp = scan->packets.back().stamp;
+  scan->header.stamp = stamp;
   scan->header.frame_id = config_.frame_id;
   output_->publish(std::move(scan));
 
   // notify diagnostics that a message has been published, updating
   // its status
-  diag_topic_->tick(scan->header.stamp);
+  diag_topic_->tick(stamp);
 
   return true;
 }
