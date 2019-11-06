@@ -123,6 +123,9 @@ public:
     cloud.is_dense = static_cast<uint8_t>(config_.is_dense);
     cloud.row_step = cloud.width * cloud.point_step;
     cloud.data.resize(scan_msg->packets.size() * config_.scans_per_packet * cloud.point_step);
+    if (config_.transform) {
+      computeTransformation(scan_msg->header.stamp);
+    }
   }
 
   virtual void addPoint(
@@ -164,7 +167,7 @@ protected:
     eigen_vec(2) = tf_vec[2];
   }
 
-  inline bool computeTransformation(const rclcpp::Time & time)
+  void computeTransformation(const rclcpp::Time & time)
   {
     geometry_msgs::msg::TransformStamped transform;
     try {
@@ -172,9 +175,9 @@ protected:
       std::chrono::time_point<std::chrono::system_clock, std::chrono::nanoseconds> time(dur);
       transform = tf_buffer_.lookupTransform(config_.target_frame, cloud.header.frame_id, time);
     } catch (tf2::LookupException & e) {
-      return false;
+      return;
     } catch (tf2::ExtrapolationException & e) {
-      return false;
+      return;
     }
 
     tf2::Quaternion quaternion(
@@ -192,7 +195,6 @@ protected:
     vectorTfToEigen(origin, eigen_origin);
     Eigen::Translation3f translation(eigen_origin);
     transformation = translation * rotation;
-    return true;
   }
 
   inline void transformPoint(float & x, float & y, float & z)
