@@ -144,23 +144,20 @@ VelodyneDriver::VelodyneDriver(const rclcpp::NodeOptions & options)
 
   RCLCPP_INFO(this->get_logger(), "expected frequency: %.3f (Hz)", diag_freq);
 
-  namespace du = diagnostic_updater;
-  diag_topic_.reset(
-    new du::TopicDiagnostic(
-      "velodyne_packets", diagnostics_, du::FrequencyStatusParam(
-        &diag_min_freq_, &diag_max_freq_, 0.1, 10),
-      du::TimeStampStatusParam()));
+  diag_topic_ = std::make_unique<diagnostic_updater::TopicDiagnostic>(
+    "velodyne_packets", diagnostics_, diagnostic_updater::FrequencyStatusParam(
+      &diag_min_freq_, &diag_max_freq_, 0.1, 10),
+    diagnostic_updater::TimeStampStatusParam());
 
   // open Velodyne input device or file
   if (dump_file != "") {                // have PCAP file?
     // read data from packet capture file
-    input_.reset(
-      new velodyne_driver::InputPCAP(
-        this, devip, udp_port, packet_rate,
-        dump_file, read_once, read_fast, repeat_delay));
+    input_ = std::make_unique<velodyne_driver::InputPCAP>(
+      this, devip, udp_port, packet_rate,
+      dump_file, read_once, read_fast, repeat_delay);
   } else {
     // read data from live socket
-    input_.reset(new velodyne_driver::InputSocket(this, devip, udp_port, gps_time));
+    input_ = std::make_unique<velodyne_driver::InputSocket>(this, devip, udp_port, gps_time);
   }
 
   // raw packet output topic

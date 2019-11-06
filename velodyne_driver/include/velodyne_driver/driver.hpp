@@ -74,7 +74,7 @@ private:
   }
   config_;
 
-  std::shared_ptr<Input> input_;
+  std::unique_ptr<Input> input_;
   rclcpp::Publisher<velodyne_msgs::msg::VelodyneScan>::SharedPtr output_;
   int last_azimuth_;
 
@@ -82,7 +82,7 @@ private:
   diagnostic_updater::Updater diagnostics_;
   double diag_min_freq_;
   double diag_max_freq_;
-  std::shared_ptr<diagnostic_updater::TopicDiagnostic> diag_topic_;
+  std::unique_ptr<diagnostic_updater::TopicDiagnostic> diag_topic_;
 
   // We use this future/promise pair to notify threads that we are shutting down
   std::shared_future<void> future_;
