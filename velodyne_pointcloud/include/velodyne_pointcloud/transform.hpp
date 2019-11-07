@@ -77,7 +77,7 @@ private:
   diagnostic_updater::Updater diagnostics_;
   double diag_min_freq_;
   double diag_max_freq_;
-  std::shared_ptr<diagnostic_updater::TopicDiagnostic> diag_topic_;
+  std::unique_ptr<diagnostic_updater::TopicDiagnostic> diag_topic_;
 };
 }  // namespace velodyne_pointcloud
 

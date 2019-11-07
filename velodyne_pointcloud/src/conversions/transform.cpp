@@ -56,7 +56,7 @@ Transform::Transform(const rclcpp::NodeOptions & options)
   velodyne_scan_(this, "velodyne_packets"), tf_buffer_(this->get_clock()),
   diagnostics_(this)
 {
-  std::string calibrationFile = this->declare_parameter("calibration", "");
+  std::string calibration_file = this->declare_parameter("calibration", "");
 
   rcl_interfaces::msg::ParameterDescriptor min_range_desc;
   min_range_desc.name = "min_range";
@@ -102,20 +102,18 @@ Transform::Transform(const rclcpp::NodeOptions & options)
   std::string fixed_frame = this->declare_parameter("fixed_frame", "odom");
   bool organize_cloud = this->declare_parameter("organize_cloud", true);
 
-  RCLCPP_INFO(this->get_logger(), "correction angles: %s", calibrationFile.c_str());
+  RCLCPP_INFO(this->get_logger(), "correction angles: %s", calibration_file.c_str());
 
-  data_ = std::make_unique<velodyne_rawdata::RawData>(calibrationFile);
+  data_ = std::make_unique<velodyne_rawdata::RawData>(calibration_file);
 
   if (organize_cloud) {
-    container_ptr_ = std::unique_ptr<OrganizedCloudXYZIR>(
-      new OrganizedCloudXYZIR(
-        min_range, max_range, target_frame, fixed_frame, data_->numLasers(),
-        data_->scansPerPacket(), tf_buffer_));
+    container_ptr_ = std::make_unique<OrganizedCloudXYZIR>(
+      min_range, max_range, target_frame, fixed_frame, data_->numLasers(),
+      data_->scansPerPacket(), tf_buffer_);
   } else {
-    container_ptr_ = std::unique_ptr<PointcloudXYZIR>(
-      new PointcloudXYZIR(
-        min_range, max_range, target_frame, fixed_frame,
-        data_->scansPerPacket(), tf_buffer_));
+    container_ptr_ = std::make_unique<PointcloudXYZIR>(
+      min_range, max_range, target_frame, fixed_frame,
+      data_->scansPerPacket(), tf_buffer_);
   }
 
   // advertise output point cloud (before subscribing to input data)
@@ -135,12 +133,10 @@ Transform::Transform(const rclcpp::NodeOptions & options)
   // concerned about monitoring the frequency.
   diag_min_freq_ = 2.0;
   diag_max_freq_ = 20.0;
-  namespace du = diagnostic_updater;
-  diag_topic_.reset(
-    new du::TopicDiagnostic(
-      "velodyne_points", diagnostics_, du::FrequencyStatusParam(
-        &diag_min_freq_, &diag_max_freq_, 0.1, 10),
-      du::TimeStampStatusParam()));
+  diag_topic_ = std::make_unique<diagnostic_updater::TopicDiagnostic>(
+    "velodyne_points", diagnostics_, diagnostic_updater::FrequencyStatusParam(
+      &diag_min_freq_, &diag_max_freq_, 0.1, 10),
+    diagnostic_updater::TimeStampStatusParam());
 
   data_->setParameters(min_range, max_range, view_direction, view_width);
   container_ptr_->configure(min_range, max_range, target_frame, fixed_frame);

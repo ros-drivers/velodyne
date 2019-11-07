@@ -115,7 +115,6 @@ int RawData::numLasers() const
  */
 void RawData::unpack(const velodyne_msgs::msg::VelodynePacket & pkt, DataContainerBase & data)
 {
-  using velodyne_pointcloud::LaserCorrection;
   // RCLCPP_DEBUG(this->get_logger(), "Received packet, time: %s", pkt.stamp);
 
   /** special parsing for the VLP16 **/
@@ -142,7 +141,8 @@ void RawData::unpack(const velodyne_msgs::msg::VelodynePacket & pkt, DataContain
       float intensity;
       const uint8_t laser_number = j + bank_origin;
 
-      const LaserCorrection & corrections = calibration_->laser_corrections[laser_number];
+      const velodyne_pointcloud::LaserCorrection & corrections =
+        calibration_->laser_corrections[laser_number];
 
       /** Position Calculation */
       const raw_block_t & block = raw->blocks[i];
