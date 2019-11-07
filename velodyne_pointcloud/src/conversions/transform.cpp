@@ -43,6 +43,8 @@
 #include <functional>
 #include <memory>
 #include <string>
+#include <unordered_map>
+#include <vector>
 
 #include "velodyne_pointcloud/organized_cloudXYZIR.hpp"
 #include "velodyne_pointcloud/pointcloudXYZIR.hpp"
@@ -57,6 +59,7 @@ Transform::Transform(const rclcpp::NodeOptions & options)
   diagnostics_(this)
 {
   std::string calibration_file = this->declare_parameter("calibration", "");
+  required_parameters_["calibration"] = true;
 
   rcl_interfaces::msg::ParameterDescriptor min_range_desc;
   min_range_desc.name = "min_range";
@@ -67,6 +70,7 @@ Transform::Transform(const rclcpp::NodeOptions & options)
   min_range_range.to_value = 10.0;
   min_range_desc.floating_point_range.push_back(min_range_range);
   double min_range = this->declare_parameter("min_range", 0.9, min_range_desc);
+  required_parameters_["min_range"] = true;
 
   rcl_interfaces::msg::ParameterDescriptor max_range_desc;
   max_range_desc.name = "max_range";
@@ -77,6 +81,7 @@ Transform::Transform(const rclcpp::NodeOptions & options)
   max_range_range.to_value = 200.0;
   max_range_desc.floating_point_range.push_back(max_range_range);
   double max_range = this->declare_parameter("max_range", 130.0, max_range_desc);
+  required_parameters_["max_range"] = true;
 
   rcl_interfaces::msg::ParameterDescriptor view_direction_desc;
   view_direction_desc.name = "view_direction";
@@ -87,6 +92,7 @@ Transform::Transform(const rclcpp::NodeOptions & options)
   view_direction_range.to_value = M_PI;
   view_direction_desc.floating_point_range.push_back(view_direction_range);
   double view_direction = this->declare_parameter("view_direction", 0.0, view_direction_desc);
+  required_parameters_["view_direction"] = true;
 
   rcl_interfaces::msg::ParameterDescriptor view_width_desc;
   view_width_desc.name = "view_width";
@@ -97,10 +103,16 @@ Transform::Transform(const rclcpp::NodeOptions & options)
   view_width_range.to_value = 2.0 * M_PI;
   view_width_desc.floating_point_range.push_back(view_width_range);
   double view_width = this->declare_parameter("view_width", 2.0 * M_PI, view_width_desc);
+  required_parameters_["view_width"] = true;
 
   std::string target_frame = this->declare_parameter("frame_id", "map");
+  required_parameters_["target_frame"] = true;
+
   std::string fixed_frame = this->declare_parameter("fixed_frame", "odom");
+  required_parameters_["fixed_frame"] = true;
+
   bool organize_cloud = this->declare_parameter("organize_cloud", true);
+  required_parameters_["organize_cloud"] = true;
 
   RCLCPP_INFO(this->get_logger(), "correction angles: %s", calibration_file.c_str());
 
@@ -140,6 +152,85 @@ Transform::Transform(const rclcpp::NodeOptions & options)
 
   data_->setParameters(min_range, max_range, view_direction, view_width);
   container_ptr_->configure(min_range, max_range, target_frame, fixed_frame);
+
+  set_on_parameters_set_callback(std::bind(&Transform::parametersCallback, this,
+    std::placeholders::_1));
+}
+
+rcl_interfaces::msg::SetParametersResult Transform::parametersCallback(
+  const std::vector<rclcpp::Parameter> & parameters)
+{
+  // This callback is called *before* the new values are set (so get_parameter
+  // always returns the old value).  Collect the old values here, and we'll
+  // update them in the loop below, then use the resulting collection of old
+  // and new values to do the reconfiguration at the end.
+  std::unordered_map<std::string, rclcpp::Parameter> updated_params;
+  for (const auto & p : required_parameters_) {
+    updated_params[p.first] = this->get_parameter(p.first);
+  }
+
+  bool need_new_data = false;
+  bool need_new_container = false;
+  rcl_interfaces::msg::SetParametersResult result;
+  result.successful = true;
+  for (const auto & parameter : parameters) {
+    if (required_parameters_.find(parameter.get_name()) != required_parameters_.end()) {
+      // The user is trying to change one of the required parameters.
+      // Ensure they aren't trying to delete it.
+      if (parameter.get_type() == rclcpp::ParameterType::PARAMETER_NOT_SET) {
+        result.successful = false;
+        result.reason = "Cannot delete required parameter";
+        break;
+      }
+
+      if (parameter.get_name() == "calibration" &&
+        this->get_parameter("calibration").get_value<std::string>() !=
+        parameter.get_value<std::string>())
+      {
+        need_new_data = true;
+      }
+
+      if (parameter.get_name() == "organize_cloud" &&
+        this->get_parameter("organize_cloud").get_value<bool>() !=
+        parameter.get_value<bool>())
+      {
+        need_new_container = true;
+      }
+
+      updated_params[parameter.get_name()] = parameter;
+    }
+  }
+
+  if (result.successful) {
+    double min_range = updated_params["min_range"].get_value<double>();
+    double max_range = updated_params["max_range"].get_value<double>();
+    double view_direction = updated_params["view_direction"].get_value<double>();
+    double view_width = updated_params["view_width"].get_value<double>();
+    std::string target_frame = updated_params["target_frame"].get_value<std::string>();
+    std::string fixed_frame = updated_params["fixed_frame"].get_value<std::string>();
+    std::string calibration_file = updated_params["calibration"].get_value<std::string>();
+
+    if (need_new_data) {
+      data_ = std::make_unique<velodyne_rawdata::RawData>(calibration_file);
+    }
+
+    if (need_new_container) {
+      if (updated_params["organize_cloud"].get_value<bool>()) {
+        container_ptr_ = std::make_unique<OrganizedCloudXYZIR>(
+          min_range, max_range, target_frame, fixed_frame,
+          data_->numLasers(), data_->scansPerPacket(), tf_buffer_);
+      } else {
+        container_ptr_ = std::make_unique<PointcloudXYZIR>(
+          min_range, max_range, target_frame, fixed_frame,
+          data_->scansPerPacket(), tf_buffer_);
+      }
+    }
+
+    data_->setParameters(min_range, max_range, view_direction, view_width);
+    container_ptr_->configure(min_range, max_range, target_frame, fixed_frame);
+  }
+
+  return result;
 }
 
 /** @brief Callback for raw scan messages.

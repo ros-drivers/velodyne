@@ -36,12 +36,15 @@
 #include <diagnostic_updater/diagnostic_updater.hpp>
 #include <diagnostic_updater/publisher.hpp>
 #include <rclcpp/rclcpp.hpp>
+#include <rcl_interfaces/msg/set_parameters_result.hpp>
 #include <sensor_msgs/msg/point_cloud2.hpp>
 #include <tf2_ros/buffer.h>
 #include <velodyne_msgs/msg/velodyne_scan.hpp>
 
 #include <memory>
 #include <string>
+#include <unordered_map>
+#include <vector>
 
 #include "velodyne_pointcloud/pointcloudXYZIR.hpp"
 #include "velodyne_pointcloud/rawdata.hpp"
@@ -61,6 +64,10 @@ public:
 
 private:
   void processScan(const velodyne_msgs::msg::VelodyneScan::SharedPtr scanMsg);
+
+  std::unordered_map<std::string, bool> required_parameters_;
+  rcl_interfaces::msg::SetParametersResult parametersCallback(
+    const std::vector<rclcpp::Parameter> & parameters);
 
   std::unique_ptr<velodyne_rawdata::RawData> data_;
   rclcpp::Subscription<velodyne_msgs::msg::VelodyneScan>::SharedPtr velodyne_scan_;
