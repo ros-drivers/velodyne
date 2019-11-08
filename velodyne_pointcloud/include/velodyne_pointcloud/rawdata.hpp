@@ -134,22 +134,21 @@ public:
 
 private:
   /** configuration parameters */
-  typedef struct
+  struct Config
   {
     double min_range;             ///< minimum range to publish
     double max_range;             ///< maximum range to publish
     int min_angle;                ///< minimum angle to publish
     int max_angle;                ///< maximum angle to publish
-  }
-  Config;
-  Config config_;
+  };
+  Config config_{};
 
   /**
    * Calibration file
    */
   std::unique_ptr<velodyne_pointcloud::Calibration> calibration_;
-  float sin_rot_table_[ROTATION_MAX_UNITS];
-  float cos_rot_table_[ROTATION_MAX_UNITS];
+  float sin_rot_table_[ROTATION_MAX_UNITS]{};
+  float cos_rot_table_[ROTATION_MAX_UNITS]{};
 
   /** add private function to handle the VLP16 **/
   void unpack_vlp16(const velodyne_msgs::msg::VelodynePacket & pkt, DataContainerBase & data);

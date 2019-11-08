@@ -69,12 +69,11 @@ private:
   std::unique_ptr<velodyne_rawdata::DataContainerBase> container_ptr_;
 
   /// configuration parameters
-  typedef struct
+  struct Config
   {
     int npackets;  // number of packets to combine
-  }
-  Config;
-  Config config_;
+  };
+  Config config_{};
 
   // diagnostics updater
   diagnostic_updater::Updater diagnostics_;

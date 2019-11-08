@@ -121,8 +121,7 @@ InputSocket::InputSocket(
     return;
   }
 
-  sockaddr_in my_addr;                     // my address information
-  memset(&my_addr, 0, sizeof(my_addr));    // initialize to zeros
+  sockaddr_in my_addr{};                   // my address information
   my_addr.sin_family = AF_INET;            // host byte order
   my_addr.sin_port = htons(port);          // port in network byte order
   my_addr.sin_addr.s_addr = INADDR_ANY;    // automatically fill in my IP
@@ -157,7 +156,7 @@ int InputSocket::getPacket(velodyne_msgs::msg::VelodynePacket * pkt, const doubl
   fds[0].events = POLLIN;
   static const int POLL_TIMEOUT = 1000;  // one second (in msec)
 
-  sockaddr_in sender_address;
+  sockaddr_in sender_address{};
   socklen_t sender_address_len = sizeof(sender_address);
 
   while (true) {

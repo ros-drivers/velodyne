@@ -337,7 +337,7 @@ void RawData::unpack_vlp16(const velodyne_msgs::msg::VelodynePacket & pkt, DataC
         velodyne_pointcloud::LaserCorrection & corrections = calibration_->laser_corrections[dsr];
 
         /** Position Calculation */
-        union two_bytes tmp;
+        union two_bytes tmp{};
         tmp.bytes[0] = raw->blocks[block].data[k];
         tmp.bytes[1] = raw->blocks[block].data[k + 1];
 

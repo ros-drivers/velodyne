@@ -110,7 +110,7 @@ public:
 
 private:
   int sockfd_;
-  in_addr devip_;
+  in_addr devip_{};
   bool gps_time_;
 };
 
@@ -143,8 +143,8 @@ private:
   rclcpp::Rate packet_rate_;
   std::string filename_;
   pcap_t * pcap_;
-  bpf_program pcap_packet_filter_;
-  char errbuf_[PCAP_ERRBUF_SIZE];
+  bpf_program pcap_packet_filter_{};
+  char errbuf_[PCAP_ERRBUF_SIZE]{};
   bool empty_;
   bool read_once_;
   bool read_fast_;

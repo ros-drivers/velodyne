@@ -82,7 +82,7 @@ public:
 
   float distance_resolution_m;
   std::vector<LaserCorrection> laser_corrections;
-  int num_lasers;
+  int num_lasers{};
 };
 
 }  // namespace velodyne_pointcloud
