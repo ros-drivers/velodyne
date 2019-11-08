@@ -45,6 +45,7 @@
  * @return timestamp from velodyne, possibly shifted by 1 hour if the function arguments
  * disagree by more than a half-hour.
  */
+inline
 rclcpp::Time resolveHourAmbiguity(const rclcpp::Time & stamp, const rclcpp::Time & nominal_stamp)
 {
   const int HALFHOUR_TO_SEC = 1800;
@@ -61,6 +62,7 @@ rclcpp::Time resolveHourAmbiguity(const rclcpp::Time & stamp, const rclcpp::Time
   return retval;
 }
 
+inline
 rclcpp::Time rosTimeFromGpsTimestamp(rclcpp::Time & time_nom, const uint8_t * const data)
 {
   // time_nom is used to recover the hour
