@@ -86,8 +86,8 @@ void RawData::setParameters(
 
   // converting into the hardware velodyne ref (negative yaml and degrees)
   // adding 0.5 performs a centered double to int conversion
-  config_.min_angle = std::lround(100.0 * (2.0 * M_PI - tmp_min_angle) * 180.0 / M_PI + 0.5);
-  config_.max_angle = std::lround(100.0 * (2.0 * M_PI - tmp_max_angle) * 180.0 / M_PI + 0.5);
+  config_.min_angle = std::lround(100.0 * (2.0 * M_PI - tmp_min_angle) * 180.0 / M_PI);
+  config_.max_angle = std::lround(100.0 * (2.0 * M_PI - tmp_max_angle) * 180.0 / M_PI);
 
   if (config_.min_angle == config_.max_angle) {
     // avoid returning empty cloud if min_angle = max_angle
