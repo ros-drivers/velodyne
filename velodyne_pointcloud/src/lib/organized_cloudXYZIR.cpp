@@ -82,7 +82,7 @@ void OrganizedCloudXYZIR::setup(const velodyne_msgs::msg::VelodyneScan::SharedPt
 }
 
 void OrganizedCloudXYZIR::addPoint(
-  float x, float y, float z, const uint16_t ring, const uint16_t /*azimuth*/,
+  float x, float y, float z, const uint16_t ring,
   const float distance, const float intensity)
 {
   /** The laser values are not ordered, the organized structure

@@ -131,7 +131,7 @@ public:
   }
 
   virtual void addPoint(
-    float x, float y, float z, const uint16_t ring, const uint16_t azimuth, const float distance,
+    float x, float y, float z, const uint16_t ring, const float distance,
     const float intensity) = 0;
   virtual void newLine() = 0;
 

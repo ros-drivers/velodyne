@@ -51,13 +51,12 @@ public:
 
   void addPoint(
     float x, float y, float z, const uint16_t ring,
-    const uint16_t azimuth, const float distance, const float intensity) override
+    const float distance, const float intensity) override
   {
     (void)x;
     (void)y;
     (void)z;
     (void)ring;
-    (void)azimuth;
     (void)distance;
     (void)intensity;
   }

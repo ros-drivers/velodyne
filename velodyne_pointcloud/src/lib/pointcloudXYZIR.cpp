@@ -73,7 +73,7 @@ void PointcloudXYZIR::newLine()
 }
 
 void PointcloudXYZIR::addPoint(
-  float x, float y, float z, uint16_t ring, uint16_t /*azimuth*/,
+  float x, float y, float z, uint16_t ring,
   float distance, float intensity)
 {
   if (!pointInRange(distance)) {

@@ -272,7 +272,7 @@ void RawData::unpack(const velodyne_msgs::msg::VelodynePacket & pkt, DataContain
 
         data.addPoint(
           x_coord, y_coord, z_coord, corrections.laser_ring,
-          raw->blocks[i].rotation, distance, intensity);
+          distance, intensity);
       }
     }
 
@@ -459,7 +459,7 @@ void RawData::unpack_vlp16(const velodyne_msgs::msg::VelodynePacket & pkt, DataC
 
           data.addPoint(
             x_coord, y_coord, z_coord, corrections.laser_ring,
-            azimuth_corrected, distance, intensity);
+            distance, intensity);
         }
       }
 
