@@ -44,7 +44,10 @@
 namespace velodyne_rawdata
 {
 
-inline float SQR(float val) {return val * val;}
+inline float square(float val)
+{
+  return val * val;
+}
 
 ////////////////////////////////////////////////////////////////////////
 //
@@ -262,9 +265,8 @@ void RawData::unpack(const velodyne_msgs::msg::VelodynePacket & pkt, DataContain
           (1.0f - corrections.focal_distance / 13100.0f) *
           (1.0f - corrections.focal_distance / 13100.0f);
         float focal_slope = corrections.focal_slope;
-        intensity +=
-          focal_slope * (std::abs(focal_offset - 256 *
-          SQR(1 - static_cast<float>(tmp.uint) / 65535)));
+        intensity += focal_slope *
+          (std::abs(focal_offset - 256.0f * square((1.0f - distance) / 65535.0f)));
         intensity = (intensity < min_intensity) ? min_intensity : intensity;
         intensity = (intensity > max_intensity) ? max_intensity : intensity;
 
@@ -448,10 +450,10 @@ void RawData::unpack_vlp16(const velodyne_msgs::msg::VelodynePacket & pkt, DataC
 
           intensity = raw->blocks[block].data[k + 2];
 
-          float focal_offset = 256 * SQR(1 - corrections.focal_distance / 13100);
+          float focal_offset = 256.0f * square(1.0f - corrections.focal_distance / 13100.0f);
           float focal_slope = corrections.focal_slope;
           intensity += focal_slope *
-            (std::abs(focal_offset - 256 * SQR(1 - tmp.uint / 65535)));
+            (std::abs(focal_offset - 256.0f * square((1.0f - distance) / 65535.0f)));
           intensity = (intensity < min_intensity) ? min_intensity : intensity;
           intensity = (intensity > max_intensity) ? max_intensity : intensity;
 
