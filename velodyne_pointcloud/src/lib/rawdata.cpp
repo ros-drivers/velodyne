@@ -194,11 +194,11 @@ void RawData::unpack(const velodyne_msgs::msg::VelodynePacket & pkt, DataContain
         // Calculate temporal Y, use absolute value
         float yy = xy_distance * cos_rot_angle + horiz_offset * sin_rot_angle;
 
-        if (xx < 0) {
+        if (xx < 0.0f) {
           xx = -xx;
         }
 
-        if (yy < 0) {
+        if (yy < 0.0f) {
           yy = -yy;
         }
 
@@ -211,12 +211,12 @@ void RawData::unpack(const velodyne_msgs::msg::VelodynePacket & pkt, DataContain
         if (corrections.two_pt_correction_available) {
           distance_corr_x =
             (corrections.dist_correction - corrections.dist_correction_x) *
-            (xx - 2.4) / (25.04 - 2.4) +
+            (xx - 2.4f) / (25.04f - 2.4f) +
             corrections.dist_correction_x;
           distance_corr_x -= corrections.dist_correction;
           distance_corr_y =
             (corrections.dist_correction - corrections.dist_correction_y) *
-            (yy - 1.93) / (25.04 - 1.93) +
+            (yy - 1.93f) / (25.04f - 1.93f) +
             corrections.dist_correction_y;
           distance_corr_y -= corrections.dist_correction;
         }
@@ -258,9 +258,9 @@ void RawData::unpack(const velodyne_msgs::msg::VelodynePacket & pkt, DataContain
 
         intensity = raw->blocks[i].data[k + 2];
 
-        float focal_offset = 256 *
-          (1 - corrections.focal_distance / 13100) *
-          (1 - corrections.focal_distance / 13100);
+        float focal_offset = 256.0f *
+          (1.0f - corrections.focal_distance / 13100.0f) *
+          (1.0f - corrections.focal_distance / 13100.0f);
         float focal_slope = corrections.focal_slope;
         intensity +=
           focal_slope * (std::abs(focal_offset - 256 *
@@ -388,11 +388,11 @@ void RawData::unpack_vlp16(const velodyne_msgs::msg::VelodynePacket & pkt, DataC
           // Calculate temporal Y, use absolute value
           float yy = xy_distance * cos_rot_angle + horiz_offset * sin_rot_angle;
 
-          if (xx < 0) {
+          if (xx < 0.0f) {
             xx = -xx;
           }
 
-          if (yy < 0) {
+          if (yy < 0.0f) {
             yy = -yy;
           }
 
@@ -405,11 +405,11 @@ void RawData::unpack_vlp16(const velodyne_msgs::msg::VelodynePacket & pkt, DataC
           if (corrections.two_pt_correction_available) {
             distance_corr_x =
               (corrections.dist_correction - corrections.dist_correction_x) *
-              (xx - 2.4) / (25.04 - 2.4) + corrections.dist_correction_x;
+              (xx - 2.4f) / (25.04f - 2.4f) + corrections.dist_correction_x;
             distance_corr_x -= corrections.dist_correction;
             distance_corr_y =
               (corrections.dist_correction - corrections.dist_correction_y) *
-              (yy - 1.93) / (25.04 - 1.93) + corrections.dist_correction_y;
+              (yy - 1.93f) / (25.04f - 1.93f) + corrections.dist_correction_y;
             distance_corr_y -= corrections.dist_correction;
           }
 
