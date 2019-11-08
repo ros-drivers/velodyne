@@ -331,7 +331,7 @@ int InputPCAP::getPacket(velodyne_msgs::msg::VelodynePacket * pkt, const double 
       }
 
       // Keep the reader from blowing through the file.
-      if (read_fast_ == false) {
+      if (!read_fast_) {
         packet_rate_.sleep();
       }
 
