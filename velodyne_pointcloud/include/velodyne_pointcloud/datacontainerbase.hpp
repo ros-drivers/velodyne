@@ -125,6 +125,8 @@ public:
     cloud.is_dense = static_cast<uint8_t>(config_.is_dense);
     cloud.row_step = cloud.width * cloud.point_step;
     cloud.data.resize(scan_msg->packets.size() * config_.scans_per_packet * cloud.point_step);
+    // Clear out the last data; this is important in the organized cloud case
+    std::fill(cloud.data.begin(), cloud.data.end(), 0);
     if (config_.transform) {
       computeTransformation(scan_msg->header.stamp);
     }
