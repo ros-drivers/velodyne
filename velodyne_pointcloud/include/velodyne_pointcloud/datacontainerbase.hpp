@@ -86,6 +86,8 @@ public:
     cloud.row_step = cloud.width * cloud.point_step;
   }
 
+  virtual ~DataContainerBase() {}
+
   struct Config final
   {
     double min_range;          ///< minimum range to publish
