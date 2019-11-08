@@ -150,7 +150,7 @@ VelodyneDriver::VelodyneDriver(const rclcpp::NodeOptions & options)
     diagnostic_updater::TimeStampStatusParam());
 
   // open Velodyne input device or file
-  if (dump_file != "") {                // have PCAP file?
+  if (!dump_file.empty()) {                // have PCAP file?
     // read data from packet capture file
     input_ = std::make_unique<velodyne_driver::InputPCAP>(
       this, devip, udp_port, packet_rate,
