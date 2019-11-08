@@ -57,9 +57,9 @@ public:
   VelodyneDriver & operator=(const VelodyneDriver & c) = delete;
 
 private:
-  bool poll(void);
+  bool poll();
 
-  void pollThread(void);
+  void pollThread();
 
   // configuration parameters
   struct

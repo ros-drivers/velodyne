@@ -179,7 +179,7 @@ VelodyneDriver::~VelodyneDriver()
  *
  *  @returns true unless end of file reached
  */
-bool VelodyneDriver::poll(void)
+bool VelodyneDriver::poll()
 {
   if (!config_.enabled) {
     // If we are not enabled exit once a second to let the caller handle

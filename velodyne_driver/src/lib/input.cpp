@@ -142,7 +142,7 @@ InputSocket::InputSocket(
 }
 
 /** @brief destructor */
-InputSocket::~InputSocket(void)
+InputSocket::~InputSocket()
 {
   (void) ::close(sockfd_);
 }
@@ -308,7 +308,7 @@ InputPCAP::InputPCAP(
 }
 
 /** destructor */
-InputPCAP::~InputPCAP(void)
+InputPCAP::~InputPCAP()
 {
   pcap_close(pcap_);
 }
