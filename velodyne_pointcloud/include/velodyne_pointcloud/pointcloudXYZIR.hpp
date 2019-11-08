@@ -51,7 +51,7 @@ public:
   explicit PointcloudXYZIR(
     const double min_range, const double max_range, const std::string & target_frame,
     const std::string & fixed_frame, const unsigned int scans_per_block,
-    tf2::BufferCore & buffer);
+    tf2::BufferCore & tf_buffer);
 
   void newLine() override;
 
