@@ -53,7 +53,7 @@ class Convert final
 {
 public:
   explicit Convert(const rclcpp::NodeOptions & options);
-  ~Convert() {}
+  ~Convert() override {}
   Convert(Convert && c) = delete;
   Convert & operator=(Convert && c) = delete;
   Convert(const Convert & c) = delete;

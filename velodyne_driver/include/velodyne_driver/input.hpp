@@ -101,7 +101,7 @@ public:
   explicit InputSocket(
     rclcpp::Node * private_nh,
     const std::string & devip, uint16_t port, bool gps_time);
-  ~InputSocket();
+  ~InputSocket() override;
 
   int getPacket(
     velodyne_msgs::msg::VelodynePacket * pkt,
@@ -132,7 +132,7 @@ public:
     bool read_once,
     bool read_fast,
     double repeat_delay);
-  ~InputPCAP();
+  ~InputPCAP() override;
 
   int getPacket(
     velodyne_msgs::msg::VelodynePacket * pkt,

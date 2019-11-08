@@ -56,7 +56,7 @@ class Transform final
 {
 public:
   explicit Transform(const rclcpp::NodeOptions & options);
-  ~Transform() {}
+  ~Transform() override {}
   Transform(Transform && c) = delete;
   Transform & operator=(Transform && c) = delete;
   Transform(const Transform & c) = delete;
