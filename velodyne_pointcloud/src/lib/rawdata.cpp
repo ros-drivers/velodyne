@@ -122,7 +122,7 @@ void RawData::unpack(const velodyne_msgs::msg::VelodynePacket & pkt, DataContain
     return;
   }
 
-  const raw_packet_t * raw = (const raw_packet_t *) &pkt.data[0];
+  const raw_packet * raw = reinterpret_cast<const raw_packet *>(&pkt.data[0]);
 
   for (int i = 0; i < BLOCKS_PER_PACKET; i++) {
     // upper bank lasers are numbered [0..31]
@@ -144,8 +144,8 @@ void RawData::unpack(const velodyne_msgs::msg::VelodynePacket & pkt, DataContain
         calibration_->laser_corrections[laser_number];
 
       /** Position Calculation */
-      const raw_block_t & block = raw->blocks[i];
-      union two_bytes tmp;
+      const raw_block & block = raw->blocks[i];
+      union two_bytes tmp{};
       tmp.bytes[0] = block.data[k];
       tmp.bytes[1] = block.data[k + 1];
 
@@ -294,7 +294,7 @@ void RawData::unpack_vlp16(const velodyne_msgs::msg::VelodynePacket & pkt, DataC
   float x, y, z;
   float intensity;
 
-  const raw_packet_t * raw = (const raw_packet_t *) &pkt.data[0];
+  const raw_packet * raw = reinterpret_cast<const raw_packet *>(&pkt.data[0]);
 
   for (int block = 0; block < BLOCKS_PER_PACKET; block++) {
     // ignore packets with mangled or otherwise different contents

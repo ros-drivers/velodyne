@@ -75,13 +75,12 @@ static const float VLP16_FIRING_TOFFSET = 55.296f;    // [µs]
  *
  *  use stdint.h types, so things work with both 64 and 32-bit machines
  */
-typedef struct raw_block
+struct raw_block
 {
   uint16_t header;    ///< UPPER_BANK or LOWER_BANK
   uint16_t rotation;  ///< 0-35999, divide by 100 to get degrees
   uint8_t data[BLOCK_DATA_SIZE];
-}
-raw_block_t;
+};
 
 /** used for unpacking the first two data bytes in a block
  *
@@ -110,13 +109,12 @@ static const int SCANS_PER_PACKET = (SCANS_PER_BLOCK * BLOCKS_PER_PACKET);
  *
  *  status has either a temperature encoding or the microcode level
  */
-typedef struct raw_packet
+struct raw_packet
 {
-  raw_block_t blocks[BLOCKS_PER_PACKET];
+  raw_block blocks[BLOCKS_PER_PACKET];
   uint16_t revolution;
   uint8_t status[PACKET_STATUS_SIZE];
-}
-raw_packet_t;
+};
 
 /** \brief Velodyne data conversion class */
 class RawData final
