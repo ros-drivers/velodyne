@@ -158,12 +158,12 @@ void RawData::unpack(const velodyne_msgs::msg::VelodynePacket & pkt, DataContain
 
       /*condition added to avoid calculating points which are not
         in the interesting defined area (min_angle < area < max_angle)*/
-      if ((block.rotation >= config_.min_angle &&
-        block.rotation <= config_.max_angle &&
-        config_.min_angle < config_.max_angle) ||
+      if ((config_.min_angle < config_.max_angle &&
+        block.rotation >= config_.min_angle &&
+        block.rotation <= config_.max_angle) ||
         (config_.min_angle > config_.max_angle &&
-        (raw->blocks[i].rotation <= config_.max_angle ||
-        raw->blocks[i].rotation >= config_.min_angle)))
+        (block.rotation <= config_.max_angle ||
+        block.rotation >= config_.min_angle)))
       {
         float distance = tmp.uint * calibration_->distance_resolution_m;
         distance += corrections.dist_correction;
