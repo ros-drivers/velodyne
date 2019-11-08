@@ -45,10 +45,10 @@ import yaml
 
 def generate_launch_description():
     share_dir = ament_index_python.packages.get_package_share_directory('velodyne_pointcloud')
-    params_file = os.path.join(share_dir, 'config', 'VLP16-velodyne_convert_node-params.yaml')
+    params_file = os.path.join(share_dir, 'config', 'VLP32C-velodyne_convert_node-params.yaml')
     with open(params_file, 'r') as f:
         params = yaml.safe_load(f)['velodyne_convert_node']['ros__parameters']
-    params['calibration'] = os.path.join(share_dir, 'params', 'VLP16db.yaml')
+    params['calibration'] = os.path.join(share_dir, 'params', 'VeloView-VLP-32C.yaml')
     container = ComposableNodeContainer(
             node_name='velodyne_pointcloud_convert_container',
             node_namespace='',

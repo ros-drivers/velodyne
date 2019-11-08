@@ -29,50 +29,57 @@
 # ANY WAY OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE
 # POSSIBILITY OF SUCH DAMAGE.
 
-"""Launch the velodyne driver, pointcloud, and laserscan nodes with default configuration."""
+"""Launch the velodyne driver, pointcloud, and laserscan nodes in a composable container with default configuration."""
 
 import os
 import yaml
 
 import ament_index_python.packages
-import launch
-import launch_ros.actions
+from launch import LaunchDescription
+from launch_ros.actions import ComposableNodeContainer
+from launch_ros.descriptions import ComposableNode
 
 
 def generate_launch_description():
     driver_share_dir = ament_index_python.packages.get_package_share_directory('velodyne_driver')
-    driver_params_file = os.path.join(driver_share_dir, 'config', 'VLP16-velodyne_driver_node-params.yaml')
-    velodyne_driver_node = launch_ros.actions.Node(package='velodyne_driver',
-                                                   node_executable='velodyne_driver_node',
-                                                   output='both',
-                                                   parameters=[driver_params_file])
+    driver_params_file = os.path.join(driver_share_dir, 'config', 'VLP32C-velodyne_driver_node-params.yaml')
+    with open(driver_params_file, 'r') as f:
+        driver_params = yaml.safe_load(f)['velodyne_driver_node']['ros__parameters']
 
     convert_share_dir = ament_index_python.packages.get_package_share_directory('velodyne_pointcloud')
-    convert_params_file = os.path.join(convert_share_dir, 'config', 'VLP16-velodyne_convert_node-params.yaml')
+    convert_params_file = os.path.join(convert_share_dir, 'config', 'VLP32C-velodyne_convert_node-params.yaml')
     with open(convert_params_file, 'r') as f:
         convert_params = yaml.safe_load(f)['velodyne_convert_node']['ros__parameters']
-    convert_params['calibration'] = os.path.join(convert_share_dir, 'params', 'VLP16db.yaml')
-    velodyne_convert_node = launch_ros.actions.Node(package='velodyne_pointcloud',
-                                                    node_executable='velodyne_convert_node',
-                                                    output='both',
-                                                    parameters=[convert_params])
+    convert_params['calibration'] = os.path.join(convert_share_dir, 'params', 'VeloView-VLP-32C.yaml')
 
     laserscan_share_dir = ament_index_python.packages.get_package_share_directory('velodyne_laserscan')
     laserscan_params_file = os.path.join(laserscan_share_dir, 'config', 'default-velodyne_laserscan_node-params.yaml')
-    velodyne_laserscan_node = launch_ros.actions.Node(package='velodyne_laserscan',
-                                                      node_executable='velodyne_laserscan_node',
-                                                      output='both',
-                                                      parameters=[laserscan_params_file])
+    with open(laserscan_params_file, 'r') as f:
+        laserscan_params = yaml.safe_load(f)['velodyne_laserscan_node']['ros__parameters']
 
+    container = ComposableNodeContainer(
+            node_name='velodyne_container',
+            node_namespace='',
+            package='rclcpp_components',
+            node_executable='component_container',
+            composable_node_descriptions=[
+                ComposableNode(
+                    package='velodyne_driver',
+                    node_plugin='velodyne_driver::VelodyneDriver',
+                    node_name='velodyne_driver_node',
+                    parameters=[driver_params]),
+                ComposableNode(
+                    package='velodyne_pointcloud',
+                    node_plugin='velodyne_pointcloud::Convert',
+                    node_name='velodyne_convert_node',
+                    parameters=[convert_params]),
+                ComposableNode(
+                    package='velodyne_laserscan',
+                    node_plugin='velodyne_laserscan::VelodyneLaserScan',
+                    node_name='velodyne_laserscan_node',
+                    parameters=[laserscan_params]),
+            ],
+            output='both',
+    )
 
-    return launch.LaunchDescription([velodyne_driver_node,
-                                     velodyne_convert_node,
-                                     velodyne_laserscan_node,
-
-                                     launch.actions.RegisterEventHandler(
-                                         event_handler=launch.event_handlers.OnProcessExit(
-                                             target_action=velodyne_driver_node,
-                                             on_exit=[launch.actions.EmitEvent(
-                                                 event=launch.events.Shutdown())],
-                                         )),
-                                     ])
+    return LaunchDescription([container])

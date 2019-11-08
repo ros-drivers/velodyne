@@ -30,7 +30,7 @@
 # ANY WAY OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE
 # POSSIBILITY OF SUCH DAMAGE.
 
-"""Launch the velodyne pointcloud convert with default configuration."""
+"""Launch the velodyne driver node in a composable container with default configuration."""
 
 import os
 
@@ -44,21 +44,22 @@ import yaml
 
 
 def generate_launch_description():
-    share_dir = ament_index_python.packages.get_package_share_directory('velodyne_pointcloud')
-    params_file = os.path.join(share_dir, 'config', 'VLP16-velodyne_convert_node-params.yaml')
-    with open(params_file, 'r') as f:
-        params = yaml.safe_load(f)['velodyne_convert_node']['ros__parameters']
-    params['calibration'] = os.path.join(share_dir, 'params', 'VLP16db.yaml')
+    config_directory = os.path.join(
+        ament_index_python.packages.get_package_share_directory('velodyne_driver'),
+        'config')
+    param_config = os.path.join(config_directory, 'VLP32C-velodyne_driver_node-params.yaml')
+    with open(param_config, 'r') as f:
+        params = yaml.safe_load(f)['velodyne_driver_node']['ros__parameters']
     container = ComposableNodeContainer(
-            node_name='velodyne_pointcloud_convert_container',
+            node_name='velodyne_driver_container',
             node_namespace='',
             package='rclcpp_components',
             node_executable='component_container',
             composable_node_descriptions=[
                 ComposableNode(
-                    package='velodyne_pointcloud',
-                    node_plugin='velodyne_pointcloud::Convert',
-                    node_name='velodyne_convert_node',
+                    package='velodyne_driver',
+                    node_plugin='velodyne_driver::VelodyneDriver',
+                    node_name='velodyne_driver_node',
                     parameters=[params]),
             ],
             output='both',

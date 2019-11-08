@@ -41,17 +41,17 @@ import launch_ros.actions
 
 def generate_launch_description():
     driver_share_dir = ament_index_python.packages.get_package_share_directory('velodyne_driver')
-    driver_params_file = os.path.join(driver_share_dir, 'config', 'VLP16-velodyne_driver_node-params.yaml')
+    driver_params_file = os.path.join(driver_share_dir, 'config', 'VLP32C-velodyne_driver_node-params.yaml')
     velodyne_driver_node = launch_ros.actions.Node(package='velodyne_driver',
                                                    node_executable='velodyne_driver_node',
                                                    output='both',
                                                    parameters=[driver_params_file])
 
     convert_share_dir = ament_index_python.packages.get_package_share_directory('velodyne_pointcloud')
-    convert_params_file = os.path.join(convert_share_dir, 'config', 'VLP16-velodyne_convert_node-params.yaml')
+    convert_params_file = os.path.join(convert_share_dir, 'config', 'VLP32C-velodyne_convert_node-params.yaml')
     with open(convert_params_file, 'r') as f:
         convert_params = yaml.safe_load(f)['velodyne_convert_node']['ros__parameters']
-    convert_params['calibration'] = os.path.join(convert_share_dir, 'params', 'VLP16db.yaml')
+    convert_params['calibration'] = os.path.join(convert_share_dir, 'params', 'VeloView-VLP-32C.yaml')
     velodyne_convert_node = launch_ros.actions.Node(package='velodyne_pointcloud',
                                                     node_executable='velodyne_convert_node',
                                                     output='both',
