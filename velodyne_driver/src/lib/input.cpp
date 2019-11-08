@@ -225,9 +225,8 @@ int InputSocket::getPacket(velodyne_msgs::msg::VelodynePacket * pkt, const doubl
         sender_address.sin_addr.s_addr != devip_.s_addr)
       {
         continue;
-      } else {
-        break;  // done
       }
+      break;  // done
     }
 
     RCLCPP_DEBUG(private_nh_->get_logger(),

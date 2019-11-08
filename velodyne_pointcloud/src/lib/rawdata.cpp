@@ -98,9 +98,8 @@ int RawData::scansPerPacket() const
   if (calibration_->num_lasers == 16) {
     return BLOCKS_PER_PACKET * VLP16_FIRINGS_PER_BLOCK *
            VLP16_SCANS_PER_FIRING;
-  } else {
-    return BLOCKS_PER_PACKET * SCANS_PER_BLOCK;
   }
+  return BLOCKS_PER_PACKET * SCANS_PER_BLOCK;
 }
 
 int RawData::numLasers() const
