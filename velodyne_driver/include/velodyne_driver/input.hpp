@@ -53,10 +53,9 @@
 #ifndef VELODYNE_DRIVER__INPUT_HPP_
 #define VELODYNE_DRIVER__INPUT_HPP_
 
-#include <unistd.h>
-#include <stdio.h>
-#include <pcap.h>
 #include <netinet/in.h>
+
+#include <pcap.h>
 
 #include <rclcpp/rclcpp.hpp>
 #include <velodyne_msgs/msg/velodyne_packet.hpp>

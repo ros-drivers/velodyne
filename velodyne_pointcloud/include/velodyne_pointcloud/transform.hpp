@@ -33,10 +33,10 @@
 #ifndef VELODYNE_POINTCLOUD__TRANSFORM_HPP_
 #define VELODYNE_POINTCLOUD__TRANSFORM_HPP_
 
-#include <rclcpp/rclcpp.hpp>
 #include <diagnostic_updater/diagnostic_updater.hpp>
 #include <diagnostic_updater/publisher.hpp>
 #include <message_filters/subscriber.h>
+#include <rclcpp/rclcpp.hpp>
 #include <sensor_msgs/msg/point_cloud2.hpp>
 #include <tf2_ros/buffer.h>
 #include <tf2_ros/message_filter.h>
@@ -46,8 +46,8 @@
 #include <memory>
 #include <string>
 
-#include "velodyne_pointcloud/rawdata.hpp"
 #include "velodyne_pointcloud/pointcloudXYZIR.hpp"
+#include "velodyne_pointcloud/rawdata.hpp"
 
 namespace velodyne_pointcloud
 {
