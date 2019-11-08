@@ -156,7 +156,7 @@ public:
     config_.fixed_frame = fixed_frame;
     config_.target_frame = target_frame;
 
-    config_.transform = fixed_frame.compare(target_frame) != 0;
+    config_.transform = fixed_frame != target_frame;
   }
 
 protected:
