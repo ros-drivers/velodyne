@@ -43,7 +43,7 @@ import yaml
 
 def generate_launch_description():
     share_dir = ament_index_python.packages.get_package_share_directory('velodyne_pointcloud')
-    params_file = os.path.join(share_dir, 'config', 'default-velodyne_transform_node-params.yaml')
+    params_file = os.path.join(share_dir, 'config', 'VLP16-velodyne_transform_node-params.yaml')
     with open(params_file, 'r') as f:
         params = yaml.safe_load(f)['velodyne_transform_node']['ros__parameters']
     params['calibration'] = os.path.join(share_dir, 'params', 'VLP16db.yaml')

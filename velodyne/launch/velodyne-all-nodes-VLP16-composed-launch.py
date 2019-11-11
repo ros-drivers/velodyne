@@ -47,7 +47,7 @@ def generate_launch_description():
         driver_params = yaml.safe_load(f)['velodyne_driver_node']['ros__parameters']
 
     convert_share_dir = ament_index_python.packages.get_package_share_directory('velodyne_pointcloud')
-    convert_params_file = os.path.join(convert_share_dir, 'config', 'default-velodyne_convert_node-params.yaml')
+    convert_params_file = os.path.join(convert_share_dir, 'config', 'VLP16-velodyne_convert_node-params.yaml')
     with open(convert_params_file, 'r') as f:
         convert_params = yaml.safe_load(f)['velodyne_convert_node']['ros__parameters']
     convert_params['calibration'] = os.path.join(convert_share_dir, 'params', 'VLP16db.yaml')

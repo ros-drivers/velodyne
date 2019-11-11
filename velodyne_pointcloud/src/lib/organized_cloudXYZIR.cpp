@@ -56,33 +56,33 @@ OrganizedCloudXYZIR::OrganizedCloudXYZIR(
     "z", 1, sensor_msgs::msg::PointField::FLOAT32,
     "intensity", 1, sensor_msgs::msg::PointField::FLOAT32,
     "ring", 1, sensor_msgs::msg::PointField::UINT16),
-  iter_x(cloud, "x"), iter_y(cloud, "y"), iter_z(cloud, "z"),
-  iter_intensity(cloud, "intensity"), iter_ring(cloud, "ring")
+  iter_x_(cloud, "x"), iter_y_(cloud, "y"), iter_z_(cloud, "z"),
+  iter_intensity_(cloud, "intensity"), iter_ring_(cloud, "ring")
 {
 }
 
 void OrganizedCloudXYZIR::newLine()
 {
-  iter_x = iter_x + config_.init_width;
-  iter_y = iter_y + config_.init_width;
-  iter_z = iter_z + config_.init_width;
-  iter_ring = iter_ring + config_.init_width;
-  iter_intensity = iter_intensity + config_.init_width;
+  iter_x_ = iter_x_ + config_.init_width;
+  iter_y_ = iter_y_ + config_.init_width;
+  iter_z_ = iter_z_ + config_.init_width;
+  iter_ring_ = iter_ring_ + config_.init_width;
+  iter_intensity_ = iter_intensity_ + config_.init_width;
   ++cloud.height;
 }
 
 void OrganizedCloudXYZIR::setup(const velodyne_msgs::msg::VelodyneScan::SharedPtr scan_msg)
 {
   DataContainerBase::setup(scan_msg);
-  iter_x = sensor_msgs::PointCloud2Iterator<float>(cloud, "x");
-  iter_y = sensor_msgs::PointCloud2Iterator<float>(cloud, "y");
-  iter_z = sensor_msgs::PointCloud2Iterator<float>(cloud, "z");
-  iter_intensity = sensor_msgs::PointCloud2Iterator<float>(cloud, "intensity");
-  iter_ring = sensor_msgs::PointCloud2Iterator<uint16_t>(cloud, "ring");
+  iter_x_ = sensor_msgs::PointCloud2Iterator<float>(cloud, "x");
+  iter_y_ = sensor_msgs::PointCloud2Iterator<float>(cloud, "y");
+  iter_z_ = sensor_msgs::PointCloud2Iterator<float>(cloud, "z");
+  iter_intensity_ = sensor_msgs::PointCloud2Iterator<float>(cloud, "intensity");
+  iter_ring_ = sensor_msgs::PointCloud2Iterator<uint16_t>(cloud, "ring");
 }
 
 void OrganizedCloudXYZIR::addPoint(
-  float x, float y, float z, const uint16_t ring, const uint16_t /*azimuth*/,
+  float x, float y, float z, const uint16_t ring,
   const float distance, const float intensity)
 {
   /** The laser values are not ordered, the organized structure
@@ -96,17 +96,17 @@ void OrganizedCloudXYZIR::addPoint(
       transformPoint(x, y, z);
     }
 
-    *(iter_x + ring) = x;
-    *(iter_y + ring) = y;
-    *(iter_z + ring) = z;
-    *(iter_intensity + ring) = intensity;
-    *(iter_ring + ring) = ring;
+    *(iter_x_ + ring) = x;
+    *(iter_y_ + ring) = y;
+    *(iter_z_ + ring) = z;
+    *(iter_intensity_ + ring) = intensity;
+    *(iter_ring_ + ring) = ring;
   } else {
-    *(iter_x + ring) = nanf("");
-    *(iter_y + ring) = nanf("");
-    *(iter_z + ring) = nanf("");
-    *(iter_intensity + ring) = ::nanf("");
-    *(iter_ring + ring) = ring;
+    *(iter_x_ + ring) = nanf("");
+    *(iter_y_ + ring) = nanf("");
+    *(iter_z_ + ring) = nanf("");
+    *(iter_intensity_ + ring) = ::nanf("");
+    *(iter_ring_ + ring) = ring;
   }
 }
 

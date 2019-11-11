@@ -30,38 +30,31 @@
 # ANY WAY OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE
 # POSSIBILITY OF SUCH DAMAGE.
 
-"""Launch the velodyne pointcloud convert with default configuration."""
+"""Launch the velodyne driver node with default configuration."""
 
 import os
 
 import ament_index_python.packages
-
-from launch import LaunchDescription
-from launch_ros.actions import ComposableNodeContainer
-from launch_ros.descriptions import ComposableNode
-
-import yaml
+import launch
+import launch_ros.actions
 
 
 def generate_launch_description():
-    share_dir = ament_index_python.packages.get_package_share_directory('velodyne_pointcloud')
-    params_file = os.path.join(share_dir, 'config', 'VLP16-velodyne_convert_node-params.yaml')
-    with open(params_file, 'r') as f:
-        params = yaml.safe_load(f)['velodyne_convert_node']['ros__parameters']
-    params['calibration'] = os.path.join(share_dir, 'params', 'VLP16db.yaml')
-    container = ComposableNodeContainer(
-            node_name='velodyne_pointcloud_convert_container',
-            node_namespace='',
-            package='rclcpp_components',
-            node_executable='component_container',
-            composable_node_descriptions=[
-                ComposableNode(
-                    package='velodyne_pointcloud',
-                    node_plugin='velodyne_pointcloud::Convert',
-                    node_name='velodyne_convert_node',
-                    parameters=[params]),
-            ],
-            output='both',
-    )
+    config_directory = os.path.join(
+        ament_index_python.packages.get_package_share_directory('velodyne_driver'),
+        'config')
+    params = os.path.join(config_directory, 'VLP32C-velodyne_driver_node-params.yaml')
+    velodyne_driver_node = launch_ros.actions.Node(package='velodyne_driver',
+                                                   node_executable='velodyne_driver_node',
+                                                   output='both',
+                                                   parameters=[params])
 
-    return LaunchDescription([container])
+    return launch.LaunchDescription([velodyne_driver_node,
+
+                                     launch.actions.RegisterEventHandler(
+                                         event_handler=launch.event_handlers.OnProcessExit(
+                                             target_action=velodyne_driver_node,
+                                             on_exit=[launch.actions.EmitEvent(
+                                                 event=launch.events.Shutdown())],
+                                         )),
+                                     ])

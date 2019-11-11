@@ -33,9 +33,9 @@
 #ifndef VELODYNE_POINTCLOUD__CONVERT_HPP_
 #define VELODYNE_POINTCLOUD__CONVERT_HPP_
 
-#include <rclcpp/rclcpp.hpp>
 #include <diagnostic_updater/diagnostic_updater.hpp>
 #include <diagnostic_updater/publisher.hpp>
+#include <rclcpp/rclcpp.hpp>
 #include <sensor_msgs/msg/point_cloud2.hpp>
 #include <tf2_ros/buffer.h>
 #include <velodyne_msgs/msg/velodyne_scan.hpp>
@@ -43,8 +43,8 @@
 #include <memory>
 #include <string>
 
-#include "velodyne_pointcloud/rawdata.hpp"
 #include "velodyne_pointcloud/pointcloudXYZIR.hpp"
+#include "velodyne_pointcloud/rawdata.hpp"
 
 namespace velodyne_pointcloud
 {
@@ -53,7 +53,7 @@ class Convert final
 {
 public:
   explicit Convert(const rclcpp::NodeOptions & options);
-  ~Convert() {}
+  ~Convert() override {}
   Convert(Convert && c) = delete;
   Convert & operator=(Convert && c) = delete;
   Convert(const Convert & c) = delete;
@@ -69,12 +69,11 @@ private:
   std::unique_ptr<velodyne_rawdata::DataContainerBase> container_ptr_;
 
   /// configuration parameters
-  typedef struct
+  struct Config
   {
     int npackets;  // number of packets to combine
-  }
-  Config;
-  Config config_;
+  };
+  Config config_{};
 
   // diagnostics updater
   diagnostic_updater::Updater diagnostics_;

@@ -140,7 +140,7 @@ void operator>>(const YAML::Node & node, std::pair<int, LaserCorrection> & corre
 
 #endif
 
-  correction.second.max_intensity = ::floor(max_intensity_float);
+  correction.second.max_intensity = ::floorf(max_intensity_float);
 
   float min_intensity_float = 0.0;
 
@@ -158,7 +158,7 @@ void operator>>(const YAML::Node & node, std::pair<int, LaserCorrection> & corre
 
 #endif
 
-  correction.second.min_intensity = ::floor(min_intensity_float);
+  correction.second.min_intensity = ::floorf(min_intensity_float);
 
   node[FOCAL_DISTANCE] >> correction.second.focal_distance;
   node[FOCAL_SLOPE] >> correction.second.focal_slope;

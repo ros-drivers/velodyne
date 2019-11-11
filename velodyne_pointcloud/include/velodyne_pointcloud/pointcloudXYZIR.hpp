@@ -51,19 +51,19 @@ public:
   explicit PointcloudXYZIR(
     const double min_range, const double max_range, const std::string & target_frame,
     const std::string & fixed_frame, const unsigned int scans_per_block,
-    tf2::BufferCore & buffer);
+    tf2::BufferCore & tf_buffer);
 
   void newLine() override;
 
   void setup(const velodyne_msgs::msg::VelodyneScan::SharedPtr scan_msg) override;
 
   void addPoint(
-    float x, float y, float z, uint16_t ring, uint16_t azimuth,
+    float x, float y, float z, uint16_t ring,
     float distance, float intensity) override;
 
 private:
-  sensor_msgs::PointCloud2Iterator<float> iter_x, iter_y, iter_z, iter_intensity;
-  sensor_msgs::PointCloud2Iterator<uint16_t> iter_ring;
+  sensor_msgs::PointCloud2Iterator<float> iter_x_, iter_y_, iter_z_, iter_intensity_;
+  sensor_msgs::PointCloud2Iterator<uint16_t> iter_ring_;
 };
 }  // namespace velodyne_pointcloud
 

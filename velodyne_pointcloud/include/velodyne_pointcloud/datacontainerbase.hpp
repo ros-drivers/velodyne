@@ -86,6 +86,8 @@ public:
     cloud.row_step = cloud.width * cloud.point_step;
   }
 
+  virtual ~DataContainerBase() {}
+
   struct Config final
   {
     double min_range;          ///< minimum range to publish
@@ -123,13 +125,15 @@ public:
     cloud.is_dense = static_cast<uint8_t>(config_.is_dense);
     cloud.row_step = cloud.width * cloud.point_step;
     cloud.data.resize(scan_msg->packets.size() * config_.scans_per_packet * cloud.point_step);
+    // Clear out the last data; this is important in the organized cloud case
+    std::fill(cloud.data.begin(), cloud.data.end(), 0);
     if (config_.transform) {
       computeTransformation(scan_msg->header.stamp);
     }
   }
 
   virtual void addPoint(
-    float x, float y, float z, const uint16_t ring, const uint16_t azimuth, const float distance,
+    float x, float y, float z, const uint16_t ring, const float distance,
     const float intensity) = 0;
   virtual void newLine() = 0;
 
@@ -154,7 +158,7 @@ public:
     config_.fixed_frame = fixed_frame;
     config_.target_frame = target_frame;
 
-    config_.transform = fixed_frame.compare(target_frame) != 0;
+    config_.transform = fixed_frame != target_frame;
   }
 
 protected:

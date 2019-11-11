@@ -35,9 +35,9 @@
  *  ROS driver implementation for the Velodyne 3D LIDARs
  */
 
-#include <rclcpp/rclcpp.hpp>
 #include <rcl_interfaces/msg/floating_point_range.hpp>
 #include <rcl_interfaces/msg/parameter_descriptor.hpp>
+#include <rclcpp/rclcpp.hpp>
 #include <rclcpp_components/register_node_macro.hpp>
 #include <tf2_ros/transform_listener.h>
 #include <velodyne_msgs/msg/velodyne_scan.hpp>
@@ -150,7 +150,7 @@ VelodyneDriver::VelodyneDriver(const rclcpp::NodeOptions & options)
     diagnostic_updater::TimeStampStatusParam());
 
   // open Velodyne input device or file
-  if (dump_file != "") {                // have PCAP file?
+  if (!dump_file.empty()) {                // have PCAP file?
     // read data from packet capture file
     input_ = std::make_unique<velodyne_driver::InputPCAP>(
       this, devip, udp_port, packet_rate,
@@ -179,7 +179,7 @@ VelodyneDriver::~VelodyneDriver()
  *
  *  @returns true unless end of file reached
  */
-bool VelodyneDriver::poll(void)
+bool VelodyneDriver::poll()
 {
   if (!config_.enabled) {
     // If we are not enabled exit once a second to let the caller handle

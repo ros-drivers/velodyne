@@ -33,9 +33,9 @@
 #ifndef VELODYNE_DRIVER__DRIVER_HPP_
 #define VELODYNE_DRIVER__DRIVER_HPP_
 
-#include <rclcpp/rclcpp.hpp>
 #include <diagnostic_updater/diagnostic_updater.hpp>
 #include <diagnostic_updater/publisher.hpp>
+#include <rclcpp/rclcpp.hpp>
 
 #include <future>
 #include <memory>
@@ -57,9 +57,9 @@ public:
   VelodyneDriver & operator=(const VelodyneDriver & c) = delete;
 
 private:
-  bool poll(void);
+  bool poll();
 
-  void pollThread(void);
+  void pollThread();
 
   // configuration parameters
   struct

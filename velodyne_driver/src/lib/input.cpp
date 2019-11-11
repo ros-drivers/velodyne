@@ -47,13 +47,13 @@
 #include <velodyne_msgs/msg/velodyne_packet.hpp>
 
 #include <arpa/inet.h>
-#include <errno.h>
 #include <fcntl.h>
 #include <poll.h>
 #include <sys/file.h>
 #include <sys/socket.h>
 #include <unistd.h>
 
+#include <cerrno>
 #include <cmath>
 #include <memory>
 #include <sstream>
@@ -121,8 +121,7 @@ InputSocket::InputSocket(
     return;
   }
 
-  sockaddr_in my_addr;                     // my address information
-  memset(&my_addr, 0, sizeof(my_addr));    // initialize to zeros
+  sockaddr_in my_addr{};                   // my address information
   my_addr.sin_family = AF_INET;            // host byte order
   my_addr.sin_port = htons(port);          // port in network byte order
   my_addr.sin_addr.s_addr = INADDR_ANY;    // automatically fill in my IP
@@ -142,7 +141,7 @@ InputSocket::InputSocket(
 }
 
 /** @brief destructor */
-InputSocket::~InputSocket(void)
+InputSocket::~InputSocket()
 {
   (void) ::close(sockfd_);
 }
@@ -157,7 +156,7 @@ int InputSocket::getPacket(velodyne_msgs::msg::VelodynePacket * pkt, const doubl
   fds[0].events = POLLIN;
   static const int POLL_TIMEOUT = 1000;  // one second (in msec)
 
-  sockaddr_in sender_address;
+  sockaddr_in sender_address{};
   socklen_t sender_address_len = sizeof(sender_address);
 
   while (true) {
@@ -226,9 +225,8 @@ int InputSocket::getPacket(velodyne_msgs::msg::VelodynePacket * pkt, const doubl
         sender_address.sin_addr.s_addr != devip_.s_addr)
       {
         continue;
-      } else {
-        break;  // done
       }
+      break;  // done
     }
 
     RCLCPP_DEBUG(private_nh_->get_logger(),
@@ -308,7 +306,7 @@ InputPCAP::InputPCAP(
 }
 
 /** destructor */
-InputPCAP::~InputPCAP(void)
+InputPCAP::~InputPCAP()
 {
   pcap_close(pcap_);
 }
@@ -333,7 +331,7 @@ int InputPCAP::getPacket(velodyne_msgs::msg::VelodynePacket * pkt, const double 
       }
 
       // Keep the reader from blowing through the file.
-      if (read_fast_ == false) {
+      if (!read_fast_) {
         packet_rate_.sleep();
       }
 

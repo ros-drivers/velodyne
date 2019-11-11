@@ -45,7 +45,7 @@ class VelodyneLaserScan final
 {
 public:
   explicit VelodyneLaserScan(const rclcpp::NodeOptions & options);
-  ~VelodyneLaserScan() {}
+  ~VelodyneLaserScan() override {}
   VelodyneLaserScan(VelodyneLaserScan && c) = delete;
   VelodyneLaserScan & operator=(VelodyneLaserScan && c) = delete;
   VelodyneLaserScan(const VelodyneLaserScan & c) = delete;

@@ -54,18 +54,18 @@ PointcloudXYZIR::PointcloudXYZIR(
     "z", 1, sensor_msgs::msg::PointField::FLOAT32,
     "intensity", 1, sensor_msgs::msg::PointField::FLOAT32,
     "ring", 1, sensor_msgs::msg::PointField::UINT16),
-  iter_x(cloud, "x"), iter_y(cloud, "y"), iter_z(cloud, "z"),
-  iter_intensity(cloud, "intensity"), iter_ring(cloud, "ring")
+  iter_x_(cloud, "x"), iter_y_(cloud, "y"), iter_z_(cloud, "z"),
+  iter_intensity_(cloud, "intensity"), iter_ring_(cloud, "ring")
 {}
 
 void PointcloudXYZIR::setup(const velodyne_msgs::msg::VelodyneScan::SharedPtr scan_msg)
 {
   DataContainerBase::setup(scan_msg);
-  iter_x = sensor_msgs::PointCloud2Iterator<float>(cloud, "x");
-  iter_y = sensor_msgs::PointCloud2Iterator<float>(cloud, "y");
-  iter_z = sensor_msgs::PointCloud2Iterator<float>(cloud, "z");
-  iter_intensity = sensor_msgs::PointCloud2Iterator<float>(cloud, "intensity");
-  iter_ring = sensor_msgs::PointCloud2Iterator<uint16_t>(cloud, "ring");
+  iter_x_ = sensor_msgs::PointCloud2Iterator<float>(cloud, "x");
+  iter_y_ = sensor_msgs::PointCloud2Iterator<float>(cloud, "y");
+  iter_z_ = sensor_msgs::PointCloud2Iterator<float>(cloud, "z");
+  iter_intensity_ = sensor_msgs::PointCloud2Iterator<float>(cloud, "intensity");
+  iter_ring_ = sensor_msgs::PointCloud2Iterator<uint16_t>(cloud, "ring");
 }
 
 void PointcloudXYZIR::newLine()
@@ -73,7 +73,7 @@ void PointcloudXYZIR::newLine()
 }
 
 void PointcloudXYZIR::addPoint(
-  float x, float y, float z, uint16_t ring, uint16_t /*azimuth*/,
+  float x, float y, float z, uint16_t ring,
   float distance, float intensity)
 {
   if (!pointInRange(distance)) {
@@ -86,18 +86,18 @@ void PointcloudXYZIR::addPoint(
     transformPoint(x, y, z);
   }
 
-  *iter_x = x;
-  *iter_y = y;
-  *iter_z = z;
-  *iter_ring = ring;
-  *iter_intensity = intensity;
+  *iter_x_ = x;
+  *iter_y_ = y;
+  *iter_z_ = z;
+  *iter_ring_ = ring;
+  *iter_intensity_ = intensity;
 
   ++cloud.width;
-  ++iter_x;
-  ++iter_y;
-  ++iter_z;
-  ++iter_ring;
-  ++iter_intensity;
+  ++iter_x_;
+  ++iter_y_;
+  ++iter_z_;
+  ++iter_ring_;
+  ++iter_intensity_;
 }
 
 }  // namespace velodyne_pointcloud

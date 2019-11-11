@@ -58,12 +58,12 @@ public:
   void setup(const velodyne_msgs::msg::VelodyneScan::SharedPtr scan_msg) override;
 
   void addPoint(
-    float x, float y, float z, const uint16_t ring, const uint16_t azimuth,
+    float x, float y, float z, const uint16_t ring,
     const float distance, const float intensity) override;
 
 private:
-  sensor_msgs::PointCloud2Iterator<float> iter_x, iter_y, iter_z, iter_intensity;
-  sensor_msgs::PointCloud2Iterator<uint16_t> iter_ring;
+  sensor_msgs::PointCloud2Iterator<float> iter_x_, iter_y_, iter_z_, iter_intensity_;
+  sensor_msgs::PointCloud2Iterator<uint16_t> iter_ring_;
 };
 }  // namespace velodyne_pointcloud
 

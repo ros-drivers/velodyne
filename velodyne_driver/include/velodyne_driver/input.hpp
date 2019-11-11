@@ -53,10 +53,9 @@
 #ifndef VELODYNE_DRIVER__INPUT_HPP_
 #define VELODYNE_DRIVER__INPUT_HPP_
 
-#include <unistd.h>
-#include <stdio.h>
-#include <pcap.h>
 #include <netinet/in.h>
+
+#include <pcap.h>
 
 #include <rclcpp/rclcpp.hpp>
 #include <velodyne_msgs/msg/velodyne_packet.hpp>
@@ -102,7 +101,7 @@ public:
   explicit InputSocket(
     rclcpp::Node * private_nh,
     const std::string & devip, uint16_t port, bool gps_time);
-  ~InputSocket();
+  ~InputSocket() override;
 
   int getPacket(
     velodyne_msgs::msg::VelodynePacket * pkt,
@@ -111,7 +110,7 @@ public:
 
 private:
   int sockfd_;
-  in_addr devip_;
+  in_addr devip_{};
   bool gps_time_;
 };
 
@@ -133,7 +132,7 @@ public:
     bool read_once,
     bool read_fast,
     double repeat_delay);
-  ~InputPCAP();
+  ~InputPCAP() override;
 
   int getPacket(
     velodyne_msgs::msg::VelodynePacket * pkt,
@@ -144,8 +143,8 @@ private:
   rclcpp::Rate packet_rate_;
   std::string filename_;
   pcap_t * pcap_;
-  bpf_program pcap_packet_filter_;
-  char errbuf_[PCAP_ERRBUF_SIZE];
+  bpf_program pcap_packet_filter_{};
+  char errbuf_[PCAP_ERRBUF_SIZE]{};
   bool empty_;
   bool read_once_;
   bool read_fast_;
