@@ -181,47 +181,24 @@ void VelodyneLaserScan::recvCallback(const sensor_msgs::PointCloud2ConstPtr& msg
 
     if ((offset_x == 0) &&
         (offset_y == 4) &&
-        (offset_i == 16) &&
-        (offset_r == 20))
+        (offset_i % 4 == 0) &&
+        (offset_r % 4 == 0))
     {
       scan->intensities.resize(SIZE);
 
+      const size_t X = 0;
+      const size_t Y = 1;
+      const size_t I = offset_i / 4;
+      const size_t R = offset_r / 4;
       for (sensor_msgs::PointCloud2ConstIterator<float> it(*msg, "x"); it != it.end(); ++it)
       {
-        const uint16_t r = *((const uint16_t*)(&it[5]));  // ring
+        const uint16_t r = *((const uint16_t*)(&it[R]));  // ring
 
         if (r == ring)
         {
-          const float x = it[0];  // x
-          const float y = it[1];  // y
-          const float i = it[4];  // intensity
-          const int bin = (atan2f(y, x) + static_cast<float>(M_PI)) / RESOLUTION;
-
-          if ((bin >= 0) && (bin < static_cast<int>(SIZE)))
-          {
-            scan->ranges[bin] = sqrtf(x * x + y * y);
-            scan->intensities[bin] = i;
-          }
-        }
-      }
-    }
-    else
-    if ((offset_x == 0) &&
-        (offset_y == 4) &&
-        (offset_i == 12) &&
-        (offset_r == 16))
-    {
-      scan->intensities.resize(SIZE);
-
-      for (sensor_msgs::PointCloud2ConstIterator<float> it(*msg, "x"); it != it.end(); ++it)
-      {
-        const uint16_t r = *((const uint16_t*)(&it[4]));  // ring
-
-        if (r == ring)
-        {
-          const float x = it[0];  // x
-          const float y = it[1];  // y
-          const float i = it[3];  // intensity
+          const float x = it[X];  // x
+          const float y = it[Y];  // y
+          const float i = it[I];  // intensity
           const int bin = (atan2f(y, x) + static_cast<float>(M_PI)) / RESOLUTION;
 
           if ((bin >= 0) && (bin < static_cast<int>(SIZE)))
