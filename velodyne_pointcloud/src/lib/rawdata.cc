@@ -196,9 +196,7 @@ inline float SQR(float val) { return val*val; }
   /** Set up for on-line operation. */
   boost::optional<velodyne_pointcloud::Calibration> RawData::setup(ros::NodeHandle private_nh)
   {
-    // ros::NodeHandle nh_driver("private_nh.getNamespace().substr(0, private_nh.getNamespace().length()-6)+"_driver"");
-    ros::NodeHandle nh_driver("/velodyne_nodelet_manager_driver");
-    nh_driver.param("model", config_.model, std::string("64E"));
+    private_nh.param("model", config_.model, std::string("64E"));
     buildTimings();
 
     // get path to angles.config file for this device
