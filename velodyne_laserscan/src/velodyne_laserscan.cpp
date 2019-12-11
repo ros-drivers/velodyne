@@ -179,9 +179,12 @@ void VelodyneLaserScan::recvCallback(const sensor_msgs::msg::PointCloud2::Shared
       scan->intensities.resize(kSize);
 
       for (sensor_msgs::PointCloud2ConstIterator<float> it(*msg, "x"); it != it.end(); ++it) {
-        const uint16_t r =
-          (static_cast<const uint16_t>(it[5]) << 8) |
-          static_cast<const uint16_t>(it[6]);
+        // Field "ring" is of UINT16 type, 2 bytes long. But this loop's iterator assumes FLOAT32
+        // type fields, 4 bytes long. Thus, de-referencing it (even) at the right offset will
+        // only yield "ring" field bytes, plus 2 bytes right after it, interpreted as a float
+        // value. We can, however, re-interpret that float value binary representation as that
+        // of an unsigned integer, 16 bit long.
+        const uint16_t r = *(reinterpret_cast<const uint16_t *>(&it[5]));
 
         if (r == ring) {
           const float x = it[0];  // x
