@@ -25,6 +25,12 @@ namespace velodyne_pointcloud
     data_(new velodyne_rawdata::RawData()), first_rcfg_call(true),
     diagnostics_(node, private_nh, node_name)
   {
+    // Get startup parameters
+    private_nh.param<std::string>("fixed_frame", config_.fixed_frame, "velodyne");
+    private_nh.param<std::string>("target_Frame", config_.target_frame, "velodyne");
+    private_nh.param<double>("min_range", config_.min_range, 10.0);
+    private_nh.param<double>("max_range", config_.max_range, 200.0);
+    private_nh.param<bool>("organize_cloud", config_.organize_cloud, false);
 
     boost::optional<velodyne_pointcloud::Calibration> calibration = data_->setup(private_nh);
     if(calibration)
