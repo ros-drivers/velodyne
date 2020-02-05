@@ -126,7 +126,7 @@ public:
     cloud.row_step = cloud.width * cloud.point_step;
     int data_size = scan_msg->packets.size() * config_.scans_per_packet * cloud.point_step;
     // additional space is required for HDL64 S3
-    if(!cloud.is_dense && cloud.width == 64) {
+    if (!cloud.is_dense && cloud.width == 64) {
       data_size = scan_msg->packets.size() * config_.scans_per_packet * cloud.point_step * 2;
     }
     cloud.data.resize(data_size);
