@@ -6,7 +6,7 @@
   <description>
     ROS message definitions for Velodyne 3D LIDARs.
   </description>
-  <maintainer email="jwhitley@autonomoustuff.com">Josh Whitley</maintainer>
+  <maintainer email="josh.whitley@autoware.org">Josh Whitley</maintainer>
   <license>BSD</license>
   <url type="website">http://ros.org/wiki/velodyne_msgs</url>
   <url type="repository">https://github.com/ros-drivers/velodyne</url>
