@@ -11,14 +11,15 @@ namespace velodyne_pointcloud
       boost::shared_ptr<tf::TransformListener> tf_ptr)
     : DataContainerBase(
         max_range, min_range, target_frame, fixed_frame,
-        num_lasers, 0, false, scans_per_block, tf_ptr, 5,
+        num_lasers, 0, false, scans_per_block, tf_ptr, 6,
         "x", 1, sensor_msgs::PointField::FLOAT32,
         "y", 1, sensor_msgs::PointField::FLOAT32,
         "z", 1, sensor_msgs::PointField::FLOAT32,
         "intensity", 1, sensor_msgs::PointField::FLOAT32,
-        "ring", 1, sensor_msgs::PointField::UINT16),
+        "ring", 1, sensor_msgs::PointField::UINT16,
+        "time", 1, sensor_msgs::PointField::FLOAT32),
         iter_x(cloud, "x"), iter_y(cloud, "y"), iter_z(cloud, "z"),
-        iter_intensity(cloud, "intensity"), iter_ring(cloud, "ring")
+        iter_intensity(cloud, "intensity"), iter_ring(cloud, "ring"), iter_time(cloud, "time")
   {
   }
 
@@ -29,6 +30,7 @@ namespace velodyne_pointcloud
     iter_z = iter_z + config_.init_width;
     iter_ring = iter_ring + config_.init_width;
     iter_intensity = iter_intensity + config_.init_width;
+    iter_time = iter_time + config_.init_width;
     ++cloud.height;
   }
 
@@ -39,11 +41,12 @@ namespace velodyne_pointcloud
     iter_z = sensor_msgs::PointCloud2Iterator<float>(cloud, "z");
     iter_intensity = sensor_msgs::PointCloud2Iterator<float>(cloud, "intensity");
     iter_ring = sensor_msgs::PointCloud2Iterator<uint16_t >(cloud, "ring");
+    iter_time = sensor_msgs::PointCloud2Iterator<float >(cloud, "time");
   }
 
 
   void OrganizedCloudXYZIR::addPoint(float x, float y, float z,
-      const uint16_t ring, const uint16_t /*azimuth*/, const float distance, const float intensity)
+      const uint16_t ring, const uint16_t /*azimuth*/, const float distance, const float intensity, const float time)
   {
     /** The laser values are not ordered, the organized structure
      * needs ordered neighbour points. The right order is defined
@@ -61,6 +64,7 @@ namespace velodyne_pointcloud
       *(iter_z+ring) = z;
       *(iter_intensity+ring) = intensity;
       *(iter_ring+ring) = ring;
+      *(iter_time+time) = time;
     }
     else
     {
@@ -69,6 +73,7 @@ namespace velodyne_pointcloud
       *(iter_z+ring) = nanf("");
       *(iter_intensity+ring) = nanf("");
       *(iter_ring+ring) = ring;
+      *(iter_time+time) = time;
     }
   }
 }

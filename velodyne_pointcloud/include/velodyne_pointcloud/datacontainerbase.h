@@ -101,8 +101,8 @@ public:
       ROS_INFO_STREAM("Initialized container with "
                       << "min_range: " << min_range << ", max_range: " << max_range
                       << ", target_frame: " << target_frame << ", fixed_frame: " << fixed_frame
-                      << ", init_with: " << init_width << ", init_height: " << init_height << ", is_dense: " << is_dense
-                      << ", scans_per_packet: " << scans_per_packet);
+                      << ", init_width: " << init_width << ", init_height: " << init_height
+                      << ", is_dense: " << is_dense << ", scans_per_packet: " << scans_per_packet);
     }
   };
 
@@ -116,7 +116,7 @@ public:
   }
 
   virtual void addPoint(float x, float y, float z, const uint16_t ring, const uint16_t azimuth, const float distance,
-                        const float intensity) = 0;
+                        const float intensity, const float time) = 0;
   virtual void newLine() = 0;
 
   const sensor_msgs::PointCloud2& finishCloud()

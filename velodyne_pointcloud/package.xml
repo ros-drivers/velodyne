@@ -5,7 +5,7 @@
   <description>
     Point cloud conversions for Velodyne 3D LIDARs.
   </description>
-  <maintainer email="jwhitley@autonomoustuff.com">Josh Whitley</maintainer>
+  <maintainer email="josh.whitley@autoware.org">Josh Whitley</maintainer>
   <author>Jack O'Quin</author>
   <author>Piyush Khandelwal</author>
   <author>Jesse Vera</author>
