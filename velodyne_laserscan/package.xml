@@ -14,7 +14,7 @@
   <author>Micho Radovnikovich</author>
   <author>Kevin Hallenbeck</author>
 
-  <buildtool_depend>ament_cmake</buildtool_depend>
+  <buildtool_depend>ament_cmake_ros</buildtool_depend>
 
   <depend>rclcpp</depend>
   <depend>rclcpp_components</depend>
