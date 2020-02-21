@@ -3,7 +3,9 @@ find_package(ament_cmake_gtest REQUIRED)
 
 ament_add_gtest(test_row_step test_row_step.cpp)
 ament_target_dependencies(test_row_step
+  geometry_msgs
   rclcpp
+  sensor_msgs
   tf2
   velodyne_msgs
 )
