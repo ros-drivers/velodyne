@@ -16,6 +16,7 @@ add_library(velodyne_cloud_types SHARED
   organized_cloudXYZIR.cpp
 )
 ament_target_dependencies(velodyne_cloud_types
+  rclcpp
   sensor_msgs
   tf2
   velodyne_msgs
