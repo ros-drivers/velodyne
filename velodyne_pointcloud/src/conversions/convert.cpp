@@ -100,10 +100,10 @@ Convert::Convert(const rclcpp::NodeOptions & options)
   view_width_desc.floating_point_range.push_back(view_width_range);
   double view_width = this->declare_parameter("view_width", 2.0 * M_PI, view_width_desc);
 
-  bool organize_cloud = this->declare_parameter("organize_cloud", true);
+  bool organize_cloud = this->declare_parameter("organize_cloud", false);
 
-  std::string target_frame = this->declare_parameter("target_frame", "");
-  std::string fixed_frame = this->declare_parameter("fixed_frame", "");
+  std::string target_frame = this->declare_parameter("target_frame", "velodyne");
+  std::string fixed_frame = this->declare_parameter("fixed_frame", "velodyne");
 
   RCLCPP_INFO(this->get_logger(), "correction angles: %s", calibration_file.c_str());
 

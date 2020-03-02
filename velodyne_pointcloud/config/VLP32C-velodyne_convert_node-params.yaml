@@ -2,6 +2,8 @@ velodyne_convert_node:
     ros__parameters:
         calibration: VeloView-VLP-32C.yaml
         model: 32C
+        target_frame: velodyne
+        fixed_frame: velodyne
         min_range: 0.9
         max_range: 200.0
         view_direction: 0.0
