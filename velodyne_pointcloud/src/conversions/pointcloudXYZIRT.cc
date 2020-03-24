@@ -1,12 +1,11 @@
 
 
 
-#include <velodyne_pointcloud/pointcloudXYZIR.h>
+#include <velodyne_pointcloud/pointcloudXYZIRT.h>
 
 namespace velodyne_pointcloud 
 {
-
-  PointcloudXYZIR::PointcloudXYZIR(
+PointcloudXYZIRT::PointcloudXYZIRT(
     const double max_range, const double min_range,
     const std::string& target_frame, const std::string& fixed_frame,
     const unsigned int scans_per_block, boost::shared_ptr<tf::TransformListener> tf_ptr)
@@ -23,7 +22,7 @@ namespace velodyne_pointcloud
         iter_ring(cloud, "ring"), iter_intensity(cloud, "intensity"), iter_time(cloud, "time")
     {};
 
-  void PointcloudXYZIR::setup(const velodyne_msgs::VelodyneScan::ConstPtr& scan_msg){
+  void PointcloudXYZIRT::setup(const velodyne_msgs::VelodyneScan::ConstPtr& scan_msg){
     DataContainerBase::setup(scan_msg);
     iter_x = sensor_msgs::PointCloud2Iterator<float>(cloud, "x");
     iter_y = sensor_msgs::PointCloud2Iterator<float>(cloud, "y");
@@ -33,10 +32,10 @@ namespace velodyne_pointcloud
     iter_time = sensor_msgs::PointCloud2Iterator<float >(cloud, "time");
   }
 
-  void PointcloudXYZIR::newLine()
+  void PointcloudXYZIRT::newLine()
   {}
 
-  void PointcloudXYZIR::addPoint(float x, float y, float z, uint16_t ring, uint16_t /*azimuth*/, float distance, float intensity, float time)
+  void PointcloudXYZIRT::addPoint(float x, float y, float z, uint16_t ring, uint16_t /*azimuth*/, float distance, float intensity, float time)
   {
     if(!pointInRange(distance)) return;
 

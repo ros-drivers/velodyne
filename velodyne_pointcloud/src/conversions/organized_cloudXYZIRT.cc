@@ -1,10 +1,9 @@
 
-#include <velodyne_pointcloud/organized_cloudXYZIR.h>
+#include <velodyne_pointcloud/organized_cloudXYZIRT.h>
 
 namespace velodyne_pointcloud
 {
-
-  OrganizedCloudXYZIR::OrganizedCloudXYZIR(
+OrganizedCloudXYZIRT::OrganizedCloudXYZIRT(
       const double max_range, const double min_range,
       const std::string& target_frame, const std::string& fixed_frame,
       const unsigned int num_lasers, const unsigned int scans_per_block,
@@ -23,7 +22,7 @@ namespace velodyne_pointcloud
   {
   }
 
-  void OrganizedCloudXYZIR::newLine()
+  void OrganizedCloudXYZIRT::newLine()
   {
     iter_x = iter_x + config_.init_width;
     iter_y = iter_y + config_.init_width;
@@ -34,7 +33,7 @@ namespace velodyne_pointcloud
     ++cloud.height;
   }
 
-  void OrganizedCloudXYZIR::setup(const velodyne_msgs::VelodyneScan::ConstPtr& scan_msg){
+  void OrganizedCloudXYZIRT::setup(const velodyne_msgs::VelodyneScan::ConstPtr& scan_msg){
     DataContainerBase::setup(scan_msg);
     iter_x = sensor_msgs::PointCloud2Iterator<float>(cloud, "x");
     iter_y = sensor_msgs::PointCloud2Iterator<float>(cloud, "y");
@@ -45,7 +44,7 @@ namespace velodyne_pointcloud
   }
 
 
-  void OrganizedCloudXYZIR::addPoint(float x, float y, float z,
+  void OrganizedCloudXYZIRT::addPoint(float x, float y, float z,
       const uint16_t ring, const uint16_t /*azimuth*/, const float distance, const float intensity, const float time)
   {
     /** The laser values are not ordered, the organized structure
