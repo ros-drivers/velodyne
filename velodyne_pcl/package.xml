@@ -1,0 +1,19 @@
+<?xml version="1.0"?>
+<package format="2">
+  <name>velodyne_pcl</name>
+  <version>0.0.0</version>
+  <description>The velodyne_pcl package</description>
+
+  <maintainer email="josh.whitley@autoware.org">Josh Whitley</maintainer>
+  <author>Sebastian Pütz</author>
+
+  <license>BSD</license>
+
+  <url type="website">http://wiki.ros.org/velodyne_pcl</url>
+  <url type="repository">https://github.com/ros-drivers/velodyne</url>
+  <url type="bugtracker">https://github.com/ros-drivers/velodyne/issues</url>
+
+  <depend>pcl_ros</depend>
+  <buildtool_depend>catkin</buildtool_depend>
+
+</package>
