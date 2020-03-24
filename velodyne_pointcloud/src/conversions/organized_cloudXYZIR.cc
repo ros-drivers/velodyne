@@ -64,7 +64,7 @@ namespace velodyne_pointcloud
       *(iter_z+ring) = z;
       *(iter_intensity+ring) = intensity;
       *(iter_ring+ring) = ring;
-      *(iter_time+time) = time;
+      *(iter_time+ring) = time;
     }
     else
     {
@@ -73,7 +73,7 @@ namespace velodyne_pointcloud
       *(iter_z+ring) = nanf("");
       *(iter_intensity+ring) = nanf("");
       *(iter_ring+ring) = ring;
-      *(iter_time+time) = time;
+      *(iter_time+ring) = time;
     }
   }
 }
