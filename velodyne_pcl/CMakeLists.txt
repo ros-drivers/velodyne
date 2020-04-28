@@ -1,7 +1,13 @@
 cmake_minimum_required(VERSION 2.8.3)
 project(velodyne_pcl)
 
-find_package(catkin REQUIRED COMPONENTS pcl_ros)
+find_package(catkin REQUIRED COMPONENTS pcl_ros roslint)
+
+roslint_cpp()
+
+if(CATKIN_ENABLE_TESTING)
+  roslint_add_test()
+endif()
 
 catkin_package(
   INCLUDE_DIRS include

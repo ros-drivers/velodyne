@@ -1,4 +1,4 @@
-// Copyright (C) 2012 - 2020 Austin Robot Technology, Jesse Vera, Jack O'Quin, Piyush Khandelwal, Joshua Whitley, Sebastian Pütz
+// Copyright (C) 2012 - 2020 Austin Robot Technology, Jesse Vera, Jack O'Quin, Piyush Khandelwal, Joshua Whitley, Sebastian Pütz  // NOLINT
 // All rights reserved.
 //
 // Software License Agreement (BSD License 2.0)
@@ -64,6 +64,6 @@ POINT_CLOUD_REGISTER_POINT_STRUCT(velodyne_pcl::PointXYZIR,
                                   (float, z, z)
                                   (float, intensity, intensity)
                                   (uint16_t, ring, ring)
-				  (float, time, time))
+                                  (float, time, time))
 
 #endif  // VELODYNE_PCL_POINT_TYPES_H

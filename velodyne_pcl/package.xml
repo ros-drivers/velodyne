@@ -13,7 +13,8 @@
   <url type="repository">https://github.com/ros-drivers/velodyne</url>
   <url type="bugtracker">https://github.com/ros-drivers/velodyne/issues</url>
 
-  <depend>pcl_ros</depend>
   <buildtool_depend>catkin</buildtool_depend>
+  <build_depend>roslint</build_depend>
+  <depend>pcl_ros</depend>
 
 </package>
