@@ -76,11 +76,9 @@ private:
   boost::shared_ptr<dynamic_reconfigure::Server<velodyne_pointcloud::TransformNodeConfig>> srv_;
   void reconfigure_callback(velodyne_pointcloud::TransformNodeConfig& config, uint32_t level);
 
-  const std::string tf_prefix_;
   boost::shared_ptr<velodyne_rawdata::RawData> data_;
-  message_filters::Subscriber<velodyne_msgs::VelodyneScan> velodyne_scan_;
-  ros::Publisher output_;
-  boost::shared_ptr<tf::MessageFilter<velodyne_msgs::VelodyneScan>> tf_filter_ptr_;
+  ros::Subscriber scan_sub_;
+  ros::Publisher cloud_pub_;
   boost::shared_ptr<tf::TransformListener> tf_ptr_;
 
   /// configuration parameters

@@ -8,10 +8,10 @@ namespace velodyne_pointcloud
 PointcloudXYZIRT::PointcloudXYZIRT(
     const double max_range, const double min_range,
     const std::string& target_frame, const std::string& fixed_frame,
-    const unsigned int scans_per_block, boost::shared_ptr<tf::TransformListener> tf_ptr)
+    const unsigned int scans_per_block)
     : DataContainerBase(
         max_range, min_range, target_frame, fixed_frame,
-        0, 1, true, scans_per_block, tf_ptr, 6,
+        0, 1, true, scans_per_block, 6,
         "x", 1, sensor_msgs::PointField::FLOAT32,
         "y", 1, sensor_msgs::PointField::FLOAT32,
         "z", 1, sensor_msgs::PointField::FLOAT32,
@@ -41,8 +41,7 @@ PointcloudXYZIRT::PointcloudXYZIRT(
 
     // convert polar coordinates to Euclidean XYZ
 
-    if(config_.transform)
-      transformPoint(x, y, z);
+    transformPoint(x, y, z);
 
     *iter_x = x;
     *iter_y = y;

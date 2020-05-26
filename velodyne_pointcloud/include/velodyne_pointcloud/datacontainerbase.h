@@ -47,10 +47,8 @@ class DataContainerBase
 public:
   DataContainerBase(const double max_range, const double min_range, const std::string& target_frame,
                     const std::string& fixed_frame, const unsigned int init_width, const unsigned int init_height,
-                    const bool is_dense, const unsigned int scans_per_packet,
-                    boost::shared_ptr<tf::TransformListener>& tf_ptr, int fields, ...)
+                    const bool is_dense, const unsigned int scans_per_packet, int fields, ...)
     : config_(max_range, min_range, target_frame, fixed_frame, init_width, init_height, is_dense, scans_per_packet)
-    , tf_ptr(tf_ptr)
   {
     va_list vl;
     cloud.fields.clear();
@@ -68,23 +66,19 @@ public:
     va_end(vl);
     cloud.point_step = offset;
     cloud.row_step = init_width * cloud.point_step;
-    if (config_.transform && !tf_ptr)
-    {
-      tf_ptr = boost::shared_ptr<tf::TransformListener>(new tf::TransformListener);
-    }
+    tf_ptr = boost::shared_ptr<tf::TransformListener>(new tf::TransformListener);
   }
 
   struct Config
   {
     double max_range;          ///< maximum range to publish
     double min_range;          ///< minimum range to publish
-    std::string target_frame;  ///< target frame to transform a point
-    std::string fixed_frame;   ///< fixed frame used for transform
+    std::string target_frame;  ///< output frame of final point cloud
+    std::string fixed_frame;   ///< world fixed frame for ego motion compenstation
     unsigned int init_width;
     unsigned int init_height;
     bool is_dense;
     unsigned int scans_per_packet;
-    bool transform;  ///< enable / disable transform points
 
     Config(double max_range, double min_range, std::string target_frame, std::string fixed_frame,
            unsigned int init_width, unsigned int init_height, bool is_dense, unsigned int scans_per_packet)
@@ -92,7 +86,6 @@ public:
       , min_range(min_range)
       , target_frame(target_frame)
       , fixed_frame(fixed_frame)
-      , transform(fixed_frame != target_frame)
       , init_width(init_width)
       , init_height(init_height)
       , is_dense(is_dense)
@@ -126,6 +119,9 @@ public:
     if (!config_.target_frame.empty())
     {
       cloud.header.frame_id = config_.target_frame;
+    } else if (!config_.fixed_frame.empty())
+    {
+      cloud.header.frame_id = config_.fixed_frame;
     }
 
     ROS_DEBUG_STREAM("Prepared cloud width" << cloud.height * cloud.width
@@ -140,12 +136,6 @@ public:
     config_.min_range = min_range;
     config_.fixed_frame = fixed_frame;
     config_.target_frame = target_frame;
-
-    config_.transform = fixed_frame.compare(target_frame) != 0;
-    if (config_.transform && !tf_ptr)
-    {
-      tf_ptr = boost::shared_ptr<tf::TransformListener>(new tf::TransformListener);
-    }
   }
 
   sensor_msgs::PointCloud2 cloud;
@@ -157,12 +147,13 @@ public:
     eigen_vec(2) = tf_vec[2];
   }
 
-  inline bool computeTransformation(const ros::Time& time)
+  inline bool lookupHTM(Eigen::Affine3f& htm, const std::string& target_frame, const std::string& source_frame, const ros::Time& time)
   {
     tf::StampedTransform transform;
     try
     {
-      tf_ptr->lookupTransform(config_.target_frame, cloud.header.frame_id, time, transform);
+      tf_ptr->waitForTransform(target_frame, source_frame, time, ros::Duration(0.2));
+      tf_ptr->lookupTransform(target_frame, source_frame, time, transform);
     }
     catch (tf::LookupException& e)
     {
@@ -181,13 +172,35 @@ public:
     Eigen::Vector3f eigen_origin;
     vectorTfToEigen(transform.getOrigin(), eigen_origin);
     Eigen::Translation3f translation(eigen_origin);
-    transformation = translation * rotation;
+    htm = translation * rotation;
     return true;
+  }
+
+  inline bool computeTransformToTarget(const ros::Time &scan_time) {
+    std::string &source_frame = config_.fixed_frame.empty()
+                                    ? cloud.header.frame_id
+                                    : config_.fixed_frame;
+    return !(!config_.target_frame.empty() &&
+             !lookupHTM(htm_to_target, config_.target_frame, source_frame,
+                        scan_time));
+  }
+
+  inline bool computeTransformToFixed(const ros::Time &packet_time) {
+    std::string &source_frame = cloud.header.frame_id;
+    return !(!config_.fixed_frame.empty() &&
+             !lookupHTM(htm_to_fixed, config_.fixed_frame, source_frame,
+                        packet_time));
   }
 
   inline void transformPoint(float& x, float& y, float& z)
   {
-    Eigen::Vector3f p = transformation * Eigen::Vector3f(x, y, z);
+    Eigen::Vector3f p = Eigen::Vector3f(x, y, z);
+    if (!config_.fixed_frame.empty()) {
+      p = htm_to_fixed * p;
+    }
+    if (!config_.target_frame.empty()) {
+      p = htm_to_target * p;
+    }
     x = p.x();
     y = p.y();
     z = p.z();
@@ -200,8 +213,9 @@ public:
 
 protected:
   Config config_;
-  boost::shared_ptr<tf::TransformListener> tf_ptr;  ///< transform listener
-  Eigen::Affine3f transformation;
+  boost::shared_ptr<tf::TransformListener> tf_ptr;
+  Eigen::Affine3f htm_to_fixed;
+  Eigen::Affine3f htm_to_target;
 };
 } /* namespace velodyne_rawdata */
 #endif  // VELODYNE_POINTCLOUD_DATACONTAINERBASE_H
