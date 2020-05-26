@@ -119,7 +119,8 @@ public:
     if (!config_.target_frame.empty())
     {
       cloud.header.frame_id = config_.target_frame;
-    } else if (!config_.fixed_frame.empty())
+    }
+    else if (!config_.fixed_frame.empty())
     {
       cloud.header.frame_id = config_.fixed_frame;
     }
@@ -147,7 +148,8 @@ public:
     eigen_vec(2) = tf_vec[2];
   }
 
-  inline bool lookupHTM(Eigen::Affine3f& htm, const std::string& target_frame, const std::string& source_frame, const ros::Time& time)
+  inline bool lookupHTM(Eigen::Affine3f& htm, const std::string& target_frame,
+                        const std::string& source_frame, const ros::Time& time)
   {
     tf::StampedTransform transform;
     try
@@ -176,7 +178,8 @@ public:
     return true;
   }
 
-  inline bool computeTransformToTarget(const ros::Time &scan_time) {
+  inline bool computeTransformToTarget(const ros::Time &scan_time)
+  {
     std::string &source_frame = config_.fixed_frame.empty()
                                     ? cloud.header.frame_id
                                     : config_.fixed_frame;
@@ -185,7 +188,8 @@ public:
                         scan_time));
   }
 
-  inline bool computeTransformToFixed(const ros::Time &packet_time) {
+  inline bool computeTransformToFixed(const ros::Time &packet_time)
+  {
     std::string &source_frame = cloud.header.frame_id;
     return !(!config_.fixed_frame.empty() &&
              !lookupHTM(htm_to_fixed, config_.fixed_frame, source_frame,
@@ -195,10 +199,12 @@ public:
   inline void transformPoint(float& x, float& y, float& z)
   {
     Eigen::Vector3f p = Eigen::Vector3f(x, y, z);
-    if (!config_.fixed_frame.empty()) {
+    if (!config_.fixed_frame.empty())
+    {
       p = htm_to_fixed * p;
     }
-    if (!config_.target_frame.empty()) {
+    if (!config_.target_frame.empty())
+    {
       p = htm_to_target * p;
     }
     x = p.x();
