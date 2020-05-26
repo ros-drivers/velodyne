@@ -45,8 +45,10 @@ namespace velodyne_pointcloud
   // advertise output point cloud (before subscribing to input data)
   cloud_pub_ = node.advertise<sensor_msgs::PointCloud2>("velodyne_points", 10);
 
-  srv_ = boost::make_shared<dynamic_reconfigure::Server<TransformNodeCfg>>(private_nh);
-  srv_->setCallback([this](auto &&config, auto &&level) { reconfigure_callback(config, level); });
+    srv_ = boost::make_shared<dynamic_reconfigure::Server<TransformNodeCfg>> (private_nh);
+    dynamic_reconfigure::Server<TransformNodeCfg>::CallbackType f;
+    f = boost::bind (&Transform::reconfigure_callback, this, _1, _2);
+    srv_->setCallback (f);
 
   scan_sub_ = node.subscribe("velodyne_packets", 10, &Transform::processScan, this);
 
