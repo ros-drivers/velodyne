@@ -29,7 +29,7 @@ jobs:
           command: |
             source `find /opt/ros -name setup.bash | sort | head -1`
             cd ..
-            catkin_make test -j 1
+            catkin_make run_tests -j 1
             catkin_test_results
     working_directory: ~/src
 
