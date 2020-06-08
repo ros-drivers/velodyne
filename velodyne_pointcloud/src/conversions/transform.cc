@@ -50,31 +50,48 @@ namespace velodyne_pointcloud
 
     // container selection and check
     std::string container_name;
-
-    private_nh.param<std::string>("container", container_name, "PointCloudXYZIR");
+    container_configured_ = private_nh.getParam("container", container_name);
     private_nh.param<bool>("organize_cloud", config_.organize_cloud, false);
-    if(config_.organize_cloud)
+    if(!container_configured_)
     {
-      ROS_WARN_STREAM("The parameter \"organize_cloud\" is deprecated, please use the \"container\" param "
-                      "with one of the organized containers!");
-      container_name = "OrganizedCloudXYZIR";
-    }
-
-    container_id_ = container_names_.find(container_name);
-    if(container_id_ == container_names_.end())
-    {
-      ROS_ERROR_STREAM("Container with name \"" << container_name << "\" does not exist!");
       std::stringstream container_list;
       for (const auto& pair : container_names_)
       {
         container_list << pair.first << ", ";
       }
-      ROS_ERROR_STREAM("Use one of the following container names: " << container_list.str());
-      exit(EXIT_FAILURE);
-    }
 
-    container_ptr = getContainer(container_id_->second);
-    ROS_INFO_STREAM("Using the " << container_id_->first << " container.");
+      if(config_.organize_cloud)
+      {
+        ROS_WARN_STREAM("The parameter \"organize_cloud\" is deprecated, please use the \"container\" param "
+                        "with one of the organized containers!");
+        container_name = default_organized_container_.first;
+        container_ptr = getContainer(default_organized_container_.second);
+      }
+      else
+      {
+        container_name = default_container_.first;
+        container_ptr = getContainer(default_container_.second);
+      }
+      ROS_WARN_STREAM("Using default container \"" << container_name << "\"!");
+      ROS_WARN_STREAM("Please use the \"container\" param with one of the following container names: " << container_list.str());
+    }
+    else
+    {
+      std::map<std::string, Container>::iterator container_it = container_names_.find(container_name);
+      if(container_it == container_names_.end())
+      {
+        ROS_ERROR_STREAM("Container with name \"" << container_name << "\" does not exist!");
+        std::stringstream container_list;
+        for (const auto& pair : container_names_)
+        {
+          container_list << pair.first << ", ";
+        }
+        ROS_ERROR_STREAM("Use one of the following container names: " << container_list.str());
+        exit(EXIT_FAILURE);
+      }
+      container_ptr = getContainer(container_it->second);
+      ROS_INFO_STREAM("Using the \"" << container_it->first << "\" container.");
+    }
 
     // advertise output point cloud (before subscribing to input data)
     output_ =
@@ -153,14 +170,23 @@ namespace velodyne_pointcloud
       first_rcfg_call = false;
       config_.organize_cloud = config.organize_cloud;
 
-      if(config_.organize_cloud)
+      if(!container_configured_)
       {
-        ROS_WARN_STREAM("The parameter \"organize_cloud\" is deprecated, please use the \"container\" param "
-                        "with one of the organized containers!");
+        std::string container_name;
+        if(config_.organize_cloud)
+        {
+          ROS_WARN_STREAM("The parameter \"organize_cloud\" is deprecated, please use the \"container\" param "
+                          "with one of the organized containers!");
+          container_name = default_organized_container_.first;
+          container_ptr = getContainer(default_organized_container_.second);
+        }
+        else
+        {
+          container_name = default_container_.first;
+          container_ptr = getContainer(default_container_.second);
+        }
+        ROS_INFO_STREAM("Using the \"" << container_name << "\" container.");
       }
-      container_id_ = container_names_.find("OrganizedCloudXYZIR");
-      container_ptr = getContainer(container_id_->second);
-      ROS_INFO_STREAM("Using the " << container_id_->first << " container.");
     }
     container_ptr->configure(config_.max_range, config_.min_range, config_.fixed_frame, config_.target_frame);
   }

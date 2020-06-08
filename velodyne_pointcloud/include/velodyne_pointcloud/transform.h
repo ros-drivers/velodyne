@@ -83,6 +83,8 @@ private:
   boost::shared_ptr<tf::MessageFilter<velodyne_msgs::VelodyneScan>> tf_filter_ptr_;
   boost::shared_ptr<tf::TransformListener> tf_ptr_;
 
+  bool container_configured_ = false;
+
   enum Container{
     PointCloudXYZIR,
     PointCloudXYZIRT,
@@ -97,7 +99,8 @@ private:
       {"OrganizedPointCloudXYZIRT", Container::OrganizedPointCloudXYZIRT}
   };
 
-  std::map<std::string, Container>::iterator container_id_; // container (name and id) for the currently used container
+  const std::pair<std::string, uint8_t> default_container_ = {"PointCloudXYZIR", PointCloudXYZIR};
+  const std::pair<std::string, uint8_t> default_organized_container_ = {"OrganizedPointCloudXYZIR", OrganizedPointCloudXYZIR};
 
   boost::shared_ptr<velodyne_rawdata::DataContainerBase> getContainer(uint8_t container_id);
 
