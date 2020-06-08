@@ -40,6 +40,8 @@
 #define VELODYNE_POINTCLOUD_CONVERT_H
 
 #include <string>
+#include <utility>
+#include <map>
 
 #include <ros/ros.h>
 #include <diagnostic_updater/diagnostic_updater.h>
@@ -76,14 +78,16 @@ class Convert
 
     bool container_configured_ = false;
 
-    enum Container{
+    enum Container
+    {
       PointCloudXYZIR,
       PointCloudXYZIRT,
       OrganizedPointCloudXYZIR,
       OrganizedPointCloudXYZIRT
     };
 
-    std::map<std::string, Container> container_names_{
+    std::map<std::string, Container> container_names_
+    {
       {"PointCloudXYZIR", Container::PointCloudXYZIR},
       {"PointCloudXYZIRT", Container::PointCloudXYZIRT},
       {"OrganizedPointCloudXYZIR", Container::OrganizedPointCloudXYZIR},
@@ -91,7 +95,8 @@ class Convert
     };
 
     const std::pair<std::string, uint8_t> default_container_ = {"PointCloudXYZIR", PointCloudXYZIR};
-    const std::pair<std::string, uint8_t> default_organized_container_ = {"OrganizedPointCloudXYZIR", OrganizedPointCloudXYZIR};
+    const std::pair<std::string, uint8_t> default_organized_container_ =
+        {"OrganizedPointCloudXYZIR", OrganizedPointCloudXYZIR};
 
     boost::shared_ptr<velodyne_rawdata::DataContainerBase> getContainer(uint8_t container_id);
 
