@@ -21,7 +21,9 @@
 #include "velodyne_pointcloud/transform.h"
 
 #include <velodyne_pointcloud/pointcloudXYZIR.h>
+#include <velodyne_pointcloud/pointcloudXYZIRT.h>
 #include <velodyne_pointcloud/organized_cloudXYZIR.h>
+#include <velodyne_pointcloud/organized_cloudXYZIRT.h>
 
 namespace velodyne_pointcloud
 {
@@ -46,19 +48,33 @@ namespace velodyne_pointcloud
     config_.target_frame = config_.fixed_frame = "velodyne";
     tf_ptr_ = boost::make_shared<tf::TransformListener>();
 
+    // container selection and check
+    std::string container_name;
+
+    private_nh.param<std::string>("container", container_name, "PointCloudXYZIR");
+    private_nh.param<bool>("organize_cloud", config_.organize_cloud, false);
     if(config_.organize_cloud)
     {
-      container_ptr = boost::shared_ptr<OrganizedCloudXYZIR>(
-          new OrganizedCloudXYZIR(config_.max_range, config_.min_range, config_.target_frame, config_.fixed_frame,
-                                  config_.num_lasers, data_->scansPerPacket(), tf_ptr_));
+      ROS_WARN_STREAM("The parameter \"organize_cloud\" is deprecated, please use the \"container\" param "
+                      "with one of the organized containers!");
+      container_name = "OrganizedCloudXYZIR";
     }
-    else
+
+    container_id_ = container_names_.find(container_name);
+    if(container_id_ == container_names_.end())
     {
-      container_ptr = boost::shared_ptr<PointcloudXYZIR>(
-          new PointcloudXYZIR(config_.max_range, config_.min_range,
-                              config_.target_frame, config_.fixed_frame,
-                              data_->scansPerPacket(), tf_ptr_));
+      ROS_ERROR_STREAM("Container with name \"" << container_name << "\" does not exist!");
+      std::stringstream container_list;
+      for (const auto& pair : container_names_)
+      {
+        container_list << pair.first << ", ";
+      }
+      ROS_ERROR_STREAM("Use one of the following container names: " << container_list.str());
+      exit(EXIT_FAILURE);
     }
+
+    container_ptr = getContainer(container_id_->second);
+    ROS_INFO_STREAM("Using the " << container_id_->first << " container.");
 
     // advertise output point cloud (before subscribing to input data)
     output_ =
@@ -90,7 +106,36 @@ namespace velodyne_pointcloud
                                           TimeStampStatusParam()));
 
   }
-  
+
+  boost::shared_ptr<velodyne_rawdata::DataContainerBase> Transform::getContainer(uint8_t container_id)
+  {
+    switch (container_id)
+    {
+      case Container::PointCloudXYZIR:
+        return boost::shared_ptr<PointcloudXYZIR>(
+            new PointcloudXYZIR(config_.max_range, config_.min_range,
+                                config_.target_frame, config_.fixed_frame,
+                                data_->scansPerPacket(), tf_ptr_));
+      case Container::PointCloudXYZIRT:
+        return boost::shared_ptr<PointcloudXYZIRT>(
+            new PointcloudXYZIRT(config_.max_range, config_.min_range,
+                                config_.target_frame, config_.fixed_frame,
+                                data_->scansPerPacket(), tf_ptr_));
+      case Container::OrganizedPointCloudXYZIR:
+        return boost::shared_ptr<OrganizedCloudXYZIR>(
+            new OrganizedCloudXYZIR(config_.max_range, config_.min_range, config_.target_frame, config_.fixed_frame,
+                                    config_.num_lasers, data_->scansPerPacket(), tf_ptr_));
+      case Container::OrganizedPointCloudXYZIRT:
+        return boost::shared_ptr<OrganizedCloudXYZIRT>(
+            new OrganizedCloudXYZIRT(config_.max_range, config_.min_range, config_.target_frame, config_.fixed_frame,
+                                    config_.num_lasers, data_->scansPerPacket(), tf_ptr_));
+      default:
+        ROS_FATAL_STREAM("Container for id " << container_id << " does not exist! Exit node!");
+        exit(EXIT_FAILURE);
+    }
+  }
+
+
   void Transform::reconfigure_callback(
       velodyne_pointcloud::TransformNodeConfig &config, uint32_t level)
   {
@@ -107,21 +152,15 @@ namespace velodyne_pointcloud
     if(first_rcfg_call || config.organize_cloud != config_.organize_cloud){
       first_rcfg_call = false;
       config_.organize_cloud = config.organize_cloud;
+
       if(config_.organize_cloud)
       {
-        ROS_INFO_STREAM("Using the organized cloud format...");
-        container_ptr = boost::shared_ptr<OrganizedCloudXYZIR>(
-            new OrganizedCloudXYZIR(config_.max_range, config_.min_range,
-                                    config_.target_frame, config_.fixed_frame,
-                                    config_.num_lasers, data_->scansPerPacket()));
+        ROS_WARN_STREAM("The parameter \"organize_cloud\" is deprecated, please use the \"container\" param "
+                        "with one of the organized containers!");
       }
-      else
-      {
-        container_ptr = boost::shared_ptr<PointcloudXYZIR>(
-            new PointcloudXYZIR(config_.max_range, config_.min_range,
-                                config_.target_frame, config_.fixed_frame,
-                                data_->scansPerPacket()));
-      }
+      container_id_ = container_names_.find("OrganizedCloudXYZIR");
+      container_ptr = getContainer(container_id_->second);
+      ROS_INFO_STREAM("Using the " << container_id_->first << " container.");
     }
     container_ptr->configure(config_.max_range, config_.min_range, config_.fixed_frame, config_.target_frame);
   }
