@@ -10,10 +10,18 @@ ament_target_dependencies(test_row_step
   velodyne_msgs
 )
 
-# C++ gtests
-# catkin_add_gtest(test_calibration test_calibration.cpp)
-# add_dependencies(test_calibration ${catkin_EXPORTED_TARGETS})
-# target_link_libraries(test_calibration velodyne_rawdata ${catkin_LIBRARIES})
+ament_add_gtest(test_calibration
+  test_calibration.cpp
+  ../src/lib/calibration.cpp
+)
+
+ament_target_dependencies(test_calibration
+  rclcpp
+)
+
+target_link_libraries(test_calibration
+  ${YAML_CPP_LIBRARIES}
+)
 
 # # Download packet capture (PCAP) files containing test data.
 # # Store them in devel-space, so rostest can easily find them.
