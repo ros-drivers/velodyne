@@ -74,6 +74,27 @@ class Convert
 
     boost::shared_ptr<velodyne_rawdata::DataContainerBase> container_ptr_;
 
+    bool container_configured_ = false;
+
+    enum Container{
+      PointCloudXYZIR,
+      PointCloudXYZIRT,
+      OrganizedPointCloudXYZIR,
+      OrganizedPointCloudXYZIRT
+    };
+
+    std::map<std::string, Container> container_names_{
+      {"PointCloudXYZIR", Container::PointCloudXYZIR},
+      {"PointCloudXYZIRT", Container::PointCloudXYZIRT},
+      {"OrganizedPointCloudXYZIR", Container::OrganizedPointCloudXYZIR},
+      {"OrganizedPointCloudXYZIRT", Container::OrganizedPointCloudXYZIRT}
+    };
+
+    const std::pair<std::string, uint8_t> default_container_ = {"PointCloudXYZIR", PointCloudXYZIR};
+    const std::pair<std::string, uint8_t> default_organized_container_ = {"OrganizedPointCloudXYZIR", OrganizedPointCloudXYZIR};
+
+    boost::shared_ptr<velodyne_rawdata::DataContainerBase> getContainer(uint8_t container_id);
+
     boost::mutex reconfigure_mtx_;
 
     /// configuration parameters
