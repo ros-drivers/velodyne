@@ -15,8 +15,8 @@
 
 #include "velodyne_pointcloud/convert.h"
 
-#include <velodyne_pointcloud/pointcloudXYZIR.h>
-#include <velodyne_pointcloud/organized_cloudXYZIR.h>
+#include <velodyne_pointcloud/pointcloudXYZIRT.h>
+#include <velodyne_pointcloud/organized_cloudXYZIRT.h>
 
 namespace velodyne_pointcloud
 {
@@ -45,15 +45,15 @@ namespace velodyne_pointcloud
 
     if(config_.organize_cloud)
     {
-      container_ptr_ = boost::shared_ptr<OrganizedCloudXYZIR>(
-          new OrganizedCloudXYZIR(config_.max_range, config_.min_range,
+      container_ptr_ = boost::shared_ptr<OrganizedCloudXYZIRT>(
+          new OrganizedCloudXYZIRT(config_.max_range, config_.min_range,
               config_.target_frame, config_.fixed_frame,
               config_.num_lasers, data_->scansPerPacket()));
     }
     else
     {
-      container_ptr_ = boost::shared_ptr<PointcloudXYZIR>(
-          new PointcloudXYZIR(config_.max_range, config_.min_range,
+      container_ptr_ = boost::shared_ptr<PointcloudXYZIRT>(
+          new PointcloudXYZIRT(config_.max_range, config_.min_range,
               config_.target_frame, config_.fixed_frame,
               data_->scansPerPacket()));
     }
@@ -107,15 +107,15 @@ namespace velodyne_pointcloud
         if(config_.organize_cloud) // TODO only on change
         {
             ROS_INFO_STREAM("Using the organized cloud format...");
-            container_ptr_ = boost::shared_ptr<OrganizedCloudXYZIR>(
-                new OrganizedCloudXYZIR(config_.max_range, config_.min_range,
+            container_ptr_ = boost::shared_ptr<OrganizedCloudXYZIRT>(
+                new OrganizedCloudXYZIRT(config_.max_range, config_.min_range,
                     config_.target_frame, config_.fixed_frame,
                     config_.num_lasers, data_->scansPerPacket()));
         }
         else
         {
-            container_ptr_ = boost::shared_ptr<PointcloudXYZIR>(
-                new PointcloudXYZIR(config_.max_range, config_.min_range,
+            container_ptr_ = boost::shared_ptr<PointcloudXYZIRT>(
+                new PointcloudXYZIRT(config_.max_range, config_.min_range,
                     config_.target_frame, config_.fixed_frame,
                     data_->scansPerPacket()));
         }
