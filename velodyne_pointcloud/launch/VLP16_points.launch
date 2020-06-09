@@ -45,6 +45,8 @@
     <arg name="model" value="VLP16"/>
     <arg name="calibration" value="$(arg calibration)"/>
     <arg name="manager" value="$(arg manager)" />
+    <arg name="fixed_frame" value="" />
+    <arg name="target_frame" value="" />
     <arg name="max_range" value="$(arg max_range)"/>
     <arg name="min_range" value="$(arg min_range)"/>
     <arg name="organize_cloud" value="$(arg organize_cloud)"/>
