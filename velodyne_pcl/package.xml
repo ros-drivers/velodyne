@@ -1,0 +1,27 @@
+<?xml-model href="http://download.ros.org/schema/package_format3.xsd" schematypens="http://www.w3.org/2001/XMLSchema"?>
+<package format="3">
+  <name>velodyne_pcl</name>
+  <version>1.5.2</version>
+  <description>The velodyne_pcl package</description>
+
+  <maintainer email="josh.whitley@autoware.org">Josh Whitley</maintainer>
+
+  <license>BSD</license>
+
+  <url type="website">http://wiki.ros.org/velodyne_pcl</url>
+  <url type="repository">https://github.com/ros-drivers/velodyne</url>
+  <url type="bugtracker">https://github.com/ros-drivers/velodyne/issues</url>
+
+  <author>Sebastian Pütz</author>
+
+  <buildtool_depend>ament_cmake_auto</buildtool_depend>
+
+  <depend>libpcl-all-dev</depend>
+
+  <test_depend>ament_lint_auto</test_depend>
+  <test_depend>ament_lint_common</test_depend>
+
+  <export>
+    <build_type>ament_cmake</build_type>
+  </export>
+</package>
