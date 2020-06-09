@@ -1,5 +1,5 @@
 <?xml-model href="http://download.ros.org/schema/package_format3.xsd" schematypens="http://www.w3.org/2001/XMLSchema"?>
-<package format="2">
+<package format="3">
   <name>velodyne_pcl</name>
   <version>1.5.2</version>
   <description>The velodyne_pcl package</description>
