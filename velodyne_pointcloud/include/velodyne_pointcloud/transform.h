@@ -77,9 +77,8 @@ private:
   void reconfigure_callback(velodyne_pointcloud::TransformNodeConfig& config, uint32_t level);
 
   boost::shared_ptr<velodyne_rawdata::RawData> data_;
-  ros::Subscriber scan_sub_;
-  ros::Publisher cloud_pub_;
-  boost::shared_ptr<tf::TransformListener> tf_ptr_;
+  ros::Subscriber velodyne_scan_;
+  ros::Publisher output_;
 
   /// configuration parameters
   typedef struct

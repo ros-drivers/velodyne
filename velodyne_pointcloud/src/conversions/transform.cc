@@ -42,15 +42,15 @@ namespace velodyne_pointcloud
       ROS_ERROR_STREAM("Could not load calibration file!");
     }
 
-  // advertise output point cloud (before subscribing to input data)
-  cloud_pub_ = node.advertise<sensor_msgs::PointCloud2>("velodyne_points", 10);
+    // advertise output point cloud (before subscribing to input data)
+    output_ = node.advertise<sensor_msgs::PointCloud2>("velodyne_points", 10);
 
     srv_ = boost::make_shared<dynamic_reconfigure::Server<TransformNodeCfg>> (private_nh);
     dynamic_reconfigure::Server<TransformNodeCfg>::CallbackType f;
     f = boost::bind (&Transform::reconfigure_callback, this, _1, _2);
     srv_->setCallback (f);
 
-  scan_sub_ = node.subscribe("velodyne_packets", 10, &Transform::processScan, this);
+    velodyne_scan_ = node.subscribe("velodyne_packets", 10, &Transform::processScan, this);
 
     // Diagnostics
     diagnostics_.setHardwareID("Velodyne Transform");
@@ -112,7 +112,7 @@ namespace velodyne_pointcloud
   void
     Transform::processScan(const velodyne_msgs::VelodyneScan::ConstPtr &scanMsg)
   {
-    if (cloud_pub_.getNumSubscribers() == 0)      // no one listening?
+    if (output_.getNumSubscribers() == 0)      // no one listening?
       return;                                     // avoid much work
 
     boost::lock_guard<boost::mutex> guard(reconfigure_mtx_);
@@ -140,7 +140,7 @@ namespace velodyne_pointcloud
       data_->unpack(scanMsg->packets[i], *container_ptr, scanMsg->header.stamp);
     }
     // publish the accumulated cloud message
-    cloud_pub_.publish(container_ptr->finishCloud());
+    output_.publish(container_ptr->finishCloud());
 
     diag_topic_->tick(scanMsg->header.stamp);
     diagnostics_.update();
