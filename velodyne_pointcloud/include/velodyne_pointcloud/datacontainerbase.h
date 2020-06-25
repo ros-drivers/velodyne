@@ -66,7 +66,8 @@ public:
     va_end(vl);
     cloud.point_step = offset;
     cloud.row_step = init_width * cloud.point_step;
-    tf_ptr = boost::shared_ptr<tf::TransformListener>(new tf::TransformListener);
+
+    configure(max_range, min_range, fixed_frame, target_frame);
   }
 
   struct Config
@@ -137,6 +138,16 @@ public:
     config_.min_range = min_range;
     config_.fixed_frame = fixed_frame;
     config_.target_frame = target_frame;
+
+    // only use somewhat resource intensive tf listener when it is necessary
+    if (!fixed_frame.empty() || !target_frame.empty())
+    {
+      tf_ptr = boost::shared_ptr<tf::TransformListener>(new tf::TransformListener);
+    }
+    else
+    {
+      tf_ptr.reset();
+    }
   }
 
   sensor_msgs::PointCloud2 cloud;
