@@ -103,7 +103,9 @@ public:
 
   virtual void setup(const velodyne_msgs::VelodyneScan::ConstPtr& scan_msg)
   {
-    cloud.header = scan_msg->header;
+    sensor_frame = scan_msg->header.frame_id;
+
+    cloud.header.stamp = scan_msg->header.stamp;
     cloud.data.resize(scan_msg->packets.size() * config_.scans_per_packet * cloud.point_step);
     cloud.width = config_.init_width;
     cloud.height = config_.init_height;
@@ -125,6 +127,8 @@ public:
     else if (!config_.fixed_frame.empty())
     {
       cloud.header.frame_id = config_.fixed_frame;
+    } else {
+      cloud.header.frame_id = sensor_frame;
     }
 
     ROS_DEBUG_STREAM("Prepared cloud width" << cloud.height * cloud.width
@@ -189,18 +193,22 @@ public:
 
   inline bool computeTransformToTarget(const ros::Time &scan_time)
   {
-    std::string &source_frame = config_.fixed_frame.empty()
-                                    ? cloud.header.frame_id
-                                    : config_.fixed_frame;
-    return !(!config_.target_frame.empty() &&
-             !calculateTransformMatrix(tf_matrix_to_target, config_.target_frame, source_frame, scan_time));
+    if(config_.target_frame.empty()) {
+      // no need to calculate transform -> success
+      return true;
+    }
+    std::string& source_frame = config_.fixed_frame.empty() ? sensor_frame : config_.fixed_frame;
+    return calculateTransformMatrix(tf_matrix_to_target, config_.target_frame, source_frame, scan_time);
   }
 
   inline bool computeTransformToFixed(const ros::Time &packet_time)
   {
-    std::string &source_frame = cloud.header.frame_id;
-    return !(!config_.fixed_frame.empty() &&
-             !calculateTransformMatrix(tf_matrix_to_fixed, config_.fixed_frame, source_frame, packet_time));
+    if(config_.fixed_frame.empty()) {
+      // no need to calculate transform -> success
+      return true;
+    }
+    std::string &source_frame = sensor_frame;
+    return calculateTransformMatrix(tf_matrix_to_fixed, config_.fixed_frame, source_frame, packet_time);
   }
 
   inline void transformPoint(float& x, float& y, float& z)
@@ -230,6 +238,7 @@ protected:
   boost::shared_ptr<tf2_ros::Buffer> tf_buffer;
   Eigen::Affine3f tf_matrix_to_fixed;
   Eigen::Affine3f tf_matrix_to_target;
+  std::string sensor_frame;
 };
 } /* namespace velodyne_rawdata */
 #endif  // VELODYNE_POINTCLOUD_DATACONTAINERBASE_H
