@@ -127,7 +127,9 @@ public:
     else if (!config_.fixed_frame.empty())
     {
       cloud.header.frame_id = config_.fixed_frame;
-    } else {
+    }
+    else
+    {
       cloud.header.frame_id = sensor_frame;
     }
 
@@ -193,7 +195,8 @@ public:
 
   inline bool computeTransformToTarget(const ros::Time &scan_time)
   {
-    if(config_.target_frame.empty()) {
+    if (config_.target_frame.empty())
+    {
       // no need to calculate transform -> success
       return true;
     }
@@ -203,7 +206,8 @@ public:
 
   inline bool computeTransformToFixed(const ros::Time &packet_time)
   {
-    if(config_.fixed_frame.empty()) {
+    if (config_.fixed_frame.empty())
+    {
       // no need to calculate transform -> success
       return true;
     }
