@@ -32,7 +32,8 @@
 // ANY WAY OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE
 // POSSIBILITY OF SUCH DAMAGE.
 
-#include <tf/transform_listener.h>
+#include <tf2_ros/transform_listener.h>
+#include <geometry_msgs/TransformStamped.h>
 #include <velodyne_msgs/VelodyneScan.h>
 #include <sensor_msgs/point_cloud2_iterator.h>
 #include <Eigen/Dense>
@@ -142,49 +143,46 @@ public:
     // only use somewhat resource intensive tf listener when it is necessary
     if (!fixed_frame.empty() || !target_frame.empty())
     {
-      tf_ptr = boost::shared_ptr<tf::TransformListener>(new tf::TransformListener);
+      if (!tf_buffer)
+      {
+        tf_buffer = boost::shared_ptr<tf2_ros::Buffer>(new tf2_ros::Buffer());
+        tf_listener = boost::shared_ptr<tf2_ros::TransformListener>(new tf2_ros::TransformListener(*tf_buffer));
+      }
     }
     else
     {
-      tf_ptr.reset();
+      tf_listener.reset();
+      tf_buffer.reset();
     }
   }
 
   sensor_msgs::PointCloud2 cloud;
 
-  inline void vectorTfToEigen(tf::Vector3& tf_vec, Eigen::Vector3f& eigen_vec)
-  {
-    eigen_vec(0) = tf_vec[0];
-    eigen_vec(1) = tf_vec[1];
-    eigen_vec(2) = tf_vec[2];
-  }
-
   inline bool calculateTransformMatrix(Eigen::Affine3f& matrix, const std::string& target_frame,
                                        const std::string& source_frame, const ros::Time& time)
   {
-    tf::StampedTransform transform;
+    geometry_msgs::TransformStamped msg;
     try
     {
-      tf_ptr->waitForTransform(target_frame, source_frame, time, ros::Duration(0.2));
-      tf_ptr->lookupTransform(target_frame, source_frame, time, transform);
+      msg = tf_buffer->lookupTransform(target_frame, source_frame, time, ros::Duration(0.2));
     }
-    catch (tf::LookupException& e)
+    catch (tf2::LookupException& e)
     {
       ROS_ERROR("%s", e.what());
       return false;
     }
-    catch (tf::ExtrapolationException& e)
+    catch (tf2::ExtrapolationException& e)
     {
       ROS_ERROR("%s", e.what());
       return false;
     }
 
-    tf::Quaternion quaternion = transform.getRotation();
-    Eigen::Quaternionf rotation(quaternion.w(), quaternion.x(), quaternion.y(), quaternion.z());
+    const geometry_msgs::Quaternion& quaternion = msg.transform.rotation;
+    Eigen::Quaternionf rotation(quaternion.w, quaternion.x, quaternion.y, quaternion.z);
 
-    Eigen::Vector3f eigen_origin;
-    vectorTfToEigen(transform.getOrigin(), eigen_origin);
-    Eigen::Translation3f translation(eigen_origin);
+    const geometry_msgs::Vector3& origin = msg.transform.translation;
+    Eigen::Translation3f translation(origin.x, origin.y, origin.z);
+
     matrix = translation * rotation;
     return true;
   }
@@ -228,7 +226,8 @@ public:
 
 protected:
   Config config_;
-  boost::shared_ptr<tf::TransformListener> tf_ptr;
+  boost::shared_ptr<tf2_ros::TransformListener> tf_listener;
+  boost::shared_ptr<tf2_ros::Buffer> tf_buffer;
   Eigen::Affine3f tf_matrix_to_fixed;
   Eigen::Affine3f tf_matrix_to_target;
 };

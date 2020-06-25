@@ -16,7 +16,7 @@ set(${PROJECT_NAME}_CATKIN_DEPS
     roscpp
     roslib
     sensor_msgs
-    tf
+    tf2_ros
     velodyne_driver
     velodyne_msgs
     dynamic_reconfigure
