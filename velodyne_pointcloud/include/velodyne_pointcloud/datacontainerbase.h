@@ -148,8 +148,8 @@ public:
     eigen_vec(2) = tf_vec[2];
   }
 
-  inline bool lookupHTM(Eigen::Affine3f& htm, const std::string& target_frame,
-                        const std::string& source_frame, const ros::Time& time)
+  inline bool calculateTransformMatrix(Eigen::Affine3f& matrix, const std::string& target_frame,
+                                       const std::string& source_frame, const ros::Time& time)
   {
     tf::StampedTransform transform;
     try
@@ -174,7 +174,7 @@ public:
     Eigen::Vector3f eigen_origin;
     vectorTfToEigen(transform.getOrigin(), eigen_origin);
     Eigen::Translation3f translation(eigen_origin);
-    htm = translation * rotation;
+    matrix = translation * rotation;
     return true;
   }
 
@@ -184,16 +184,14 @@ public:
                                     ? cloud.header.frame_id
                                     : config_.fixed_frame;
     return !(!config_.target_frame.empty() &&
-             !lookupHTM(htm_to_target, config_.target_frame, source_frame,
-                        scan_time));
+             !calculateTransformMatrix(tf_matrix_to_target, config_.target_frame, source_frame, scan_time));
   }
 
   inline bool computeTransformToFixed(const ros::Time &packet_time)
   {
     std::string &source_frame = cloud.header.frame_id;
     return !(!config_.fixed_frame.empty() &&
-             !lookupHTM(htm_to_fixed, config_.fixed_frame, source_frame,
-                        packet_time));
+             !calculateTransformMatrix(tf_matrix_to_fixed, config_.fixed_frame, source_frame, packet_time));
   }
 
   inline void transformPoint(float& x, float& y, float& z)
@@ -201,11 +199,11 @@ public:
     Eigen::Vector3f p = Eigen::Vector3f(x, y, z);
     if (!config_.fixed_frame.empty())
     {
-      p = htm_to_fixed * p;
+      p = tf_matrix_to_fixed * p;
     }
     if (!config_.target_frame.empty())
     {
-      p = htm_to_target * p;
+      p = tf_matrix_to_target * p;
     }
     x = p.x();
     y = p.y();
@@ -220,8 +218,8 @@ public:
 protected:
   Config config_;
   boost::shared_ptr<tf::TransformListener> tf_ptr;
-  Eigen::Affine3f htm_to_fixed;
-  Eigen::Affine3f htm_to_target;
+  Eigen::Affine3f tf_matrix_to_fixed;
+  Eigen::Affine3f tf_matrix_to_target;
 };
 } /* namespace velodyne_rawdata */
 #endif  // VELODYNE_POINTCLOUD_DATACONTAINERBASE_H
