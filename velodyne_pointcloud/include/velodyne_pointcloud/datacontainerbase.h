@@ -37,6 +37,7 @@
 #include <velodyne_msgs/VelodyneScan.h>
 #include <sensor_msgs/point_cloud2_iterator.h>
 #include <Eigen/Dense>
+#include <memory>
 #include <string>
 #include <algorithm>
 #include <cstdarg>
@@ -67,8 +68,6 @@ public:
     va_end(vl);
     cloud.point_step = offset;
     cloud.row_step = init_width * cloud.point_step;
-
-    configure(max_range, min_range, fixed_frame, target_frame);
   }
 
   struct Config
@@ -104,6 +103,7 @@ public:
   virtual void setup(const velodyne_msgs::VelodyneScan::ConstPtr& scan_msg)
   {
     sensor_frame = scan_msg->header.frame_id;
+    manage_tf_buffer();
 
     cloud.header.stamp = scan_msg->header.stamp;
     cloud.data.resize(scan_msg->packets.size() * config_.scans_per_packet * cloud.point_step);
@@ -138,21 +138,29 @@ public:
     return cloud;
   }
 
-  void configure(const double max_range, const double min_range, const std::string fixed_frame,
-                 const std::string target_frame)
+  void manage_tf_buffer()
   {
-    config_.max_range = max_range;
-    config_.min_range = min_range;
-    config_.fixed_frame = fixed_frame;
-    config_.target_frame = target_frame;
+    // check if sensor frame is already known, if not don't prepare tf buffer until setup was called
+    if (sensor_frame.empty())
+    {
+      return;
+    }
 
-    // only use somewhat resource intensive tf listener when it is necessary
-    if (!fixed_frame.empty() || !target_frame.empty())
+    // avoid doing transformation when sensor_frame equals target frame and no ego
+    if (config_.fixed_frame.empty() && sensor_frame == config_.target_frame)
+    {
+      // when the string is empty the points will not be transformed later on
+      config_.target_frame = "";
+      return;
+    }
+
+    // only use somewhat resource intensive tf listener when transformations are necessary
+    if (!config_.fixed_frame.empty() || !config_.target_frame.empty())
     {
       if (!tf_buffer)
       {
-        tf_buffer = boost::shared_ptr<tf2_ros::Buffer>(new tf2_ros::Buffer());
-        tf_listener = boost::shared_ptr<tf2_ros::TransformListener>(new tf2_ros::TransformListener(*tf_buffer));
+        tf_buffer = std::make_shared<tf2_ros::Buffer>();
+        tf_listener = std::make_shared<tf2_ros::TransformListener>(*tf_buffer);
       }
     }
     else
@@ -162,11 +170,28 @@ public:
     }
   }
 
+  void configure(const double max_range, const double min_range, const std::string fixed_frame,
+                 const std::string target_frame)
+  {
+    config_.max_range = max_range;
+    config_.min_range = min_range;
+    config_.fixed_frame = fixed_frame;
+    config_.target_frame = target_frame;
+
+    manage_tf_buffer();
+  }
+
   sensor_msgs::PointCloud2 cloud;
 
   inline bool calculateTransformMatrix(Eigen::Affine3f& matrix, const std::string& target_frame,
                                        const std::string& source_frame, const ros::Time& time)
   {
+    if (!tf_buffer)
+    {
+      ROS_ERROR("tf buffer was not initialized yet");
+      return false;
+    }
+
     geometry_msgs::TransformStamped msg;
     try
     {
@@ -238,8 +263,8 @@ public:
 
 protected:
   Config config_;
-  boost::shared_ptr<tf2_ros::TransformListener> tf_listener;
-  boost::shared_ptr<tf2_ros::Buffer> tf_buffer;
+  std::shared_ptr<tf2_ros::TransformListener> tf_listener;
+  std::shared_ptr<tf2_ros::Buffer> tf_buffer;
   Eigen::Affine3f tf_matrix_to_fixed;
   Eigen::Affine3f tf_matrix_to_target;
   std::string sensor_frame;
