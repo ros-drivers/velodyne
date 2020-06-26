@@ -146,7 +146,7 @@ public:
       return;
     }
 
-    // avoid doing transformation when sensor_frame equals target frame and no ego
+    // avoid doing transformation when sensor_frame equals target frame and no ego motion compensation is perfomed
     if (config_.fixed_frame.empty() && sensor_frame == config_.target_frame)
     {
       // when the string is empty the points will not be transformed later on
