@@ -7,11 +7,10 @@ namespace velodyne_pointcloud
   OrganizedCloudXYZIR::OrganizedCloudXYZIR(
       const double max_range, const double min_range,
       const std::string& target_frame, const std::string& fixed_frame,
-      const unsigned int num_lasers, const unsigned int scans_per_block,
-      boost::shared_ptr<tf::TransformListener> tf_ptr)
+      const unsigned int num_lasers, const unsigned int scans_per_block)
     : DataContainerBase(
         max_range, min_range, target_frame, fixed_frame,
-        num_lasers, 0, false, scans_per_block, tf_ptr, 6,
+        num_lasers, 0, false, scans_per_block, 6,
         "x", 1, sensor_msgs::PointField::FLOAT32,
         "y", 1, sensor_msgs::PointField::FLOAT32,
         "z", 1, sensor_msgs::PointField::FLOAT32,
@@ -56,8 +55,7 @@ namespace velodyne_pointcloud
      */
     if (pointInRange(distance))
     {
-      if(config_.transform)
-        transformPoint(x, y, z);
+      transformPoint(x, y, z);
 
       *(iter_x+ring) = x;
       *(iter_y+ring) = y;
