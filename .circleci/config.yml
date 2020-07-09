@@ -8,7 +8,8 @@ jobs:
       - run:
           name: Set Up Container
           command: |
-            apt update -qq && apt install -y python3-argcomplete python3-colcon-common-extensions
+            apt-get update -qq && DEBIAN_FRONTEND=noninteractive apt-get install -y keyboard-configuration
+            apt-get install -y python3-argcomplete python3-colcon-common-extensions
             source `find /opt/ros -maxdepth 2 -name setup.bash | sort | head -1`
             rosdep install --from-paths . --ignore-src -y
       - run:
