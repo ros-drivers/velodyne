@@ -1,8 +1,8 @@
 version: 2
 jobs:
-  dashing:
+  foxy:
     docker:
-      - image: ros:dashing-ros-base
+      - image: ros:foxy-ros-base
     steps:
       - checkout
       - run:
@@ -32,4 +32,4 @@ workflows:
   version: 2
   ros_build:
     jobs:
-      - dashing
+      - foxy
