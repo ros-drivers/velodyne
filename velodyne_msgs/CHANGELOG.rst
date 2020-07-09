@@ -1,6 +1,11 @@
 Change history
 ==============
 
+Forthcoming
+-----------
+* Updating maintainer email address.
+* Contributors: Joshua Whitley, Sebastian Pütz
+
 1.5.2 (2019-01-28)
 ------------------
 
