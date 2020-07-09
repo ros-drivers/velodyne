@@ -7,7 +7,7 @@
 
   <group ns="hdl32e">
 
-    <!-- start nodelet manager, driver and cloud nodelets -->
+    <!-- start nodelet manager, driver and transform nodelets -->
     <include file="$(find velodyne_pointcloud)/launch/32e_points.launch">
       <arg name="frame_id" value="hdl32e"/>
       <arg name="pcap" value="$(find velodyne_pointcloud)/tests/32e.pcap"/>
@@ -27,7 +27,7 @@
 
   <group ns="vlp16">
 
-    <!-- start nodelet manager, driver and cloud nodelets -->
+    <!-- start nodelet manager, driver and transform nodelets -->
     <include file="$(find velodyne_pointcloud)/launch/VLP16_points.launch">
       <arg name="frame_id" value="vlp16"/>
       <arg name="pcap" value="$(find velodyne_pointcloud)/tests/vlp16.pcap"/>

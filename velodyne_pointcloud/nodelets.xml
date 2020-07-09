@@ -1,15 +1,5 @@
 <class_libraries>
 
-  <library path="lib/libcloud_nodelet">
-    <class name="velodyne_pointcloud/CloudNodelet"
-           type="velodyne_pointcloud::CloudNodelet"
-           base_class_type="nodelet::Nodelet">
-      <description>
-        Aggregates points from multiple packets, publishing PointCloud2.
-      </description>
-    </class>
-  </library>
-
   <library path="lib/libringcolors_nodelet">
     <class name="velodyne_pointcloud/RingColorsNodelet"
            type="velodyne_pointcloud::RingColorsNodelet"

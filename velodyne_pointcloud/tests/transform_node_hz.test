@@ -13,8 +13,9 @@
 
   <!-- start transform node with test calibration file -->
   <node pkg="velodyne_pointcloud" type="transform_node" name="transform_node">
-    <param name="calibration"
-           value="$(find velodyne_pointcloud)/tests/angles.yaml"/>
+    <param name="calibration" value="$(find velodyne_pointcloud)/tests/angles.yaml"/>
+    <param name="fixed_frame" value="odom"/>
+    <param name="target_frame" value="velodyne"/>
   </node>
 
   <!-- Verify PointCloud2 publication rate.  Unfortunately,
@@ -25,9 +26,9 @@
         type="hztest" name="hztest_transform_node_64e" >
     <param name="hz" value="10.0" />
     <param name="hzerror" value="7.0" />
-    <param name="test_duration" value="5.0" />    
-    <param name="topic" value="velodyne_points" />  
-    <param name="wait_time" value="2.0" />  
+    <param name="test_duration" value="5.0" />
+    <param name="topic" value="velodyne_points" />
+    <param name="wait_time" value="2.0" />
   </test>
 
 </launch>

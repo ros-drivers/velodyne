@@ -36,16 +36,14 @@ catkin_download_test_data(
   MD5 f45c2bb1d7ee358274e423ea3b66fd73)
 
 # run rostests
-add_rostest(cloud_node_hz.test)
-add_rostest(cloud_nodelet_hz.test)
-add_rostest(cloud_node_32e_hz.test)
-add_rostest(cloud_nodelet_32e_hz.test)
-add_rostest(cloud_node_64e_s2.1_hz.test)
-add_rostest(cloud_nodelet_64e_s2.1_hz.test)
-add_rostest(cloud_node_vlp16_hz.test)
-add_rostest(cloud_nodelet_vlp16_hz.test)
 add_rostest(transform_node_hz.test)
 add_rostest(transform_nodelet_hz.test)
+add_rostest(transform_node_32e_hz.test)
+add_rostest(transform_nodelet_32e_hz.test)
+add_rostest(transform_node_64e_s2.1_hz.test)
+add_rostest(transform_nodelet_64e_s2.1_hz.test)
+add_rostest(transform_node_vlp16_hz.test)
+add_rostest(transform_nodelet_vlp16_hz.test)
 add_rostest(two_nodelet_managers.test)
 
 # parse check all the launch/*.launch files
