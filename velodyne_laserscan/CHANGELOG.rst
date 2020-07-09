@@ -2,8 +2,8 @@
 Changelog for package velodyne_laserscan
 ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
 
-Forthcoming
------------
+1.6.0 (2020-07-09)
+------------------
 * Updating maintainer email address.
 * Add laserscan support for new PointXYZIR structure (`#316 <https://github.com/ros-drivers/velodyne/issues/316>`_)
   * Add laserscan support for new PointXYZIR structure

@@ -2,8 +2,8 @@
 Changelog for package velodyne_pcl
 ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
 
-Forthcoming
------------
+1.6.0 (2020-07-09)
+------------------
 * Velodyne pcl (`#335 <https://github.com/ros-drivers/velodyne/issues/335>`_)
   * fix time assignment in organized cloud container
   * add velodyne_pcl package with point_types.h
