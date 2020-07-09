@@ -3,7 +3,7 @@
 
 <launch>
 
-  <!-- start nodelet manager, driver and pointcloud nodelets -->
+  <!-- start nodelet manager, driver and transform nodelets -->
   <include file="$(find velodyne_driver)/launch/nodelet_manager.launch">
     <arg name="pcap" value="$(find velodyne_driver)/tests/class.pcap"/>
   </include>

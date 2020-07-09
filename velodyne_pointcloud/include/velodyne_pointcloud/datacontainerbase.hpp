@@ -34,12 +34,15 @@
 #define VELODYNE_POINTCLOUD__DATACONTAINERBASE_HPP_
 
 #include <rclcpp/time.hpp>
+#include <geometry_msgs/msg/transform_stamped.hpp>
 #include <sensor_msgs/msg/point_cloud2.hpp>
 #include <sensor_msgs/point_cloud2_iterator.hpp>
 #include <tf2/LinearMath/Quaternion.h>
 #include <tf2/LinearMath/Vector3.h>
 #include <tf2/buffer_core.h>
 #include <tf2/exceptions.h>
+#include <tf2_ros/buffer.h>
+#include <tf2_ros/transform_listener.h>
 #include <velodyne_msgs/msg/velodyne_scan.hpp>
 
 #include <Eigen/Core>
@@ -58,11 +61,11 @@ public:
   explicit DataContainerBase(
     const double min_range, const double max_range, const std::string & target_frame,
     const std::string & fixed_frame, const unsigned int init_width, const unsigned int init_height,
-    const bool is_dense, const unsigned int scans_per_packet,
-    tf2::BufferCore & buffer, int fields, ...)
+    const bool is_dense, const unsigned int scans_per_packet, rclcpp::Clock::SharedPtr clock,
+    int fields, ...)
   : config_(min_range, max_range, target_frame, fixed_frame,
       init_width, init_height, is_dense, scans_per_packet),
-    tf_buffer_(buffer)
+    clock_(clock)
   {
     va_list vl;
     cloud.fields.clear();
@@ -92,15 +95,14 @@ public:
   {
     double min_range;          ///< minimum range to publish
     double max_range;          ///< maximum range to publish
-    std::string target_frame;  ///< target frame to transform a point
-    std::string fixed_frame;   ///< fixed frame used for transform
+    std::string target_frame;  ///< output frame of final point cloud
+    std::string fixed_frame;   ///< world fixed frame for ego motion compenstation
     unsigned int init_width;
     unsigned int init_height;
     bool is_dense;
     unsigned int scans_per_packet;
-    bool transform;  ///< enable / disable transform points
 
-    explicit Config(
+    Config(
       double min_range, double max_range, const std::string & target_frame,
       const std::string & fixed_frame, unsigned int init_width,
       unsigned int init_height, bool is_dense, unsigned int scans_per_packet)
@@ -111,15 +113,17 @@ public:
       init_width(init_width),
       init_height(init_height),
       is_dense(is_dense),
-      scans_per_packet(scans_per_packet),
-      transform(fixed_frame != target_frame)
+      scans_per_packet(scans_per_packet)
     {
     }
   };
 
-  virtual void setup(const velodyne_msgs::msg::VelodyneScan::SharedPtr scan_msg)
+  virtual void setup(const velodyne_msgs::msg::VelodyneScan::ConstSharedPtr scan_msg)
   {
-    cloud.header = scan_msg->header;
+    sensor_frame_ = scan_msg->header.frame_id;
+    manage_tf_buffer();
+
+    cloud.header.stamp = scan_msg->header.stamp;
     cloud.width = config_.init_width;
     cloud.height = config_.init_height;
     cloud.is_dense = static_cast<uint8_t>(config_.is_dense);
@@ -142,8 +146,40 @@ public:
     // set to something, then we override that value.
     if (!config_.target_frame.empty()) {
       cloud.header.frame_id = config_.target_frame;
+    } else if (!config_.fixed_frame.empty()) {
+      cloud.header.frame_id = config_.fixed_frame;
+    } else {
+      cloud.header.frame_id = sensor_frame_;
     }
+
     return cloud;
+  }
+
+  void manage_tf_buffer()
+  {
+    // check if sensor frame is already known, if not don't prepare tf buffer until setup was called
+    if (sensor_frame_.empty()) {
+      return;
+    }
+
+    // avoid doing transformation when sensor_frame equals target frame
+    // and no ego motion compensation is perfomed
+    if (config_.fixed_frame.empty() && sensor_frame_ == config_.target_frame) {
+      // when the string is empty the points will not be transformed later on
+      config_.target_frame = "";
+      return;
+    }
+
+    // only use somewhat resource intensive tf listener when transformations are necessary
+    if (!config_.fixed_frame.empty() || !config_.target_frame.empty()) {
+      if (!tf_buffer_) {
+        tf_buffer_ = std::make_shared<tf2_ros::Buffer>(clock_);
+        tf_listener_ = std::make_shared<tf2_ros::TransformListener>(*tf_buffer_);
+      }
+    } else {
+      tf_listener_.reset();
+      tf_buffer_.reset();
+    }
   }
 
   void configure(
@@ -155,37 +191,60 @@ public:
     config_.fixed_frame = fixed_frame;
     config_.target_frame = target_frame;
 
-    config_.transform = fixed_frame != target_frame;
+    manage_tf_buffer();
   }
 
-  void computeTransformation(const rclcpp::Time & time)
+  inline bool calculateTransformMatrix(
+    Eigen::Affine3f & matrix, const std::string & target_frame,
+    const std::string & source_frame, const rclcpp::Time & time)
   {
-    geometry_msgs::msg::TransformStamped transform;
-    try {
-      const std::chrono::nanoseconds dur(time.nanoseconds());
-      std::chrono::time_point<std::chrono::system_clock, std::chrono::nanoseconds> time(dur);
-      transform = tf_buffer_.lookupTransform(config_.target_frame, cloud.header.frame_id, time);
-    } catch (tf2::LookupException & e) {
-      return;
-    } catch (tf2::ExtrapolationException & e) {
-      return;
+    if (!tf_buffer_) {
+      RCLCPP_ERROR(rclcpp::get_logger("velodyne_pointcloud"), "tf buffer was not initialized yet");
+      return false;
     }
 
-    tf2::Quaternion quaternion(
-      transform.transform.rotation.x,
-      transform.transform.rotation.y,
-      transform.transform.rotation.z,
-      transform.transform.rotation.w);
-    Eigen::Quaternionf rotation(quaternion.w(), quaternion.x(), quaternion.y(), quaternion.z());
+    geometry_msgs::msg::TransformStamped msg;
+    try {
+      msg = tf_buffer_->lookupTransform(
+        target_frame, source_frame, time, rclcpp::Duration::from_seconds(0.2));
+    } catch (tf2::LookupException & e) {
+      RCLCPP_ERROR(rclcpp::get_logger("velodyne_pointcloud"), "%s", e.what());
+      return false;
+    } catch (tf2::ExtrapolationException & e) {
+      RCLCPP_ERROR(rclcpp::get_logger("velodyne_pointcloud"), "%s", e.what());
+      return false;
+    }
 
-    Eigen::Vector3f eigen_origin;
-    tf2::Vector3 origin(
-      transform.transform.translation.x,
-      transform.transform.translation.y,
-      transform.transform.translation.z);
-    vectorTfToEigen(origin, eigen_origin);
-    Eigen::Translation3f translation(eigen_origin);
-    transformation = translation * rotation;
+    const auto & quaternion = msg.transform.rotation;
+    Eigen::Quaternionf rotation(quaternion.w, quaternion.x, quaternion.y, quaternion.z);
+
+    const auto & origin = msg.transform.translation;
+    Eigen::Translation3f translation(origin.x, origin.y, origin.z);
+
+    matrix = translation * rotation;
+    return true;
+  }
+
+  inline bool computeTransformToTarget(const rclcpp::Time & scan_time)
+  {
+    if (config_.target_frame.empty()) {
+      // no need to calculate transform -> success
+      return true;
+    }
+    std::string & source_frame = config_.fixed_frame.empty() ? sensor_frame_ : config_.fixed_frame;
+    return calculateTransformMatrix(
+      tf_matrix_to_target_, config_.target_frame, source_frame, scan_time);
+  }
+
+  inline bool computeTransformToFixed(const rclcpp::Time & packet_time)
+  {
+    if (config_.fixed_frame.empty()) {
+      // no need to calculate transform -> success
+      return true;
+    }
+    std::string & source_frame = sensor_frame_;
+    return calculateTransformMatrix(
+      tf_matrix_to_fixed_, config_.fixed_frame, source_frame, packet_time);
   }
 
 protected:
@@ -200,7 +259,13 @@ protected:
 
   inline void transformPoint(float & x, float & y, float & z)
   {
-    Eigen::Vector3f p = transformation * Eigen::Vector3f(x, y, z);
+    Eigen::Vector3f p = Eigen::Vector3f(x, y, z);
+    if (!config_.fixed_frame.empty()) {
+      p = tf_matrix_to_fixed_ * p;
+    }
+    if (!config_.target_frame.empty()) {
+      p = tf_matrix_to_target_ * p;
+    }
     x = p.x();
     y = p.y();
     z = p.z();
@@ -212,8 +277,12 @@ protected:
   }
 
   Config config_;
-  tf2::BufferCore & tf_buffer_;
-  Eigen::Affine3f transformation;
+  rclcpp::Clock::SharedPtr clock_;
+  std::shared_ptr<tf2_ros::TransformListener> tf_listener_;
+  std::shared_ptr<tf2_ros::Buffer> tf_buffer_;
+  Eigen::Affine3f tf_matrix_to_fixed_;
+  Eigen::Affine3f tf_matrix_to_target_;
+  std::string sensor_frame_;
 };
 }  // namespace velodyne_rawdata
 
