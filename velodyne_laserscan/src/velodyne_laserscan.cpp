@@ -199,7 +199,8 @@ void VelodyneLaserScan::recvCallback(const sensor_msgs::msg::PointCloud2::Shared
         }
       }
     } else {
-      RCLCPP_WARN_ONCE(get_logger(),
+      RCLCPP_WARN_ONCE(
+        get_logger(),
         "PointCloud2 fields in unexpected order. Using slower generic method.");
 
       if (offset_i >= 0) {
@@ -247,7 +248,8 @@ void VelodyneLaserScan::recvCallback(const sensor_msgs::msg::PointCloud2::Shared
 
     pub_->publish(std::move(scan));
   } else {
-    RCLCPP_ERROR(this->get_logger(),
+    RCLCPP_ERROR(
+      this->get_logger(),
       "PointCloud2 missing one or more required fields! (x,y,ring)");
   }
 }

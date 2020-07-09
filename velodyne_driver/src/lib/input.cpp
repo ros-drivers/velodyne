@@ -132,7 +132,8 @@ InputSocket::InputSocket(
   }
 
   if (::fcntl(sockfd_, F_SETFL, O_NONBLOCK | FASYNC) < 0) {
-    RCLCPP_ERROR(private_nh->get_logger(),
+    RCLCPP_ERROR(
+      private_nh->get_logger(),
       "Error settign socket to non-blocking: %s", ::strerror(errno));
     return;
   }
@@ -229,7 +230,8 @@ int InputSocket::getPacket(velodyne_msgs::msg::VelodynePacket * pkt, const doubl
       break;  // done
     }
 
-    RCLCPP_DEBUG(private_nh_->get_logger(),
+    RCLCPP_DEBUG(
+      private_nh_->get_logger(),
       "incomplete Velodyne packet read: " + std::to_string(nbytes) + " bytes");
   }
 
@@ -284,7 +286,8 @@ InputPCAP::InputPCAP(
     RCLCPP_INFO(private_nh->get_logger(), "Read input file as quickly as possible.");
   }
   if (repeat_delay_ > 0.0) {
-    RCLCPP_INFO(private_nh->get_logger(), "Delay %.3f seconds before repeating input file.",
+    RCLCPP_INFO(
+      private_nh->get_logger(), "Delay %.3f seconds before repeating input file.",
       repeat_delay_);
   }
 
@@ -301,7 +304,8 @@ InputPCAP::InputPCAP(
   }
 
   filter << "udp dst port " << port;
-  pcap_compile(pcap_, &pcap_packet_filter_,
+  pcap_compile(
+    pcap_, &pcap_packet_filter_,
     filter.str().c_str(), 1, PCAP_NETMASK_UNKNOWN);
 }
 
@@ -344,7 +348,8 @@ int InputPCAP::getPacket(velodyne_msgs::msg::VelodynePacket * pkt, const double 
     }
 
     if (empty_) {               // no data in file?
-      RCLCPP_WARN(private_nh_->get_logger(), "Error %d reading Velodyne packet: %s",
+      RCLCPP_WARN(
+        private_nh_->get_logger(), "Error %d reading Velodyne packet: %s",
         res, pcap_geterr(pcap_));
       return -1;
     }
@@ -355,7 +360,8 @@ int InputPCAP::getPacket(velodyne_msgs::msg::VelodynePacket * pkt, const double 
     }
 
     if (repeat_delay_ > 0.0) {
-      RCLCPP_INFO(private_nh_->get_logger(), "end of file reached -- delaying %.3f seconds.",
+      RCLCPP_INFO(
+        private_nh_->get_logger(), "end of file reached -- delaying %.3f seconds.",
         repeat_delay_);
       ::usleep(::rint(repeat_delay_ * 1000000.0));
     }

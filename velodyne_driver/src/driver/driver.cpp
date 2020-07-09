@@ -123,7 +123,8 @@ VelodyneDriver::VelodyneDriver(const rclcpp::NodeOptions & options)
   if (cut_angle < 0.0) {
     RCLCPP_INFO(this->get_logger(), "Cut at specific angle feature deactivated.");
   } else if (cut_angle <= (2.0 * M_PI)) {
-    RCLCPP_INFO(this->get_logger(), "Cut at specific angle feature activated. "
+    RCLCPP_INFO(
+      this->get_logger(), "Cut at specific angle feature activated. "
       "Cutting velodyne points always at " + std::to_string(cut_angle) + " rad.");
   } else {
     RCLCPP_ERROR(
