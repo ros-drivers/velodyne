@@ -1,8 +1,8 @@
 Change history
 ==============
 
-Forthcoming
------------
+2.0.0 (2020-07-10)
+------------------
 * Fixes pointed out by clang-tidy (`#310 <https://github.com/ros-drivers/velodyne/issues/310>`_)
   * Rearrange header includes so clang-tidy is happy.
   * Get rid of unnecessary void arguments on methods.

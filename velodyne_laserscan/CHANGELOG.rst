@@ -2,8 +2,8 @@
 Changelog for package velodyne_laserscan
 ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
 
-Forthcoming
------------
+2.0.0 (2020-07-10)
+------------------
 * Fix dependencies in package.xml (`#331 <https://github.com/ros-drivers/velodyne/issues/331>`_)
   Ensure that we depend on ament_cmake_ros as appropriate.
 * Fix ring retrieval from float pointcloud iterator. (`#322 <https://github.com/ros-drivers/velodyne/issues/322>`_)

@@ -1,8 +1,8 @@
 Change history
 ==============
 
-Forthcoming
------------
+2.0.0 (2020-07-10)
+------------------
 * Fix dependencies in package.xml (`#331 <https://github.com/ros-drivers/velodyne/issues/331>`_)
   Ensure that we depend on ament_cmake_ros as appropriate.
 * Fixes pointed out by clang-tidy (`#310 <https://github.com/ros-drivers/velodyne/issues/310>`_)
