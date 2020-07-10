@@ -1,6 +1,81 @@
 Change history
 ==============
 
+Forthcoming
+-----------
+* Fix dependencies in package.xml (`#331 <https://github.com/ros-drivers/velodyne/issues/331>`_)
+  Ensure that we depend on ament_cmake_ros as appropriate.
+* Fixes pointed out by clang-tidy (`#310 <https://github.com/ros-drivers/velodyne/issues/310>`_)
+  * Rearrange header includes so clang-tidy is happy.
+  * Get rid of unnecessary void arguments on methods.
+  * Properly mark methods as override where appropriate.
+  * Initialize members and stack variables to zero before use.
+  * Mark function implementations in header files 'inline'.
+  * Use more efficient 'empty' method instead of empty string.
+  * Get rid of unnecessary else statements after a continue/return.
+  * Get rid of unnecessary == false use.
+  * Make sure to add a virtual destructor to DataContainerBase.
+  * Use string != comparison instead of 'compare' method.
+  * Rename PointcloudXYZIR parameter name to match implementation.
+  * Get rid of usage of typedef.
+  * Be more explicit about using floats.
+  * Do an explicit lround to do int->float conversion.
+  * Fix the intensity calculation.
+  * Remove the azimuth from addPoint.
+  * Make sure to reset the cloud data to 0 before reusing.
+  * Use underscores on pointcloud member variables.
+  * Using std::lround means we don't need to add 0.5 to the result.
+  * Slightly rearrange and simplify range checks.
+  * Add in example launch files for VLP32C.
+* Dashing fixes (`#307 <https://github.com/ros-drivers/velodyne/issues/307>`_)
+  * Use std::make_unique as appropriate.
+  * Fix the azimuth calculation.
+  * Fix a crash during driver startup.
+  * Always recalculate the row_step while setting up the cloud.
+  * Make sure to call computeTransformation.
+  * Fix style errors pointed out by flake8.
+* ROS2: Add Linters to velodyne_driver (`#301 <https://github.com/ros-drivers/velodyne/issues/301>`_)
+  * Renaming files to match ROS2 conventions.
+  * Cleaning up velodyne_driver and fixing diags.
+  * velodyne_driver linting complete.
+  * VD: Removing unused namespace.
+* Add in example launch files.
+* Disable copy, move, and assign operators.
+* Build the components so the velodyne can be run as a component.
+* Add in NodeOptions to node constructors.
+* Throw an exception for an invalid Velodyne model.
+* Add explicit, final, and override to classes where appropriate.
+* Switch to using nullptr everywhere.
+* Pass read_once, read_fast, and repeat_delay to InputPCAP constructor.
+* Change filename parameter to const reference.
+* Pass the devip string into the Input* constructors.
+* Move gps_time into the InputSocket class.
+* Get rid of default parameters for Input* constructors.
+* Rename nodes.
+* Update the documentation for ROS 2.
+* Switch to using the cut angle by default.
+* Merge pull request `#251 <https://github.com/ros-drivers/velodyne/issues/251>`_ from clalancette/dashing-devel3
+  ROS 2 Dashing port
+* Merge pull request `#214 <https://github.com/ros-drivers/velodyne/issues/214>`_ from spuetz/feature/opc_nopcl
+  Container cleanup and organized pointclouds
+* Merge pull request `#243 <https://github.com/ros-drivers/velodyne/issues/243>`_ from dandedrick/reconfig-enable
+  driver: add enabled reconfigure param
+* Merge pull request `#234 <https://github.com/ros-drivers/velodyne/issues/234>`_ from kmhallen/c++11
+  Set minimum C++ standard to C++11
+* Merge pull request `#231 <https://github.com/ros-drivers/velodyne/issues/231>`_ from ros-drivers/ci/test_better_output
+  CI: Adding roslint as separate step. Limiting output of catkin build.
+* Merge pull request `#227 <https://github.com/ros-drivers/velodyne/issues/227>`_ from ros-drivers/roslint
+  Applying roslint to velodyne_pointcloud.
+* Merge pull request `#225 <https://github.com/ros-drivers/velodyne/issues/225>`_ from ros-drivers/roslint
+  Adding roslint to velodyne_driver.
+* Merge pull request `#222 <https://github.com/ros-drivers/velodyne/issues/222>`_ from mpitropov/feat_Use_GPS_time
+  Add flag to enable using GPS time from within the Velodyne packet instead of ROS time for scan.
+* Merge pull request `#220 <https://github.com/ros-drivers/velodyne/issues/220>`_ from nbussas/static
+  Transform static variable into member
+* Merge pull request `#216 <https://github.com/ros-drivers/velodyne/issues/216>`_ from ros-drivers/maint/poll_timeout_handling
+  Testing reporting error instead of stopping node on disconnect.
+* Contributors: Andreas Klintberg, Chris Lalancette, Dan Dedrick, Joshua Whitley, Kevin Hallenbeck, Matthew Pitropov, Nils Hauke Bussas, Sebastian, Sebastian Pütz
+
 1.5.2 (2019-01-28)
 ------------------
 * Merge pull request `#212 <https://github.com/ros-drivers/velodyne/issues/212>`_ from ros-drivers/maint/vdump_as_root

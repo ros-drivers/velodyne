@@ -1,6 +1,14 @@
 Change history
 ==============
 
+Forthcoming
+-----------
+* Adding linters to velodyne_msgs. (`#302 <https://github.com/ros-drivers/velodyne/issues/302>`_)
+* Update the documentation for ROS 2.
+* Merge pull request `#251 <https://github.com/ros-drivers/velodyne/issues/251>`_ from clalancette/dashing-devel3
+  ROS 2 Dashing port
+* Contributors: Andreas Klintberg, Chris Lalancette, Joshua Whitley, Sebastian Pütz
+
 1.5.2 (2019-01-28)
 ------------------
 

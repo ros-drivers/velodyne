@@ -2,6 +2,67 @@
 Changelog for package velodyne_laserscan
 ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
 
+Forthcoming
+-----------
+* Fix dependencies in package.xml (`#331 <https://github.com/ros-drivers/velodyne/issues/331>`_)
+  Ensure that we depend on ament_cmake_ros as appropriate.
+* Fix ring retrieval from float pointcloud iterator. (`#322 <https://github.com/ros-drivers/velodyne/issues/322>`_)
+  * Fix ring retrieval from float pointcloud iterator.
+* Fixes pointed out by clang-tidy (`#310 <https://github.com/ros-drivers/velodyne/issues/310>`_)
+  * Rearrange header includes so clang-tidy is happy.
+  * Get rid of unnecessary void arguments on methods.
+  * Properly mark methods as override where appropriate.
+  * Initialize members and stack variables to zero before use.
+  * Mark function implementations in header files 'inline'.
+  * Use more efficient 'empty' method instead of empty string.
+  * Get rid of unnecessary else statements after a continue/return.
+  * Get rid of unnecessary == false use.
+  * Make sure to add a virtual destructor to DataContainerBase.
+  * Use string != comparison instead of 'compare' method.
+  * Rename PointcloudXYZIR parameter name to match implementation.
+  * Get rid of usage of typedef.
+  * Be more explicit about using floats.
+  * Do an explicit lround to do int->float conversion.
+  * Fix the intensity calculation.
+  * Remove the azimuth from addPoint.
+  * Make sure to reset the cloud data to 0 before reusing.
+  * Use underscores on pointcloud member variables.
+  * Using std::lround means we don't need to add 0.5 to the result.
+  * Slightly rearrange and simplify range checks.
+  * Add in example launch files for VLP32C.
+* Dashing fixes (`#307 <https://github.com/ros-drivers/velodyne/issues/307>`_)
+  * Use std::make_unique as appropriate.
+  * Fix the azimuth calculation.
+  * Fix a crash during driver startup.
+  * Always recalculate the row_step while setting up the cloud.
+  * Make sure to call computeTransformation.
+  * Fix style errors pointed out by flake8.
+* ROS2: Add Linters to velodyne_laserscan (`#303 <https://github.com/ros-drivers/velodyne/issues/303>`_)
+  * Adding tests and updating file naming.
+  * Fixing copyright and xml issues.
+  * Fixing linter stuff on velodyne_laserscan.
+  * Fixing typo in conversion.
+* Switch the style on scope-constants to google style.
+* Add in example launch files.
+* Disable copy, move, and assign operators.
+* Build the components so the velodyne can be run as a component.
+* Add in NodeOptions to node constructors.
+* Make sure to install the header files for laserscan and pointcloud.
+* Switch to RCLCPP_WARN_ONCE.
+* Make sure to only print the "slower generic method" message once.
+* Add explicit, final, and override to classes where appropriate.
+* Merge pull request `#251 <https://github.com/ros-drivers/velodyne/issues/251>`_ from clalancette/dashing-devel3
+  ROS 2 Dashing port
+* Merge pull request `#234 <https://github.com/ros-drivers/velodyne/issues/234>`_ from kmhallen/c++11
+  Set minimum C++ standard to C++11
+* Merge pull request `#231 <https://github.com/ros-drivers/velodyne/issues/231>`_ from ros-drivers/ci/test_better_output
+  CI: Adding roslint as separate step. Limiting output of catkin build.
+* Merge pull request `#227 <https://github.com/ros-drivers/velodyne/issues/227>`_ from ros-drivers/roslint
+  Applying roslint to velodyne_pointcloud.
+* Merge pull request `#226 <https://github.com/ros-drivers/velodyne/issues/226>`_ from ros-drivers/roslint
+  Adding roslint to velodyne_laserscan
+* Contributors: Chris Lalancette, Joshua Whitley, Kevin Hallenbeck, Matthew Pitropov, Michel Hidalgo, Sebastian, Sebastian Pütz
+
 1.5.2 (2019-01-28)
 ------------------
 

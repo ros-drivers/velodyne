@@ -1,6 +1,35 @@
 Change history
 ==============
 
+Forthcoming
+-----------
+* Fixes pointed out by clang-tidy (`#310 <https://github.com/ros-drivers/velodyne/issues/310>`_)
+  * Rearrange header includes so clang-tidy is happy.
+  * Get rid of unnecessary void arguments on methods.
+  * Properly mark methods as override where appropriate.
+  * Initialize members and stack variables to zero before use.
+  * Mark function implementations in header files 'inline'.
+  * Use more efficient 'empty' method instead of empty string.
+  * Get rid of unnecessary else statements after a continue/return.
+  * Get rid of unnecessary == false use.
+  * Make sure to add a virtual destructor to DataContainerBase.
+  * Use string != comparison instead of 'compare' method.
+  * Rename PointcloudXYZIR parameter name to match implementation.
+  * Get rid of usage of typedef.
+  * Be more explicit about using floats.
+  * Do an explicit lround to do int->float conversion.
+  * Fix the intensity calculation.
+  * Remove the azimuth from addPoint.
+  * Make sure to reset the cloud data to 0 before reusing.
+  * Use underscores on pointcloud member variables.
+  * Using std::lround means we don't need to add 0.5 to the result.
+  * Slightly rearrange and simplify range checks.
+  * Add in example launch files for VLP32C.
+* Add in example launch files.
+* Merge pull request `#251 <https://github.com/ros-drivers/velodyne/issues/251>`_ from clalancette/dashing-devel3
+  ROS 2 Dashing port
+* Contributors: Andreas Klintberg, Chris Lalancette, Joshua Whitley, Sebastian Pütz
+
 1.5.2 (2019-01-28)
 ------------------
 

@@ -1,6 +1,107 @@
 Change history
 ==============
 
+Forthcoming
+-----------
+* More fixing of dependencies. (`#333 <https://github.com/ros-drivers/velodyne/issues/333>`_)
+  * More fixing of dependencies.
+* Fixes pointed out by clang-tidy (`#310 <https://github.com/ros-drivers/velodyne/issues/310>`_)
+  * Rearrange header includes so clang-tidy is happy.
+  * Get rid of unnecessary void arguments on methods.
+  * Properly mark methods as override where appropriate.
+  * Initialize members and stack variables to zero before use.
+  * Mark function implementations in header files 'inline'.
+  * Use more efficient 'empty' method instead of empty string.
+  * Get rid of unnecessary else statements after a continue/return.
+  * Get rid of unnecessary == false use.
+  * Make sure to add a virtual destructor to DataContainerBase.
+  * Use string != comparison instead of 'compare' method.
+  * Rename PointcloudXYZIR parameter name to match implementation.
+  * Get rid of usage of typedef.
+  * Be more explicit about using floats.
+  * Do an explicit lround to do int->float conversion.
+  * Fix the intensity calculation.
+  * Remove the azimuth from addPoint.
+  * Make sure to reset the cloud data to 0 before reusing.
+  * Use underscores on pointcloud member variables.
+  * Using std::lround means we don't need to add 0.5 to the result.
+  * Slightly rearrange and simplify range checks.
+  * Add in example launch files for VLP32C.
+* A few more minor style updates. (`#308 <https://github.com/ros-drivers/velodyne/issues/308>`_)
+  - Get rid of the last users of new in the codebase
+  - Get rid of the users of 'using' in the codebase
+  - Rename 'calibrationFile' -> 'calibration_file'
+* Dashing fixes (`#307 <https://github.com/ros-drivers/velodyne/issues/307>`_)
+  * Use std::make_unique as appropriate.
+  * Fix the azimuth calculation.
+  * Fix a crash during driver startup.
+  * Always recalculate the row_step while setting up the cloud.
+  * Make sure to call computeTransformation.
+  * Fix style errors pointed out by flake8.
+* ROS2: Add Linters to velodyne_pointcloud (`#304 <https://github.com/ros-drivers/velodyne/issues/304>`_)
+  * VP: Renaming files.
+  * VP: Fixed copyrights.
+  * VP: cpplint is satisfied!
+  * VP: Converted gen_calibration.py to Python3.
+  * Uncrustify fixed!
+  * VP: Lint errors clear.
+  * VP: Moving organized_cloud and pointcloud to lib and building as library.
+* Check for intra-process subscribers
+* Add in example launch files.
+* Disable copy, move, and assign operators.
+* Build the components so the velodyne can be run as a component.
+* Add in NodeOptions to node constructors.
+* Only find the "common" component to PCL.
+* Make sure to install the header files for laserscan and pointcloud.
+* Properly setup the row_step.
+* Add explicit, final, and override to classes where appropriate.
+* Remove organize_cloud, fixed_frame, and target_frame configs.
+* Stop storing view\_{direction,width} in the Node classes.
+* Stop storing {min,max}_range in the Node classes.
+* Make DataContainerBase::configure const reference string parameters.
+* Switch argument order to always be (min,max)
+* Remove tmp\_{min,max}_angle from stored RawData config.
+* Remove unused tf_ptr.
+* Switch container_ptr to a unique_ptr.
+* container_ptr -> container_ptr\_
+* Don't store number of lasers in the Transfrom/Convert node.
+* Make the RawData class RAII-style.
+* Make RawData::setup not return the number of lasers.
+* Remove unused laser_corrections_maps.
+* Remove the calibration read method.
+* Make the Calibration class only have the RAII-style constructor.
+* Remove unnecessary ros_info parameter from Calibration.
+* Remove unused calibration write method.
+* Remove unused setupOffline method.
+* Remove calibrationFile from rawdata config.
+* Switch to using nullptr everywhere.
+* fixed timpepoint issue
+* Remove dead store from rawdata.cc
+* Rename nodes.
+* Switch organize_cloud to true by default.
+* Update the documentation for ROS 2.
+* Remove debugging statements.
+* Fix dead pointers in calibration.cc.
+* Merge pull request `#251 <https://github.com/ros-drivers/velodyne/issues/251>`_ from clalancette/dashing-devel3
+  ROS 2 Dashing port
+* Merge pull request `#214 <https://github.com/ros-drivers/velodyne/issues/214>`_ from spuetz/feature/opc_nopcl
+  Container cleanup and organized pointclouds
+* Merge pull request `#236 <https://github.com/ros-drivers/velodyne/issues/236>`_ from mpitropov/fix_transform_node_frame_bug
+  set correct output frame
+* Merge pull request `#234 <https://github.com/ros-drivers/velodyne/issues/234>`_ from kmhallen/c++11
+  Set minimum C++ standard to C++11
+* Merge pull request `#231 <https://github.com/ros-drivers/velodyne/issues/231>`_ from ros-drivers/ci/test_better_output
+  CI: Adding roslint as separate step. Limiting output of catkin build.
+* Merge pull request `#227 <https://github.com/ros-drivers/velodyne/issues/227>`_ from ros-drivers/roslint
+  Applying roslint to velodyne_pointcloud.
+* Merge pull request `#223 <https://github.com/ros-drivers/velodyne/issues/223>`_ from mpitropov/feat_Add_fixed_frame
+  Add fixed frame and use ros message time within transform node
+* Merge pull request `#224 <https://github.com/ros-drivers/velodyne/issues/224>`_ from mpitropov/feat_add_diagnostics
+  Added diagnostic publishing
+* Merge pull request `#222 <https://github.com/ros-drivers/velodyne/issues/222>`_ from mpitropov/feat_Use_GPS_time
+  Add flag to enable using GPS time from within the Velodyne packet instead of ROS time for scan.
+* Contributors: Andreas Klintberg, Chris Lalancette, Ian Colwell, Joshua Whitley, Kevin Hallenbeck, Matthew Pitropov, P. J. Reed, Sebastian, Sebastian Pütz
+
 1.5.2 (2019-01-28)
 ------------------
 * Merge pull request `#205 <https://github.com/ros-drivers/velodyne/issues/205>`_ from xiesc/master
