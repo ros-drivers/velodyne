@@ -1,6 +1,9 @@
 Change history
 ==============
 
+Forthcoming
+-----------
+
 2.0.0 (2020-07-10)
 ------------------
 * More fixing of dependencies. (`#333 <https://github.com/ros-drivers/velodyne/issues/333>`_)
