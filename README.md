@@ -1,4 +1,4 @@
-[![CircleCI](https://circleci.com/gh/ros-drivers/velodyne.svg?style=svg)](https://circleci.com/gh/ros-drivers/velodyne)
+[![](https://github.com/ros-drivers/velodyne/workflows/Basic%20Build%20Workflow/badge.svg)](https://github.com/ros-drivers/velodyne/actions)
 
 Overview
 ========
