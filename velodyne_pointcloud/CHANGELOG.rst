@@ -1,6 +1,56 @@
 Change history
 ==============
 
+1.6.0 (2020-07-09)
+------------------
+* Unify tf frame parameters between transform and cloud nodes (`#344 <https://github.com/ros-drivers/velodyne/issues/344>`_)
+  * Unify tf frame parameters between transform and cloud nodes
+  * Use more common ROS terminology instead of 'htm'
+  * Just use tf listener when necessary
+  * Migrate package to tf2
+  * Explicitly store sensor frame in a dedicated variable to make code easier to read
+  * Avoid unnecessary transforms when sensor_frame == target_frame
+  Co-authored-by: anre <andreas.reich@unibw.de>
+* Velodyne pcl (`#335 <https://github.com/ros-drivers/velodyne/issues/335>`_)
+  * fix time assignment in organized cloud container
+  * add velodyne_pcl package with point_types.h
+  * add README.md with infos for conversion
+  * rename containers to cover the added time property
+  * Update package.xml to Format2 and package version to 1.5.2
+  Co-authored-by: Joshua Whitley <josh.whitley@autoware.org>
+* Passing fixed_frame and target_frame to Convert object. (`#330 <https://github.com/ros-drivers/velodyne/issues/330>`_)
+* Updating maintainer email address.
+* Increase the max_range of the 32C launch file (`#323 <https://github.com/ros-drivers/velodyne/issues/323>`_)
+* Getting model param for timings from private node handle. (`#318 <https://github.com/ros-drivers/velodyne/issues/318>`_)
+* updated model to have a default of "" so that tests run successfully
+* Move timing offsets functionality into class private. Also fix linter errors
+* Added model param to each of the cloud nodelet starters
+* Initial commit to timestamp each point using the timing spec in the manuals
+* use correct node handles and node names for diagnostic_updater::Updater
+* Added config option to timestamp a full scan based on first velo packet instead of last packet
+* Remove a dead store from rawdata.cc.
+* fix for `#267 <https://github.com/ros-drivers/velodyne/issues/267>`_, transform each packet
+* Merge pull request `#250 <https://github.com/ros-drivers/velodyne/issues/250>`_ from zhixy/master
+  bug fix for row step
+* Merge pull request `#253 <https://github.com/ros-drivers/velodyne/issues/253>`_ from ros-drivers/fix/fixed_frame_target_frame
+  Add configurable fixed_frame/target_frame for velodyne_pointcloud
+* Merge pull request `#214 <https://github.com/ros-drivers/velodyne/issues/214>`_ from spuetz/feature/opc_nopcl
+  Container cleanup and organized pointclouds
+* Merge pull request `#236 <https://github.com/ros-drivers/velodyne/issues/236>`_ from mpitropov/fix_transform_node_frame_bug
+  set correct output frame
+* Merge pull request `#234 <https://github.com/ros-drivers/velodyne/issues/234>`_ from kmhallen/c++11
+  Set minimum C++ standard to C++11
+* Merge pull request `#223 <https://github.com/ros-drivers/velodyne/issues/223>`_ from mpitropov/feat_Add_fixed_frame
+  Add fixed frame and use ros message time within transform node
+* Made static tf publisher test adhere to REP 105
+* change more odom to map
+* Merge pull request `#224 <https://github.com/ros-drivers/velodyne/issues/224>`_ from mpitropov/feat_add_diagnostics
+  Added diagnostic publishing
+* Merge pull request `#222 <https://github.com/ros-drivers/velodyne/issues/222>`_ from mpitropov/feat_Use_GPS_time
+  Add flag to enable using GPS time from within the Velodyne packet instead of ROS time for scan.
+* Created gps_time param to enable this feature
+* Contributors: AndreasR30, Chris Lalancette, Daniel Seifert, Ian Colwell, Joshua Whitley, Kevin Hallenbeck, Matthew Pitropov, Sebastian, Sebastian Pütz, Shawn Hanna, zhixiangyang
+
 1.5.2 (2019-01-28)
 ------------------
 * Merge pull request `#205 <https://github.com/ros-drivers/velodyne/issues/205>`_ from xiesc/master

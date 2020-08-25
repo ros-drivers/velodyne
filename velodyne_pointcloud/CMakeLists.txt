@@ -16,7 +16,7 @@ set(${PROJECT_NAME}_CATKIN_DEPS
     roscpp
     roslib
     sensor_msgs
-    tf
+    tf2_ros
     velodyne_driver
     velodyne_msgs
     dynamic_reconfigure
@@ -43,7 +43,7 @@ find_library(YAML_CPP_LIBRARY
 link_directories(${YAML_CPP_LIBRARY_DIRS})
 
 generate_dynamic_reconfigure_options(
-  cfg/CloudNode.cfg cfg/TransformNode.cfg
+  cfg/TransformNode.cfg
 )
 
 if(NOT ${YAML_CPP_VERSION} VERSION_LESS "0.5")

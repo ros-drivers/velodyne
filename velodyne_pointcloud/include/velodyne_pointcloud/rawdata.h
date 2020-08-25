@@ -47,6 +47,7 @@
 #include <string>
 #include <boost/format.hpp>
 #include <math.h>
+#include <vector>
 
 #include <ros/ros.h>
 #include <velodyne_msgs/VelodyneScan.h>
@@ -149,6 +150,7 @@ public:
    */
   boost::optional<velodyne_pointcloud::Calibration> setup(ros::NodeHandle private_nh);
 
+
   /** \brief Set up for data processing offline.
    * Performs the same initialization as in setup, in the abscence of a ros::NodeHandle.
    * this method is useful if unpacking data directly from bag files, without passing
@@ -162,7 +164,8 @@ public:
    */
   int setupOffline(std::string calibration_file, double max_range_, double min_range_);
 
-  void unpack(const velodyne_msgs::VelodynePacket& pkt, DataContainerBase& data);
+  void unpack(const velodyne_msgs::VelodynePacket& pkt, DataContainerBase& data,
+              const ros::Time& scan_start_time);
 
   void setParameters(double min_range, double max_range, double view_direction, double view_width);
 
@@ -172,6 +175,7 @@ private:
   /** configuration parameters */
   typedef struct
   {
+    std::string model;
     std::string calibrationFile;  ///< calibration file name
     double max_range;             ///< maximum range to publish
     double min_range;             ///< minimum range to publish
@@ -191,8 +195,20 @@ private:
   float sin_rot_table_[ROTATION_MAX_UNITS];
   float cos_rot_table_[ROTATION_MAX_UNITS];
 
+  // timing offset lookup table
+  std::vector< std::vector<float> > timing_offsets;
+
+  /** \brief setup per-point timing offsets
+   * 
+   *  Runs during initialization and determines the firing time for each point in the scan
+   * 
+   *  NOTE: Does not support all sensors yet (vlp16, vlp32, and hdl32 are currently supported)
+   */
+  bool buildTimings();
+
   /** add private function to handle the VLP16 **/
-  void unpack_vlp16(const velodyne_msgs::VelodynePacket& pkt, DataContainerBase& data);
+  void unpack_vlp16(const velodyne_msgs::VelodynePacket& pkt, DataContainerBase& data,
+                    const ros::Time& scan_start_time);
 };
 
 }  // namespace velodyne_rawdata

@@ -1,6 +1,12 @@
 Change history
 ==============
 
+1.6.0 (2020-07-09)
+------------------
+* Updating maintainer email address.
+* Merge branch 'feature/opc_nopcl' of github.com:spuetz/velodyne into feature/opc_nopcl
+* Contributors: Joshua Whitley, Sebastian Pütz
+
 1.5.2 (2019-01-28)
 ------------------
 

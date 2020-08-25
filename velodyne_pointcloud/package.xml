@@ -1,11 +1,11 @@
 <?xml version="1.0"?>
 <package format="2">
   <name>velodyne_pointcloud</name>
-  <version>1.5.2</version>
+  <version>1.6.0</version>
   <description>
     Point cloud conversions for Velodyne 3D LIDARs.
   </description>
-  <maintainer email="jwhitley@autonomoustuff.com">Josh Whitley</maintainer>
+  <maintainer email="josh.whitley@autoware.org">Josh Whitley</maintainer>
   <author>Jack O'Quin</author>
   <author>Piyush Khandelwal</author>
   <author>Jesse Vera</author>
@@ -24,7 +24,7 @@
   <depend>roscpp</depend>
   <depend>roslib</depend>
   <depend>sensor_msgs</depend>
-  <depend>tf</depend>
+  <depend>tf2_ros</depend>
   <depend>velodyne_driver</depend>
   <depend>velodyne_msgs</depend>
   <depend>yaml-cpp</depend>
