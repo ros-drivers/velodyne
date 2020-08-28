@@ -58,7 +58,7 @@ include_directories(include ${catkin_INCLUDE_DIRS}
 catkin_package(
     CATKIN_DEPENDS ${${PROJECT_NAME}_CATKIN_DEPS}
     INCLUDE_DIRS include
-    LIBRARIES velodyne_rawdata)
+    LIBRARIES velodyne_rawdata data_containers)
 
 #add_executable(dynamic_reconfigure_node src/dynamic_reconfigure_node.cpp)
 #target_link_libraries(dynamic_reconfigure_node
