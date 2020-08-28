@@ -58,7 +58,7 @@ struct PointXYZIRT
 EIGEN_ALIGN16;
 }  // namespace velodyne_pcl
 
-POINT_CLOUD_REGISTER_POINT_STRUCT(velodyne_pcl::PointXYZIR,
+POINT_CLOUD_REGISTER_POINT_STRUCT(velodyne_pcl::PointXYZIRT,
                                   (float, x, x)
                                   (float, y, y)
                                   (float, z, z)
