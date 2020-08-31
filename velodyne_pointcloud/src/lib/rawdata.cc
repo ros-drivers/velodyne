@@ -299,6 +299,7 @@ inline float SQR(float val) { return val*val; }
         float x, y, z;
         float intensity;
         const uint8_t laser_number  = j + bank_origin;
+        float time = 0;
 
         const LaserCorrection &corrections = calibration_.laser_corrections[laser_number];
 
@@ -311,7 +312,7 @@ inline float SQR(float val) { return val*val; }
         {
           if (config_.organize_cloud)
           {
-            data.addPoint(nanf(""), nanf(""), nanf(""), corrections.laser_ring, raw->blocks[i].rotation, nanf(""), nanf(""));
+            data.addPoint(nanf(""), nanf(""), nanf(""), corrections.laser_ring, raw->blocks[i].rotation, nanf(""), nanf(""), time);
           }
           continue;
         }
@@ -422,7 +423,6 @@ inline float SQR(float val) { return val*val; }
           intensity = (intensity < min_intensity) ? min_intensity : intensity;
           intensity = (intensity > max_intensity) ? max_intensity : intensity;
 
-          float time = 0;
           if (timing_offsets.size())
             time = timing_offsets[i][j] + time_diff_start_to_this_packet;
 
