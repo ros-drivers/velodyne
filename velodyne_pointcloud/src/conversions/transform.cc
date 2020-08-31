@@ -20,14 +20,13 @@
 
 #include "velodyne_pointcloud/transform.h"
 
-#include <velodyne_pointcloud/pointcloudXYZIR.h>
-#include <velodyne_pointcloud/organized_cloudXYZIR.h>
+#include <velodyne_pointcloud/pointcloudXYZIRT.h>
+#include <velodyne_pointcloud/organized_cloudXYZIRT.h>
 
 namespace velodyne_pointcloud
 {
   /** @brief Constructor. */
   Transform::Transform(ros::NodeHandle node, ros::NodeHandle private_nh, std::string const & node_name):
-    tf_prefix_(tf::getPrefixParam(private_nh)),
     data_(new velodyne_rawdata::RawData),
     first_rcfg_call(true),
     diagnostics_(node, private_nh, node_name)
@@ -43,38 +42,15 @@ namespace velodyne_pointcloud
       ROS_ERROR_STREAM("Could not load calibration file!");
     }
 
-    config_.target_frame = config_.fixed_frame = "velodyne";
-    tf_ptr_ = boost::make_shared<tf::TransformListener>();
-
-    if(config_.organize_cloud)
-    {
-      container_ptr = boost::shared_ptr<OrganizedCloudXYZIR>(
-          new OrganizedCloudXYZIR(config_.max_range, config_.min_range, config_.target_frame, config_.fixed_frame,
-                                  config_.num_lasers, data_->scansPerPacket(), tf_ptr_));
-    }
-    else
-    {
-      container_ptr = boost::shared_ptr<PointcloudXYZIR>(
-          new PointcloudXYZIR(config_.max_range, config_.min_range,
-                              config_.target_frame, config_.fixed_frame,
-                              data_->scansPerPacket(), tf_ptr_));
-    }
-
     // advertise output point cloud (before subscribing to input data)
-    output_ =
-      node.advertise<sensor_msgs::PointCloud2>("velodyne_points", 10);
+    output_ = node.advertise<sensor_msgs::PointCloud2>("velodyne_points", 10);
 
     srv_ = boost::make_shared<dynamic_reconfigure::Server<TransformNodeCfg>> (private_nh);
     dynamic_reconfigure::Server<TransformNodeCfg>::CallbackType f;
     f = boost::bind (&Transform::reconfigure_callback, this, _1, _2);
     srv_->setCallback (f);
 
-    // subscribe to VelodyneScan packets using transform filter
-    velodyne_scan_.subscribe(node, "velodyne_packets", 10);
-    tf_filter_ptr_ = boost::shared_ptr<tf::MessageFilter<velodyne_msgs::VelodyneScan> >(
-            new tf::MessageFilter<velodyne_msgs::VelodyneScan>(velodyne_scan_, *tf_ptr_, config_.target_frame, 10));
-    tf_filter_ptr_->registerCallback(boost::bind(&Transform::processScan, this, _1));
-    private_nh.param<std::string>("fixed_frame", config_.fixed_frame, "odom");
+    velodyne_scan_ = node.subscribe("velodyne_packets", 10, &Transform::processScan, this);
 
     // Diagnostics
     diagnostics_.setHardwareID("Velodyne Transform");
@@ -90,15 +66,17 @@ namespace velodyne_pointcloud
                                           TimeStampStatusParam()));
 
   }
-  
+
   void Transform::reconfigure_callback(
       velodyne_pointcloud::TransformNodeConfig &config, uint32_t level)
   {
     ROS_INFO_STREAM("Reconfigure request.");
     data_->setParameters(config.min_range, config.max_range,
                          config.view_direction, config.view_width);
-    config_.target_frame = tf::resolve(tf_prefix_, config.frame_id);
+    config_.target_frame = config.target_frame;
+    config_.fixed_frame = config.fixed_frame;
     ROS_INFO_STREAM("Target frame ID now: " << config_.target_frame);
+    ROS_INFO_STREAM("Fixed frame ID now: " << config_.fixed_frame);
     config_.min_range = config.min_range;
     config_.max_range = config.max_range;
 
@@ -110,15 +88,15 @@ namespace velodyne_pointcloud
       if(config_.organize_cloud)
       {
         ROS_INFO_STREAM("Using the organized cloud format...");
-        container_ptr = boost::shared_ptr<OrganizedCloudXYZIR>(
-            new OrganizedCloudXYZIR(config_.max_range, config_.min_range,
+        container_ptr = boost::shared_ptr<OrganizedCloudXYZIRT>(
+            new OrganizedCloudXYZIRT(config_.max_range, config_.min_range,
                                     config_.target_frame, config_.fixed_frame,
                                     config_.num_lasers, data_->scansPerPacket()));
       }
       else
       {
-        container_ptr = boost::shared_ptr<PointcloudXYZIR>(
-            new PointcloudXYZIR(config_.max_range, config_.min_range,
+        container_ptr = boost::shared_ptr<PointcloudXYZIRT>(
+            new PointcloudXYZIRT(config_.max_range, config_.min_range,
                                 config_.target_frame, config_.fixed_frame,
                                 data_->scansPerPacket()));
       }
@@ -134,7 +112,7 @@ namespace velodyne_pointcloud
   void
     Transform::processScan(const velodyne_msgs::VelodyneScan::ConstPtr &scanMsg)
   {
-    if (output_.getNumSubscribers() == 0)         // no one listening?
+    if (output_.getNumSubscribers() == 0)      // no one listening?
       return;                                     // avoid much work
 
     boost::lock_guard<boost::mutex> guard(reconfigure_mtx_);
@@ -142,11 +120,24 @@ namespace velodyne_pointcloud
     // allocate a point cloud with same time and frame ID as raw data
     container_ptr->setup(scanMsg);
 
+    // sufficient to calculate single transform for whole scan
+    if(!container_ptr->computeTransformToTarget(scanMsg->header.stamp))
+    {
+      // target frame not available
+      return;
+    }
+
     // process each packet provided by the driver
     for (size_t i = 0; i < scanMsg->packets.size(); ++i)
     {
-      container_ptr->computeTransformation(scanMsg->packets[i].stamp);
-      data_->unpack(scanMsg->packets[i], *container_ptr,  scanMsg->header.stamp);
+      // calculate individual transform for each packet to account for ego
+      // during one rotation of the velodyne sensor
+      if(!container_ptr->computeTransformToFixed(scanMsg->packets[i].stamp))
+      {
+        // fixed frame not available
+        return;
+      }
+      data_->unpack(scanMsg->packets[i], *container_ptr, scanMsg->header.stamp);
     }
     // publish the accumulated cloud message
     output_.publish(container_ptr->finishCloud());

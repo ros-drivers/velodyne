@@ -1,17 +1,15 @@
 
-#include <velodyne_pointcloud/organized_cloudXYZIR.h>
+#include <velodyne_pointcloud/organized_cloudXYZIRT.h>
 
 namespace velodyne_pointcloud
 {
-
-  OrganizedCloudXYZIR::OrganizedCloudXYZIR(
+OrganizedCloudXYZIRT::OrganizedCloudXYZIRT(
       const double max_range, const double min_range,
       const std::string& target_frame, const std::string& fixed_frame,
-      const unsigned int num_lasers, const unsigned int scans_per_block,
-      boost::shared_ptr<tf::TransformListener> tf_ptr)
+      const unsigned int num_lasers, const unsigned int scans_per_block)
     : DataContainerBase(
         max_range, min_range, target_frame, fixed_frame,
-        num_lasers, 0, false, scans_per_block, tf_ptr, 6,
+        num_lasers, 0, false, scans_per_block, 6,
         "x", 1, sensor_msgs::PointField::FLOAT32,
         "y", 1, sensor_msgs::PointField::FLOAT32,
         "z", 1, sensor_msgs::PointField::FLOAT32,
@@ -23,7 +21,7 @@ namespace velodyne_pointcloud
   {
   }
 
-  void OrganizedCloudXYZIR::newLine()
+  void OrganizedCloudXYZIRT::newLine()
   {
     iter_x = iter_x + config_.init_width;
     iter_y = iter_y + config_.init_width;
@@ -34,7 +32,7 @@ namespace velodyne_pointcloud
     ++cloud.height;
   }
 
-  void OrganizedCloudXYZIR::setup(const velodyne_msgs::VelodyneScan::ConstPtr& scan_msg){
+  void OrganizedCloudXYZIRT::setup(const velodyne_msgs::VelodyneScan::ConstPtr& scan_msg){
     DataContainerBase::setup(scan_msg);
     iter_x = sensor_msgs::PointCloud2Iterator<float>(cloud, "x");
     iter_y = sensor_msgs::PointCloud2Iterator<float>(cloud, "y");
@@ -45,7 +43,7 @@ namespace velodyne_pointcloud
   }
 
 
-  void OrganizedCloudXYZIR::addPoint(float x, float y, float z,
+  void OrganizedCloudXYZIRT::addPoint(float x, float y, float z,
       const uint16_t ring, const uint16_t /*azimuth*/, const float distance, const float intensity, const float time)
   {
     /** The laser values are not ordered, the organized structure
@@ -56,15 +54,14 @@ namespace velodyne_pointcloud
      */
     if (pointInRange(distance))
     {
-      if(config_.transform)
-        transformPoint(x, y, z);
+      transformPoint(x, y, z);
 
       *(iter_x+ring) = x;
       *(iter_y+ring) = y;
       *(iter_z+ring) = z;
       *(iter_intensity+ring) = intensity;
       *(iter_ring+ring) = ring;
-      *(iter_time+time) = time;
+      *(iter_time+ring) = time;
     }
     else
     {
@@ -73,7 +70,7 @@ namespace velodyne_pointcloud
       *(iter_z+ring) = nanf("");
       *(iter_intensity+ring) = nanf("");
       *(iter_ring+ring) = ring;
-      *(iter_time+time) = time;
+      *(iter_time+ring) = time;
     }
   }
 }
