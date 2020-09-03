@@ -256,6 +256,7 @@ void RawData::unpack(
       float x, y, z;
       float intensity;
       const uint8_t laser_number = j + bank_origin;
+      float time = 0;
 
       const velodyne_pointcloud::LaserCorrection & corrections =
         calibration_->laser_corrections[laser_number];
@@ -266,10 +267,6 @@ void RawData::unpack(
       tmp.bytes[0] = block.data[k];
       tmp.bytes[1] = block.data[k + 1];
 
-      if (tmp.bytes[0] == 0 && tmp.bytes[1] == 0) {  // no laser beam return
-        continue;
-      }
-
       /*condition added to avoid calculating points which are not
         in the interesting defined area (min_angle < area < max_angle)*/
       if ((config_.min_angle < config_.max_angle &&
@@ -279,6 +276,18 @@ void RawData::unpack(
         (block.rotation <= config_.max_angle ||
         block.rotation >= config_.min_angle)))
       {
+        if (timing_offsets_.size()) {
+          time = timing_offsets_[i][j] + time_diff_start_to_this_packet;
+        }
+
+        if (tmp.uint == 0) {  // no valid laser beam return
+          // call to addPoint is still required since output could be organized
+          data.addPoint(
+            nanf(""), nanf(""), nanf(""), corrections.laser_ring,
+            nanf(""), nanf(""), time);
+          continue;
+        }
+
         float distance = tmp.uint * calibration_->distance_resolution_m;
         distance += corrections.dist_correction;
 
@@ -383,11 +392,6 @@ void RawData::unpack(
           (std::abs(focal_offset - 256.0f * square((1.0f - distance) / 65535.0f)));
         intensity = (intensity < min_intensity) ? min_intensity : intensity;
         intensity = (intensity > max_intensity) ? max_intensity : intensity;
-
-        float time = 0;
-        if (timing_offsets_.size()) {
-          time = timing_offsets_[i][j] + time_diff_start_to_this_packet;
-        }
 
         data.addPoint(
           x_coord, y_coord, z_coord, corrections.laser_ring,
