@@ -296,6 +296,7 @@ inline float SQR(float val) { return val*val; }
         float x, y, z;
         float intensity;
         const uint8_t laser_number  = j + bank_origin;
+        float time = 0;
 
         const LaserCorrection &corrections = calibration_.laser_corrections[laser_number];
 
@@ -304,10 +305,6 @@ inline float SQR(float val) { return val*val; }
         union two_bytes tmp;
         tmp.bytes[0] = block.data[k];
         tmp.bytes[1] = block.data[k+1];
-        if (tmp.bytes[0]==0 &&tmp.bytes[1]==0 ) //no laser beam return
-        {
-          continue;
-        }
 
         /*condition added to avoid calculating points which are not
           in the interesting defined area (min_angle < area < max_angle)*/
@@ -317,6 +314,19 @@ inline float SQR(float val) { return val*val; }
              ||(config_.min_angle > config_.max_angle 
              && (raw->blocks[i].rotation <= config_.max_angle 
              || raw->blocks[i].rotation >= config_.min_angle))){
+
+          if (timing_offsets.size())
+          {
+            time = timing_offsets[i][j] + time_diff_start_to_this_packet;
+          }
+
+          if (tmp.uint == 0) // no valid laser beam return
+          {
+            // call to addPoint is still required since output could be organized
+            data.addPoint(nanf(""), nanf(""), nanf(""), corrections.laser_ring, raw->blocks[i].rotation, nanf(""), nanf(""), time);
+            continue;
+          }
+
           float distance = tmp.uint * calibration_.distance_resolution_m;
           distance += corrections.dist_correction;
   
@@ -414,10 +424,6 @@ inline float SQR(float val) { return val*val; }
             SQR(1 - static_cast<float>(tmp.uint)/65535)));
           intensity = (intensity < min_intensity) ? min_intensity : intensity;
           intensity = (intensity > max_intensity) ? max_intensity : intensity;
-
-          float time = 0;
-          if (timing_offsets.size())
-            time = timing_offsets[i][j] + time_diff_start_to_this_packet;
 
           data.addPoint(x_coord, y_coord, z_coord, corrections.laser_ring, raw->blocks[i].rotation, distance, intensity, time);
         }
