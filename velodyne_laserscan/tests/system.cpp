@@ -43,20 +43,18 @@
 // Define our own PointCloud type for easy use
 typedef struct
 {
-  float x;  // x
-  float y;  // y
-  float z;  // z
-  float i;  // intensity
+  float x;     // x
+  float y;     // y
+  float z;     // z
+  float i;     // intensity
   uint16_t r;  // ring
-}
-Point;
+} Point;
 
 typedef struct
 {
   std_msgs::Header header;
   std::vector<Point> points;
-}
-PointCloud;
+} PointCloud;
 
 // Global variables
 ros::Publisher g_pub;
@@ -65,7 +63,7 @@ sensor_msgs::LaserScan g_scan;
 volatile bool g_scan_new = false;
 
 // Convert WallTime to Time
-static inline ros::Time rosTime(const ros::WallTime &stamp)
+static inline ros::Time rosTime(const ros::WallTime& stamp)
 {
   return ros::Time(stamp.sec, stamp.nsec);
 }
@@ -97,7 +95,7 @@ bool waitForScan(ros::WallDuration dur)
 }
 
 // Build and publish PointCloud2 messages of various structures
-void publishXYZIR1(const PointCloud &cloud)
+void publishXYZIR1(const PointCloud& cloud)
 {
   g_scan_new = false;
   const uint32_t POINT_STEP = 32;
@@ -132,13 +130,13 @@ void publishXYZIR1(const PointCloud &cloud)
   msg.width = msg.row_step / POINT_STEP;
   msg.is_bigendian = false;
   msg.is_dense = true;
-  uint8_t *ptr = msg.data.data();
+  uint8_t* ptr = msg.data.data();
 
   for (size_t i = 0; i < cloud.points.size(); i++)
   {
-    *(reinterpret_cast<float*>(ptr +  0)) = cloud.points[i].x;
-    *(reinterpret_cast<float*>(ptr +  4)) = cloud.points[i].y;
-    *(reinterpret_cast<float*>(ptr +  8)) = cloud.points[i].z;
+    *(reinterpret_cast<float*>(ptr + 0)) = cloud.points[i].x;
+    *(reinterpret_cast<float*>(ptr + 4)) = cloud.points[i].y;
+    *(reinterpret_cast<float*>(ptr + 8)) = cloud.points[i].z;
     *(reinterpret_cast<float*>(ptr + 16)) = cloud.points[i].i;
     *(reinterpret_cast<uint16_t*>(ptr + 20)) = cloud.points[i].r;
     ptr += POINT_STEP;
@@ -147,7 +145,7 @@ void publishXYZIR1(const PointCloud &cloud)
   g_pub.publish(msg);
 }
 
-void publishXYZIR2(const PointCloud &cloud)
+void publishXYZIR2(const PointCloud& cloud)
 {
   g_scan_new = false;
   const uint32_t POINT_STEP = 19;
@@ -182,13 +180,13 @@ void publishXYZIR2(const PointCloud &cloud)
   msg.width = msg.row_step / POINT_STEP;
   msg.is_bigendian = false;
   msg.is_dense = true;
-  uint8_t *ptr = msg.data.data();
+  uint8_t* ptr = msg.data.data();
 
   for (size_t i = 0; i < cloud.points.size(); i++)
   {
-    *(reinterpret_cast<float*>(ptr +  0)) = cloud.points[i].i;
-    *(reinterpret_cast<float*>(ptr +  4)) = cloud.points[i].z;
-    *(reinterpret_cast<float*>(ptr +  8)) = cloud.points[i].y;
+    *(reinterpret_cast<float*>(ptr + 0)) = cloud.points[i].i;
+    *(reinterpret_cast<float*>(ptr + 4)) = cloud.points[i].z;
+    *(reinterpret_cast<float*>(ptr + 8)) = cloud.points[i].y;
     *(reinterpret_cast<float*>(ptr + 12)) = cloud.points[i].x;
     *(reinterpret_cast<uint16_t*>(ptr + 16)) = cloud.points[i].r;
     ptr += POINT_STEP;
@@ -197,7 +195,7 @@ void publishXYZIR2(const PointCloud &cloud)
   g_pub.publish(msg);
 }
 
-void publishXYZR(const PointCloud &cloud)
+void publishXYZR(const PointCloud& cloud)
 {
   g_scan_new = false;
   const uint32_t POINT_STEP = 15;
@@ -228,7 +226,7 @@ void publishXYZR(const PointCloud &cloud)
   msg.width = msg.row_step / POINT_STEP;
   msg.is_bigendian = false;
   msg.is_dense = true;
-  uint8_t *ptr = msg.data.data();
+  uint8_t* ptr = msg.data.data();
 
   for (size_t i = 0; i < cloud.points.size(); i++)
   {
@@ -242,7 +240,7 @@ void publishXYZR(const PointCloud &cloud)
   g_pub.publish(msg);
 }
 
-void publishR(const PointCloud &cloud)
+void publishR(const PointCloud& cloud)
 {
   g_scan_new = false;
   const uint32_t POINT_STEP = 2;
@@ -258,7 +256,7 @@ void publishR(const PointCloud &cloud)
   msg.row_step = msg.data.size();
   msg.height = 1;
   msg.width = msg.row_step / POINT_STEP;
-  uint8_t *ptr = msg.data.data();
+  uint8_t* ptr = msg.data.data();
 
   for (size_t i = 0; i < cloud.points.size(); i++)
   {
@@ -269,7 +267,7 @@ void publishR(const PointCloud &cloud)
   g_pub.publish(msg);
 }
 
-void publishXYZR32(const PointCloud &cloud)
+void publishXYZR32(const PointCloud& cloud)
 {
   g_scan_new = false;
   const uint32_t POINT_STEP = 16;
@@ -300,7 +298,7 @@ void publishXYZR32(const PointCloud &cloud)
   msg.width = msg.row_step / POINT_STEP;
   msg.is_bigendian = false;
   msg.is_dense = true;
-  uint8_t *ptr = msg.data.data();
+  uint8_t* ptr = msg.data.data();
 
   for (size_t i = 0; i < cloud.points.size(); i++)
   {
@@ -314,7 +312,7 @@ void publishXYZR32(const PointCloud &cloud)
   g_pub.publish(msg);
 }
 
-void publishXYZ(const PointCloud &cloud)
+void publishXYZ(const PointCloud& cloud)
 {
   g_scan_new = false;
   const uint32_t POINT_STEP = 12;
@@ -338,7 +336,7 @@ void publishXYZ(const PointCloud &cloud)
   msg.row_step = msg.data.size();
   msg.height = 1;
   msg.width = msg.row_step / POINT_STEP;
-  uint8_t *ptr = msg.data.data();
+  uint8_t* ptr = msg.data.data();
 
   for (size_t i = 0; i < cloud.points.size(); i++)
   {
@@ -371,7 +369,7 @@ static inline float SQUARE(float x)
   return x * x;
 }
 
-size_t findClosestIndex(const PointCloud &cloud, uint16_t ring, float x, float y)
+size_t findClosestIndex(const PointCloud& cloud, uint16_t ring, float x, float y)
 {
   size_t index = SIZE_MAX;
   float delta = INFINITY;
@@ -394,7 +392,7 @@ size_t findClosestIndex(const PointCloud &cloud, uint16_t ring, float x, float y
 }
 
 // Verify that all LaserScan header values are values are passed through, and other values are default
-void verifyScanEmpty(const PointCloud &cloud, bool intensity = true)
+void verifyScanEmpty(const PointCloud& cloud, bool intensity = true)
 {
   ASSERT_EQ(cloud.header.stamp, g_scan.header.stamp);
   EXPECT_EQ(cloud.header.frame_id, g_scan.header.frame_id);
@@ -420,7 +418,7 @@ void verifyScanEmpty(const PointCloud &cloud, bool intensity = true)
 }
 
 // Verify that every PointCloud point made it to the LaserScan and other values are default
-void verifyScanSparse(const PointCloud &cloud, uint16_t ring, uint16_t ring_count, bool intensity = true)
+void verifyScanSparse(const PointCloud& cloud, uint16_t ring, uint16_t ring_count, bool intensity = true)
 {
   ASSERT_EQ(cloud.header.stamp, g_scan.header.stamp);
   EXPECT_EQ(cloud.header.frame_id, g_scan.header.frame_id);
@@ -468,7 +466,7 @@ void verifyScanSparse(const PointCloud &cloud, uint16_t ring, uint16_t ring_coun
 }
 
 // Verify that every LaserScan point is not default, and every point came from the PointCloud
-void verifyScanDense(const PointCloud &cloud, uint16_t ring, bool intensity = true)
+void verifyScanDense(const PointCloud& cloud, uint16_t ring, bool intensity = true)
 {
   ASSERT_EQ(cloud.header.stamp, g_scan.header.stamp);
   EXPECT_EQ(cloud.header.frame_id, g_scan.header.frame_id);
@@ -531,7 +529,6 @@ TEST(System, missing_fields)
   // Verify no LaserScan when PointCloud2 field 'ring' is the incorrect type
   publishXYZR32(cloud);
   EXPECT_FALSE(waitForScan(ros::WallDuration(0.5)));
-
 
   // Verify no LaserScan when PointCloud2 fields are missing 'x' and 'y'
   publishR(cloud);
@@ -690,7 +687,7 @@ TEST(System, random_data_dense)
   verifyScanDense(cloud, 8, false);
 }
 
-int main(int argc, char **argv)
+int main(int argc, char** argv)
 {
   testing::InitGoogleTest(&argc, argv);
 

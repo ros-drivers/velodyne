@@ -35,9 +35,8 @@
 
 namespace velodyne_laserscan
 {
-
-VelodyneLaserScan::VelodyneLaserScan(ros::NodeHandle &nh, ros::NodeHandle &nh_priv) :
-    nh_(nh), srv_(nh_priv), ring_count_(0)
+VelodyneLaserScan::VelodyneLaserScan(ros::NodeHandle& nh, ros::NodeHandle& nh_priv)
+  : nh_(nh), srv_(nh_priv), ring_count_(0)
 {
   ros::SubscriberStatusCallback connect_cb = boost::bind(&VelodyneLaserScan::connectCb, this);
   pub_ = nh.advertise<sensor_msgs::LaserScan>("scan", 10, connect_cb, connect_cb);
@@ -179,10 +178,7 @@ void VelodyneLaserScan::recvCallback(const sensor_msgs::PointCloud2ConstPtr& msg
     scan->time_increment = 0.0;
     scan->ranges.resize(SIZE, INFINITY);
 
-    if ((offset_x == 0) &&
-        (offset_y == 4) &&
-        (offset_i % 4 == 0) &&
-        (offset_r % 4 == 0))
+    if ((offset_x == 0) && (offset_y == 4) && (offset_i % 4 == 0) && (offset_r % 4 == 0))
     {
       scan->intensities.resize(SIZE);
 
@@ -220,7 +216,7 @@ void VelodyneLaserScan::recvCallback(const sensor_msgs::PointCloud2ConstPtr& msg
         sensor_msgs::PointCloud2ConstIterator<float> iter_x(*msg, "x");
         sensor_msgs::PointCloud2ConstIterator<float> iter_y(*msg, "y");
         sensor_msgs::PointCloud2ConstIterator<float> iter_i(*msg, "intensity");
-        for ( ; iter_r != iter_r.end(); ++iter_x, ++iter_y, ++iter_r, ++iter_i)
+        for (; iter_r != iter_r.end(); ++iter_x, ++iter_y, ++iter_r, ++iter_i)
         {
           const uint16_t r = *iter_r;  // ring
 

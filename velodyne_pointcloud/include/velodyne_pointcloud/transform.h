@@ -61,10 +61,7 @@ using TransformNodeCfg = velodyne_pointcloud::TransformNodeConfig;
 class Transform
 {
 public:
-  Transform(
-      ros::NodeHandle node,
-      ros::NodeHandle private_nh,
-      std::string const & node_name = ros::this_node::getName());
+  Transform(ros::NodeHandle node, ros::NodeHandle private_nh, std::string const& node_name = ros::this_node::getName());
   ~Transform()
   {
   }
@@ -89,8 +86,7 @@ private:
     double max_range;          ///< maximum range to publish
     double min_range;          ///< minimum range to publish
     uint16_t num_lasers;       ///< number of lasers
-  }
-  Config;
+  } Config;
   Config config_;
 
   bool first_rcfg_call;

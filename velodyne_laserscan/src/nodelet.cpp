@@ -37,12 +37,15 @@
 
 namespace velodyne_laserscan
 {
-
-class LaserScanNodelet: public nodelet::Nodelet
+class LaserScanNodelet : public nodelet::Nodelet
 {
 public:
-  LaserScanNodelet() {}
-  ~LaserScanNodelet() {}
+  LaserScanNodelet()
+  {
+  }
+  ~LaserScanNodelet()
+  {
+  }
 
 private:
   virtual void onInit()

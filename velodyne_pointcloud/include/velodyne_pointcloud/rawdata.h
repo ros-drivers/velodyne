@@ -90,8 +90,7 @@ typedef struct raw_block
   uint16_t header;    ///< UPPER_BANK or LOWER_BANK
   uint16_t rotation;  ///< 0-35999, divide by 100 to get degrees
   uint8_t data[BLOCK_DATA_SIZE];
-}
-raw_block_t;
+} raw_block_t;
 
 /** used for unpacking the first two data bytes in a block
  *
@@ -126,8 +125,7 @@ typedef struct raw_packet
   raw_block_t blocks[BLOCKS_PER_PACKET];
   uint16_t revolution;
   uint8_t status[PACKET_STATUS_SIZE];
-}
-raw_packet_t;
+} raw_packet_t;
 
 /** \brief Velodyne data conversion class */
 class RawData
@@ -150,7 +148,6 @@ public:
    */
   boost::optional<velodyne_pointcloud::Calibration> setup(ros::NodeHandle private_nh);
 
-
   /** \brief Set up for data processing offline.
    * Performs the same initialization as in setup, in the abscence of a ros::NodeHandle.
    * this method is useful if unpacking data directly from bag files, without passing
@@ -164,8 +161,7 @@ public:
    */
   int setupOffline(std::string calibration_file, double max_range_, double min_range_);
 
-  void unpack(const velodyne_msgs::VelodynePacket& pkt, DataContainerBase& data,
-              const ros::Time& scan_start_time);
+  void unpack(const velodyne_msgs::VelodynePacket& pkt, DataContainerBase& data, const ros::Time& scan_start_time);
 
   void setParameters(double min_range, double max_range, double view_direction, double view_width);
 
@@ -184,8 +180,7 @@ private:
 
     double tmp_min_angle;
     double tmp_max_angle;
-  }
-  Config;
+  } Config;
   Config config_;
 
   /**
@@ -196,12 +191,12 @@ private:
   float cos_rot_table_[ROTATION_MAX_UNITS];
 
   // timing offset lookup table
-  std::vector< std::vector<float> > timing_offsets;
+  std::vector<std::vector<float> > timing_offsets;
 
   /** \brief setup per-point timing offsets
-   * 
+   *
    *  Runs during initialization and determines the firing time for each point in the scan
-   * 
+   *
    *  NOTE: Does not support all sensors yet (vlp16, vlp32, and hdl32 are currently supported)
    */
   bool buildTimings();

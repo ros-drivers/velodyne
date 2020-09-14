@@ -46,35 +46,32 @@
 
 namespace velodyne_driver
 {
-
-class DriverNodelet: public nodelet::Nodelet
+class DriverNodelet : public nodelet::Nodelet
 {
 public:
-
-  DriverNodelet():
-    running_(false)
-  {}
+  DriverNodelet() : running_(false)
+  {
+  }
 
   ~DriverNodelet()
   {
     if (running_)
-      {
-        NODELET_INFO("shutting down driver thread");
-        running_ = false;
-        deviceThread_->join();
-        NODELET_INFO("driver thread stopped");
-      }
+    {
+      NODELET_INFO("shutting down driver thread");
+      running_ = false;
+      deviceThread_->join();
+      NODELET_INFO("driver thread stopped");
+    }
   }
 
 private:
-
   virtual void onInit(void);
   virtual void devicePoll(void);
 
-  volatile bool running_;               ///< device thread is running
+  volatile bool running_;  ///< device thread is running
   boost::shared_ptr<boost::thread> deviceThread_;
 
-  boost::shared_ptr<VelodyneDriver> dvr_; ///< driver implementation class
+  boost::shared_ptr<VelodyneDriver> dvr_;  ///< driver implementation class
 };
 
 void DriverNodelet::onInit()
@@ -84,24 +81,23 @@ void DriverNodelet::onInit()
 
   // spawn device poll thread
   running_ = true;
-  deviceThread_ = boost::shared_ptr< boost::thread >
-    (new boost::thread(boost::bind(&DriverNodelet::devicePoll, this)));
+  deviceThread_ = boost::shared_ptr<boost::thread>(new boost::thread(boost::bind(&DriverNodelet::devicePoll, this)));
 }
 
 /** @brief Device poll thread main loop. */
 void DriverNodelet::devicePoll()
 {
-  while(ros::ok())
-    {
-      // poll device until end of file
-      running_ = dvr_->poll();
-      if (!running_)
-        ROS_ERROR_THROTTLE(1.0, "DriverNodelet::devicePoll - Failed to poll device.");
-    }
+  while (ros::ok())
+  {
+    // poll device until end of file
+    running_ = dvr_->poll();
+    if (!running_)
+      ROS_ERROR_THROTTLE(1.0, "DriverNodelet::devicePoll - Failed to poll device.");
+  }
   running_ = false;
 }
 
-} // namespace velodyne_driver
+}  // namespace velodyne_driver
 
 // Register this plugin with pluginlib.  Names must match nodelet_velodyne.xml.
 //

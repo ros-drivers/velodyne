@@ -55,7 +55,7 @@ TEST(TimeConversion, BytesToTimestamp)
   ASSERT_NEAR(ros_stamp_converted.nsec, ros_stamp.nsec, 1000);
 }
 
-int main(int argc, char **argv)
+int main(int argc, char** argv)
 {
   ::testing::InitGoogleTest(&argc, argv);
   int ret = RUN_ALL_TESTS();

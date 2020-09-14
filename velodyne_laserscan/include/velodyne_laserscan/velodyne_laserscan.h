@@ -45,11 +45,10 @@
 
 namespace velodyne_laserscan
 {
-
 class VelodyneLaserScan
 {
 public:
-  VelodyneLaserScan(ros::NodeHandle &nh, ros::NodeHandle &nh_priv);
+  VelodyneLaserScan(ros::NodeHandle& nh, ros::NodeHandle& nh_priv);
 
 private:
   boost::mutex connect_mutex_;

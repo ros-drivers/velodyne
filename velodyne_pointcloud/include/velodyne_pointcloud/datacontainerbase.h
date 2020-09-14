@@ -218,7 +218,7 @@ public:
     return true;
   }
 
-  inline bool computeTransformToTarget(const ros::Time &scan_time)
+  inline bool computeTransformToTarget(const ros::Time& scan_time)
   {
     if (config_.target_frame.empty())
     {
@@ -229,14 +229,14 @@ public:
     return calculateTransformMatrix(tf_matrix_to_target, config_.target_frame, source_frame, scan_time);
   }
 
-  inline bool computeTransformToFixed(const ros::Time &packet_time)
+  inline bool computeTransformToFixed(const ros::Time& packet_time)
   {
     if (config_.fixed_frame.empty())
     {
       // no need to calculate transform -> success
       return true;
     }
-    std::string &source_frame = sensor_frame;
+    std::string& source_frame = sensor_frame;
     return calculateTransformMatrix(tf_matrix_to_fixed, config_.fixed_frame, source_frame, packet_time);
   }
 
