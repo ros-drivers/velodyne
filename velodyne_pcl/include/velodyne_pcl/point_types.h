@@ -47,6 +47,7 @@
 
 namespace velodyne_pcl
 {
+// clang-format off
 struct PointXYZIRT
 {
   PCL_ADD_POINT4D;                 // quad-word XYZ
@@ -54,7 +55,9 @@ struct PointXYZIRT
   uint16_t ring;                   ///< laser ring number
   float time;                      ///< laser time reading
   EIGEN_MAKE_ALIGNED_OPERATOR_NEW  // ensure proper alignment
-} EIGEN_ALIGN16;
+}
+EIGEN_ALIGN16;
+// clang-format on
 }  // namespace velodyne_pcl
 
 POINT_CLOUD_REGISTER_POINT_STRUCT(velodyne_pcl::PointXYZIRT,
