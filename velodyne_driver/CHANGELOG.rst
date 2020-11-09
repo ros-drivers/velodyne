@@ -1,6 +1,9 @@
 Change history
 ==============
 
+Forthcoming
+-----------
+
 1.6.0 (2020-07-09)
 ------------------
 * Unify tf frame parameters between transform and cloud nodes (`#344 <https://github.com/ros-drivers/velodyne/issues/344>`_)

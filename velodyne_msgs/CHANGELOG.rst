@@ -1,6 +1,9 @@
 Change history
 ==============
 
+Forthcoming
+-----------
+
 1.6.0 (2020-07-09)
 ------------------
 * Updating maintainer email address.

@@ -1,6 +1,16 @@
 Change history
 ==============
 
+Forthcoming
+-----------
+* Add invalid points in organized cloud (`#360 <https://github.com/ros-drivers/velodyne/issues/360>`_)
+  * Set NaN in ordered point cloud in case of no return
+  * Adapt to current master
+  * consider min/max angle and timing_offsets also in organized mode
+  Co-authored-by: Nuernberg Thomas (CR/AEV4) <thomas.nuernberg@de.bosch.com>
+* build and export library data_containers so it can be used in other packages (`#359 <https://github.com/ros-drivers/velodyne/issues/359>`_)
+* Contributors: Sebastian Scherer
+
 1.6.0 (2020-07-09)
 ------------------
 * Unify tf frame parameters between transform and cloud nodes (`#344 <https://github.com/ros-drivers/velodyne/issues/344>`_)
