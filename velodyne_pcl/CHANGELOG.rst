@@ -2,8 +2,8 @@
 Changelog for package velodyne_pcl
 ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
 
-Forthcoming
------------
+1.6.1 (2020-11-09)
+------------------
 * Fix typo in velodyne_pcl/point_types.h (`#357 <https://github.com/ros-drivers/velodyne/issues/357>`_)
   Fixes an issue where the POINT_CLOUD_REGISTER_POINT_STRUCT function was using the old PointXYZIR and not PointXYZIRT.
 * Contributors: Matthew Hannay
