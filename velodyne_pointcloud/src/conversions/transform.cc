@@ -128,6 +128,11 @@ namespace velodyne_pointcloud
   {
     switch (container_id)
     {
+      case Container::PointCloudXYZPIR:
+        return boost::shared_ptr<PointcloudXYZIR>(
+            new PointcloudXYZIR("p", config_.max_range, config_.min_range,
+                                config_.target_frame, config_.fixed_frame,
+                                data_->scansPerPacket(), tf_ptr_));
       case Container::PointCloudXYZIR:
         return boost::shared_ptr<PointcloudXYZIR>(
             new PointcloudXYZIR(config_.max_range, config_.min_range,

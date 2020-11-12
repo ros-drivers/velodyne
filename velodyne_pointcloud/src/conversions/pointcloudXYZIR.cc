@@ -21,7 +21,25 @@ namespace velodyne_pointcloud
         iter_ring(cloud, "ring"), iter_intensity(cloud, "intensity")
     {};
 
-  void PointcloudXYZIR::setup(const velodyne_msgs::VelodyneScan::ConstPtr& scan_msg){
+  PointcloudXYZIR::PointcloudXYZIR(std::string pad,
+    const double max_range, const double min_range,
+    const std::string& target_frame, const std::string& fixed_frame,
+    const unsigned int scans_per_block, boost::shared_ptr<tf::TransformListener> tf_ptr)
+    : DataContainerBase(
+    max_range, min_range, target_frame, fixed_frame,
+    0, 1, true, scans_per_block, tf_ptr, 6,
+    "x", 1, sensor_msgs::PointField::FLOAT32,
+    "y", 1, sensor_msgs::PointField::FLOAT32,
+    "z", 1, sensor_msgs::PointField::FLOAT32,
+    pad, 1, sensor_msgs::PointField::FLOAT32,
+    "intensity", 1, sensor_msgs::PointField::FLOAT32,
+    "ring", 1, sensor_msgs::PointField::UINT16),
+      iter_x(cloud, "x"), iter_y(cloud, "y"), iter_z(cloud, "z"),
+      iter_ring(cloud, "ring"), iter_intensity(cloud, "intensity")
+    {};
+
+  void PointcloudXYZIR::setup(const velodyne_msgs::VelodyneScan::ConstPtr& scan_msg)
+  {
     DataContainerBase::setup(scan_msg);
     iter_x = sensor_msgs::PointCloud2Iterator<float>(cloud, "x");
     iter_y = sensor_msgs::PointCloud2Iterator<float>(cloud, "y");

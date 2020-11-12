@@ -90,6 +90,7 @@ private:
 
   enum Container
   {
+    PointCloudXYZPIR,
     PointCloudXYZIR,
     PointCloudXYZIRT,
     OrganizedPointCloudXYZIR,
@@ -98,13 +99,14 @@ private:
 
   std::map<std::string, Container> container_names_
   {
+    {"PointCloudXYZPIR", Container::PointCloudXYZPIR},
     {"PointCloudXYZIR", Container::PointCloudXYZIR},
     {"PointCloudXYZIRT", Container::PointCloudXYZIRT},
     {"OrganizedPointCloudXYZIR", Container::OrganizedPointCloudXYZIR},
     {"OrganizedPointCloudXYZIRT", Container::OrganizedPointCloudXYZIRT}
   };
 
-  const std::pair<std::string, uint8_t> default_container_ = {"PointCloudXYZIR", PointCloudXYZIR};
+  const std::pair<std::string, uint8_t> default_container_ = {"PointCloudXYZPIR", PointCloudXYZPIR};
   const std::pair<std::string, uint8_t> default_organized_container_ =
       {"OrganizedPointCloudXYZIR", OrganizedPointCloudXYZIR};
 
