@@ -226,42 +226,30 @@ inline float SQR(float val) { return val*val; }
       ROS_ERROR("No Velodyne Sensor Model specified using default %s!", config_.model.c_str());
 
     }
-//    private_nh.param("model", config_.model, std::string("64E"));
+
     buildTimings();
 
     // get path to angles.config file for this device
     if (!private_nh.getParam("calibration", config_.calibrationFile))
-      {
-        ROS_ERROR_STREAM("No calibration angles specified! Using test values!");
+    {
+      ROS_ERROR_STREAM("No calibration angles specified! Using test values!");
 
-        // have to use something: grab unit test version as a default
-        std::string pkgPath = ros::package::getPath("velodyne_pointcloud");
-        config_.calibrationFile = pkgPath + "/params/64e_utexas.yaml";
-      }
+      // have to use something: grab unit test version as a default
+      std::string pkgPath = ros::package::getPath("velodyne_pointcloud");
+      config_.calibrationFile = pkgPath + "/params/64e_utexas.yaml";
+    }
 
     ROS_INFO_STREAM("correction angles: " << config_.calibrationFile);
 
-    calibration_.read(config_.calibrationFile);
-    if (!calibration_.initialized) {
-      ROS_ERROR_STREAM("Unable to open calibration file: " <<
-          config_.calibrationFile);
+    if (!loadCalibration()) {
       return boost::none;
     }
-
     ROS_INFO_STREAM("Number of lasers: " << calibration_.num_lasers << ".");
 
-    // Set up cached values for sin and cos of all the possible headings
-    for (uint16_t rot_index = 0; rot_index < ROTATION_MAX_UNITS; ++rot_index) {
-      float rotation = angles::from_degrees(ROTATION_RESOLUTION * rot_index);
-      cos_rot_table_[rot_index] = cosf(rotation);
-      sin_rot_table_[rot_index] = sinf(rotation);
-    }
+    setupSinCosCache();
+    setupAzimuthCache();
 
-    for (uint8_t i = 0; i < 16; i++) {
-      vls_128_laser_azimuth_cache[i] = (VLS128_CHANNEL_TDURATION / VLS128_SEQ_TDURATION) * (i + i / 8);
-    }
-
-   return calibration_;
+    return calibration_;
   }
 
   /** Set up for offline operation */
@@ -278,12 +266,29 @@ inline float SQR(float val) { return val*val; }
 
     ROS_INFO_STREAM("correction angles: " << config_.calibrationFile);
 
+    if (!loadCalibration()) {
+      return -1;
+    }
+    ROS_INFO_STREAM("Number of lasers: " << calibration_.num_lasers << ".");
+
+    setupSinCosCache();
+    setupAzimuthCache();
+
+    return 0;
+  }
+
+  bool RawData::loadCalibration() {
+
     calibration_.read(config_.calibrationFile);
     if (!calibration_.initialized) {
       ROS_ERROR_STREAM("Unable to open calibration file: " << config_.calibrationFile);
-      return -1;
+      return false;
     }
+    return true;
 
+  }
+  void RawData::setupSinCosCache()
+  {
     // Set up cached values for sin and cos of all the possible headings
     for (uint16_t rot_index = 0; rot_index < ROTATION_MAX_UNITS; ++rot_index) {
       float rotation = angles::from_degrees(ROTATION_RESOLUTION * rot_index);
@@ -291,12 +296,26 @@ inline float SQR(float val) { return val*val; }
       sin_rot_table_[rot_index] = sinf(rotation);
     }
 
-    for (uint8_t i = 0; i < 16; i++) {
-      vls_128_laser_azimuth_cache[i] = (VLS128_CHANNEL_TDURATION / VLS128_SEQ_TDURATION) * (i + i / 8);
+    if (config_.model == "VLS128") {
+      for (uint8_t i = 0; i < 16; i++) {
+        vls_128_laser_azimuth_cache[i] =
+            (VLS128_CHANNEL_TDURATION / VLS128_SEQ_TDURATION) * (i + i / 8);
+      }
     }
-
-    return 0;
   }
+
+void RawData::setupAzimuthCache()
+{
+  if (config_.model == "VLS128") {
+    for (uint8_t i = 0; i < 16; i++) {
+      vls_128_laser_azimuth_cache[i] =
+          (VLS128_CHANNEL_TDURATION / VLS128_SEQ_TDURATION) * (i + i / 8);
+    }
+  }
+  else{
+    ROS_WARN("No Azimuth Cache configured for model %s", config_.model.c_str());
+  }
+}
 
 
   /** @brief convert raw packet to point cloud
@@ -310,7 +329,7 @@ inline float SQR(float val) { return val*val; }
     ROS_DEBUG_STREAM("Received packet, time: " << pkt.stamp);
 
     /** special parsing for the VLS128 **/
-    if (pkt.data[1205] == 161 || pkt.data[1205] == 99) { // VLS 128
+    if (pkt.data[1205] == VLS128_MODEL_ID) { // VLS 128
       unpack_vls128(pkt, data, scan_start_time);
       return;
     }
@@ -542,7 +561,7 @@ void RawData::unpack_vls128(const velodyne_msgs::VelodynePacket &pkt, DataContai
       // Get the next block rotation to calculate how far we rotate between blocks
       azimuth_next = raw->blocks[block + (1+dual_return)].rotation;
 
-      // Finds the difference between two sucessive blocks
+      // Finds the difference between two successive blocks
       azimuth_diff = (float)((36000 + azimuth_next - azimuth) % 36000);
 
       // This is used when the last block is next to predict rotation amount
@@ -560,7 +579,7 @@ void RawData::unpack_vls128(const velodyne_msgs::VelodynePacket &pkt, DataContai
         // distance extraction
         tmp.bytes[0] = current_block.data[k];
         tmp.bytes[1] = current_block.data[k + 1];
-        distance = tmp.uint * VLP32_DISTANCE_RESOLUTION;
+        distance = tmp.uint * VLS128_DISTANCE_RESOLUTION;
 
 
 
@@ -596,20 +615,6 @@ void RawData::unpack_vls128(const velodyne_msgs::VelodynePacket &pkt, DataContai
 
           // Compute the distance in the xy plane (w/o accounting for rotation)
           xy_distance = distance * cos_vert_angle;
-
-          /** Use standard ROS coordinate system (right-hand rule) */
-          // append this point to the cloud
-          //VPoint point;
-          //point.ring = corrections.laser_ring;
-          //point.x = xy_distance * cos_rot_angle;    // velodyne y
-          //point.y = -(xy_distance * sin_rot_angle); // velodyne x
-          //point.z = distance * sin_vert_angle;      // velodyne z
-
-          // Intensity extraction
-          //point.intensity = current_block.data[k + 2];
-
-          //pc.points.push_back(point);
-          //++pc.width;
 
           data.addPoint(xy_distance * cos_rot_angle,
                         -(xy_distance * sin_rot_angle),

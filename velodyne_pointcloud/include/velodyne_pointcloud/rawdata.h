@@ -118,7 +118,8 @@ static const uint16_t VLS128_BANK_4 = 0xbbff;
 
 static const float  VLS128_CHANNEL_TDURATION  =  2.665f;  // [µs] Channels corresponds to one laser firing
 static const float  VLS128_SEQ_TDURATION      =  53.3f;   // [µs] Sequence is a set of laser firings including recharging
-static const float    VLP32_DISTANCE_RESOLUTION   =    0.004f;  // [m]
+static const float  VLS128_DISTANCE_RESOLUTION=  0.004f;  // [m]
+static const float  VLS128_MODEL_ID=  161;
 
 
 
@@ -163,6 +164,10 @@ public:
    */
   boost::optional<velodyne_pointcloud::Calibration> setup(ros::NodeHandle private_nh);
 
+
+  void setupSinCosCache();
+  void setupAzimuthCache();
+  bool loadCalibration();
 
   /** \brief Set up for data processing offline.
    * Performs the same initialization as in setup, in the abscence of a ros::NodeHandle.
@@ -230,7 +235,7 @@ private:
                      const ros::Time& scan_start_time);
 
   /** in-line test whether a point is in range */
-  bool pointInRange(float range)
+  inline bool pointInRange(float range)
   {
     return (range >= config_.min_range
             && range <= config_.max_range);
