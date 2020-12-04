@@ -118,7 +118,7 @@ static const uint16_t VLS128_BANK_4 = 0xbbff;
 
 static const float  VLS128_CHANNEL_TDURATION  =  2.665f;  // [µs] Channels corresponds to one laser firing
 static const float  VLS128_SEQ_TDURATION      =  53.3f;   // [µs] Sequence is a set of laser firings including recharging
-static const float  VLS128_TOH_ADJUSMENT     =  8.7f;   // [µs] μs. Top Of the Hour is aligned with the fourth firing group in a firing sequence.
+static const float  VLS128_TOH_ADJUSTMENT     =  8.7f;   // [µs] μs. Top Of the Hour is aligned with the fourth firing group in a firing sequence.
 static const float  VLS128_DISTANCE_RESOLUTION=  0.004f;  // [m]
 static const float  VLS128_MODEL_ID=  161;
 
