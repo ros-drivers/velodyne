@@ -180,9 +180,9 @@ inline float SQR(float val) { return val*val; }
         timing_offsets[i].resize(17); // 17 (+1 for the maintenance time after firing group 8)
       }
 
-      double full_firing_cycle = 53.3 * 1e-6; //seconds
-      double single_firing = 2.665 * 1e-6; // seconds
-      double offset_paket_time = 8.7 * 1e-6; //seconds
+      double full_firing_cycle = VLS128_SEQ_TDURATION * 1e-6; //seconds
+      double single_firing = VLS128_CHANNEL_TDURATION * 1e-6; // seconds
+      double offset_paket_time = VLS128_TOH_ADJUSTMENT * 1e-6; //seconds
       double sequenceIndex, firingGroupIndex;
       // Compute timing offsets
       for (size_t x = 0; x < timing_offsets.size(); ++x){
