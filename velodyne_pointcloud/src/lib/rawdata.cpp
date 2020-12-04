@@ -204,7 +204,7 @@ bool RawData::buildTimings()
           offset_paket_time;
         RCLCPP_DEBUG(
           rclcpp::get_logger("velodyne_pointcloud"),
-          "firing_seque %i firing_group %i offset %f", x, y, timing_offsets_[x][y]);
+          "firing_seque %lu firing_group %lu offset %f", x, y, timing_offsets_[x][y]);
       }
     }
   } else {
