@@ -191,7 +191,7 @@ inline float SQR(float val) { return val*val; }
           sequenceIndex = x;
           firingGroupIndex = y;
           timing_offsets[x][y] = (full_firing_cycle * sequenceIndex) + (single_firing * firingGroupIndex) - offset_paket_time;
-          ROS_DEBUG(" firing_seque %i firing_group %i offset %f",x,y,timing_offsets[x][y]);
+          ROS_DEBUG(" firing_seque %lu firing_group %lu offset %f",x,y,timing_offsets[x][y]);
         }
       }
     }
