@@ -87,9 +87,14 @@ VelodyneDriver::VelodyneDriver(const rclcpp::NodeOptions & options)
   // get model name, validate string, determine packet rate
   double packet_rate;                   // packet frequency (Hz)
   std::string model_full_name;
-  if ((config_.model == "64E_S2") ||
-    (config_.model == "64E_S2.1"))
-  {                                     // generates 1333312 points per second
+  if (config_.model == "VLS128") {
+    packet_rate = 6253.9;   // 3 firing cycles in a data packet.
+                            // 3 x 53.3 μs = 0.1599 ms is the accumulation delay per packet.
+                            // 1 packet/0.1599 ms = 6253.9 packets/second
+
+    model_full_name = config_.model;
+  } else if ((config_.model == "64E_S2") || (config_.model == "64E_S2.1")) {
+    // generates 1333312 points per second
     packet_rate = 3472.17;              // 1 packet holds 384 points - 1333312 / 384
     model_full_name = std::string("HDL-") + config_.model;
   } else if (config_.model == "64E") {
