@@ -62,7 +62,14 @@ VelodyneDriver::VelodyneDriver(ros::NodeHandle node,
   private_nh.param("model", config_.model, std::string("64E"));
   double packet_rate;                   // packet frequency (Hz)
   std::string model_full_name;
-  if ((config_.model == "64E_S2") || 
+  if ((config_.model == "VLS128") )
+  {
+    packet_rate = 6253.9;     //  3 firing cycles in a data packet. 3 x 53.3 μs = 0.1599 ms is the accumulation delay per packet.
+                            //   1 packet/0.1599 ms = 6253.9 packets/second
+
+    model_full_name = config_.model;
+  }
+  else if ((config_.model == "64E_S2") ||
       (config_.model == "64E_S2.1"))    // generates 1333312 points per second
     {                                   // 1 packet holds 384 points
       packet_rate = 3472.17;            // 1333312 / 384
