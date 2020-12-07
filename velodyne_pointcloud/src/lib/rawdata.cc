@@ -201,7 +201,7 @@ inline float SQR(float val) { return val*val; }
     }
 
     if (timing_offsets.size()){
-      // ROS_INFO("VELODYNE TIMING TABLE:");
+      ROS_INFO("VELODYNE TIMING TABLE [usec]:");
       for (size_t x = 0; x < timing_offsets.size(); ++x){
         for (size_t y = 0; y < timing_offsets[x].size(); ++y){
           printf("%04.3f ", timing_offsets[x][y] * 1e6);
@@ -294,13 +294,6 @@ inline float SQR(float val) { return val*val; }
       float rotation = angles::from_degrees(ROTATION_RESOLUTION * rot_index);
       cos_rot_table_[rot_index] = cosf(rotation);
       sin_rot_table_[rot_index] = sinf(rotation);
-    }
-
-    if (config_.model == "VLS128") {
-      for (uint8_t i = 0; i < 16; i++) {
-        vls_128_laser_azimuth_cache[i] =
-            (VLS128_CHANNEL_TDURATION / VLS128_SEQ_TDURATION) * (i + i / 8);
-      }
     }
   }
 
