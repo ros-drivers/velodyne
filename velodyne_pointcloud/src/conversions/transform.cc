@@ -20,8 +20,9 @@
 
 #include "velodyne_pointcloud/transform.h"
 
-#include <velodyne_pointcloud/pointcloudXYZIRT.h>
 #include <velodyne_pointcloud/organized_cloudXYZIRT.h>
+#include <velodyne_pointcloud/pointcloudXYZIRT.h>
+#include <velodyne_pointcloud/pointcloud_extended.h>
 
 namespace velodyne_pointcloud
 {
@@ -82,10 +83,11 @@ namespace velodyne_pointcloud
 
     boost::lock_guard<boost::mutex> guard(reconfigure_mtx_);
 
-    if(first_rcfg_call || config.organize_cloud != config_.organize_cloud){
+    if(first_rcfg_call || config.cloud_type != config_.cloud_type){
       first_rcfg_call = false;
-      config_.organize_cloud = config.organize_cloud;
-      if(config_.organize_cloud)
+      config_.cloud_type = config.cloud_type;
+
+      if(config_.cloud_type == ORGANIZED_TYPE)
       {
         ROS_INFO_STREAM("Using the organized cloud format...");
         container_ptr = boost::shared_ptr<OrganizedCloudXYZIRT>(
@@ -95,11 +97,37 @@ namespace velodyne_pointcloud
       }
       else
       {
-        container_ptr = boost::shared_ptr<PointcloudXYZIRT>(
-            new PointcloudXYZIRT(config_.max_range, config_.min_range,
-                                config_.target_frame, config_.fixed_frame,
-                                data_->scansPerPacket()));
+        if(config_.cloud_type == XYZIRT_TYPE) {
+          ROS_INFO_STREAM("Using the XYZIRT cloud format...");
+          container_ptr =
+              boost::shared_ptr<PointcloudXYZIRT>(new PointcloudXYZIRT(
+                  config_.max_range, config_.min_range, config_.target_frame,
+                  config_.fixed_frame, data_->scansPerPacket()));
+        }
+        else
+        {
+          if(config_.cloud_type == EXTENDED_TYPE) {
+            ROS_INFO_STREAM("Using the Extended cloud format...");
+            container_ptr =
+                boost::shared_ptr<PointcloudExtended>(new PointcloudExtended(
+                    config_.max_range, config_.min_range, config_.target_frame,
+                    config_.fixed_frame, data_->scansPerPacket()));
+          }
+          else
+          {
+            ROS_ERROR("Wrong option in parameter cloud_type %s, using default type %s",
+                             config_.cloud_type.c_str(), XYZIRT_TYPE.c_str());
+
+            container_ptr =
+                boost::shared_ptr<PointcloudXYZIRT>(new PointcloudXYZIRT(
+                    config_.max_range, config_.min_range, config_.target_frame,
+                    config_.fixed_frame, data_->scansPerPacket()));
+
+          }
+
+        }
       }
+
     }
     container_ptr->configure(config_.max_range, config_.min_range, config_.fixed_frame, config_.target_frame);
   }
@@ -137,7 +165,7 @@ namespace velodyne_pointcloud
         // fixed frame not available
         return;
       }
-      data_->unpack(scanMsg->packets[i], *container_ptr, scanMsg->header.stamp);
+      data_->unpack(scanMsg->packets[i], *container_ptr, scanMsg->header.stamp, i,scanMsg->packets.size());
     }
     // publish the accumulated cloud message
     output_.publish(container_ptr->finishCloud());

@@ -112,8 +112,20 @@ public:
     cloud.is_dense = static_cast<uint8_t>(config_.is_dense);
   }
 
-  virtual void addPoint(float x, float y, float z, const uint16_t ring, const uint16_t azimuth, const float distance,
+
+  virtual void addPoint(float x, float y, float z, const uint16_t ring,
+                        const uint16_t azimuth, const float distance,
                         const float intensity, const float time) = 0;
+
+  virtual void addPoint(float x, float y, float z, const uint16_t ring,
+                       const uint16_t azimuth, const float distance,
+                       const float intensity, const float time,
+                       const uint32_t sub_segment, const uint16_t  rotation_segment,
+                       const uint16_t  firing_bin, const uint8_t laser_id)
+  {
+    addPoint(x, y, z, ring, azimuth, distance, intensity, time);
+  }
+
   virtual void newLine() = 0;
 
   const sensor_msgs::PointCloud2& finishCloud()
@@ -260,6 +272,7 @@ public:
   {
     return (range >= config_.min_range && range <= config_.max_range);
   }
+
 
 protected:
   Config config_;

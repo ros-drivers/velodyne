@@ -56,6 +56,11 @@
 
 namespace velodyne_pointcloud
 {
+
+static const std::string  XYZIRT_TYPE    = "XYZIRT";
+static const std::string  ORGANIZED_TYPE = "ORGANIZED";
+static const std::string  EXTENDED_TYPE  = "EXTENDED";
+
 using TransformNodeCfg = velodyne_pointcloud::TransformNodeConfig;
 
 class Transform
@@ -85,7 +90,7 @@ private:
   {
     std::string target_frame;  ///< target frame
     std::string fixed_frame;   ///< fixed frame
-    bool organize_cloud;       ///< enable/disable organized cloud structure
+    std::string cloud_type;    ///< selects the type of point cloud to use as output
     double max_range;          ///< maximum range to publish
     double min_range;          ///< minimum range to publish
     uint16_t num_lasers;       ///< number of lasers

@@ -35,7 +35,8 @@ PointcloudXYZIRT::PointcloudXYZIRT(
   void PointcloudXYZIRT::newLine()
   {}
 
-  void PointcloudXYZIRT::addPoint(float x, float y, float z, uint16_t ring, uint16_t /*azimuth*/, float distance, float intensity, float time)
+  void PointcloudXYZIRT::addPoint(float x, float y, float z,
+       const uint16_t ring, const uint16_t /*azimuth*/, const float distance, const float intensity, const float time)
   {
     if(!pointInRange(distance)) return;
 

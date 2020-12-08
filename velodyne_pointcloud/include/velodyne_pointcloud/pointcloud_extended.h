@@ -30,33 +30,44 @@
 // ANY WAY OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE
 // POSSIBILITY OF SUCH DAMAGE.
 
-#ifndef VELODYNE_POINTCLOUD_ORGANIZED_CLOUDXYZIRT_H
-#define VELODYNE_POINTCLOUD_ORGANIZED_CLOUDXYZIRT_H
+#ifndef ROS_OBJECT_INSTANCES_POINTCLOUD_EXTENDED_H
+#define ROS_OBJECT_INSTANCES_POINTCLOUD_EXTENDED_H
+
 
 #include <velodyne_pointcloud/datacontainerbase.h>
-#include <sensor_msgs/point_cloud2_iterator.h>
 #include <string>
 
 namespace velodyne_pointcloud
 {
-class OrganizedCloudXYZIRT : public velodyne_rawdata::DataContainerBase
+class PointcloudExtended : public velodyne_rawdata::DataContainerBase
 {
 public:
-  OrganizedCloudXYZIRT(const double max_range, const double min_range, const std::string& target_frame,
-                       const std::string& fixed_frame, const unsigned int num_lasers,
-                       const unsigned int scans_per_block);
+  PointcloudExtended(const double max_range, const double min_range, const std::string& target_frame,
+                   const std::string& fixed_frame, const unsigned int scans_per_block);
 
   virtual void newLine();
 
   virtual void setup(const velodyne_msgs::VelodyneScan::ConstPtr& scan_msg);
 
-  virtual void addPoint(float x, float y, float z, const uint16_t ring,
-                        const uint16_t azimuth, const float distance,
-                        const float intensity, const float time);
+  void addPoint(float x, float y, float z, const uint16_t ring,
+                const uint16_t azimuth, const float distance,
+                const float intensity, const float time) override;
 
-private:
-  sensor_msgs::PointCloud2Iterator<float> iter_x, iter_y, iter_z, iter_intensity, iter_time;
-  sensor_msgs::PointCloud2Iterator<uint16_t> iter_ring;
+  // With the VSL 128 the ring and the rotation segment can be used to build a range image
+  void addPoint(float x, float y, float z, const uint16_t ring,
+                        const uint16_t azimuth, const float distance,
+                        const float intensity, const float time,
+                        const uint32_t sub_segment, const uint16_t  rotation_segment,
+                        const uint16_t  firing_bin, const uint8_t laser_id) override ;
+
+  sensor_msgs::PointCloud2Iterator<float> iter_x, iter_y, iter_z,  iter_distance, iter_time;
+  sensor_msgs::PointCloud2Iterator<uint32_t> iter_sub_segment;
+  sensor_msgs::PointCloud2Iterator<uint16_t> iter_rotation_segment, iter_azimuth, iter_firing_bin,  iter_intensity, iter_ring;
+  sensor_msgs::PointCloud2Iterator<uint8_t>  iter_laser_id;
+
 };
-} /* namespace velodyne_pointcloud */
-#endif  // VELODYNE_POINTCLOUD_ORGANIZED_CLOUDXYZIRT_H
+}  // namespace velodyne_pointcloud
+
+
+
+#endif // ROS_OBJECT_INSTANCES_POINTCLOUD_EXTENDED_H

@@ -316,14 +316,16 @@ void RawData::setupAzimuthCache()
    *  @param pkt raw packet to unpack
    *  @param pc shared pointer to point cloud (points are appended)
    */
-  void RawData::unpack(const velodyne_msgs::VelodynePacket &pkt, DataContainerBase& data, const ros::Time& scan_start_time)
+  void RawData::unpack(const velodyne_msgs::VelodynePacket &pkt, DataContainerBase& data,
+                     const ros::Time& scan_start_time, const size_t packet_pos_in_scan,
+                     const size_t scan_size)
   {
     using velodyne_pointcloud::LaserCorrection;
     ROS_DEBUG_STREAM("Received packet, time: " << pkt.stamp);
 
     /** special parsing for the VLS128 **/
     if (pkt.data[1205] == VLS128_MODEL_ID) { // VLS 128
-      unpack_vls128(pkt, data, scan_start_time);
+      unpack_vls128(pkt, data, scan_start_time, packet_pos_in_scan, scan_size);
       return;
     }
 
@@ -496,13 +498,14 @@ void RawData::setupAzimuthCache()
  *  @param pc shared pointer to point cloud (points are appended)
  */
 void RawData::unpack_vls128(const velodyne_msgs::VelodynePacket &pkt, DataContainerBase& data,
-                            const ros::Time& scan_start_time) {
+                            const ros::Time& scan_start_time, const size_t packet_pos_in_scan,
+                            const size_t scan_size) {
   float azimuth_diff, azimuth_corrected_f;
   float last_azimuth_diff = 0;
   uint16_t azimuth, azimuth_next, azimuth_corrected;
   float x_coord, y_coord, z_coord;
   float distance;
-  const raw_packet_t *raw = (const raw_packet_t *) &pkt.data[0];
+  const auto *raw = (const raw_packet_t *) &pkt.data[0];
   union two_bytes tmp;
 
   float cos_vert_angle, sin_vert_angle, cos_rot_correction, sin_rot_correction;
@@ -510,6 +513,8 @@ void RawData::unpack_vls128(const velodyne_msgs::VelodynePacket &pkt, DataContai
   float xy_distance;
 
   float time_diff_start_to_this_packet = (pkt.stamp - scan_start_time).toSec();
+
+  int columns = std::floor(BLOCKS_PER_PACKET/4) * scan_size;
 
   uint8_t laser_number, firing_order;
   bool dual_return = (pkt.data[1204] == 57);
@@ -609,14 +614,28 @@ void RawData::unpack_vls128(const velodyne_msgs::VelodynePacket &pkt, DataContai
           // Compute the distance in the xy plane (w/o accounting for rotation)
           xy_distance = distance * cos_vert_angle;
 
+          uint16_t firing_bin = packet_pos_in_scan*std::floor(BLOCKS_PER_PACKET/4 )+ std::floor(block/4);
+
+          std::uint16_t rotation_segment = ((7-(laser_number - (8 * std::floor(laser_number/8)))) * 9) + firing_bin ;
+
+
+          while(rotation_segment>= columns)
+          {
+            rotation_segment = rotation_segment - columns;
+          }
+
           data.addPoint(xy_distance * cos_rot_angle,
                         -(xy_distance * sin_rot_angle),
                         distance * sin_vert_angle,
                         corrections.laser_ring,
                         azimuth_corrected,
                         distance,
-                        current_block.data[k + 2],
-                        time);
+                        static_cast<float>(current_block.data[k + 2]),
+                        time,
+                        rotation_segment + corrections.laser_ring * rotation_segment,
+                        rotation_segment,
+                        firing_bin,
+                        laser_number);
         }
       }
       data.newLine();
