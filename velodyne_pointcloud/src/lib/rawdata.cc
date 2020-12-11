@@ -578,8 +578,6 @@ void RawData::unpack_vls128(const velodyne_msgs::VelodynePacket &pkt, DataContai
         distance = tmp.uint * VLS128_DISTANCE_RESOLUTION;
 
 
-
-        if (pointInRange(distance)) {
           laser_number = j + bank_origin;   // Offset the laser in this block by which block it's in
           firing_order = laser_number / 8;  // VLS-128 fires 8 lasers at a time
 
@@ -616,7 +614,6 @@ void RawData::unpack_vls128(const velodyne_msgs::VelodynePacket &pkt, DataContai
 
           std::uint16_t rotation_segment = ((7-(laser_number - (8 * std::floor(laser_number/8)))) * 9) + firing_bin ;
 
-
           while(rotation_segment>= columns)
           {
             rotation_segment = rotation_segment - columns;
@@ -634,10 +631,53 @@ void RawData::unpack_vls128(const velodyne_msgs::VelodynePacket &pkt, DataContai
                         rotation_segment,
                         firing_bin,
                         laser_number);
-        }
+
       }
-      data.newLine();
     }
+    else
+    {
+      // add  points outside the interest segment to the cloud as empty points
+      for (int j = 0, k = 0; j < SCANS_PER_BLOCK; j++, k += RAW_SCAN_SIZE) {
+
+        laser_number = j + bank_origin;   // Offset the laser in this block by which block it's in
+        firing_order = laser_number / 8;  // VLS-128 fires 8 lasers at a time
+
+        if (timing_offsets.size())
+        {
+          time = timing_offsets[block/4][firing_order + laser_number/64] + time_diff_start_to_this_packet;
+        }
+
+        velodyne_pointcloud::LaserCorrection &corrections = calibration_.laser_corrections[laser_number];
+
+        // correct for the laser rotation as a function of timing during the firings
+        azimuth_corrected_f = azimuth + (azimuth_diff * vls_128_laser_azimuth_cache[firing_order]);
+        azimuth_corrected = ((uint16_t) round(azimuth_corrected_f)) % 36000;
+
+        uint16_t firing_bin = packet_pos_in_scan*std::floor(BLOCKS_PER_PACKET/4 )+ std::floor(block/4);
+
+        std::uint16_t rotation_segment = ((7-(laser_number - (8 * std::floor(laser_number/8)))) * 9) + firing_bin ;
+
+        while(rotation_segment>= columns)
+        {
+          rotation_segment = rotation_segment - columns;
+        }
+
+        data.addPoint(nanf(""),
+                      nanf(""),
+                      nanf(""),
+                      corrections.laser_ring,
+                      azimuth_corrected,
+                      nanf(""), // copm with nan is false so in a XYZIRT cloud this point is not stored
+                      0.0,
+                      time,
+                      rotation_segment + corrections.laser_ring * rotation_segment,
+                      rotation_segment,
+                      firing_bin,
+                      laser_number);
+      }
+    }
+    if((block+1)%4 == 0) //add a new line every 4 blocks (one firing for each of the 128 lasers)
+      data.newLine();
   }
 }
   

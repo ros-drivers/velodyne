@@ -43,7 +43,8 @@ class PointcloudExtended : public velodyne_rawdata::DataContainerBase
 {
 public:
   PointcloudExtended(const double max_range, const double min_range, const std::string& target_frame,
-                   const std::string& fixed_frame, const unsigned int scans_per_block);
+                   const std::string& fixed_frame, const unsigned int num_lasers,
+                     const unsigned int scans_per_block);
 
   virtual void newLine();
 
@@ -62,8 +63,9 @@ public:
 
   sensor_msgs::PointCloud2Iterator<float> iter_x, iter_y, iter_z,  iter_distance, iter_time;
   sensor_msgs::PointCloud2Iterator<uint32_t> iter_sub_segment;
-  sensor_msgs::PointCloud2Iterator<uint16_t> iter_rotation_segment, iter_azimuth, iter_firing_bin,  iter_intensity, iter_ring;
-  sensor_msgs::PointCloud2Iterator<uint8_t>  iter_laser_id;
+  sensor_msgs::PointCloud2Iterator<uint16_t> iter_rotation_segment, iter_azimuth, iter_firing_bin, iter_ring;
+  sensor_msgs::PointCloud2Iterator<uint8_t>   iter_intensity, iter_laser_id;
+
 
 };
 }  // namespace velodyne_pointcloud

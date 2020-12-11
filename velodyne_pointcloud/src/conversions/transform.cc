@@ -111,7 +111,7 @@ namespace velodyne_pointcloud
             container_ptr =
                 boost::shared_ptr<PointcloudExtended>(new PointcloudExtended(
                     config_.max_range, config_.min_range, config_.target_frame,
-                    config_.fixed_frame, data_->scansPerPacket()));
+                    config_.fixed_frame, config_.num_lasers, data_->scansPerPacket()));
           }
           else
           {
