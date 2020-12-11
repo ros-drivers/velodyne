@@ -104,12 +104,13 @@ public:
   {
     sensor_frame = scan_msg->header.frame_id;
     manage_tf_buffer();
-
+    packets_in_scan = scan_msg->packets.size();
     cloud.header.stamp = scan_msg->header.stamp;
     cloud.data.resize(scan_msg->packets.size() * config_.scans_per_packet * cloud.point_step);
     cloud.width = config_.init_width;
     cloud.height = config_.init_height;
     cloud.is_dense = static_cast<uint8_t>(config_.is_dense);
+
   }
 
 
@@ -268,9 +269,14 @@ public:
     z = p.z();
   }
 
-  inline bool pointInRange(float range)
+  inline bool pointInRange(const float range) const
   {
     return (range >= config_.min_range && range <= config_.max_range);
+  }
+
+  inline size_t packetsInScan()
+  {
+    return packets_in_scan;
   }
 
 
@@ -281,6 +287,7 @@ protected:
   Eigen::Affine3f tf_matrix_to_fixed;
   Eigen::Affine3f tf_matrix_to_target;
   std::string sensor_frame;
+  size_t  packets_in_scan{0};
 };
 } /* namespace velodyne_rawdata */
 #endif  // VELODYNE_POINTCLOUD_DATACONTAINERBASE_H
