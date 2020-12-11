@@ -317,15 +317,14 @@ void RawData::setupAzimuthCache()
    *  @param pc shared pointer to point cloud (points are appended)
    */
   void RawData::unpack(const velodyne_msgs::VelodynePacket &pkt, DataContainerBase& data,
-                     const ros::Time& scan_start_time, const size_t packet_pos_in_scan,
-                     const size_t scan_size)
+                     const ros::Time& scan_start_time, const size_t packet_pos_in_scan)
   {
     using velodyne_pointcloud::LaserCorrection;
     ROS_DEBUG_STREAM("Received packet, time: " << pkt.stamp);
 
     /** special parsing for the VLS128 **/
     if (pkt.data[1205] == VLS128_MODEL_ID) { // VLS 128
-      unpack_vls128(pkt, data, scan_start_time, packet_pos_in_scan, scan_size);
+      unpack_vls128(pkt, data, scan_start_time, packet_pos_in_scan);
       return;
     }
 
@@ -498,8 +497,7 @@ void RawData::setupAzimuthCache()
  *  @param pc shared pointer to point cloud (points are appended)
  */
 void RawData::unpack_vls128(const velodyne_msgs::VelodynePacket &pkt, DataContainerBase& data,
-                            const ros::Time& scan_start_time, const size_t packet_pos_in_scan,
-                            const size_t scan_size) {
+                            const ros::Time& scan_start_time, const size_t packet_pos_in_scan) {
   float azimuth_diff, azimuth_corrected_f;
   float last_azimuth_diff = 0;
   uint16_t azimuth, azimuth_next, azimuth_corrected;
@@ -514,7 +512,7 @@ void RawData::unpack_vls128(const velodyne_msgs::VelodynePacket &pkt, DataContai
 
   float time_diff_start_to_this_packet = (pkt.stamp - scan_start_time).toSec();
 
-  int columns = std::floor(BLOCKS_PER_PACKET/4) * scan_size;
+  int columns = std::floor(BLOCKS_PER_PACKET/4) * data.packetsInScan();
 
   uint8_t laser_number, firing_order;
   bool dual_return = (pkt.data[1204] == 57);
