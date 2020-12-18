@@ -512,12 +512,12 @@ void RawData::unpack_vls128(const velodyne_msgs::VelodynePacket &pkt, DataContai
 
   float time_diff_start_to_this_packet = (pkt.stamp - scan_start_time).toSec();
 
-  int columns = std::floor(BLOCKS_PER_PACKET/4) * data.packetsInScan();
+  int firing_seq_in_scan = std::floor(BLOCKS_PER_PACKET/VLS128_BLOCKS_PER_FIRING_SEQ) * data.packetsInScan();
 
   uint8_t laser_number, firing_order;
   bool dual_return = (pkt.data[1204] == 57);
 
-  for (int block = 0; block < BLOCKS_PER_PACKET - (4* dual_return); block++) {
+  for (int block = 0; block < BLOCKS_PER_PACKET - (VLS128_BLOCKS_PER_FIRING_SEQ* dual_return); block++) {
     // cache block for use
     const raw_block_t &current_block = raw->blocks[block];
     float time = 0;
@@ -566,7 +566,7 @@ void RawData::unpack_vls128(const velodyne_msgs::VelodynePacket &pkt, DataContai
       // This makes the assumption the difference between the last block and the next packet is the
       // same as the last to the second to last.
       // Assumes RPM doesn't change much between blocks
-      azimuth_diff = (block == BLOCKS_PER_PACKET - (4*dual_return)-1) ? 0 : last_azimuth_diff;
+      azimuth_diff = (block == BLOCKS_PER_PACKET - (VLS128_BLOCKS_PER_FIRING_SEQ*dual_return)-1) ? 0 : last_azimuth_diff;
     }
 
     // condition added to avoid calculating points which are not in the interesting defined area (min_angle < area < max_angle)
@@ -583,7 +583,7 @@ void RawData::unpack_vls128(const velodyne_msgs::VelodynePacket &pkt, DataContai
 
           if (timing_offsets.size())
           {
-            time = timing_offsets[block/4][firing_order + laser_number/64] + time_diff_start_to_this_packet;
+            time = timing_offsets[block/VLS128_BLOCKS_PER_FIRING_SEQ][firing_order + laser_number/64] + time_diff_start_to_this_packet;
           }
 
           velodyne_pointcloud::LaserCorrection &corrections = calibration_.laser_corrections[laser_number];
@@ -610,13 +610,15 @@ void RawData::unpack_vls128(const velodyne_msgs::VelodynePacket &pkt, DataContai
           // Compute the distance in the xy plane (w/o accounting for rotation)
           xy_distance = distance * cos_vert_angle;
 
-          uint16_t firing_bin = packet_pos_in_scan*std::floor(BLOCKS_PER_PACKET/4 )+ std::floor(block/4);
+          uint16_t firing_seq = packet_pos_in_scan*std::floor(BLOCKS_PER_PACKET/VLS128_BLOCKS_PER_FIRING_SEQ )+
+                                std::floor(block/VLS128_BLOCKS_PER_FIRING_SEQ);
 
-          std::uint16_t rotation_segment = ((7-(laser_number - (8 * std::floor(laser_number/8)))) * 9) + firing_bin ;
+          std::uint16_t rotation_segment = ((7-(laser_number - (8 * std::floor(laser_number/8)))) * 9) +
+              firing_seq;
 
-          while(rotation_segment>= columns)
+          while(rotation_segment>= firing_seq_in_scan)
           {
-            rotation_segment = rotation_segment - columns;
+            rotation_segment = rotation_segment - firing_seq_in_scan;
           }
 
           data.addPoint(xy_distance * cos_rot_angle,
@@ -627,9 +629,8 @@ void RawData::unpack_vls128(const velodyne_msgs::VelodynePacket &pkt, DataContai
                         distance,
                         static_cast<float>(current_block.data[k + 2]),
                         time,
-                        rotation_segment + corrections.laser_ring * rotation_segment,
-                        rotation_segment,
-                        firing_bin,
+                        corrections.laser_ring + calibration_.num_lasers * rotation_segment,
+                        rotation_segment, firing_seq,
                         laser_number);
 
       }
@@ -644,7 +645,7 @@ void RawData::unpack_vls128(const velodyne_msgs::VelodynePacket &pkt, DataContai
 
         if (timing_offsets.size())
         {
-          time = timing_offsets[block/4][firing_order + laser_number/64] + time_diff_start_to_this_packet;
+          time = timing_offsets[block/VLS128_BLOCKS_PER_FIRING_SEQ][firing_order + laser_number/64] + time_diff_start_to_this_packet;
         }
 
         velodyne_pointcloud::LaserCorrection &corrections = calibration_.laser_corrections[laser_number];
@@ -653,13 +654,14 @@ void RawData::unpack_vls128(const velodyne_msgs::VelodynePacket &pkt, DataContai
         azimuth_corrected_f = azimuth + (azimuth_diff * vls_128_laser_azimuth_cache[firing_order]);
         azimuth_corrected = ((uint16_t) round(azimuth_corrected_f)) % 36000;
 
-        uint16_t firing_bin = packet_pos_in_scan*std::floor(BLOCKS_PER_PACKET/4 )+ std::floor(block/4);
+        uint16_t firing_bin = packet_pos_in_scan*std::floor(BLOCKS_PER_PACKET/VLS128_BLOCKS_PER_FIRING_SEQ )
+                              + std::floor(block/VLS128_BLOCKS_PER_FIRING_SEQ);
 
         std::uint16_t rotation_segment = ((7-(laser_number - (8 * std::floor(laser_number/8)))) * 9) + firing_bin ;
 
-        while(rotation_segment>= columns)
+        while(rotation_segment>= firing_seq_in_scan)
         {
-          rotation_segment = rotation_segment - columns;
+          rotation_segment = rotation_segment - firing_seq_in_scan;
         }
 
         data.addPoint(nanf(""),
@@ -667,16 +669,16 @@ void RawData::unpack_vls128(const velodyne_msgs::VelodynePacket &pkt, DataContai
                       nanf(""),
                       corrections.laser_ring,
                       azimuth_corrected,
-                      nanf(""), // copm with nan is false so in a XYZIRT cloud this point is not stored
+                      nanf(""),
                       0.0,
                       time,
-                      rotation_segment + corrections.laser_ring * rotation_segment,
+                      corrections.laser_ring + calibration_.num_lasers * rotation_segment,
                       rotation_segment,
                       firing_bin,
                       laser_number);
       }
     }
-    if((block+1)%4 == 0) //add a new line every 4 blocks (one firing for each of the 128 lasers)
+    if((block+1)%VLS128_BLOCKS_PER_FIRING_SEQ == 0) //add a new line every 4 blocks (one firing for each of the 128 lasers)
       data.newLine();
   }
 }

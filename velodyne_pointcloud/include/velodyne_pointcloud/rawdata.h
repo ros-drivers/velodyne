@@ -120,7 +120,8 @@ static const float  VLS128_CHANNEL_TDURATION  =  2.665f;  // [µs] Channels corr
 static const float  VLS128_SEQ_TDURATION      =  53.3f;   // [µs] Sequence is a set of laser firings including recharging
 static const float  VLS128_TOH_ADJUSTMENT    =  8.7f;   // [µs] μs. Top Of the Hour is aligned with the fourth firing group in a firing sequence.
 static const float  VLS128_DISTANCE_RESOLUTION=  0.004f;  // [m]
-static const float  VLS128_MODEL_ID=  161;
+static const int  VLS128_MODEL_ID=  161;
+static const int  VLS128_BLOCKS_PER_FIRING_SEQ=  4; // A packet has 3 firing sequences and each one has 4 blocks of 32 individual laser firings
 
 
 
