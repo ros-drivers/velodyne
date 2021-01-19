@@ -139,6 +139,7 @@ private:
   bpf_program pcap_packet_filter_;
   char errbuf_[PCAP_ERRBUF_SIZE];
   bool empty_;
+  bool pcap_time_;
   bool read_once_;
   bool read_fast_;
   double repeat_delay_;

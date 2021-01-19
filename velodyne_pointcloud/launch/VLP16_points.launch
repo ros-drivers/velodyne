@@ -17,6 +17,7 @@
   <arg name="repeat_delay" default="0.0" />
   <arg name="rpm" default="600.0" />
   <arg name="gps_time" default="false" />
+  <arg name="pcap_time" default="false" />
   <arg name="cut_angle" default="-0.01" />
   <arg name="timestamp_first_packet" default="false" />
   <arg name="laserscan_ring" default="-1" />
@@ -36,6 +37,7 @@
     <arg name="repeat_delay" value="$(arg repeat_delay)"/>
     <arg name="rpm" value="$(arg rpm)"/>
     <arg name="gps_time" value="$(arg gps_time)"/>
+    <arg name="pcap_time" value="$(arg pcap_time)"/>
     <arg name="cut_angle" value="$(arg cut_angle)"/>
     <arg name="timestamp_first_packet" value="$(arg timestamp_first_packet)"/>
   </include>
