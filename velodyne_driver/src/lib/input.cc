@@ -325,13 +325,9 @@ namespace velodyne_driver
                 pkt->stamp = ros::Time(header->ts.tv_sec, header->ts.tv_usec * 1000); // 
               }
             } else {
-              if (!pcap_time_) {
-                pkt->stamp = ros::Time::now(); // correcting ros::Time::now() using GPS from PCAP is an invalid parameter combination, so just return ros::Time::now()
-              } else {
-                // time for each packet is a 4 byte uint located starting at offset 1200 in
-                // the data packet
-                pkt->stamp = rosTimeFromGpsTimestamp(&(pkt->data[1200]), header);
-              }
+              // time for each packet is a 4 byte uint located starting at offset 1200 in
+              // the data packet
+              pkt->stamp = rosTimeFromGpsTimestamp(&(pkt->data[1200]), header);
             }
             empty_ = false;
             return 0;                   // success
