@@ -801,7 +801,7 @@ void RawData::unpack_vls128(const velodyne_msgs::VelodynePacket &pkt, DataContai
             float focal_offset = 256 * SQR(1 - corrections.focal_distance / 13100);
             float focal_slope = corrections.focal_slope;
             intensity += focal_slope * (std::abs(focal_offset - 256 * 
-              SQR(1 - tmp.uint/65535)));
+              SQR(1 - static_cast<float>(tmp.uint) / 65535)));
             intensity = (intensity < min_intensity) ? min_intensity : intensity;
             intensity = (intensity > max_intensity) ? max_intensity : intensity;
   
