@@ -125,7 +125,7 @@ VelodyneDriver::VelodyneDriver(const rclcpp::NodeOptions & options)
   } else if (cut_angle <= (2.0 * M_PI)) {
     RCLCPP_INFO(
       this->get_logger(), "Cut at specific angle feature activated. "
-      "Cutting velodyne points always at " + std::to_string(cut_angle) + " rad.");
+      "Cutting velodyne points always at %f rad.", cut_angle);
   } else {
     RCLCPP_ERROR(
       this->get_logger(), "cut_angle parameter is out of range."
