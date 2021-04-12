@@ -6,7 +6,7 @@ on:
 
 jobs:
   build-foxy:
-    runs-on: ubuntu-latest
+    runs-on: ubuntu-20.04
     strategy:
       fail-fast: false
     container:
@@ -14,10 +14,9 @@ jobs:
     steps:
     - name: Fix Bugs in ros-tooling/action-ros-ci
       run: |
-        sudo chown -R rosbuild:rosbuild "$HOME" .
         sudo apt-get update && sudo DEBIAN_FRONTEND=noninteractive apt-get install -y keyboard-configuration
     - name: Run Tests
-      uses: ros-tooling/action-ros-ci@0.0.17
+      uses: ros-tooling/action-ros-ci@0.2.0
       with:
         package-name: |
           velodyne
@@ -25,8 +24,7 @@ jobs:
           velodyne_laserscan
           velodyne_msgs
           velodyne_pointcloud
-        source-ros-binary-installation: foxy
-        vcs-repo-file-url: ""
+        target-ros2-distro: foxy
     - name: Upload logs
       uses: actions/upload-artifact@v1
       with:
