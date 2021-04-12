@@ -64,11 +64,12 @@ inline float SQR(float val) { return val*val; }
     //computing positive modulo to keep theses angles into [0;2*M_PI]
     config_.tmp_min_angle = fmod(fmod(config_.tmp_min_angle,2*M_PI) + 2*M_PI,2*M_PI);
     config_.tmp_max_angle = fmod(fmod(config_.tmp_max_angle,2*M_PI) + 2*M_PI,2*M_PI);
-    
+
     //converting into the hardware velodyne ref (negative yaml and degrees)
     //adding 0.5 perfomrs a centered double to int conversion 
     config_.min_angle = 100 * (2*M_PI - config_.tmp_min_angle) * 180 / M_PI + 0.5;
     config_.max_angle = 100 * (2*M_PI - config_.tmp_max_angle) * 180 / M_PI + 0.5;
+    
     if (config_.min_angle == config_.max_angle)
     {
       //avoid returning empty cloud if min_angle = max_angle
@@ -371,8 +372,8 @@ void RawData::setupAzimuthCache()
              && block.rotation <= config_.max_angle
              && config_.min_angle < config_.max_angle)
              ||(config_.min_angle > config_.max_angle 
-             && (raw->blocks[i].rotation <= config_.max_angle 
-             || raw->blocks[i].rotation >= config_.min_angle))){
+             && (block.rotation <= config_.max_angle
+             || block.rotation >= config_.min_angle))){
 
           if (timing_offsets.size())
           {
@@ -570,7 +571,8 @@ void RawData::unpack_vls128(const velodyne_msgs::VelodynePacket &pkt, DataContai
     }
 
     // condition added to avoid calculating points which are not in the interesting defined area (min_angle < area < max_angle)
-    if ((config_.min_angle < config_.max_angle && azimuth >= config_.min_angle && azimuth <= config_.max_angle) || (config_.min_angle > config_.max_angle)) {
+    if ((config_.min_angle < config_.max_angle && azimuth >= config_.min_angle && azimuth <= config_.max_angle) ||
+        (config_.min_angle > config_.max_angle && (azimuth >= config_.min_angle|| azimuth <= config_.max_angle))) {
       for (int j = 0, k = 0; j < SCANS_PER_BLOCK; j++, k += RAW_SCAN_SIZE) {
         // distance extraction
         tmp.bytes[0] = current_block.data[k];
