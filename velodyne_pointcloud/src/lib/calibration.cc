@@ -127,6 +127,8 @@ namespace velodyne_pointcloud
     node[FOCAL_SLOPE] >> correction.second.focal_slope;
 
     // Calculate cached values
+    correction.second.rot_correction_deg =
+        correction.second.rot_correction * 180.0 / M_PI;
     correction.second.cos_rot_correction =
       cosf(correction.second.rot_correction);
     correction.second.sin_rot_correction =

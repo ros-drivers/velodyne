@@ -53,6 +53,7 @@ struct LaserCorrection
 {
   /** parameters in db.xml */
   float rot_correction;
+  float rot_correction_deg;
   float vert_correction;
   float dist_correction;
   bool two_pt_correction_available;
