@@ -74,6 +74,7 @@ VelodyneDriver::VelodyneDriver(const rclcpp::NodeOptions & options)
   bool read_once = this->declare_parameter("read_once", false);
   bool read_fast = this->declare_parameter("read_fast", false);
   double repeat_delay = this->declare_parameter("repeat_delay", 0.0);
+  bool pcap_time = this->declare_parameter("pcap_time", false);
   config_.frame_id = this->declare_parameter("frame_id", std::string("velodyne"));
   config_.model = this->declare_parameter("model", std::string("64E"));
   config_.rpm = this->declare_parameter("rpm", 600.0);
@@ -167,8 +168,8 @@ VelodyneDriver::VelodyneDriver(const rclcpp::NodeOptions & options)
   if (!dump_file.empty()) {                // have PCAP file?
     // read data from packet capture file
     input_ = std::make_unique<velodyne_driver::InputPCAP>(
-      this, devip, udp_port, packet_rate,
-      dump_file, read_once, read_fast, repeat_delay);
+      this, devip, udp_port, gps_time, packet_rate,
+      dump_file, read_once, read_fast, repeat_delay, pcap_time);
   } else {
     // read data from live socket
     input_ = std::make_unique<velodyne_driver::InputSocket>(this, devip, udp_port, gps_time);

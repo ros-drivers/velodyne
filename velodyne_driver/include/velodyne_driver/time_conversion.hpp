@@ -33,6 +33,8 @@
 #ifndef VELODYNE_DRIVER__TIME_CONVERSION_HPP_
 #define VELODYNE_DRIVER__TIME_CONVERSION_HPP_
 
+#include <pcap.h>
+
 #include <rclcpp/time.hpp>
 
 /** @brief Function used to check that hour assigned to timestamp in conversion is
@@ -63,7 +65,9 @@ rclcpp::Time resolveHourAmbiguity(const rclcpp::Time & stamp, const rclcpp::Time
 }
 
 inline
-rclcpp::Time rosTimeFromGpsTimestamp(rclcpp::Time & time_nom, const uint8_t * const data)
+rclcpp::Time rosTimeFromGpsTimestamp(
+  const uint8_t * const data, rclcpp::Clock::SharedPtr clock,
+  const struct pcap_pkthdr * header = nullptr)
 {
   // time_nom is used to recover the hour
   const int HOUR_TO_SEC = 3600;
@@ -75,10 +79,17 @@ rclcpp::Time rosTimeFromGpsTimestamp(rclcpp::Time & time_nom, const uint8_t * co
     ((uint32_t) data[2] ) << 16 |
     ((uint32_t) data[1] ) << 8 |
     ((uint32_t) data[0] ));
+  // if header is NULL, assume real time operation
+  rclcpp::Time time_nom{0, 0, RCL_ROS_TIME};
+  if (!header) {
+    time_nom = clock->now();    // use this to recover the hour
+  } else {
+    time_nom = rclcpp::Time(header->ts.tv_sec, header->ts.tv_usec * 1000, RCL_ROS_TIME);
+  }
   uint32_t cur_hour = time_nom.nanoseconds() / 1000000000 / HOUR_TO_SEC;
   auto stamp = rclcpp::Time(
     (cur_hour * HOUR_TO_SEC) + (usecs / 1000000),
-    (usecs % 1000000) * 1000);
+    (usecs % 1000000) * 1000, RCL_ROS_TIME);
   return resolveHourAmbiguity(stamp, time_nom);
 }
 

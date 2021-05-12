@@ -12,3 +12,4 @@ velodyne_driver_node:
         rpm: 600.0
         port: 2368
         timestamp_first_packet: false
+        pcap_time: false

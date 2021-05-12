@@ -56,7 +56,7 @@ TEST(TimeConversion, BytesToTimestamp)
   native_format[2] = 0xFF & (((uint32_t)since_the_hour) >> 16);
   native_format[3] = 0xFF & (((uint32_t)since_the_hour) >> 24);
 
-  rclcpp::Time ros_stamp_converted = rosTimeFromGpsTimestamp(ros_stamp, native_format);
+  rclcpp::Time ros_stamp_converted = rosTimeFromGpsTimestamp(native_format, clock_);
 
   ASSERT_NEAR(ros_stamp_converted.nanoseconds(), ros_stamp.nanoseconds(), 2000);
 }

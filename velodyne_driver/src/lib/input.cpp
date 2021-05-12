@@ -78,10 +78,13 @@ static const size_t packet_size =
  *  @param devip Device IP address.
  *  @param port UDP port number.
  */
-Input::Input(rclcpp::Node * private_nh, const std::string & devip, uint16_t port)
+Input::Input(
+  rclcpp::Node * private_nh, const std::string & devip,
+  uint16_t port, bool gps_time)
 : private_nh_(private_nh),
   devip_str_(devip),
-  port_(port)
+  port_(port),
+  gps_time_(gps_time)
 {
   if (!devip_str_.empty()) {
     RCLCPP_INFO(
@@ -104,7 +107,7 @@ InputSocket::InputSocket(
   rclcpp::Node * private_nh,
   const std::string & devip,
   uint16_t port, bool gps_time)
-: Input(private_nh, devip, port), gps_time_(gps_time)
+: Input(private_nh, devip, port, gps_time)
 {
   sockfd_ = -1;
 
@@ -246,12 +249,13 @@ int InputSocket::getPacket(velodyne_msgs::msg::VelodynePacket * pkt, const doubl
   if (!gps_time_) {
     // Average the times at which we begin and end reading.  Use that to
     // estimate when the scan occurred. Add the time offset.
-    pkt->stamp = rclcpp::Time((time2.nanoseconds() + time1.nanoseconds()) / 2.0 + time_offset);
+    pkt->stamp = rclcpp::Time(
+      (time2.nanoseconds() + time1.nanoseconds()) / 2.0 + time_offset, RCL_ROS_TIME);
   } else {
     // time for each packet is a 4 byte uint located starting at offset 1200 in
     // the data packet
     // TODO(clalancette): What if the packet is shorter than 1204 bytes?
-    pkt->stamp = rosTimeFromGpsTimestamp(time2, &(pkt->data[1200]));
+    pkt->stamp = rosTimeFromGpsTimestamp(&(pkt->data[1200]), private_nh_->get_clock());
   }
 
   return 0;
@@ -273,16 +277,17 @@ int InputSocket::getPacket(velodyne_msgs::msg::VelodynePacket * pkt, const doubl
  *  @param repeat_delay Seconds to wait between repeating input file.
  */
 InputPCAP::InputPCAP(
-  rclcpp::Node * private_nh, const std::string & devip, uint16_t port,
+  rclcpp::Node * private_nh, const std::string & devip, uint16_t port, bool gps_time,
   double packet_rate, const std::string & filename, bool read_once,
-  bool read_fast, double repeat_delay)
-: Input(private_nh, devip, port),
+  bool read_fast, double repeat_delay, bool pcap_time)
+: Input(private_nh, devip, port, gps_time),
   packet_rate_(packet_rate),
   filename_(filename),
   pcap_(nullptr),
   read_once_(read_once),
   read_fast_(read_fast),
-  repeat_delay_(repeat_delay)
+  repeat_delay_(repeat_delay),
+  pcap_time_(pcap_time)
 {
   empty_ = true;
 
@@ -348,8 +353,18 @@ int InputPCAP::getPacket(velodyne_msgs::msg::VelodynePacket * pkt, const double 
 
       ::memcpy(&pkt->data[0], pkt_data + 42, packet_size);
       (void)time_offset;
-      // time_offset not considered here, as no synchronization required
-      pkt->stamp = private_nh_->get_clock()->now();
+      if (!gps_time_) {
+        if (!pcap_time_) {
+          // time_offset not considered here, as no synchronization required
+          pkt->stamp = private_nh_->get_clock()->now();
+        } else {
+          pkt->stamp = rclcpp::Time(header->ts.tv_sec, header->ts.tv_usec * 1000, RCL_ROS_TIME);
+        }
+      } else {
+        // time for each packet is a 4 byte uint located starting at offset 1200 in
+        // the data packet
+        pkt->stamp = rosTimeFromGpsTimestamp(&(pkt->data[1200]), private_nh_->get_clock(), header);
+      }
       empty_ = false;
       return 0;                   // success
     }

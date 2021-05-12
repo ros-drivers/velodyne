@@ -73,7 +73,9 @@ constexpr uint16_t DATA_PORT_NUMBER = 2368;      // default data port
 class Input
 {
 public:
-  explicit Input(rclcpp::Node * private_nh, const std::string & devip, uint16_t port);
+  explicit Input(
+    rclcpp::Node * private_nh,
+    const std::string & devip, uint16_t port, bool gps_time);
   virtual ~Input() {}
 
   /** @brief Read one Velodyne packet.
@@ -92,6 +94,7 @@ protected:
   rclcpp::Node * private_nh_;
   std::string devip_str_;
   uint16_t port_;
+  bool gps_time_;
 };
 
 /** @brief Live Velodyne input from socket. */
@@ -111,7 +114,6 @@ public:
 private:
   int sockfd_;
   in_addr devip_{};
-  bool gps_time_;
 };
 
 
@@ -127,11 +129,13 @@ public:
     rclcpp::Node * private_nh,
     const std::string & devip,
     uint16_t port,
+    bool gps_time,
     double packet_rate,
     const std::string & filename,
     bool read_once,
     bool read_fast,
-    double repeat_delay);
+    double repeat_delay,
+    bool pcap_time);
   ~InputPCAP() override;
 
   int getPacket(
@@ -146,6 +150,7 @@ private:
   bpf_program pcap_packet_filter_{};
   char errbuf_[PCAP_ERRBUF_SIZE]{};
   bool empty_;
+  bool pcap_time_;
   bool read_once_;
   bool read_fast_;
   double repeat_delay_;
