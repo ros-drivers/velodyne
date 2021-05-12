@@ -14,6 +14,7 @@
   <arg name="repeat_delay" default="0.0" />
   <arg name="rpm" default="600.0" />
   <arg name="gps_time" default="false" />
+  <arg name="pcap_time" default="false" />
   <arg name="cut_angle" default="-0.01" />
   <arg name="timestamp_first_packet" default="false" />
 
@@ -33,6 +34,7 @@
     <param name="repeat_delay" value="$(arg repeat_delay)"/>
     <param name="rpm" value="$(arg rpm)"/>
     <param name="gps_time" value="$(arg gps_time)"/>
+    <param name="pcap_time" value="$(arg pcap_time)"/>
     <param name="cut_angle" value="$(arg cut_angle)"/>
     <param name="timestamp_first_packet" value="$(arg timestamp_first_packet)"/>
   </node>    
