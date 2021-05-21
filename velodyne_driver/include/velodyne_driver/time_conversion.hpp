@@ -33,6 +33,8 @@
 #ifndef VELODYNE_DRIVER_TIME_CONVERSION_HPP
 #define VELODYNE_DRIVER_TIME_CONVERSION_HPP
 
+#include <pcap.h>
+
 #include <ros/ros.h>
 #include <ros/time.h>
 

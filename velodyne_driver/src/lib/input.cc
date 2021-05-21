@@ -44,15 +44,17 @@
  *              PCAP dump
  */
 
-#include <unistd.h>
-#include <string>
-#include <sstream>
-#include <sys/socket.h>
 #include <arpa/inet.h>
-#include <poll.h>
 #include <errno.h>
 #include <fcntl.h>
+#include <pcap.h>
+#include <poll.h>
+#include <string>
+#include <sstream>
 #include <sys/file.h>
+#include <sys/socket.h>
+#include <unistd.h>
+
 #include <velodyne_driver/input.h>
 #include <velodyne_driver/time_conversion.hpp>
 
