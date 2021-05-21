@@ -48,6 +48,7 @@
 
 #include <arpa/inet.h>
 #include <fcntl.h>
+#include <pcap.h>
 #include <poll.h>
 #include <sys/file.h>
 #include <sys/socket.h>
