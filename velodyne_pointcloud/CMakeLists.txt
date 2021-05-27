@@ -19,6 +19,7 @@ set(${PROJECT_NAME}_CATKIN_DEPS
     tf2_ros
     velodyne_driver
     velodyne_msgs
+    ethernet_msgs
     dynamic_reconfigure
     diagnostic_updater
 )

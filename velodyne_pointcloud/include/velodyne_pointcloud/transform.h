@@ -47,6 +47,7 @@
 #include <diagnostic_updater/diagnostic_updater.h>
 #include <diagnostic_updater/publisher.h>
 #include <sensor_msgs/PointCloud2.h>
+#include <ethernet_msgs/Packet.h>
 
 #include <velodyne_pointcloud/rawdata.h>
 #include <velodyne_pointcloud/pointcloudXYZIRT.h>
@@ -76,6 +77,8 @@ public:
 
 private:
   void processScan(const velodyne_msgs::VelodyneScan::ConstPtr& scanMsg);
+  void processEthernetMsgs(const ethernet_msgs::PacketConstPtr& ethernet_msg);
+
 
   // Pointer to dynamic reconfigure service srv_
   boost::shared_ptr<dynamic_reconfigure::Server<velodyne_pointcloud::TransformNodeConfig>> srv_;
@@ -83,6 +86,7 @@ private:
 
   boost::shared_ptr<velodyne_rawdata::RawData> data_;
   ros::Subscriber velodyne_scan_;
+  ros::Subscriber velodyne_ethernet_msgs_;
   ros::Publisher output_;
 
   /// configuration parameters
@@ -91,6 +95,7 @@ private:
     std::string target_frame;  ///< target frame
     std::string fixed_frame;   ///< fixed frame
     std::string cloud_type;    ///< selects the type of point cloud to use as output
+    std::string input_ethernet_msgs_topic; ///< topic name for ethernet_msgs
     double max_range;          ///< maximum range to publish
     double min_range;          ///< minimum range to publish
     uint16_t num_lasers;       ///< number of lasers

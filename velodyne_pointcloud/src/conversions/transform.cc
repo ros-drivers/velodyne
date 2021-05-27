@@ -51,7 +51,16 @@ namespace velodyne_pointcloud
     f = boost::bind (&Transform::reconfigure_callback, this, _1, _2);
     srv_->setCallback (f);
 
-    velodyne_scan_ = node.subscribe("velodyne_packets", 10, &Transform::processScan, this);
+    if(config_.input_ethernet_msgs_topic == "")
+    {
+        ROS_INFO_STREAM("subscribe to: velodyne_packets");
+        velodyne_scan_ = node.subscribe("velodyne_packets", 10, &Transform::processScan, this);
+    }
+    else
+    {
+        ROS_INFO_STREAM("subscribe to: "<<config_.input_ethernet_msgs_topic);
+        velodyne_ethernet_msgs_ = node.subscribe(config_.input_ethernet_msgs_topic, 10*604, &Transform::processEthernetMsgs, this);
+    }
 
     // Diagnostics
     diagnostics_.setHardwareID("Velodyne Transform");
@@ -80,6 +89,7 @@ namespace velodyne_pointcloud
     ROS_INFO_STREAM("Fixed frame ID now: " << config_.fixed_frame);
     config_.min_range = config.min_range;
     config_.max_range = config.max_range;
+    config_.input_ethernet_msgs_topic = config.input_ethernet_msgs_topic;
 
     boost::lock_guard<boost::mutex> guard(reconfigure_mtx_);
 
@@ -174,6 +184,59 @@ namespace velodyne_pointcloud
 
     diag_topic_->tick(scanMsg->header.stamp);
     diagnostics_.update();
+  }
+
+
+  void
+    Transform::processEthernetMsgs(const ethernet_msgs::PacketConstPtr &ethernet_msg)
+  {
+     if (output_.getNumSubscribers() == 0)      // no one listening?
+       return;                                  // avoid much work
+
+    // global vector to buffer several ethernet_msg:
+    static std::shared_ptr<std::vector<ethernet_msgs::PacketConstPtr>> vec_ethernet_msgs = std::make_shared<std::vector<ethernet_msgs::PacketConstPtr>>();
+
+    uint16_t current_angle = 0; // 0...36000
+    std::memcpy( &current_angle, &ethernet_msg->payload[ 2 ], 2 );
+
+    static bool is_new_revolution = true;
+    if(current_angle < 9000)
+    {
+        is_new_revolution = true;
+    }
+    if(is_new_revolution && current_angle > 18000)
+    {
+        is_new_revolution = false;
+
+        velodyne_msgs::VelodyneScanPtr scan(new velodyne_msgs::VelodyneScan);
+        scan->packets.reserve(vec_ethernet_msgs->size());
+
+        for(ethernet_msgs::PacketConstPtr& msg: *vec_ethernet_msgs)
+        {
+            velodyne_msgs::VelodynePacket tmp_packet;
+            std::memcpy( &tmp_packet.data, &msg->payload[ 0 ], 1206 );
+            tmp_packet.stamp = ethernet_msg->header.stamp;
+            scan->packets.push_back(tmp_packet);
+        }
+
+        if(vec_ethernet_msgs->size() > 0)
+        {
+            scan->header = vec_ethernet_msgs->at(0)->header;
+            if(scan->header.frame_id == "")
+            {
+                scan->header.frame_id = config_.target_frame;
+            }
+        }
+
+        // publish the pointcloud2
+        processScan(scan);
+
+        // delete the buffer
+        vec_ethernet_msgs->clear();
+    }
+
+    // adding to global accumulator
+    vec_ethernet_msgs->push_back(ethernet_msg);
   }
 
 } // namespace velodyne_pointcloud
