@@ -101,12 +101,14 @@ namespace velodyne_driver
 
     // connect to Velodyne UDP port
     ROS_INFO_STREAM("Opening UDP socket: port " << port);
-    sockfd_ = socket(PF_INET, SOCK_DGRAM, 0);
+    sockfd_ = socket(AF_INET, SOCK_DGRAM, IPPROTO_UDP);
     if (sockfd_ == -1)
       {
         perror("socket");               // TODO: ROS_ERROR errno
         return;
       }
+    int optval = 1;
+    setsockopt(sockfd_, SOL_SOCKET, SO_REUSEADDR, &optval, sizeof(optval));
   
     sockaddr_in my_addr;                     // my address information
     memset(&my_addr, 0, sizeof(my_addr));    // initialize to zeros
