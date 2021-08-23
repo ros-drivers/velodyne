@@ -2,6 +2,9 @@
 Changelog for package velodyne_laserscan
 ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
 
+Forthcoming
+-----------
+
 2.1.0 (2020-07-10)
 ------------------
 * Fixing Foxy-specific uncrustify errors.
