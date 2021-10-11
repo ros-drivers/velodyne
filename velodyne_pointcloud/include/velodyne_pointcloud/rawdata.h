@@ -176,12 +176,14 @@ public:
    * through a communication overhead.
    *
    * @param calibration_file path to the calibration file
+   * @param model sensor model type
    * @param max_range_ cutoff for maximum range
    * @param min_range_ cutoff for minimum range
    * @returns 0 if successful;
    *           errno value for failure
    */
-  int setupOffline(std::string calibration_file, double max_range_, double min_range_);
+  int setupOffline(std::string calibration_file, std::string model, double max_range_, 
+                   double min_range_);
 
   void unpack(const velodyne_msgs::VelodynePacket& pkt, DataContainerBase& data,
               const ros::Time& scan_start_time);
