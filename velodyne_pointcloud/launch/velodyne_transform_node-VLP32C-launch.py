@@ -48,7 +48,7 @@ def generate_launch_description():
         params = yaml.safe_load(f)['velodyne_transform_node']['ros__parameters']
     params['calibration'] = os.path.join(share_dir, 'params', 'VeloView-VLP-32C.yaml')
     velodyne_transform_node = launch_ros.actions.Node(package='velodyne_pointcloud',
-                                                      node_executable='velodyne_transform_node',
+                                                      executable='velodyne_transform_node',
                                                       output='both',
                                                       parameters=[params])
 
