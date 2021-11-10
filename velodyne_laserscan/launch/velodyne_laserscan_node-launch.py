@@ -43,7 +43,7 @@ def generate_launch_description():
     share_dir = ament_index_python.packages.get_package_share_directory('velodyne_laserscan')
     params_file = os.path.join(share_dir, 'config', 'default-velodyne_laserscan_node-params.yaml')
     velodyne_laserscan_node = launch_ros.actions.Node(package='velodyne_laserscan',
-                                                      node_executable='velodyne_laserscan_node',
+                                                      executable='velodyne_laserscan_node',
                                                       output='both',
                                                       parameters=[params_file])
 

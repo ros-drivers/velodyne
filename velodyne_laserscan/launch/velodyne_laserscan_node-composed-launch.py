@@ -49,15 +49,15 @@ def generate_launch_description():
     with open(params_file, 'r') as f:
         params = yaml.safe_load(f)['velodyne_laserscan_node']['ros__parameters']
     container = ComposableNodeContainer(
-            node_name='velodyne_laserscan_container',
-            node_namespace='',
+            name='velodyne_laserscan_container',
+            namespace='',
             package='rclcpp_components',
-            node_executable='component_container',
+            executable='component_container',
             composable_node_descriptions=[
                 ComposableNode(
                     package='velodyne_laserscan',
-                    node_plugin='velodyne_laserscan::VelodyneLaserScan',
-                    node_name='velodyne_laserscan_node',
+                    plugin='velodyne_laserscan::VelodyneLaserScan',
+                    name='velodyne_laserscan_node',
                     parameters=[params]),
             ],
             output='both',

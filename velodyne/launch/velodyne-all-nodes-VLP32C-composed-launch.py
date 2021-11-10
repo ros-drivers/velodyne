@@ -58,25 +58,25 @@ def generate_launch_description():
         laserscan_params = yaml.safe_load(f)['velodyne_laserscan_node']['ros__parameters']
 
     container = ComposableNodeContainer(
-            node_name='velodyne_container',
-            node_namespace='',
+            name='velodyne_container',
+            namespace='',
             package='rclcpp_components',
-            node_executable='component_container',
+            executable='component_container',
             composable_node_descriptions=[
                 ComposableNode(
                     package='velodyne_driver',
-                    node_plugin='velodyne_driver::VelodyneDriver',
-                    node_name='velodyne_driver_node',
+                    plugin='velodyne_driver::VelodyneDriver',
+                    name='velodyne_driver_node',
                     parameters=[driver_params]),
                 ComposableNode(
                     package='velodyne_pointcloud',
-                    node_plugin='velodyne_pointcloud::Convert',
-                    node_name='velodyne_convert_node',
+                    plugin='velodyne_pointcloud::Convert',
+                    name='velodyne_convert_node',
                     parameters=[convert_params]),
                 ComposableNode(
                     package='velodyne_laserscan',
-                    node_plugin='velodyne_laserscan::VelodyneLaserScan',
-                    node_name='velodyne_laserscan_node',
+                    plugin='velodyne_laserscan::VelodyneLaserScan',
+                    name='velodyne_laserscan_node',
                     parameters=[laserscan_params]),
             ],
             output='both',
