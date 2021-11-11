@@ -116,6 +116,13 @@ namespace velodyne_driver
     my_addr.sin_port = htons(port);          // port in network byte order
     my_addr.sin_addr.s_addr = INADDR_ANY;    // automatically fill in my IP
   
+    // compatibility with Spot Core EAP, reuse port 2368
+    int val = 1;
+    if(setsockopt(sockfd_, SOL_SOCKET, SO_REUSEADDR, &val, sizeof(val)) == -1) {
+        perror("socketopt");
+        return;
+    }
+
     if (bind(sockfd_, (sockaddr *)&my_addr, sizeof(sockaddr)) == -1)
       {
         perror("bind");                 // TODO: ROS_ERROR errno
