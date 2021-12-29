@@ -594,8 +594,7 @@ void RawData::unpack_vls128(
         }
       }
 
-      if (current_block.header == VLS128_BANK_4)
-      {
+      if (current_block.header == VLS128_BANK_4) {
         // add a new line only after the last bank (VLS128_BANK_4)
         data.newLine();
       }
