@@ -461,13 +461,16 @@ void RawData::unpack_vls128(
   const velodyne_msgs::msg::VelodynePacket & pkt, DataContainerBase & data,
   const rclcpp::Time & scan_start_time)
 {
-  float azimuth_diff, azimuth_corrected_f;
+  float azimuth_diff{};
+  [[maybe_unused]] float azimuth_corrected_f{};
   float last_azimuth_diff = 0;
   uint16_t azimuth{};
   uint16_t azimuth_next{};
   uint16_t azimuth_corrected{};
-  float x_coord, y_coord, z_coord;
-  float distance;
+  [[maybe_unused]] float x_coord{};
+  [[maybe_unused]] float y_coord{};
+  [[maybe_unused]] float z_coord{};
+  float distance{};
   const raw_packet * raw = (const raw_packet *) &pkt.data[0];
   union two_bytes tmp;
 

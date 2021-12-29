@@ -134,7 +134,7 @@ void VelodyneLaserScan::recvCallback(const sensor_msgs::msg::PointCloud2::Shared
   // Load structure of PointCloud2
   int offset_x = -1;
   int offset_y = -1;
-  int offset_z = -1;
+  [[maybe_unused]] int offset_z = -1;
   int offset_i = -1;
   int offset_r = -1;
 
