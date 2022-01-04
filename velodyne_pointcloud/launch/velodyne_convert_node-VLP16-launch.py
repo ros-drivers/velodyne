@@ -48,7 +48,7 @@ def generate_launch_description():
         params = yaml.safe_load(f)['velodyne_convert_node']['ros__parameters']
     params['calibration'] = os.path.join(share_dir, 'params', 'VLP16db.yaml')
     velodyne_convert_node = launch_ros.actions.Node(package='velodyne_pointcloud',
-                                                    node_executable='velodyne_convert_node',
+                                                    executable='velodyne_convert_node',
                                                     output='both',
                                                     parameters=[params])
 
