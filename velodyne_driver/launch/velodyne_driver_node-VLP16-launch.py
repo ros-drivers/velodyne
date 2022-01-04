@@ -45,7 +45,7 @@ def generate_launch_description():
         'config')
     params = os.path.join(config_directory, 'VLP16-velodyne_driver_node-params.yaml')
     velodyne_driver_node = launch_ros.actions.Node(package='velodyne_driver',
-                                                   node_executable='velodyne_driver_node',
+                                                   executable='velodyne_driver_node',
                                                    output='both',
                                                    parameters=[params])
 
