@@ -158,15 +158,6 @@ public:
     config_.transform = fixed_frame != target_frame;
   }
 
-  sensor_msgs::msg::PointCloud2 cloud;
-
-  inline void vectorTfToEigen(tf2::Vector3 & tf_vec, Eigen::Vector3f & eigen_vec)
-  {
-    eigen_vec(0) = tf_vec[0];
-    eigen_vec(1) = tf_vec[1];
-    eigen_vec(2) = tf_vec[2];
-  }
-
   void computeTransformation(const rclcpp::Time & time)
   {
     geometry_msgs::msg::TransformStamped transform;
@@ -197,6 +188,16 @@ public:
     transformation = translation * rotation;
   }
 
+protected:
+  sensor_msgs::msg::PointCloud2 cloud;
+
+  inline void vectorTfToEigen(tf2::Vector3 & tf_vec, Eigen::Vector3f & eigen_vec)
+  {
+    eigen_vec(0) = tf_vec[0];
+    eigen_vec(1) = tf_vec[1];
+    eigen_vec(2) = tf_vec[2];
+  }
+
   inline void transformPoint(float & x, float & y, float & z)
   {
     Eigen::Vector3f p = transformation * Eigen::Vector3f(x, y, z);
@@ -210,7 +211,6 @@ public:
     return range >= config_.min_range && range <= config_.max_range;
   }
 
-protected:
   Config config_;
   tf2::BufferCore & tf_buffer_;
   Eigen::Affine3f transformation;
