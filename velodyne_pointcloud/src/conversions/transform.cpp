@@ -162,6 +162,7 @@ void Transform::processScan(
 
   // process each packet provided by the driver
   for (size_t i = 0; i < scanMsg->packets.size(); ++i) {
+    container_ptr_->computeTransformation(scanMsg->packets[i].stamp);
     data_->unpack(scanMsg->packets[i], *container_ptr_);
   }
 
