@@ -11,3 +11,4 @@ velodyne_driver_node:
         model: VLP16
         rpm: 600.0
         port: 2368
+        timestamp_first_packet: false
