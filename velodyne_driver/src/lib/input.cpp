@@ -129,7 +129,7 @@ InputSocket::InputSocket(
   // compatibility with Spot Core EAP, reuse port 2368
   int val = 1;
   if (setsockopt(sockfd_, SOL_SOCKET, SO_REUSEADDR, &val, sizeof(val)) == -1) {
-    perror("socketopt");
+    RCLCPP_ERROR(private_nh->get_logger(), "Error setting REUSEADDR: %s", ::strerror(errno));
     return;
   }
 
