@@ -156,6 +156,8 @@ void VelodyneLaserScan::recvCallback(const sensor_msgs::msg::PointCloud2::Shared
     }
   }
 
+  (void)offset_z;
+
   // Construct LaserScan message
   if ((offset_x >= 0) && (offset_y >= 0) && (offset_r >= 0)) {
     const float kResolution = std::abs(resolution_);
