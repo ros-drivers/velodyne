@@ -43,8 +43,8 @@
 #include <memory>
 #include <string>
 
-#include "velodyne_pointcloud/organized_cloudXYZIR.hpp"
-#include "velodyne_pointcloud/pointcloudXYZIR.hpp"
+#include "velodyne_pointcloud/organized_cloudXYZIRT.hpp"
+#include "velodyne_pointcloud/pointcloudXYZIRT.hpp"
 #include "velodyne_pointcloud/rawdata.hpp"
 
 namespace velodyne_pointcloud
@@ -110,11 +110,11 @@ Convert::Convert(const rclcpp::NodeOptions & options)
   data_ = std::make_unique<velodyne_rawdata::RawData>(calibration_file, model);
 
   if (organize_cloud) {
-    container_ptr_ = std::make_unique<OrganizedCloudXYZIR>(
+    container_ptr_ = std::make_unique<OrganizedCloudXYZIRT>(
       min_range, max_range, target_frame, fixed_frame,
       data_->numLasers(), data_->scansPerPacket(), tf_buffer_);
   } else {
-    container_ptr_ = std::make_unique<PointcloudXYZIR>(
+    container_ptr_ = std::make_unique<PointcloudXYZIRT>(
       min_range, max_range, target_frame, fixed_frame,
       data_->scansPerPacket(), tf_buffer_);
   }
