@@ -44,8 +44,8 @@
 #include <memory>
 #include <string>
 
-#include "velodyne_pointcloud/organized_cloudXYZIR.hpp"
-#include "velodyne_pointcloud/pointcloudXYZIR.hpp"
+#include "velodyne_pointcloud/organized_cloudXYZIRT.hpp"
+#include "velodyne_pointcloud/pointcloudXYZIRT.hpp"
 #include "velodyne_pointcloud/rawdata.hpp"
 
 namespace velodyne_pointcloud
@@ -57,6 +57,7 @@ Transform::Transform(const rclcpp::NodeOptions & options)
   diagnostics_(this)
 {
   std::string calibration_file = this->declare_parameter("calibration", "");
+  const auto model = this->declare_parameter("model", "64E");
 
   rcl_interfaces::msg::ParameterDescriptor min_range_desc;
   min_range_desc.name = "min_range";
@@ -104,14 +105,14 @@ Transform::Transform(const rclcpp::NodeOptions & options)
 
   RCLCPP_INFO(this->get_logger(), "correction angles: %s", calibration_file.c_str());
 
-  data_ = std::make_unique<velodyne_rawdata::RawData>(calibration_file);
+  data_ = std::make_unique<velodyne_rawdata::RawData>(calibration_file, model);
 
   if (organize_cloud) {
-    container_ptr_ = std::make_unique<OrganizedCloudXYZIR>(
+    container_ptr_ = std::make_unique<OrganizedCloudXYZIRT>(
       min_range, max_range, target_frame, fixed_frame, data_->numLasers(),
       data_->scansPerPacket(), tf_buffer_);
   } else {
-    container_ptr_ = std::make_unique<PointcloudXYZIR>(
+    container_ptr_ = std::make_unique<PointcloudXYZIRT>(
       min_range, max_range, target_frame, fixed_frame,
       data_->scansPerPacket(), tf_buffer_);
   }
@@ -163,7 +164,7 @@ void Transform::processScan(
   // process each packet provided by the driver
   for (size_t i = 0; i < scanMsg->packets.size(); ++i) {
     container_ptr_->computeTransformation(scanMsg->packets[i].stamp);
-    data_->unpack(scanMsg->packets[i], *container_ptr_);
+    data_->unpack(scanMsg->packets[i], *container_ptr_, scanMsg->header.stamp);
   }
 
   // publish the accumulated cloud message

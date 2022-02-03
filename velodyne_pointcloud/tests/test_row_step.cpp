@@ -51,7 +51,7 @@ public:
 
   void addPoint(
     float x, float y, float z, const uint16_t ring,
-    const float distance, const float intensity) override
+    const float distance, const float intensity, const float time) override
   {
     (void)x;
     (void)y;
@@ -59,6 +59,7 @@ public:
     (void)ring;
     (void)distance;
     (void)intensity;
+    (void)time;
   }
 
   void newLine() override

@@ -30,8 +30,8 @@
 // ANY WAY OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE
 // POSSIBILITY OF SUCH DAMAGE.
 
-#ifndef VELODYNE_POINTCLOUD__POINTCLOUDXYZIR_HPP_
-#define VELODYNE_POINTCLOUD__POINTCLOUDXYZIR_HPP_
+#ifndef VELODYNE_POINTCLOUD__ORGANIZED_CLOUDXYZIRT_HPP_
+#define VELODYNE_POINTCLOUD__ORGANIZED_CLOUDXYZIRT_HPP_
 
 #include <sensor_msgs/point_cloud2_iterator.hpp>
 #include <tf2/buffer_core.h>
@@ -44,27 +44,28 @@
 
 namespace velodyne_pointcloud
 {
-class PointcloudXYZIR final
+class OrganizedCloudXYZIRT final
   : public velodyne_rawdata::DataContainerBase
 {
 public:
-  explicit PointcloudXYZIR(
+  explicit OrganizedCloudXYZIRT(
     const double min_range, const double max_range, const std::string & target_frame,
-    const std::string & fixed_frame, const unsigned int scans_per_block,
-    tf2::BufferCore & tf_buffer);
+    const std::string & fixed_frame, const unsigned int num_lasers,
+    const unsigned int scans_per_block, tf2::BufferCore & buffer);
 
   void newLine() override;
 
   void setup(const velodyne_msgs::msg::VelodyneScan::SharedPtr scan_msg) override;
 
   void addPoint(
-    float x, float y, float z, uint16_t ring,
-    float distance, float intensity) override;
+    float x, float y, float z, const uint16_t ring,
+    const float distance, const float intensity, const float time) override;
 
 private:
   sensor_msgs::PointCloud2Iterator<float> iter_x_, iter_y_, iter_z_, iter_intensity_;
   sensor_msgs::PointCloud2Iterator<uint16_t> iter_ring_;
+  sensor_msgs::PointCloud2Iterator<float> iter_time_;
 };
 }  // namespace velodyne_pointcloud
 
-#endif  // VELODYNE_POINTCLOUD__POINTCLOUDXYZIR_HPP_
+#endif  // VELODYNE_POINTCLOUD__ORGANIZED_CLOUDXYZIRT_HPP_

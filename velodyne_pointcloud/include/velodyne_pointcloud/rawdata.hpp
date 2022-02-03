@@ -40,6 +40,7 @@
 
 #include <memory>
 #include <string>
+#include <vector>
 
 #include "velodyne_pointcloud/calibration.hpp"
 #include "velodyne_pointcloud/datacontainerbase.hpp"
@@ -120,9 +121,11 @@ struct raw_packet
 class RawData final
 {
 public:
-  explicit RawData(const std::string & calibration_file);
+  RawData(const std::string & calibration_file, const std::string & model);
 
-  void unpack(const velodyne_msgs::msg::VelodynePacket & pkt, DataContainerBase & data);
+  void unpack(
+    const velodyne_msgs::msg::VelodynePacket & pkt, DataContainerBase & data,
+    const rclcpp::Time & scan_start_time);
 
   void setParameters(double min_range, double max_range, double view_direction, double view_width);
 
@@ -134,6 +137,7 @@ private:
   /** configuration parameters */
   struct Config
   {
+    std::string model;
     double min_range;             ///< minimum range to publish
     double max_range;             ///< maximum range to publish
     int min_angle;                ///< minimum angle to publish
@@ -148,8 +152,21 @@ private:
   float sin_rot_table_[ROTATION_MAX_UNITS]{};
   float cos_rot_table_[ROTATION_MAX_UNITS]{};
 
+  // timing offset lookup table
+  std::vector<std::vector<float>> timing_offsets_;
+
+  /** \brief setup per-point timing offsets
+   *
+   *  Runs during initialization and determines the firing time for each point in the scan
+   *
+   *  NOTE: Does not support all sensors yet (vlp16, vlp32, and hdl32 are currently supported)
+   */
+  bool buildTimings();
+
   /** add private function to handle the VLP16 **/
-  void unpack_vlp16(const velodyne_msgs::msg::VelodynePacket & pkt, DataContainerBase & data);
+  void unpack_vlp16(
+    const velodyne_msgs::msg::VelodynePacket & pkt, DataContainerBase & data,
+    const rclcpp::Time & scan_start_time);
 };
 
 }  // namespace velodyne_rawdata
