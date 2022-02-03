@@ -11,6 +11,9 @@ ament_target_dependencies(velodyne_rawdata
   velodyne_msgs
 )
 
+target_link_libraries(velodyne_rawdata
+        ${YAML_CPP_LIBRARIES})
+
 add_library(velodyne_cloud_types SHARED
   pointcloudXYZIR.cpp
   organized_cloudXYZIR.cpp
