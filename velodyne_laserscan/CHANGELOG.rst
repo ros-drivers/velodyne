@@ -2,6 +2,12 @@
 Changelog for package velodyne_laserscan
 ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
 
+Forthcoming
+-----------
+* Replace deprecated argument names in launch (`#435 <https://github.com/ros-drivers/velodyne/issues/435>`_)
+  Co-authored-by: Keane Quigley <keaneq@protonmail.com>
+* Contributors: Chris Lalancette
+
 2.1.0 (2020-07-10)
 ------------------
 * Fixing Foxy-specific uncrustify errors.
