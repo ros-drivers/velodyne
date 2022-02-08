@@ -2,6 +2,11 @@
 Changelog for package velodyne_laserscan
 ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
 
+Forthcoming
+-----------
+* Updating for first Galactic release
+* Contributors: Joshua Whitley
+
 2.1.1 (2021-08-23)
 ------------------
 

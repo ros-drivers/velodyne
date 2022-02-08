@@ -1,6 +1,15 @@
 Change history
 ==============
 
+Forthcoming
+-----------
+* Updating for first Galactic release
+* Minor fixes to string formatting. (`#396 <https://github.com/ros-drivers/velodyne/issues/396>`_)
+  These changes will allow velodyne to compile without warnings
+  on Rolling (soon to be Galactic).  The changes are also backwards
+  compatible to Foxy if we want to backport them.
+* Contributors: Chris Lalancette, Joshua Whitley
+
 2.1.1 (2021-08-23)
 ------------------
 * Minor fixes to string formatting. (`#396 <https://github.com/ros-drivers/velodyne/issues/396>`_)
