@@ -1,8 +1,8 @@
 Change history
 ==============
 
-Forthcoming
------------
+2.2.0 (2022-02-07)
+------------------
 * Updating for first Galactic release
 * Minor fixes to string formatting. (`#396 <https://github.com/ros-drivers/velodyne/issues/396>`_)
   These changes will allow velodyne to compile without warnings

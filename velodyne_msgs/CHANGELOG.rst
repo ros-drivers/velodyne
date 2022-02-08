@@ -1,8 +1,8 @@
 Change history
 ==============
 
-Forthcoming
------------
+2.2.0 (2022-02-07)
+------------------
 * Updating for first Galactic release
 * Contributors: Joshua Whitley
 
