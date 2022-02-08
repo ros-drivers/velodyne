@@ -1,8 +1,8 @@
 Change history
 ==============
 
-Forthcoming
------------
+2.1.1 (2022-02-07)
+------------------
 * Replace deprecated argument names in launch (`#435 <https://github.com/ros-drivers/velodyne/issues/435>`_)
   Co-authored-by: Keane Quigley <keaneq@protonmail.com>
 * Contributors: Chris Lalancette
