@@ -6,7 +6,7 @@
   <description>
     ROS device driver for Velodyne 3D LIDARs.
   </description>
-  <maintainer email="jwhitley@autonomoustuff.com">Josh Whitley</maintainer>
+  <maintainer email="whitleysoftwareservices@gmail.com">Josh Whitley</maintainer>
   <maintainer email="brice.rebsamen@gmail.com">Brice Rebsamen</maintainer>
 
   <license>BSD</license>
