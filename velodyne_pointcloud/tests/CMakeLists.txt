@@ -12,7 +12,10 @@ ament_target_dependencies(test_row_step
 
 ament_add_gtest(test_calibration
   test_calibration.cpp
-  ../src/lib/calibration.cpp
+)
+
+target_link_libraries(test_calibration
+  velodyne_rawdata
 )
 
 ament_target_dependencies(test_calibration
