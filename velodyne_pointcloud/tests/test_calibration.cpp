@@ -145,10 +145,3 @@ TEST(Calibration, hdl64e_s21)
   EXPECT_EQ(laser.max_intensity, 255);
   EXPECT_EQ(laser.min_intensity, 0);
 }
-
-// Run all the tests that were declared with TEST()
-int main(int argc, char ** argv)
-{
-  testing::InitGoogleTest(&argc, argv);
-  return RUN_ALL_TESTS();
-}
