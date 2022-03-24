@@ -87,8 +87,8 @@ if (CATKIN_ENABLE_TESTING)
   roslaunch_add_file_check(launch)
 
   # unit test
-  catkin_add_gtest(time_test tests/timeconversiontest.cpp)
-  target_link_libraries(time_test
+  catkin_add_gtest(time-test tests/timeconversiontest.cpp)
+  target_link_libraries(time-test
     ${catkin_LIBRARIES}
     ${Boost_LIBRARIES})
 endif (CATKIN_ENABLE_TESTING)
