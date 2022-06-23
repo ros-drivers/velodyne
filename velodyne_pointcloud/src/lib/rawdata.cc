@@ -253,8 +253,12 @@ inline float SQR(float val) { return val*val; }
   }
 
   /** Set up for offline operation */
-  int RawData::setupOffline(std::string calibration_file, double max_range_, double min_range_)
+  int RawData::setupOffline(std::string calibration_file,  std::string model, 
+                            double max_range_, double min_range_)
   {
+
+    config_.model = model;
+    buildTimings();
 
     config_.max_range = max_range_;
     config_.min_range = min_range_;
