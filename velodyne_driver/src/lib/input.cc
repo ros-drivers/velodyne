@@ -189,7 +189,7 @@ namespace velodyne_driver
             if (retval == 0)            // poll() timeout?
               {
                 ROS_WARN("Velodyne poll() timeout");
-                return -1;
+                return 0;
               }
             if ((fds[0].revents & POLLERR)
                 || (fds[0].revents & POLLHUP)
@@ -243,7 +243,7 @@ namespace velodyne_driver
       pkt->stamp = rosTimeFromGpsTimestamp(&(pkt->data[1200]));
     }
 
-    return 0;
+    return 1;
   }
 
   ////////////////////////////////////////////////////////////////////////
@@ -339,7 +339,7 @@ namespace velodyne_driver
               pkt->stamp = rosTimeFromGpsTimestamp(&(pkt->data[1200]), header);
             }
             empty_ = false;
-            return 0;                   // success
+            return 1;                   // success
           }
 
         if (empty_)                 // no data in file?

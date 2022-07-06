@@ -219,9 +219,10 @@ bool VelodyneDriver::poll(void)
     {
       while(true)
       {
-        int rc = input_->getPacket(&tmp_packet, config_.time_offset);
-        if (rc == 0) break;       // got a full packet?
+        int rc = input_->getPacket(&tmp_packet, config_.time_offset);        
+        if (rc == 1) break;       // got a full packet?
         if (rc < 0) return false; // end of file reached?
+        if (rc == 0) continue;    //timeout?
       }
       scan->packets.push_back(tmp_packet);
 
@@ -255,8 +256,9 @@ bool VelodyneDriver::poll(void)
         {
           // keep reading until full packet received
           int rc = input_->getPacket(&scan->packets[i], config_.time_offset);
-          if (rc == 0) break;       // got a full packet?
+          if (rc == 1) break;       // got a full packet?
           if (rc < 0) return false; // end of file reached?
+          if (rc == 0) continue;    //timeout?
         }
     }
   }
