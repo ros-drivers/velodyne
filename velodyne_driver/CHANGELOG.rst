@@ -1,6 +1,26 @@
 Change history
 ==============
 
+Forthcoming
+-----------
+* Updating maintainer email address. (`#450 <https://github.com/ros-drivers/velodyne/issues/450>`_)
+  * Updating maintainer email address.
+  * chore: update maintainer email address
+  Co-authored-by: Joshua Whitley <jwhitley@autonomoustuff.com>
+* fix: use rclcpp logger instead of perror
+  Co-authored-by: Chris Lalancette <clalancette@gmail.com>
+* reuse Velodyne UDP port (`#427 <https://github.com/ros-drivers/velodyne/issues/427>`_)
+* Added config option to timestamp a full scan based on first velo packet instead of last packet (`#436 <https://github.com/ros-drivers/velodyne/issues/436>`_)
+  Co-authored-by: Shawn Hanna <shawn@kaarta.com>
+* Replace deprecated argument names in launch (`#430 <https://github.com/ros-drivers/velodyne/issues/430>`_)
+* 2.1.1
+* Updating for first Galactic release
+* Minor fixes to string formatting. (`#396 <https://github.com/ros-drivers/velodyne/issues/396>`_)
+  These changes will allow velodyne to compile without warnings
+  on Rolling (soon to be Galactic).  The changes are also backwards
+  compatible to Foxy if we want to backport them.
+* Contributors: Chris Lalancette, Daisuke Nishimatsu, Joshua Whitley, Keane Quigley, Nagy Dániel Zoltán
+
 2.1.1 (2021-08-23)
 ------------------
 * Minor fixes to string formatting. (`#396 <https://github.com/ros-drivers/velodyne/issues/396>`_)

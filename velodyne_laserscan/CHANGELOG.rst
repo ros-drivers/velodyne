@@ -2,6 +2,22 @@
 Changelog for package velodyne_laserscan
 ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
 
+Forthcoming
+-----------
+* Updating maintainer email address. (`#450 <https://github.com/ros-drivers/velodyne/issues/450>`_)
+  * Updating maintainer email address.
+  * chore: update maintainer email address
+  Co-authored-by: Joshua Whitley <jwhitley@autonomoustuff.com>
+* Fix small warnings from build and test.
+* Add laserscan support for new PointXYZIR structure (`#316 <https://github.com/ros-drivers/velodyne/issues/316>`_) (`#439 <https://github.com/ros-drivers/velodyne/issues/439>`_)
+  * Add laserscan support for new PointXYZIR structure
+  * Support PointCloud2 offsets that are multiples of 4
+  Co-authored-by: Kevin Hallenbeck <khallenbeck@dataspeedinc.com>
+* Replace deprecated argument names in launch (`#430 <https://github.com/ros-drivers/velodyne/issues/430>`_)
+* 2.1.1
+* Updating for first Galactic release
+* Contributors: Chris Lalancette, Daisuke Nishimatsu, Joshua Whitley, Keane Quigley
+
 2.1.1 (2021-08-23)
 ------------------
 

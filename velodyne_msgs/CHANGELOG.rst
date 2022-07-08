@@ -1,6 +1,16 @@
 Change history
 ==============
 
+Forthcoming
+-----------
+* Updating maintainer email address. (`#450 <https://github.com/ros-drivers/velodyne/issues/450>`_)
+  * Updating maintainer email address.
+  * chore: update maintainer email address
+  Co-authored-by: Joshua Whitley <jwhitley@autonomoustuff.com>
+* 2.1.1
+* Updating for first Galactic release
+* Contributors: Daisuke Nishimatsu, Joshua Whitley
+
 2.1.1 (2021-08-23)
 ------------------
 
