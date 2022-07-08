@@ -1,8 +1,8 @@
 Change history
 ==============
 
-Forthcoming
------------
+2.3.0 (2022-07-08)
+------------------
 * Passing fixed_frame and target_frame to Convert object. (`#330 <https://github.com/ros-drivers/velodyne/issues/330>`_) (`#451 <https://github.com/ros-drivers/velodyne/issues/451>`_)
   Co-authored-by: Joshua Whitley <jwhitley@autonomoustuff.com>
 * Updating maintainer email address. (`#450 <https://github.com/ros-drivers/velodyne/issues/450>`_)
