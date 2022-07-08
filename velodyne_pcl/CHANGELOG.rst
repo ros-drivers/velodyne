@@ -2,8 +2,8 @@
 Changelog for package velodyne_pcl
 ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
 
-Forthcoming
------------
+1.7.0 (2022-07-08)
+------------------
 * Use std::uint16_t to reduce build warnings from PCL (`#449 <https://github.com/ros-drivers/velodyne/issues/449>`_)
 * Contributors: icolwell-as
 

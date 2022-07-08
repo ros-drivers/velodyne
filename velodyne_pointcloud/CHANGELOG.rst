@@ -1,8 +1,8 @@
 Change history
 ==============
 
-Forthcoming
------------
+1.7.0 (2022-07-08)
+------------------
 * build timings in offline setup (`#428 <https://github.com/ros-drivers/velodyne/issues/428>`_)
   Currently when using the offline setup, it does not build the per-point timing offsets which means when unpacking the packets in the offline mode, you cannot timestamp each point with its packet time.
   This commit does the following:

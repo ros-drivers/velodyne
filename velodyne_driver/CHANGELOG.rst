@@ -1,8 +1,8 @@
 Change history
 ==============
 
-Forthcoming
------------
+1.7.0 (2022-07-08)
+------------------
 * Fix non-responsive node on packet timeout (`#466 <https://github.com/ros-drivers/velodyne/issues/466>`_)
   * No abort on packet timeout
   Changed getPacket() to return 0 on timeout and 1 on success.
