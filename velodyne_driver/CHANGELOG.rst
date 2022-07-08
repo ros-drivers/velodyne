@@ -1,6 +1,25 @@
 Change history
 ==============
 
+Forthcoming
+-----------
+* Fix non-responsive node on packet timeout (`#466 <https://github.com/ros-drivers/velodyne/issues/466>`_)
+  * No abort on packet timeout
+  Changed getPacket() to return 0 on timeout and 1 on success.
+  * Removed trailing whitespace
+* reuse Velodyne UDP port (`#427 <https://github.com/ros-drivers/velodyne/issues/427>`_)
+* add missing include to pcap.h that prevents tests from being built (`#406 <https://github.com/ros-drivers/velodyne/issues/406>`_)
+* PCAP timestamps & PCAP+GPS timestamps (`#384 <https://github.com/ros-drivers/velodyne/issues/384>`_)
+  * Add pcap_time param and implement gps_time with it
+  * If gps_time == true, ignore pcap_time
+* Add support for the velodyne Alpha Prime (`#370 <https://github.com/ros-drivers/velodyne/issues/370>`_)
+  * Add support for the velodyne Alpha Prime
+  * Change packet rate for the VLS128 according to the times specified in the manual
+  * Organize setup functions to avoid code duplication. Add a constant for the model ID of the VLS128.
+  * Use the defined constants to calculate the time offset of the points for the VLS128
+  Co-authored-by: jugo <juan.gonzalez@unibw.de>
+* Contributors: HMellor, Institute for Autonomous Systems Technology, JKaniarz, Nagy Dániel Zoltán, Sebastian Scherer
+
 1.6.1 (2020-11-09)
 ------------------
 

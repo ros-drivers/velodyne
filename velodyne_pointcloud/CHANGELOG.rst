@@ -1,6 +1,36 @@
 Change history
 ==============
 
+Forthcoming
+-----------
+* build timings in offline setup (`#428 <https://github.com/ros-drivers/velodyne/issues/428>`_)
+  Currently when using the offline setup, it does not build the per-point timing offsets which means when unpacking the packets in the offline mode, you cannot timestamp each point with its packet time.
+  This commit does the following:
+  - call buildTimings from setupOffline function
+  - add model to setupOffline interface
+  - set config model param which is needed by buildTimings
+* vls128: add line only once all four banks are processed (`#413 <https://github.com/ros-drivers/velodyne/issues/413>`_)
+* PCAP timestamps & PCAP+GPS timestamps (`#384 <https://github.com/ros-drivers/velodyne/issues/384>`_)
+  * Add pcap_time param and implement gps_time with it
+  * If gps_time == true, ignore pcap_time
+* Fixed row_step=0 when init_width=0 (dense cloud) (`#404 <https://github.com/ros-drivers/velodyne/issues/404>`_)
+  The PointCloud2 msg will be then valid: http://docs.ros.org/en/melodic/api/sensor_msgs/html/msg/PointCloud2.html
+  Referred issues:
+  * https://answers.ros.org/question/377470/rtabmap-icp_odometrycpp453callbackcloud-fatal-error/
+  * http://official-rtab-map-forum.67519.x6.nabble.com/Condition-scan3dMsg-data-size-scan3dMsg-row-step-scan3dMsg-height-not-met-td7852.html
+* Fix accidental integer division (`#391 <https://github.com/ros-drivers/velodyne/issues/391>`_)
+  Intensity values for VLP-16 were being calculated incorrectly.
+* Add VLS128 launch and calibration file (`#382 <https://github.com/ros-drivers/velodyne/issues/382>`_)
+* Fixing incorrect type in velodyne_pointcloud.
+* Fixing typo.
+* Add support for the velodyne Alpha Prime (`#370 <https://github.com/ros-drivers/velodyne/issues/370>`_)
+  * Add support for the velodyne Alpha Prime
+  * Change packet rate for the VLS128 according to the times specified in the manual
+  * Organize setup functions to avoid code duplication. Add a constant for the model ID of the VLS128.
+  * Use the defined constants to calculate the time offset of the points for the VLS128
+  Co-authored-by: jugo <juan.gonzalez@unibw.de>
+* Contributors: Daisuke Nishimatsu, HMellor, Institute for Autonomous Systems Technology, Joshua Whitley, Martin Valgur, Nick Charron, Sebastian Scherer, matlabbe
+
 1.6.1 (2020-11-09)
 ------------------
 * Add invalid points in organized cloud (`#360 <https://github.com/ros-drivers/velodyne/issues/360>`_)

@@ -2,6 +2,11 @@
 Changelog for package velodyne_pcl
 ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
 
+Forthcoming
+-----------
+* Use std::uint16_t to reduce build warnings from PCL (`#449 <https://github.com/ros-drivers/velodyne/issues/449>`_)
+* Contributors: icolwell-as
+
 1.6.1 (2020-11-09)
 ------------------
 * Fix typo in velodyne_pcl/point_types.h (`#357 <https://github.com/ros-drivers/velodyne/issues/357>`_)
