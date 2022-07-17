@@ -145,3 +145,33 @@ TEST(Calibration, hdl64e_s21)
   EXPECT_EQ(laser.max_intensity, 255);
   EXPECT_EQ(laser.min_intensity, 0);
 }
+
+TEST(Calibration, hdl64e_s2_float_intensities)
+{
+  Calibration calibration(get_package_path() + "/params/issue_84_float_intensities.yaml");
+  ASSERT_EQ(calibration.num_lasers, 64);
+
+  // check some values for the first laser:
+  LaserCorrection laser = calibration.laser_corrections[0];
+  EXPECT_FALSE(laser.two_pt_correction_available);
+  EXPECT_FLOAT_EQ(laser.vert_correction, -0.12118950050089745);
+  EXPECT_FLOAT_EQ(laser.horiz_offset_correction, 0.025999999);
+  EXPECT_EQ(laser.max_intensity, 255);
+  EXPECT_EQ(laser.min_intensity, 40);
+
+  // check similar values for laser 26:
+  laser = calibration.laser_corrections[26];
+  EXPECT_FALSE(laser.two_pt_correction_available);
+  EXPECT_FLOAT_EQ(laser.vert_correction, -0.014916840599137901);
+  EXPECT_FLOAT_EQ(laser.horiz_offset_correction, 0.025999999);
+  EXPECT_EQ(laser.max_intensity, 245);
+  EXPECT_EQ(laser.min_intensity, 0);
+
+  // check similar values for the last laser:
+  laser = calibration.laser_corrections[63];
+  EXPECT_FALSE(laser.two_pt_correction_available);
+  EXPECT_FLOAT_EQ(laser.vert_correction, -0.20683046990039078);
+  EXPECT_FLOAT_EQ(laser.horiz_offset_correction, -0.025999999);
+  EXPECT_EQ(laser.max_intensity, 255);
+  EXPECT_EQ(laser.min_intensity, 0);
+}
