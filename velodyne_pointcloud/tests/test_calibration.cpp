@@ -32,12 +32,19 @@
 
 #include <gtest/gtest.h>
 
-#include <ros/package.h>
+#include <ament_index_cpp/get_package_share_directory.hpp>
+
 #include <velodyne_pointcloud/calibration.hpp>
 
 #include <string>
 
 using namespace velodyne_pointcloud;  // NOLINT
+
+std::string get_package_path()
+{
+  std::string g_package_name("velodyne_pointcloud");
+  return ament_index_cpp::get_package_share_directory(g_package_name);
+}
 
 ///////////////////////////////////////////////////////////////
 // Test cases
@@ -45,16 +52,15 @@ using namespace velodyne_pointcloud;  // NOLINT
 
 TEST(Calibration, missing_file)
 {
-  Calibration calibration(false);
-  calibration.read("./no_such_file.yaml");
-  EXPECT_FALSE(calibration.initialized);
+  EXPECT_THROW(
+    {Calibration calibration("/no_such_file.yaml");},
+    std::runtime_error
+  );
 }
 
 TEST(Calibration, vlp16)
 {
-  std::string g_package_path = ros::package::getPath("velodyne_pointcloud");
-  Calibration calibration(g_package_path + "/params/VLP16db.yaml", false);
-  EXPECT_TRUE(calibration.initialized);
+  Calibration calibration(get_package_path() + "/params/VLP16db.yaml");
   ASSERT_EQ(calibration.num_lasers, 16);
 
   // check some values for the first laser:
@@ -76,9 +82,7 @@ TEST(Calibration, vlp16)
 
 TEST(Calibration, hdl32e)
 {
-  std::string g_package_path = ros::package::getPath("velodyne_pointcloud");
-  Calibration calibration(g_package_path + "/params/32db.yaml", false);
-  EXPECT_TRUE(calibration.initialized);
+  Calibration calibration(get_package_path() + "/params/32db.yaml");
   ASSERT_EQ(calibration.num_lasers, 32);
 
   // check some values for the first laser:
@@ -100,9 +104,7 @@ TEST(Calibration, hdl32e)
 
 TEST(Calibration, hdl64e)
 {
-  std::string g_package_path = ros::package::getPath("velodyne_pointcloud");
-  Calibration calibration(g_package_path + "/params/64e_utexas.yaml", false);
-  EXPECT_TRUE(calibration.initialized);
+  Calibration calibration(get_package_path() + "/params/64e_utexas.yaml");
   ASSERT_EQ(calibration.num_lasers, 64);
 
   // check some values for the first laser:
@@ -124,10 +126,7 @@ TEST(Calibration, hdl64e)
 
 TEST(Calibration, hdl64e_s21)
 {
-  std::string g_package_path = ros::package::getPath("velodyne_pointcloud");
-  Calibration calibration(
-    g_package_path + "/params/64e_s2.1-sztaki.yaml", false);
-  EXPECT_TRUE(calibration.initialized);
+  Calibration calibration(get_package_path() + "/params/64e_s2.1-sztaki.yaml");
   ASSERT_EQ(calibration.num_lasers, 64);
 
   // check some values for the first laser:
@@ -149,10 +148,7 @@ TEST(Calibration, hdl64e_s21)
 
 TEST(Calibration, hdl64e_s2_float_intensities)
 {
-  std::string g_package_path = ros::package::getPath("velodyne_pointcloud");
-  Calibration calibration(
-    g_package_path + "/tests/issue_84_float_intensities.yaml", false);
-  EXPECT_TRUE(calibration.initialized);
+  Calibration calibration(get_package_path() + "/params/issue_84_float_intensities.yaml");
   ASSERT_EQ(calibration.num_lasers, 64);
 
   // check some values for the first laser:
@@ -178,12 +174,4 @@ TEST(Calibration, hdl64e_s2_float_intensities)
   EXPECT_FLOAT_EQ(laser.horiz_offset_correction, -0.025999999);
   EXPECT_EQ(laser.max_intensity, 255);
   EXPECT_EQ(laser.min_intensity, 0);
-}
-
-// Run all the tests that were declared with TEST()
-int main(int argc, char ** argv)
-{
-  testing::InitGoogleTest(&argc, argv);
-  init_global_data();
-  return RUN_ALL_TESTS();
 }
