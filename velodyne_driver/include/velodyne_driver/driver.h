@@ -77,6 +77,7 @@ private:
     double time_offset;              // time in seconds added to each velodyne time stamp
     bool enabled;                    // polling is enabled
     bool timestamp_first_packet;
+    double frequency_tolerance;      // frequency tolerance (in Hz) for topic diagnostics
   }
   config_;
 
