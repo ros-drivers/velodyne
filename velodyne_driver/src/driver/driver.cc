@@ -133,7 +133,7 @@ VelodyneDriver::VelodyneDriver(ros::NodeHandle node,
   }
   else if (cut_angle < (2*M_PI))
   {
-      ROS_INFO_STREAM("Cut at specific angle feature activated. " 
+      ROS_INFO_STREAM("Cut at specific angle feature activated. "
         "Cutting velodyne points always at " << cut_angle << " rad.");
   }
   else
@@ -143,7 +143,7 @@ VelodyneDriver::VelodyneDriver(ros::NodeHandle node,
     cut_angle = -0.01;
   }
 
-  // Convert cut_angle from radian to one-hundredth degree, 
+  // Convert cut_angle from radian to one-hundredth degree,
   // which is used in velodyne packets
   config_.cut_angle = int((cut_angle*360/(2*M_PI))*100);
 
@@ -169,7 +169,7 @@ VelodyneDriver::VelodyneDriver(ros::NodeHandle node,
   diag_topic_.reset(new TopicDiagnostic("velodyne_packets", diagnostics_,
                                         FrequencyStatusParam(&diag_min_freq_,
                                                              &diag_max_freq_,
-                                                             0.1, 10),
+                                                             config_.frequency_tolerance, 10),
                                         TimeStampStatusParam()));
   diag_timer_ = private_nh.createTimer(ros::Duration(0.2), &VelodyneDriver::diagTimerCallback,this);
 
@@ -289,6 +289,7 @@ void VelodyneDriver::callback(velodyne_driver::VelodyneNodeConfig &config,
   if (level & 1)
   {
     config_.time_offset = config.time_offset;
+    config_.frequency_tolerance = config.frequency_tolerance;
   }
   if (level & 2)
   {
