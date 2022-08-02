@@ -165,11 +165,13 @@ VelodyneDriver::VelodyneDriver(ros::NodeHandle node,
   diag_min_freq_ = diag_freq;
   ROS_INFO("expected frequency: %.3f (Hz)", diag_freq);
 
+  double frequency_tolerance;
+  private_nh.param("frequency_tolerance", frequency_tolerance, 0.1);
   using namespace diagnostic_updater;
   diag_topic_.reset(new TopicDiagnostic("velodyne_packets", diagnostics_,
                                         FrequencyStatusParam(&diag_min_freq_,
                                                              &diag_max_freq_,
-                                                             config_.frequency_tolerance, 10),
+                                                             frequency_tolerance, 10),
                                         TimeStampStatusParam()));
   diag_timer_ = private_nh.createTimer(ros::Duration(0.2), &VelodyneDriver::diagTimerCallback,this);
 
