@@ -291,7 +291,6 @@ void VelodyneDriver::callback(velodyne_driver::VelodyneNodeConfig &config,
   if (level & 1)
   {
     config_.time_offset = config.time_offset;
-    config_.frequency_tolerance = config.frequency_tolerance;
   }
   if (level & 2)
   {
