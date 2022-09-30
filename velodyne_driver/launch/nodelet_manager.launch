@@ -17,6 +17,7 @@
   <arg name="pcap_time" default="false" />
   <arg name="cut_angle" default="-0.01" />
   <arg name="timestamp_first_packet" default="false" />
+  <arg name="diagnostic_frequency_tolerance" default="0.1" />
 
   <!-- start nodelet manager -->
   <node pkg="nodelet" type="nodelet" name="$(arg manager)" args="manager" output="screen"/>
@@ -37,6 +38,7 @@
     <param name="pcap_time" value="$(arg pcap_time)"/>
     <param name="cut_angle" value="$(arg cut_angle)"/>
     <param name="timestamp_first_packet" value="$(arg timestamp_first_packet)"/>
-  </node>    
+    <param name="diagnostic_frequency_tolerance" value="$(arg diagnostic_frequency_tolerance)"/>
+  </node>
 
 </launch>
