@@ -161,7 +161,7 @@ void VelodyneLaserScan::recvCallback(const sensor_msgs::msg::PointCloud2::Shared
   // Construct LaserScan message
   if ((offset_x >= 0) && (offset_y >= 0) && (offset_r >= 0)) {
     const float kResolution = std::abs(resolution_);
-    const size_t kSize = 2.0 * M_PI / kResolution;
+    const size_t kSize = std::round(2.0 * M_PI / kResolution);
     auto scan = std::make_unique<sensor_msgs::msg::LaserScan>();
     scan->header = msg->header;
     scan->angle_increment = kResolution;
