@@ -74,15 +74,18 @@ private:
     int    npackets;                 // number of packets to collect
     double rpm;                      // device rotation rate (RPMs)
     int cut_angle;                   // cutting angle in 1/100°
+    int phase_lock_angle;            // configured phase lock angle
     double time_offset;              // time in seconds added to each velodyne time stamp
     bool enabled;                    // polling is enabled
     bool timestamp_first_packet;
+    bool timestamp_phase_lock;
   }
   config_;
 
   boost::shared_ptr<Input> input_;
   ros::Publisher output_;
   int last_azimuth_;
+  int phase_lock_angle_;
 
   /* diagnostics updater */
   ros::Timer diag_timer_;

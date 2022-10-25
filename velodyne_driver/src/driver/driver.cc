@@ -122,6 +122,12 @@ VelodyneDriver::VelodyneDriver(ros::NodeHandle node,
   if (config_.timestamp_first_packet)
     ROS_INFO("Setting velodyne scan start time to timestamp of first packet");
 
+ // if we are timestamping based on the phase lock angle configured packet in the scan
+  private_nh.param("timestamp_phase_lock", config_.timestamp_phase_lock, false);
+  if (config_.timestamp_phase_lock)
+    ROS_INFO("Setting velodyne scan timestamp to timestamp of angle of phase lock");
+
+
   std::string dump_file;
   private_nh.param("pcap", dump_file, std::string(""));
 
@@ -146,6 +152,28 @@ VelodyneDriver::VelodyneDriver(ros::NodeHandle node,
   // Convert cut_angle from radian to one-hundredth degree,
   // which is used in velodyne packets
   config_.cut_angle = int((cut_angle*360/(2*M_PI))*100);
+
+  double phase_lock_angle;
+  private_nh.param("phase_lock_angle", phase_lock_angle, -0.01);
+  if (phase_lock_angle < 0.0)
+  {
+    ROS_INFO_STREAM("No Phase Lock Angle provided.");
+  }
+  else if (phase_lock_angle < (2*M_PI))
+  {
+    ROS_INFO_STREAM("Phase Lock Angle configured. "
+                    "Set to " << cut_angle << " rad.");
+  }
+  else
+  {
+    ROS_ERROR_STREAM("phase_lock_angle is out of range. Allowed range is "
+                       << "between 0.0 and 2*PI or negative values to deactivate this feature.");
+    phase_lock_angle = -0.01;
+  }
+
+  // Convert phase_lock_angle from radian to one-hundredth degree,
+  // which is used in velodyne packets
+  config_.phase_lock_angle = int((phase_lock_angle*360/(2*M_PI))*100);
 
   int udp_port;
   private_nh.param("port", udp_port, (int) DATA_PORT_NUMBER);
@@ -213,6 +241,8 @@ bool VelodyneDriver::poll(void)
   // Allocate a new shared pointer for zero-copy sharing with other nodelets.
   velodyne_msgs::VelodyneScanPtr scan(new velodyne_msgs::VelodyneScan);
 
+  ros::Time phase_lock_time;
+
   if( config_.cut_angle >= 0) //Cut at specific angle feature enabled
   {
     scan->packets.reserve(config_.npackets);
@@ -237,6 +267,14 @@ bool VelodyneDriver::poll(void)
       	 last_azimuth_ = azimuth;
       	 continue;
       }
+
+      if((last_azimuth_ < config_.phase_lock_angle && config_.phase_lock_angle <= azimuth)
+         || ( config_.phase_lock_angle <= azimuth && azimuth < last_azimuth_)
+         || (azimuth < last_azimuth_ && last_azimuth_ < config_.phase_lock_angle))
+      {
+        phase_lock_time = tmp_packet.stamp;
+      }
+
       if((last_azimuth_ < config_.cut_angle && config_.cut_angle <= azimuth)
       	 || ( config_.cut_angle <= azimuth && azimuth < last_azimuth_)
       	 || (azimuth < last_azimuth_ && last_azimuth_ < config_.cut_angle))
@@ -269,6 +307,9 @@ bool VelodyneDriver::poll(void)
   ROS_DEBUG("Publishing a full Velodyne scan.");
   if (config_.timestamp_first_packet){
     scan->header.stamp = scan->packets.front().stamp;
+  }
+  else if(config_.timestamp_phase_lock && config_.phase_lock_angle >= 0.0){
+    scan->header.stamp = phase_lock_time;
   }
   else{
     scan->header.stamp = scan->packets.back().stamp;
