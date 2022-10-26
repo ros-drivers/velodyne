@@ -19,8 +19,7 @@
   <arg name="gps_time" default="false" />
   <arg name="pcap_time" default="false" />
   <arg name="cut_angle" default="-0.01" />
-  <arg name="phase_lock_angle" default="-0.01" />
-  <arg name="timestamp_phase_lock" default="false" />
+  <arg name="timestamp_angle" default="-0.01" />
   <arg name="timestamp_first_packet" default="false" />
   <arg name="laserscan_ring" default="-1" />
   <arg name="laserscan_resolution" default="0.007" />
@@ -41,8 +40,7 @@
     <arg name="gps_time" value="$(arg gps_time)"/>
     <arg name="pcap_time" value="$(arg pcap_time)"/>
     <arg name="cut_angle" value="$(arg cut_angle)"/>
-    <arg name="phase_lock_angle" value="$(arg phase_lock_angle)"/>
-    <arg name="timestamp_phase_lock" value="$(arg timestamp_phase_lock)"/>
+    <arg name="timestamp_angle" value="$(arg timestamp_angle)"/>
     <arg name="timestamp_first_packet" value="$(arg timestamp_first_packet)"/>
   </include>
 
