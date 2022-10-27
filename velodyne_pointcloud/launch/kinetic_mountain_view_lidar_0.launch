@@ -9,7 +9,7 @@
       <arg name="calibration" value="$(arg velodyne_calib)"/>
       <arg name="device_ip" value="192.168.125.201"/>
       <arg name="frame_id" value="lidar_0"/>
-      <arg name="port" value="2369"/>
+      <arg name="port" value="2368"/>
     </include>
 </group>
 
