@@ -76,7 +76,7 @@ Convert::Convert(const rclcpp::NodeOptions & options)
   max_range_desc.description = "maximum range to publish";
   rcl_interfaces::msg::FloatingPointRange max_range_range;
   max_range_range.from_value = 0.1;
-  max_range_range.to_value = 200.0;
+  max_range_range.to_value = 300.0;
   max_range_desc.floating_point_range.push_back(max_range_range);
   double max_range = this->declare_parameter("max_range", 130.0, max_range_desc);
 
