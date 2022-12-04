@@ -45,10 +45,10 @@ namespace velodyne_pointcloud
 PointcloudXYZIRT::PointcloudXYZIRT(
   const double min_range, const double max_range,
   const std::string & target_frame, const std::string & fixed_frame,
-  const unsigned int scans_per_block, tf2::BufferCore & tf_buffer)
+  const unsigned int scans_per_block, rclcpp::Clock::SharedPtr clock)
 : DataContainerBase(
     min_range, max_range, target_frame, fixed_frame,
-    0, 1, true, scans_per_block, tf_buffer, 6,
+    0, 1, true, scans_per_block, clock, 6,
     "x", 1, sensor_msgs::msg::PointField::FLOAT32,
     "y", 1, sensor_msgs::msg::PointField::FLOAT32,
     "z", 1, sensor_msgs::msg::PointField::FLOAT32,
@@ -59,7 +59,7 @@ PointcloudXYZIRT::PointcloudXYZIRT(
   iter_intensity_(cloud, "intensity"), iter_ring_(cloud, "ring"), iter_time_(cloud, "time")
 {}
 
-void PointcloudXYZIRT::setup(const velodyne_msgs::msg::VelodyneScan::SharedPtr scan_msg)
+void PointcloudXYZIRT::setup(const velodyne_msgs::msg::VelodyneScan::ConstSharedPtr scan_msg)
 {
   DataContainerBase::setup(scan_msg);
   iter_x_ = sensor_msgs::PointCloud2Iterator<float>(cloud, "x");
@@ -84,9 +84,7 @@ void PointcloudXYZIRT::addPoint(
 
   // convert polar coordinates to Euclidean XYZ
 
-  if (config_.transform) {
-    transformPoint(x, y, z);
-  }
+  transformPoint(x, y, z);
 
   *iter_x_ = x;
   *iter_y_ = y;

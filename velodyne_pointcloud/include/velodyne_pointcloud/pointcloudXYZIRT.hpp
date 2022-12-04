@@ -48,14 +48,14 @@ class PointcloudXYZIRT final
   : public velodyne_rawdata::DataContainerBase
 {
 public:
-  explicit PointcloudXYZIRT(
+  PointcloudXYZIRT(
     const double min_range, const double max_range, const std::string & target_frame,
     const std::string & fixed_frame, const unsigned int scans_per_block,
-    tf2::BufferCore & tf_buffer);
+    rclcpp::Clock::SharedPtr clock);
 
   void newLine() override;
 
-  void setup(const velodyne_msgs::msg::VelodyneScan::SharedPtr scan_msg) override;
+  void setup(const velodyne_msgs::msg::VelodyneScan::ConstSharedPtr scan_msg) override;
 
   void addPoint(
     float x, float y, float z, uint16_t ring,

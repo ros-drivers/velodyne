@@ -45,38 +45,6 @@ include_directories(include ${PCL_COMMON_INCLUDE_DIRS})
 
 add_subdirectory(src/lib)
 
-add_library(convert SHARED
-  src/conversions/convert.cpp)
-ament_target_dependencies(convert
-  diagnostic_updater
-  Eigen3
-  rclcpp
-  rclcpp_components
-  tf2
-  velodyne_msgs
-)
-target_link_libraries(convert
-  velodyne_cloud_types
-  velodyne_rawdata
-  ${YAML_CPP_LIBRARIES})
-install(TARGETS convert
-  ARCHIVE DESTINATION lib
-  LIBRARY DESTINATION lib
-  RUNTIME DESTINATION bin
-)
-rclcpp_components_register_nodes(convert
-  "velodyne_pointcloud::Convert")
-
-add_executable(velodyne_convert_node
-  src/conversions/convert_node.cpp)
-ament_target_dependencies(velodyne_convert_node
-  rclcpp
-)
-target_link_libraries(velodyne_convert_node convert)
-install(TARGETS velodyne_convert_node
-  DESTINATION lib/${PROJECT_NAME}
-)
-
 add_library(transform SHARED
   src/conversions/transform.cpp)
 ament_target_dependencies(transform

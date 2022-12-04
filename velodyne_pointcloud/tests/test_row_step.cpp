@@ -42,10 +42,10 @@ class TestContainer final
   : public velodyne_rawdata::DataContainerBase
 {
 public:
-  TestContainer(unsigned int width, tf2::BufferCore & buffer)
+  TestContainer(unsigned int width, rclcpp::Clock::SharedPtr clock)
   : velodyne_rawdata::DataContainerBase(
       0, 0, "target", "fixed", width, 0, false, 0,
-      buffer, 1, "x", 1, sensor_msgs::msg::PointField::FLOAT32)
+      clock, 1, "x", 1, sensor_msgs::msg::PointField::FLOAT32)
   {
   }
 
@@ -84,8 +84,8 @@ public:
 
 TEST(datacontainerbase, row_step_zero_width_constructor)
 {
-  tf2::BufferCore core;
-  TestContainer cont(0, core);
+  auto clock = std::make_shared<rclcpp::Clock>();
+  TestContainer cont(0, clock);
   ASSERT_EQ(cont.getCloudWidth(), 0U);
   ASSERT_EQ(cont.getCloudPointStep(), 4U);
   ASSERT_EQ(cont.getCloudRowStep(), 0U);
@@ -93,8 +93,8 @@ TEST(datacontainerbase, row_step_zero_width_constructor)
 
 TEST(datacontainerbase, row_step_one_width_constructor)
 {
-  tf2::BufferCore core;
-  TestContainer cont(1, core);
+  auto clock = std::make_shared<rclcpp::Clock>();
+  TestContainer cont(1, clock);
   ASSERT_EQ(cont.getCloudWidth(), 1U);
   ASSERT_EQ(cont.getCloudPointStep(), 4U);
   ASSERT_EQ(cont.getCloudRowStep(), 4U);
@@ -102,8 +102,8 @@ TEST(datacontainerbase, row_step_one_width_constructor)
 
 TEST(datacontainerbase, row_step_one_width_after_setup)
 {
-  tf2::BufferCore core;
-  TestContainer cont(1, core);
+  auto clock = std::make_shared<rclcpp::Clock>();
+  TestContainer cont(1, clock);
   auto msg = std::make_shared<velodyne_msgs::msg::VelodyneScan>();
   cont.setup(msg);
   ASSERT_EQ(cont.getCloudWidth(), 1U);

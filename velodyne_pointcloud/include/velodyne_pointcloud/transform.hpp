@@ -63,13 +63,11 @@ public:
   Transform & operator=(const Transform & c) = delete;
 
 private:
-  void processScan(const std::shared_ptr<const velodyne_msgs::msg::VelodyneScan> & scanMsg);
+  void processScan(const velodyne_msgs::msg::VelodyneScan::ConstSharedPtr scanMsg);
 
   std::unique_ptr<velodyne_rawdata::RawData> data_;
   rclcpp::Publisher<sensor_msgs::msg::PointCloud2>::SharedPtr output_;
-  message_filters::Subscriber<velodyne_msgs::msg::VelodyneScan> velodyne_scan_;
-  tf2_ros::Buffer tf_buffer_;
-  std::unique_ptr<tf2_ros::MessageFilter<velodyne_msgs::msg::VelodyneScan>> tf_filter_;
+  rclcpp::Subscription<velodyne_msgs::msg::VelodyneScan>::SharedPtr velodyne_scan_;
 
   std::unique_ptr<velodyne_rawdata::DataContainerBase> container_ptr_;
 
