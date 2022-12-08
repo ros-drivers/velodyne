@@ -141,6 +141,8 @@ public:
   const sensor_msgs::msg::PointCloud2 & finishCloud()
   {
     cloud.data.resize(cloud.point_step * cloud.width * cloud.height);
+    cloud.row_step = cloud.point_step * cloud.width;
+
     // If config_.target_frame is empty (the default), we use the frame_id that
     // came in during the initial VelodyneScan (set by setup()).  If it is
     // set to something, then we override that value.
