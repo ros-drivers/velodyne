@@ -78,7 +78,7 @@ VelodyneDriver::VelodyneDriver(const rclcpp::NodeOptions & options)
   config_.model = this->declare_parameter("model", std::string("64E"));
   config_.rpm = this->declare_parameter("rpm", 600.0);
   std::string dump_file = this->declare_parameter("pcap", std::string(""));
-  double cut_angle = this->declare_parameter("cut_angle", 2.0 * M_PI);
+  double cut_angle = this->declare_parameter("cut_angle", -1.0);
   int udp_port = this->declare_parameter("port", static_cast<int>(DATA_PORT_NUMBER));
   config_.timestamp_first_packet = this->declare_parameter("timestamp_first_packet", false);
 
