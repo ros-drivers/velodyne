@@ -110,7 +110,7 @@ TEST(Calibration, hdl64e)
 
   // check some values for the first laser:
   LaserCorrection laser = calibration.laser_corrections[0];
-  EXPECT_FALSE(laser.two_pt_correction_available);
+  EXPECT_TRUE(laser.two_pt_correction_available);
   EXPECT_FLOAT_EQ(laser.vert_correction, -0.124932751059532);
   EXPECT_FLOAT_EQ(laser.horiz_offset_correction, 0.0);
   EXPECT_EQ(laser.max_intensity, 255);
@@ -118,7 +118,7 @@ TEST(Calibration, hdl64e)
 
   // check similar values for the last laser:
   laser = calibration.laser_corrections[63];
-  EXPECT_FALSE(laser.two_pt_correction_available);
+  EXPECT_TRUE(laser.two_pt_correction_available);
   EXPECT_FLOAT_EQ(laser.vert_correction, -0.209881335496902);
   EXPECT_FLOAT_EQ(laser.horiz_offset_correction, 0.0);
   EXPECT_EQ(laser.max_intensity, 255);
@@ -134,7 +134,7 @@ TEST(Calibration, hdl64e_s21)
 
   // check some values for the first laser:
   LaserCorrection laser = calibration.laser_corrections[0];
-  EXPECT_FALSE(laser.two_pt_correction_available);
+  EXPECT_TRUE(laser.two_pt_correction_available);
   EXPECT_FLOAT_EQ(laser.vert_correction, -0.15304134919741974);
   EXPECT_FLOAT_EQ(laser.horiz_offset_correction, 0.025999999);
   EXPECT_EQ(laser.max_intensity, 235);
@@ -142,7 +142,7 @@ TEST(Calibration, hdl64e_s21)
 
   // check similar values for the last laser:
   laser = calibration.laser_corrections[63];
-  EXPECT_FALSE(laser.two_pt_correction_available);
+  EXPECT_TRUE(laser.two_pt_correction_available);
   EXPECT_FLOAT_EQ(laser.vert_correction, -0.2106649408137298);
   EXPECT_FLOAT_EQ(laser.horiz_offset_correction, -0.025999999);
   EXPECT_EQ(laser.max_intensity, 255);

@@ -199,6 +199,14 @@ elif calibration['num_lasers'] != num_enabled:
 # TODO: make sure all required fields are present.
 # (Which ones are required?)
 
+
+# fix #473 : take into acount HDL-64 correction_{x,y}, related to:
+#            commit/f30d68735c47312aa73d29203ddb16abc01357f4
+for laser in calibration['lasers']:
+    if laser.get('dist_correction_x', 0) and laser.get('dist_correction_y', 0):
+        laser['two_pt_correction_available'] = True
+
+
 if calibrationGood:
 
     # write calibration data to YAML file
