@@ -246,6 +246,13 @@ void RawData::setupSinCosCache()
     cos_rot_table_[rot_index] = ::cosf(rotation);
     sin_rot_table_[rot_index] = ::sinf(rotation);
   }
+  
+  if (config_.model == "VLS128") {
+  	for (uint8_t i = 0; i < 16; i++) {
+  	vls_128_laser_azimuth_cache_[i] =
+        (VLS128_CHANNEL_TDURATION / VLS128_SEQ_TDURATION) * (i + i / 8);
+   }
+  }
 }
 
 void RawData::setupAzimuthCache()
@@ -325,18 +332,19 @@ void RawData::unpack(
         (block.rotation <= config_.max_angle ||
         block.rotation >= config_.min_angle)))
       {
+      	float time = 0;
         if (timing_offsets_.size()) {
           time = timing_offsets_[i][j] + time_diff_start_to_this_packet;
         }
-
-        if (tmp.uint == 0) {  // no valid laser beam return
+        
+        if (tmp.uint == 0) { // no valid laser beam return
           // call to addPoint is still required since output could be organized
           data.addPoint(
             nanf(""), nanf(""), nanf(""), corrections.laser_ring,
             nanf(""), nanf(""), time);
           continue;
         }
-
+        
         float distance = tmp.uint * calibration_->distance_resolution_m;
         distance += corrections.dist_correction;
 
@@ -468,7 +476,7 @@ void RawData::unpack_vls128(
   uint16_t azimuth_corrected{};
   float x_coord, y_coord, z_coord;
   float distance;
-  const raw_packet * raw = (const raw_packet *) &pkt.data[0];
+  const raw_packet * raw = reinterpret_cast<const raw_packet *> (&pkt.data[0]);
   union two_bytes tmp;
 
   float cos_vert_angle, sin_vert_angle, cos_rot_correction, sin_rot_correction;
@@ -560,9 +568,9 @@ void RawData::unpack_vls128(
             calibration_->laser_corrections[laser_number];
 
           // correct for the laser rotation as a function of timing during the firings
-          // azimuth_corrected_f = azimuth +
-          //   (azimuth_diff * vls_128_laser_azimuth_cache_[firing_order]);
-          // azimuth_corrected = ((uint16_t) round(azimuth_corrected_f)) % 36000;
+           azimuth_corrected_f = azimuth +
+             (azimuth_diff * vls_128_laser_azimuth_cache_[firing_order]);
+           azimuth_corrected = ((uint16_t) round(azimuth_corrected_f)) % 36000;
 
           // convert polar coordinates to Euclidean XYZ
           cos_vert_angle = corrections.cos_vert_correction;
