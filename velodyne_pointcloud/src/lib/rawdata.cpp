@@ -246,13 +246,6 @@ void RawData::setupSinCosCache()
     cos_rot_table_[rot_index] = ::cosf(rotation);
     sin_rot_table_[rot_index] = ::sinf(rotation);
   }
-  
-  if (config_.model == "VLS128") {
-  	for (uint8_t i = 0; i < 16; i++) {
-  	vls_128_laser_azimuth_cache_[i] =
-        (VLS128_CHANNEL_TDURATION / VLS128_SEQ_TDURATION) * (i + i / 8);
-   }
-  }
 }
 
 void RawData::setupAzimuthCache()
@@ -554,19 +547,18 @@ void RawData::unpack_vls128(
         tmp.bytes[1] = current_block.data[k + 1];
         distance = tmp.uint * VLS128_DISTANCE_RESOLUTION;
 
+        laser_number = j + bank_origin;   // Offset the laser in this block by which block it's in
+        firing_order = laser_number / 8;  // VLS-128 fires 8 lasers at a time
 
-        if (pointInRange(distance)) {
-          laser_number = j + bank_origin;   // Offset the laser in this block by which block it's in
-          firing_order = laser_number / 8;  // VLS-128 fires 8 lasers at a time
+        if (timing_offsets_.size()) {
+          time = timing_offsets_[block / 4][firing_order + laser_number / 64] +
+            time_diff_start_to_this_packet;
+        }
 
-          if (timing_offsets_.size()) {
-            time = timing_offsets_[block / 4][firing_order + laser_number / 64] +
-              time_diff_start_to_this_packet;
-          }
-
-          velodyne_pointcloud::LaserCorrection & corrections =
+        velodyne_pointcloud::LaserCorrection & corrections =
             calibration_->laser_corrections[laser_number];
 
+        if (pointInRange(distance)) {
           // correct for the laser rotation as a function of timing during the firings
            azimuth_corrected_f = azimuth +
              (azimuth_diff * vls_128_laser_azimuth_cache_[firing_order]);
@@ -599,6 +591,10 @@ void RawData::unpack_vls128(
             distance,
             current_block.data[k + 2],
             time);
+        } else {
+          // call to addPoint is still required since output could be organized
+          data.addPoint(
+            nanf(""), nanf(""), nanf(""), corrections.laser_ring, nanf(""), nanf(""), time);
         }
       }
 
