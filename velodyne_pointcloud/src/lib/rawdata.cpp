@@ -35,6 +35,7 @@
 #include <cmath>
 #include <memory>
 #include <string>
+#include <cassert>
 
 #include <velodyne_msgs/msg/velodyne_packet.hpp>
 
@@ -462,29 +463,12 @@ void RawData::unpack_vls128(
   const velodyne_msgs::msg::VelodynePacket & pkt, DataContainerBase & data,
   const rclcpp::Time & scan_start_time)
 {
-  float azimuth_diff, azimuth_corrected_f;
-  float last_azimuth_diff = 0;
-  uint16_t azimuth{};
-  uint16_t azimuth_next{};
-  uint16_t azimuth_corrected{};
-  float x_coord, y_coord, z_coord;
-  float distance;
   const raw_packet * raw = reinterpret_cast<const raw_packet *> (&pkt.data[0]);
-  union two_bytes tmp;
 
-  float cos_vert_angle, sin_vert_angle, cos_rot_correction, sin_rot_correction;
-  float cos_rot_angle, sin_rot_angle;
-  float xy_distance;
-
-  float time_diff_start_to_this_packet = (rclcpp::Time(pkt.stamp) - scan_start_time).seconds();
-
-  uint8_t laser_number, firing_order;
   bool dual_return = (pkt.data[1204] == 57);
-
   for (int block = 0; block < BLOCKS_PER_PACKET - (4 * dual_return); block++) {
     // cache block for use
     const raw_block & current_block = raw->blocks[block];
-    float time = 0;
 
     int bank_origin = 0;
     // Used to detect which bank of 32 lasers is in this block
@@ -514,95 +498,133 @@ void RawData::unpack_vls128(
         return;  // bad packet: skip the rest
     }
 
+    uint16_t azimuth{};        // Uniform initializion. equivalent to azimuth = 0;
+    uint16_t azimuth_next{};
+    float azimuth_diff{};
     // Calculate difference between current and next block's azimuth angle.
-    if (block == 0) {
-      azimuth = current_block.rotation;
-    } else {
-      azimuth = azimuth_next;
-    }
-    if (block < (BLOCKS_PER_PACKET - (1 + dual_return))) {
-      // Get the next block rotation to calculate how far we rotate between blocks
-      azimuth_next = raw->blocks[block + (1 + dual_return)].rotation;
-
-      // Finds the difference between two successive blocks
-      azimuth_diff = static_cast<float>((36000 + azimuth_next - azimuth) % 36000);
-
-      // This is used when the last block is next to predict rotation amount
-      last_azimuth_diff = azimuth_diff;
-    } else {
-      // This makes the assumption the difference between the last block and the next packet is the
-      // same as the last to the second to last.
-      // Assumes RPM doesn't change much between blocks
-      azimuth_diff = (block == BLOCKS_PER_PACKET - (4 * dual_return) - 1) ? 0 : last_azimuth_diff;
-    }
-
-    // condition added to avoid calculating points
-    // which are not in the interesting defined area (min_angle < area < max_angle)
-    if ((config_.min_angle < config_.max_angle && azimuth >= config_.min_angle &&
-      azimuth <= config_.max_angle) || (config_.min_angle > config_.max_angle))
+    if (!dual_return)
     {
-      for (int j = 0, k = 0; j < SCANS_PER_BLOCK; j++, k += RAW_SCAN_SIZE) {
-        // distance extraction
+      switch (block)
+      {
+      // 1 firing sequence span across 4 data block, causing them to have the same azimuth
+      case 0:
+      case 1:
+      case 2:
+      case 3:
+        azimuth = raw->blocks[0].rotation;
+        azimuth_next = raw->blocks[4].rotation;
+        break;
+      case 4:
+      case 5:
+      case 6:
+      case 7:
+      // We assume that the difference between 3rd firing sequence and the next packet firing
+      // sequence is the same as difference between 2nd and 3rd firing sequence.
+      case 8:
+      case 9:
+      case 10:
+      case 11:
+        azimuth = raw->blocks[4].rotation;
+        azimuth_next = raw->blocks[8].rotation;
+        break;
+      default:
+        assert(false && "block should be between 0 and BLOCK_PER_PACKET(12)");
+        break;
+      }
+      azimuth_diff = static_cast<float>((36000 + azimuth_next - azimuth) % 36000);
+    } else {
+      // We can't calculate for dual return, since it have 1 azimuth per data packet and
+      // we don't have access to the next packet.
+      azimuth = raw->blocks[0].rotation;
+    }
+
+    for (int j = 0, k = 0; j < SCANS_PER_BLOCK; j++, k += RAW_SCAN_SIZE) {
+      uint8_t laser_number = j + bank_origin;   // Offset the laser in this block by which block it's in
+      uint8_t firing_order = laser_number / 8;  // VLS-128 fires 8 lasers at a time
+
+      float time_diff_start_to_this_packet = (rclcpp::Time(pkt.stamp) - scan_start_time).seconds();
+      float time {};
+      if (timing_offsets_.size()) {
+        time = timing_offsets_[block / 4][firing_order + laser_number / 64] +
+          time_diff_start_to_this_packet;
+      }
+
+      velodyne_pointcloud::LaserCorrection & corrections =
+          calibration_->laser_corrections[laser_number];
+
+      // distance extraction
+        union two_bytes tmp;
         tmp.bytes[0] = current_block.data[k];
         tmp.bytes[1] = current_block.data[k + 1];
-        distance = tmp.uint * VLS128_DISTANCE_RESOLUTION;
+        float distance = tmp.uint * VLS128_DISTANCE_RESOLUTION;
 
-        laser_number = j + bank_origin;   // Offset the laser in this block by which block it's in
-        firing_order = laser_number / 8;  // VLS-128 fires 8 lasers at a time
+        // correct for the laser rotation as a function of timing during the firings
+        float azimuth_corrected_f = azimuth +
+           (azimuth_diff * vls_128_laser_azimuth_cache_[firing_order]);
+        uint16_t azimuth_corrected = ((uint16_t) round(azimuth_corrected_f)) % 36000;
 
-        if (timing_offsets_.size()) {
-          time = timing_offsets_[block / 4][firing_order + laser_number / 64] +
-            time_diff_start_to_this_packet;
-        }
+      // condition added to avoid calculating points
+      // which are not in the interesting defined area (min_angle < area < max_angle)
+      // ((Confusing ! Are min_angle and max_angle included or not ?))
+      if (((config_.min_angle < config_.max_angle && 
+          azimuth_corrected >= config_.min_angle &&
+          azimuth_corrected <= config_.max_angle) || 
+        (config_.min_angle > config_.max_angle)) &&
+        pointInRange(distance))
+      {
 
-        velodyne_pointcloud::LaserCorrection & corrections =
-            calibration_->laser_corrections[laser_number];
+        // convert polar coordinates to Euclidean XYZ
+        // Each laser has an vertical offset and 
+        // an horizontal offset in addition to azimut
+        float cos_vert_angle = corrections.cos_vert_correction;
+        float sin_vert_angle = corrections.sin_vert_correction;
+        float cos_rot_correction = corrections.cos_rot_correction;
+        float sin_rot_correction = corrections.sin_rot_correction;
 
-        if (pointInRange(distance)) {
-          // correct for the laser rotation as a function of timing during the firings
-           azimuth_corrected_f = azimuth +
-             (azimuth_diff * vls_128_laser_azimuth_cache_[firing_order]);
-           azimuth_corrected = ((uint16_t) round(azimuth_corrected_f)) % 36000;
+        // cos(a-b) = cos(a)*cos(b) + sin(a)*sin(b)
+        // sin(a-b) = sin(a)*cos(b) - cos(a)*sin(b)
+        float cos_rot_angle =
+          cos_rot_table_[azimuth_corrected] * cos_rot_correction +
+          sin_rot_table_[azimuth_corrected] * sin_rot_correction;
+        float sin_rot_angle =
+          sin_rot_table_[azimuth_corrected] * cos_rot_correction -
+          cos_rot_table_[azimuth_corrected] * sin_rot_correction;
 
-          // convert polar coordinates to Euclidean XYZ
-          cos_vert_angle = corrections.cos_vert_correction;
-          sin_vert_angle = corrections.sin_vert_correction;
-          cos_rot_correction = corrections.cos_rot_correction;
-          sin_rot_correction = corrections.sin_rot_correction;
+        // (TODO) Improve calculation. 
+        // We can see different calculation in the implementation of other sensors.
+        // This implementation is in agreement (if no error was made) with VLS128 manuel,
+        // But it might not be the case with physics.
 
-          // cos(a-b) = cos(a)*cos(b) + sin(a)*sin(b)
-          // sin(a-b) = sin(a)*cos(b) - cos(a)*sin(b)
-          cos_rot_angle =
-            cos_rot_table_[azimuth_corrected] * cos_rot_correction +
-            sin_rot_table_[azimuth_corrected] * sin_rot_correction;
-          sin_rot_angle =
-            sin_rot_table_[azimuth_corrected] * cos_rot_correction -
-            cos_rot_table_[azimuth_corrected] * sin_rot_correction;
+        // The velodyne VLS-128 manual user show this calcultations.
+        float x = distance * cos_vert_angle * sin_rot_angle;
+        float y = distance * cos_vert_angle * cos_rot_angle;
+        float z = distance * sin_vert_angle;
 
-          // Compute the distance in the xy plane (w/o accounting for rotation)
-          xy_distance = distance * cos_vert_angle;
+        /** Use standard ROS coordinate system (right-hand rule) */
+        float x_coord = y;
+        float y_coord = -x;
+        float z_coord = z;
 
-          data.addPoint(
-            xy_distance * cos_rot_angle,
-            -(xy_distance * sin_rot_angle),
-            distance * sin_vert_angle,
-            corrections.laser_ring,
-            // azimuth_corrected,
-            distance,
-            current_block.data[k + 2],
-            time);
-        } else {
-          // call to addPoint is still required since output could be organized
-          data.addPoint(
-            nanf(""), nanf(""), nanf(""), corrections.laser_ring, nanf(""), nanf(""), time);
-        }
+        data.addPoint(
+          x_coord,
+          y_coord,
+          z_coord,
+          corrections.laser_ring,
+          // azimuth_corrected,
+          distance,
+          current_block.data[k + 2], // intensity
+          time);
+      } else {
+        // call to addPoint is still required since output could be organized
+        data.addPoint(
+          nanf(""), nanf(""), nanf(""), corrections.laser_ring, nanf(""), nanf(""), time);
       }
+    }
 
       if (current_block.header == VLS128_BANK_4) {
         // add a new line only after the last bank (VLS128_BANK_4)
         data.newLine();
       }
-    }
   }
 }
 
