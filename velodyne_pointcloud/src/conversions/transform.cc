@@ -31,14 +31,65 @@ namespace velodyne_pointcloud
     first_rcfg_call(true),
     diagnostics_(node, private_nh, node_name)
   {
+    const std::string marker_frame_id{private_nh.param<std::string>("target_frame", "velodyne")};
+    const std::string marker_ns{private_nh.param<std::string>("model", "64E")};
+    const float max_range{private_nh.param<float>("max_range", 200.0)};
+
     boost::optional<velodyne_pointcloud::Calibration> calibration = data_->setup(private_nh);
-    if(calibration)
-    {
+
+    if(calibration) {
       ROS_DEBUG_STREAM("Calibration file loaded.");
       config_.num_lasers = static_cast<uint16_t>(calibration.get().num_lasers);
+      // publish RViz markers
+      visualization_msgs::MarkerArray marker_array;
+      size_t laser_beam_number{0};
+      geometry_msgs::Point origin_point;
+      origin_point.x = 0.0;
+      origin_point.y = 0.0;
+      origin_point.z = 0.0;
+      // white for 128 beam
+      float marker_color_r{1.0};
+      float marker_color_g{1.0};
+      float marker_color_b{1.0};
+      switch (calibration.get().num_lasers) {
+        case 64: marker_color_g = 0.0; break;
+        case 32: marker_color_r = 0.0; break;
+        case 16: marker_color_b = 0.0; break;
+      }
+      
+      for (const auto laser_correction : calibration->laser_corrections) {
+        // front point
+        geometry_msgs::Point other_point;
+        other_point.x = laser_correction.cos_vert_correction * max_range;
+        other_point.y = 0.0;
+        other_point.z = laser_correction.sin_vert_correction * max_range;
+        marker_array.markers.push_back(
+          create_laser_marker(marker_frame_id,
+                              marker_ns,
+                              2 * laser_beam_number,
+                              marker_color_r,
+                              marker_color_g,
+                              marker_color_b,
+                              origin_point,
+                              other_point));
+        // rear point
+        other_point.x = -other_point.x;
+        marker_array.markers.push_back(
+          create_laser_marker(marker_frame_id,
+                              marker_ns,
+                              2 * laser_beam_number + 1,
+                              marker_color_r,
+                              marker_color_g,
+                              marker_color_b,
+                              origin_point,
+                              other_point));
+        laser_beam_number++;
+      }
+      this->rviz_ = node.advertise<visualization_msgs::MarkerArray>(
+          "lidar_beams", 1, true);
+      this->rviz_.publish(marker_array);
     }
-    else
-    {
+    else {
       ROS_ERROR_STREAM("Could not load calibration file!");
     }
 

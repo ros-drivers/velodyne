@@ -54,6 +54,9 @@
 #include <dynamic_reconfigure/server.h>
 #include <velodyne_pointcloud/TransformNodeConfig.h>
 
+#include <visualization_msgs/Marker.h>
+#include <visualization_msgs/MarkerArray.h>
+
 namespace velodyne_pointcloud
 {
 using TransformNodeCfg = velodyne_pointcloud::TransformNodeConfig;
@@ -76,9 +79,44 @@ private:
   boost::shared_ptr<dynamic_reconfigure::Server<velodyne_pointcloud::TransformNodeConfig>> srv_;
   void reconfigure_callback(velodyne_pointcloud::TransformNodeConfig& config, uint32_t level);
 
+  visualization_msgs::Marker create_laser_marker(const std::string & frame_id,
+                                                 const std::string & ns,
+                                                 const size_t & marker_id,
+                                                 const float & marker_color_r,
+                                                 const float & marker_color_g,
+                                                 const float & marker_color_b,
+                                                 const geometry_msgs::Point & pt1,
+                                                 const geometry_msgs::Point & pt2) const {
+      visualization_msgs::Marker line_marker;
+      line_marker.ns = ns;
+      line_marker.header.frame_id = frame_id;
+      line_marker.header.stamp = ros::Time(0);
+      line_marker.id = marker_id;
+      line_marker.type = visualization_msgs::Marker::LINE_STRIP;
+      line_marker.action = visualization_msgs::Marker::ADD;
+      line_marker.pose.position.x = 0.0;
+      line_marker.pose.position.y = 0.0;
+      line_marker.pose.position.z = 0.0;
+      line_marker.pose.orientation.x = 0.0;
+      line_marker.pose.orientation.y = 0.0;
+      line_marker.pose.orientation.z = 0.0;
+      line_marker.pose.orientation.w = 1.0;
+      line_marker.scale.x = 0.005;
+      line_marker.color.a = 1;
+      line_marker.color.r = marker_color_r;
+      line_marker.color.g = marker_color_g;
+      line_marker.color.b = marker_color_b;
+      line_marker.lifetime = ros::Duration(0.0);  // lifetime is forever
+      line_marker.frame_locked = true;            // re-update every frame change
+      line_marker.points.push_back(pt1);
+      line_marker.points.push_back(pt2);
+      return line_marker;
+  }
+
   boost::shared_ptr<velodyne_rawdata::RawData> data_;
   ros::Subscriber velodyne_scan_;
   ros::Publisher output_;
+  ros::Publisher rviz_;
 
   /// configuration parameters
   typedef struct
