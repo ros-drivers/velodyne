@@ -37,16 +37,14 @@ namespace velodyne_pointcloud
 
     boost::optional<velodyne_pointcloud::Calibration> calibration = data_->setup(private_nh);
 
-    if(calibration) {
+    if (calibration) {
       ROS_DEBUG_STREAM("Calibration file loaded.");
       config_.num_lasers = static_cast<uint16_t>(calibration.get().num_lasers);
       // publish RViz markers
       visualization_msgs::MarkerArray marker_array;
-      size_t laser_beam_number{0};
+      size_t marker_id{0};
       geometry_msgs::Point origin_point;
-      origin_point.x = 0.0;
-      origin_point.y = 0.0;
-      origin_point.z = 0.0;
+      origin_point.x = origin_point.y = origin_point.z = 0.0;
       // white for 128 beam
       float marker_color_r{1.0};
       float marker_color_g{1.0};
@@ -56,17 +54,16 @@ namespace velodyne_pointcloud
         case 32: marker_color_r = 0.0; break;
         case 16: marker_color_b = 0.0; break;
       }
-      
+      geometry_msgs::Point other_point;
+      other_point.y = 0.0;
       for (const auto laser_correction : calibration->laser_corrections) {
         // front point
-        geometry_msgs::Point other_point;
         other_point.x = laser_correction.cos_vert_correction * max_range;
-        other_point.y = 0.0;
         other_point.z = laser_correction.sin_vert_correction * max_range;
         marker_array.markers.push_back(
           create_laser_marker(marker_frame_id,
                               marker_ns,
-                              2 * laser_beam_number,
+                              marker_id++,
                               marker_color_r,
                               marker_color_g,
                               marker_color_b,
@@ -77,15 +74,14 @@ namespace velodyne_pointcloud
         marker_array.markers.push_back(
           create_laser_marker(marker_frame_id,
                               marker_ns,
-                              2 * laser_beam_number + 1,
+                              marker_id++,
                               marker_color_r,
                               marker_color_g,
                               marker_color_b,
                               origin_point,
                               other_point));
-        laser_beam_number++;
       }
-      this->rviz_ = node.advertise<visualization_msgs::MarkerArray>(
+      this->rviz_ = private_nh.advertise<visualization_msgs::MarkerArray>(
           "lidar_beams", 1, true);
       this->rviz_.publish(marker_array);
     }
@@ -195,6 +191,36 @@ namespace velodyne_pointcloud
 
     diag_topic_->tick(scanMsg->header.stamp);
     diagnostics_.update();
+  }
+
+  visualization_msgs::Marker Transform::create_laser_marker(const std::string & frame_id,
+                                                            const std::string & ns,
+                                                            const size_t & marker_id,
+                                                            const float & marker_color_r,
+                                                            const float & marker_color_g,
+                                                            const float & marker_color_b,
+                                                            const geometry_msgs::Point & pt1,
+                                                            const geometry_msgs::Point & pt2) const {
+      visualization_msgs::Marker line_marker;
+      line_marker.ns = ns;
+      line_marker.header.frame_id = frame_id;
+      line_marker.header.stamp = ros::Time(0);
+      line_marker.id = marker_id;
+      line_marker.type = visualization_msgs::Marker::LINE_STRIP;
+      line_marker.action = visualization_msgs::Marker::ADD;
+      line_marker.pose.position.x = line_marker.pose.position.y = line_marker.pose.position.z = 0.0;
+      line_marker.pose.orientation.x = line_marker.pose.orientation.y = line_marker.pose.orientation.z = 0.0;
+      line_marker.pose.orientation.w = 1.0;
+      line_marker.scale.x = 0.005;
+      line_marker.color.a = 1;
+      line_marker.color.r = marker_color_r;
+      line_marker.color.g = marker_color_g;
+      line_marker.color.b = marker_color_b;
+      line_marker.lifetime = ros::Duration(0.0);  // lifetime is forever
+      line_marker.frame_locked = true;            // re-update every frame change
+      line_marker.points.push_back(pt1);
+      line_marker.points.push_back(pt2);
+      return line_marker;
   }
 
 } // namespace velodyne_pointcloud
