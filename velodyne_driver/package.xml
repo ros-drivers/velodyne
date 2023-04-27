@@ -19,8 +19,6 @@
 
   <buildtool_depend>catkin</buildtool_depend>
 
-  <build_depend>roslint</build_depend>
-
   <depend>diagnostic_updater</depend>
   <depend>dynamic_reconfigure</depend>
   <depend>libpcap</depend>
@@ -30,6 +28,7 @@
   <depend>velodyne_msgs</depend>
 
   <test_depend>roslaunch</test_depend>
+  <test_depend>roslint</test_depend>
   <test_depend>rostest</test_depend>
 
   <export>
