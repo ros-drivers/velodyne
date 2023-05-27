@@ -1,6 +1,15 @@
 Change history
 ==============
 
+Forthcoming
+-----------
+* Unify tf frame parameters between transform and cloud nodes (`#344 <https://github.com/ros-drivers/velodyne/issues/344>`_) (`#453 <https://github.com/ros-drivers/velodyne/issues/453>`_)
+  * Unify tf frame parameters between transform and cloud nodes
+  At this point there is no need any more for cloud node because transform node includes all features of cloud node.
+  Co-authored-by: AndreasR30 <andreas-reich@live.de>
+  Co-authored-by: anre <andreas.reich@unibw.de>
+* Contributors: Daisuke Nishimatsu
+
 2.3.0 (2022-07-08)
 ------------------
 * Updating maintainer email address. (`#450 <https://github.com/ros-drivers/velodyne/issues/450>`_)

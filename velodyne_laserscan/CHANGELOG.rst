@@ -2,6 +2,11 @@
 Changelog for package velodyne_laserscan
 ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
 
+Forthcoming
+-----------
+* using std::round to calculate the scan array size (`#459 <https://github.com/ros-drivers/velodyne/issues/459>`_)
+* Contributors: Gianluca Bardaro
+
 2.3.0 (2022-07-08)
 ------------------
 * Updating maintainer email address. (`#450 <https://github.com/ros-drivers/velodyne/issues/450>`_)

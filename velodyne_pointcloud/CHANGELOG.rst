@@ -1,6 +1,34 @@
 Change history
 ==============
 
+Forthcoming
+-----------
+* Add invalid points in organized cloud (`#360 <https://github.com/ros-drivers/velodyne/issues/360>`_) (`#492 <https://github.com/ros-drivers/velodyne/issues/492>`_)
+  * Set NaN in ordered point cloud in case of no return
+  * Adapt to current master
+  * consider min/max angle and timing_offsets also in organized mode
+  Co-authored-by: Sebastian Scherer <sebastian.scherer2@de.bosch.com>
+  Co-authored-by: Nuernberg Thomas (CR/AEV4) <thomas.nuernberg@de.bosch.com>
+* Fixed row_step=0 when init_width=0 (dense cloud) (`#404 <https://github.com/ros-drivers/velodyne/issues/404>`_) (`#494 <https://github.com/ros-drivers/velodyne/issues/494>`_)
+  The PointCloud2 msg will be then valid: http://docs.ros.org/en/melodic/api/sensor_msgs/html/msg/PointCloud2.html
+  Referred issues:
+  * https://answers.ros.org/question/377470/rtabmap-icp_odometrycpp453callbackcloud-fatal-error/
+  * http://official-rtab-map-forum.67519.x6.nabble.com/Condition-scan3dMsg-data-size-scan3dMsg-row-step-scan3dMsg-height-not-met-td7852.html
+  Co-authored-by: matlabbe <matlabbe@gmail.com>
+* Unify tf frame parameters between transform and cloud nodes (`#344 <https://github.com/ros-drivers/velodyne/issues/344>`_) (`#453 <https://github.com/ros-drivers/velodyne/issues/453>`_)
+  * Unify tf frame parameters between transform and cloud nodes
+  At this point there is no need any more for cloud node because transform node includes all features of cloud node.
+  Co-authored-by: AndreasR30 <andreas-reich@live.de>
+  Co-authored-by: anre <andreas.reich@unibw.de>
+* fix: modify some tests (`#452 <https://github.com/ros-drivers/velodyne/issues/452>`_)
+  * Fixing new linter errors.
+  * Changing command for running tests.
+  * remove relative file path
+  * remove unnecessary main
+  * fix: restore hdl64e s2 float intensities test
+  Co-authored-by: Joshua Whitley <jwhitley@autonomoustuff.com>
+* Contributors: Daisuke Nishimatsu
+
 2.3.0 (2022-07-08)
 ------------------
 * Passing fixed_frame and target_frame to Convert object. (`#330 <https://github.com/ros-drivers/velodyne/issues/330>`_) (`#451 <https://github.com/ros-drivers/velodyne/issues/451>`_)
