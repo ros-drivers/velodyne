@@ -8,7 +8,7 @@ jobs:
   build-humble:
     runs-on: ubuntu-22.04
     container:
-      image: rostooling/setup-ros-docker:ubuntu-focal-ros-humble-ros-base-latest
+      image: rostooling/setup-ros-docker:ubuntu-jammy-ros-humble-ros-base-latest
     strategy:
       fail-fast: false
     steps:
