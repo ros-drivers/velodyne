@@ -4,16 +4,28 @@ on:
   - pull_request
   - push
 
-steps:
-  - uses: ros-tooling/setup-ros@v0.6
-    with:
-      required-ros-distributions: humble
-  - uses: ros-tooling/action-ros-ci@v0.3
-    with:
-      package-name: |
-        velodyne
-        velodyne_driver
-        velodyne_laserscan
-        velodyne_msgs
-        velodyne_pointcloud
-      target-ros2-distro: humble
+jobs:
+  build-humble:
+    strategy:
+      fail-fast: false
+    steps:
+      - name: Build Environment
+        uses: ros-tooling/setup-ros@v0.6
+        with:
+          required-ros-distributions: humble
+      - name: Run Tests
+        uses: ros-tooling/action-ros-ci@v0.3
+        with:
+          package-name: |
+            velodyne
+            velodyne_driver
+            velodyne_laserscan
+            velodyne_msgs
+            velodyne_pointcloud
+          target-ros2-distro: humble
+      - name: Upload logs
+        uses: actions/upload-artifact@v1
+        with:
+          name: colcon-logs
+          path: ros_ws/log
+        if: always()
