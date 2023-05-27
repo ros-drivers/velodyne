@@ -1,8 +1,8 @@
 Change history
 ==============
 
-Forthcoming
------------
+2.4.0 (2023-05-27)
+------------------
 * Disable cut_angle by default. (`#497 <https://github.com/ros-drivers/velodyne/issues/497>`_)
 * Unify tf frame parameters between transform and cloud nodes (`#344 <https://github.com/ros-drivers/velodyne/issues/344>`_) (`#453 <https://github.com/ros-drivers/velodyne/issues/453>`_)
   * Unify tf frame parameters between transform and cloud nodes

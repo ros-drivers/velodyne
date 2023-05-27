@@ -1,8 +1,8 @@
 Change history
 ==============
 
-Forthcoming
------------
+2.4.0 (2023-05-27)
+------------------
 * Add invalid points in organized cloud (`#360 <https://github.com/ros-drivers/velodyne/issues/360>`_) (`#492 <https://github.com/ros-drivers/velodyne/issues/492>`_)
   * Set NaN in ordered point cloud in case of no return
   * Adapt to current master
