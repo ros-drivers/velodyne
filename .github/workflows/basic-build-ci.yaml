@@ -6,6 +6,7 @@ on:
 
 jobs:
   build-humble:
+    runs-on: ubuntu-22.04
     strategy:
       fail-fast: false
     steps:
