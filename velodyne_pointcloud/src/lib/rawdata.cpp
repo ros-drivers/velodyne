@@ -32,11 +32,11 @@
 
 #include <angles/angles.h>
 
-#include <velodyne_msgs/msg/velodyne_packet.hpp>
-
 #include <cmath>
 #include <memory>
 #include <string>
+
+#include <velodyne_msgs/msg/velodyne_packet.hpp>
 
 #include "velodyne_pointcloud/datacontainerbase.hpp"
 #include "velodyne_pointcloud/rawdata.hpp"

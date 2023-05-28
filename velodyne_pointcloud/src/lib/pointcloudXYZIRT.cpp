@@ -30,12 +30,13 @@
 // ANY WAY OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE
 // POSSIBILITY OF SUCH DAMAGE.
 
-#include <sensor_msgs/msg/point_field.hpp>
 #include <tf2/buffer_core.h>
-#include <velodyne_msgs/msg/velodyne_scan.hpp>
 
 #include <memory>
 #include <string>
+
+#include <sensor_msgs/msg/point_field.hpp>
+#include <velodyne_msgs/msg/velodyne_scan.hpp>
 
 #include "velodyne_pointcloud/pointcloudXYZIRT.hpp"
 
