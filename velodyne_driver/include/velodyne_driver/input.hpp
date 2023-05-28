@@ -54,15 +54,14 @@
 #define VELODYNE_DRIVER__INPUT_HPP_
 
 #include <netinet/in.h>
-
 #include <pcap.h>
+
+#include <memory>
+#include <string>
 
 #include <rclcpp/rclcpp.hpp>
 #include <velodyne_msgs/msg/velodyne_packet.hpp>
 #include <velodyne_msgs/msg/velodyne_scan.hpp>
-
-#include <memory>
-#include <string>
 
 namespace velodyne_driver
 {

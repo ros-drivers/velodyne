@@ -31,10 +31,11 @@
 // POSSIBILITY OF SUCH DAMAGE.
 
 #include <gtest/gtest.h>
-#include <rclcpp/rclcpp.hpp>
 
 #include <cmath>
 #include <memory>
+
+#include <rclcpp/rclcpp.hpp>
 
 #include "velodyne_driver/time_conversion.hpp"
 

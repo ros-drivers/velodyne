@@ -72,9 +72,9 @@ rclcpp::Time rosTimeFromGpsTimestamp(rclcpp::Time & time_nom, const uint8_t * co
   uint32_t usecs =
     static_cast<uint32_t>(
     ((uint32_t) data[3]) << 24 |
-    ((uint32_t) data[2] ) << 16 |
-    ((uint32_t) data[1] ) << 8 |
-    ((uint32_t) data[0] ));
+      ((uint32_t) data[2]) << 16 |
+      ((uint32_t) data[1]) << 8 |
+      ((uint32_t) data[0]));
   uint32_t cur_hour = time_nom.nanoseconds() / 1000000000 / HOUR_TO_SEC;
   auto stamp = rclcpp::Time(
     (cur_hour * HOUR_TO_SEC) + (usecs / 1000000),

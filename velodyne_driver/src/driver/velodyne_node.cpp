@@ -35,9 +35,9 @@
  *  ROS driver node for the Velodyne 3D LIDARs.
  */
 
-#include <rclcpp/rclcpp.hpp>
-
 #include <memory>
+
+#include <rclcpp/rclcpp.hpp>
 
 #include "velodyne_driver/driver.hpp"
 
