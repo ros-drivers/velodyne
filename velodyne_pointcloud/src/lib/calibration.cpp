@@ -32,8 +32,6 @@
 
 #include <yaml-cpp/yaml.h>
 
-#include <rclcpp/rclcpp.hpp>
-
 #include <cmath>
 #include <fstream>
 #include <iostream>
@@ -41,6 +39,8 @@
 #include <map>
 #include <string>
 #include <utility>
+
+#include <rclcpp/rclcpp.hpp>
 
 #include "velodyne_pointcloud/calibration.hpp"
 

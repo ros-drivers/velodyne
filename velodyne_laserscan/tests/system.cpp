@@ -123,7 +123,7 @@ void publishXYZIR1(const PointCloud & cloud)
   msg.fields[4].offset = 20;
   msg.fields[4].datatype = sensor_msgs::PointField::UINT16;
   msg.fields[4].count = 1;
-  msg.data.resize(std::max((size_t)1, cloud.points.size()) * POINT_STEP, 0x00);
+  msg.data.resize(std::max(static_cast<size_t>(1), cloud.points.size()) * POINT_STEP, 0x00);
   msg.point_step = POINT_STEP;
   msg.row_step = msg.data.size();
   msg.height = 1;
@@ -172,7 +172,7 @@ void publishXYZIR2(const PointCloud & cloud)
   msg.fields[4].offset = 16;
   msg.fields[4].datatype = sensor_msgs::PointField::UINT16;
   msg.fields[4].count = 1;
-  msg.data.resize(std::max((size_t)1, cloud.points.size()) * POINT_STEP, 0x00);
+  msg.data.resize(std::max(static_cast<size_t>(1), cloud.points.size()) * POINT_STEP, 0x00);
   msg.point_step = POINT_STEP;
   msg.row_step = msg.data.size();
   msg.height = 1;
@@ -217,7 +217,7 @@ void publishXYZR(const PointCloud & cloud)
   msg.fields[3].offset = 12;
   msg.fields[3].datatype = sensor_msgs::PointField::UINT16;
   msg.fields[3].count = 1;
-  msg.data.resize(std::max((size_t)1, cloud.points.size()) * POINT_STEP, 0x00);
+  msg.data.resize(std::max(static_cast<size_t>(1), cloud.points.size()) * POINT_STEP, 0x00);
   msg.point_step = POINT_STEP;
   msg.row_step = msg.data.size();
   msg.height = 1;
@@ -248,7 +248,7 @@ void publishR(const PointCloud & cloud)
   msg.fields[0].offset = 0;
   msg.fields[0].datatype = sensor_msgs::PointField::UINT16;
   msg.fields[0].count = 1;
-  msg.data.resize(std::max((size_t)1, cloud.points.size()) * POINT_STEP, 0x00);
+  msg.data.resize(std::max(static_cast<size_t>(1), cloud.points.size()) * POINT_STEP, 0x00);
   msg.point_step = POINT_STEP;
   msg.row_step = msg.data.size();
   msg.height = 1;
@@ -287,7 +287,7 @@ void publishXYZR32(const PointCloud & cloud)
   msg.fields[3].offset = 12;
   msg.fields[3].datatype = sensor_msgs::PointField::UINT32;
   msg.fields[3].count = 1;
-  msg.data.resize(std::max((size_t)1, cloud.points.size()) * POINT_STEP, 0x00);
+  msg.data.resize(std::max(static_cast<size_t>(1), cloud.points.size()) * POINT_STEP, 0x00);
   msg.point_step = POINT_STEP;
   msg.row_step = msg.data.size();
   msg.height = 1;
@@ -326,7 +326,7 @@ void publishXYZ(const PointCloud & cloud)
   msg.fields[2].offset = 8;
   msg.fields[2].datatype = sensor_msgs::PointField::FLOAT32;
   msg.fields[2].count = 1;
-  msg.data.resize(std::max((size_t)1, cloud.points.size()) * POINT_STEP, 0x00);
+  msg.data.resize(std::max(static_cast<size_t>(1), cloud.points.size()) * POINT_STEP, 0x00);
   msg.point_step = POINT_STEP;
   msg.row_step = msg.data.size();
   msg.height = 1;

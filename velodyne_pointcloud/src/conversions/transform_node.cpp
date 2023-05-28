@@ -30,9 +30,9 @@
 // ANY WAY OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE
 // POSSIBILITY OF SUCH DAMAGE.
 
-#include <rclcpp/rclcpp.hpp>
-
 #include <memory>
+
+#include <rclcpp/rclcpp.hpp>
 
 #include "velodyne_pointcloud/transform.hpp"
 

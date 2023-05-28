@@ -44,7 +44,7 @@
  *              PCAP dump
  */
 
-#include <velodyne_msgs/msg/velodyne_packet.hpp>
+#include "velodyne_driver/input.hpp"
 
 #include <arpa/inet.h>
 #include <fcntl.h>
@@ -59,7 +59,8 @@
 #include <sstream>
 #include <string>
 
-#include "velodyne_driver/input.hpp"
+#include <velodyne_msgs/msg/velodyne_packet.hpp>
+
 #include "velodyne_driver/time_conversion.hpp"
 
 namespace velodyne_driver
@@ -225,7 +226,7 @@ int InputSocket::getPacket(velodyne_msgs::msg::VelodynePacket * pkt, const doubl
         RCLCPP_ERROR(private_nh_->get_logger(), "recvfail: %s", ::strerror(errno));
         return -1;
       }
-    } else if ((size_t) nbytes == packet_size) {
+    } else if (static_cast<size_t>(nbytes) == packet_size) {
       // read successful,
       // if packet is not from the lidar scanner we selected by IP,
       // continue otherwise we are done

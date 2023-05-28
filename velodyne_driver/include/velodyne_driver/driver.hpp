@@ -33,13 +33,13 @@
 #ifndef VELODYNE_DRIVER__DRIVER_HPP_
 #define VELODYNE_DRIVER__DRIVER_HPP_
 
-#include <diagnostic_updater/diagnostic_updater.hpp>
-#include <diagnostic_updater/publisher.hpp>
-#include <rclcpp/rclcpp.hpp>
-
 #include <future>
 #include <memory>
 #include <string>
+
+#include <diagnostic_updater/diagnostic_updater.hpp>
+#include <diagnostic_updater/publisher.hpp>
+#include <rclcpp/rclcpp.hpp>
 
 #include "velodyne_driver/input.hpp"
 
