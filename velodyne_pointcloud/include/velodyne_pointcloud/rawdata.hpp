@@ -35,12 +35,12 @@
 
 #include <pcl/point_cloud.h>
 
-#include <rclcpp/rclcpp.hpp>
-#include <velodyne_msgs/msg/velodyne_packet.hpp>
-
 #include <memory>
 #include <string>
 #include <vector>
+
+#include <rclcpp/rclcpp.hpp>
+#include <velodyne_msgs/msg/velodyne_packet.hpp>
 
 #include "velodyne_pointcloud/calibration.hpp"
 #include "velodyne_pointcloud/datacontainerbase.hpp"

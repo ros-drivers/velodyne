@@ -35,12 +35,9 @@
  *  ROS driver implementation for the Velodyne 3D LIDARs
  */
 
-#include <rcl_interfaces/msg/floating_point_range.hpp>
-#include <rcl_interfaces/msg/parameter_descriptor.hpp>
-#include <rclcpp/rclcpp.hpp>
-#include <rclcpp_components/register_node_macro.hpp>
+#include "velodyne_driver/driver.hpp"
+
 #include <tf2_ros/transform_listener.h>
-#include <velodyne_msgs/msg/velodyne_scan.hpp>
 
 #include <chrono>
 #include <cmath>
@@ -48,7 +45,11 @@
 #include <string>
 #include <utility>
 
-#include "velodyne_driver/driver.hpp"
+#include <rcl_interfaces/msg/floating_point_range.hpp>
+#include <rcl_interfaces/msg/parameter_descriptor.hpp>
+#include <rclcpp/rclcpp.hpp>
+#include <rclcpp_components/register_node_macro.hpp>
+#include <velodyne_msgs/msg/velodyne_scan.hpp>
 
 namespace velodyne_driver
 {

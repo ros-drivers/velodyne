@@ -32,6 +32,11 @@
 
 #include "velodyne_laserscan/velodyne_laserscan.hpp"
 
+#include <cmath>
+#include <functional>
+#include <memory>
+#include <utility>
+
 #include <rcl_interfaces/msg/floating_point_range.hpp>
 #include <rcl_interfaces/msg/integer_range.hpp>
 #include <rcl_interfaces/msg/parameter_descriptor.hpp>
@@ -41,11 +46,6 @@
 #include <sensor_msgs/msg/point_cloud2.hpp>
 #include <sensor_msgs/msg/point_field.hpp>
 #include <sensor_msgs/point_cloud2_iterator.hpp>
-
-#include <cmath>
-#include <functional>
-#include <memory>
-#include <utility>
 
 namespace velodyne_laserscan
 {

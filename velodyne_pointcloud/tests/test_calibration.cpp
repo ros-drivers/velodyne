@@ -32,11 +32,11 @@
 
 #include <gtest/gtest.h>
 
+#include <string>
+
 #include <ament_index_cpp/get_package_share_directory.hpp>
 
 #include <velodyne_pointcloud/calibration.hpp>
-
-#include <string>
 
 using namespace velodyne_pointcloud;  // NOLINT
 
