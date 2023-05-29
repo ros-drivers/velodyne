@@ -1,0 +1,14 @@
+velodyne_driver_node:
+    ros__parameters:
+        device_ip: 192.168.1.201
+        gps_time: false
+        time_offset: 0.0
+        enabled: true
+        read_once: false
+        read_fast: false
+        repeat_delay: 0.0
+        frame_id: velodyne
+        model: VLS128
+        rpm: 600.0
+        port: 2368
+        timestamp_first_packet: false

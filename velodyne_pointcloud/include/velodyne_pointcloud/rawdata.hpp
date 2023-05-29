@@ -98,6 +98,20 @@ static const int BLOCKS_PER_PACKET = 12;
 static const int PACKET_STATUS_SIZE = 4;
 static const int SCANS_PER_PACKET = (SCANS_PER_BLOCK * BLOCKS_PER_PACKET);
 
+/** Special Definitions for VLS128 support **/
+// These are used to detect which bank of 32 lasers is in this block
+static const uint16_t VLS128_BANK_1 = 0xeeff;
+static const uint16_t VLS128_BANK_2 = 0xddff;
+static const uint16_t VLS128_BANK_3 = 0xccff;
+static const uint16_t VLS128_BANK_4 = 0xbbff;
+
+static const float VLS128_CHANNEL_TDURATION = 2.665f;    // [µs] Channels corresponds to one laser firing // NOLINT
+static const float VLS128_SEQ_TDURATION = 53.3f;         // [µs] Sequence is a set of laser firings including recharging // NOLINT
+static const float VLS128_TOH_ADJUSTMENT = 8.7f;          // [µs] μs. Top Of the Hour is aligned with the fourth firing group in a firing sequence. // NOLINT
+static const float VLS128_DISTANCE_RESOLUTION = 0.004f;  // [m]
+static const float VLS128_MODEL_ID = 161;
+
+
 /** \brief Raw Velodyne packet.
  *
  *  revolution is described in the device manual as incrementing
@@ -122,6 +136,10 @@ class RawData final
 {
 public:
   RawData(const std::string & calibration_file, const std::string & model);
+
+  void setupSinCosCache();
+  void setupAzimuthCache();
+  bool loadCalibration();
 
   void unpack(
     const velodyne_msgs::msg::VelodynePacket & pkt, DataContainerBase & data,
@@ -152,6 +170,9 @@ private:
   float sin_rot_table_[ROTATION_MAX_UNITS]{};
   float cos_rot_table_[ROTATION_MAX_UNITS]{};
 
+  // Caches the azimuth percent offset for the VLS-128 laser firings
+  float vls_128_laser_azimuth_cache_[16];
+
   // timing offset lookup table
   std::vector<std::vector<float>> timing_offsets_;
 
@@ -167,6 +188,17 @@ private:
   void unpack_vlp16(
     const velodyne_msgs::msg::VelodynePacket & pkt, DataContainerBase & data,
     const rclcpp::Time & scan_start_time);
+
+  void unpack_vls128(
+    const velodyne_msgs::msg::VelodynePacket & pkt, DataContainerBase & data,
+    const rclcpp::Time & scan_start_time);
+
+  /** in-line test whether a point is in range */
+  inline bool pointInRange(const float range)
+  {
+    return range >= config_.min_range &&
+           range <= config_.max_range;
+  }
 };
 
 }  // namespace velodyne_rawdata
