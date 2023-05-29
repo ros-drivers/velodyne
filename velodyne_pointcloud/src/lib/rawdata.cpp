@@ -326,19 +326,19 @@ void RawData::unpack(
         (block.rotation <= config_.max_angle ||
         block.rotation >= config_.min_angle)))
       {
-      	float time = 0;
+        float time = 0;
         if (timing_offsets_.size()) {
           time = timing_offsets_[i][j] + time_diff_start_to_this_packet;
         }
-        
-        if (tmp.uint == 0) { // no valid laser beam return
+
+        if (tmp.uint == 0) {  // no valid laser beam return
           // call to addPoint is still required since output could be organized
           data.addPoint(
             nanf(""), nanf(""), nanf(""), corrections.laser_ring,
             nanf(""), nanf(""), time);
           continue;
         }
-        
+
         float distance = tmp.uint * calibration_->distance_resolution_m;
         distance += corrections.dist_correction;
 
@@ -463,7 +463,7 @@ void RawData::unpack_vls128(
   const velodyne_msgs::msg::VelodynePacket & pkt, DataContainerBase & data,
   const rclcpp::Time & scan_start_time)
 {
-  const raw_packet * raw = reinterpret_cast<const raw_packet *> (&pkt.data[0]);
+  const raw_packet * raw = reinterpret_cast<const raw_packet *>(&pkt.data[0]);
 
   bool dual_return = (pkt.data[1204] == 57);
   for (int block = 0; block < BLOCKS_PER_PACKET - (4 * dual_return); block++) {
@@ -502,34 +502,32 @@ void RawData::unpack_vls128(
     uint16_t azimuth_next{};
     float azimuth_diff{};
     // Calculate difference between current and next block's azimuth angle.
-    if (!dual_return)
-    {
-      switch (block)
-      {
-      // 1 firing sequence span across 4 data block, causing them to have the same azimuth
-      case 0:
-      case 1:
-      case 2:
-      case 3:
-        azimuth = raw->blocks[0].rotation;
-        azimuth_next = raw->blocks[4].rotation;
-        break;
-      case 4:
-      case 5:
-      case 6:
-      case 7:
-      // We assume that the difference between 3rd firing sequence and the next packet firing
-      // sequence is the same as difference between 2nd and 3rd firing sequence.
-      case 8:
-      case 9:
-      case 10:
-      case 11:
-        azimuth = raw->blocks[4].rotation;
-        azimuth_next = raw->blocks[8].rotation;
-        break;
-      default:
-        assert(false && "block should be between 0 and BLOCK_PER_PACKET(12)");
-        break;
+    if (!dual_return) {
+      switch (block) {
+        // 1 firing sequence span across 4 data block, causing them to have the same azimuth
+        case 0:
+        case 1:
+        case 2:
+        case 3:
+          azimuth = raw->blocks[0].rotation;
+          azimuth_next = raw->blocks[4].rotation;
+          break;
+        case 4:
+        case 5:
+        case 6:
+        case 7:
+        // We assume that the difference between 3rd firing sequence and the next packet firing
+        // sequence is the same as difference between 2nd and 3rd firing sequence.
+        case 8:
+        case 9:
+        case 10:
+        case 11:
+          azimuth = raw->blocks[4].rotation;
+          azimuth_next = raw->blocks[8].rotation;
+          break;
+        default:
+          assert(false && "block should be between 0 and BLOCK_PER_PACKET(12)");
+          break;
       }
       azimuth_diff = static_cast<float>((36000 + azimuth_next - azimuth) % 36000);
     } else {
@@ -539,8 +537,10 @@ void RawData::unpack_vls128(
     }
 
     for (int j = 0, k = 0; j < SCANS_PER_BLOCK; j++, k += RAW_SCAN_SIZE) {
-      uint8_t laser_number = j + bank_origin;   // Offset the laser in this block by which block it's in
-      uint8_t firing_order = laser_number / 8;  // VLS-128 fires 8 lasers at a time
+      // Offset the laser in this block by which block it's in
+      uint8_t laser_number = j + bank_origin;
+      // VLS-128 fires 8 lasers at a time
+      uint8_t firing_order = laser_number / 8;
 
       float time_diff_start_to_this_packet = (rclcpp::Time(pkt.stamp) - scan_start_time).seconds();
       float time {};
@@ -550,31 +550,30 @@ void RawData::unpack_vls128(
       }
 
       velodyne_pointcloud::LaserCorrection & corrections =
-          calibration_->laser_corrections[laser_number];
+        calibration_->laser_corrections[laser_number];
 
       // distance extraction
-        union two_bytes tmp;
-        tmp.bytes[0] = current_block.data[k];
-        tmp.bytes[1] = current_block.data[k + 1];
-        float distance = tmp.uint * VLS128_DISTANCE_RESOLUTION;
+      union two_bytes tmp;
+      tmp.bytes[0] = current_block.data[k];
+      tmp.bytes[1] = current_block.data[k + 1];
+      float distance = tmp.uint * VLS128_DISTANCE_RESOLUTION;
 
-        // correct for the laser rotation as a function of timing during the firings
-        float azimuth_corrected_f = azimuth +
-           (azimuth_diff * vls_128_laser_azimuth_cache_[firing_order]);
-        uint16_t azimuth_corrected = ((uint16_t) round(azimuth_corrected_f)) % 36000;
+      // correct for the laser rotation as a function of timing during the firings
+      float azimuth_corrected_f = azimuth +
+        (azimuth_diff * vls_128_laser_azimuth_cache_[firing_order]);
+      uint16_t azimuth_corrected = ((uint16_t) round(azimuth_corrected_f)) % 36000;
 
       // condition added to avoid calculating points
       // which are not in the interesting defined area (min_angle < area < max_angle)
       // ((Confusing ! Are min_angle and max_angle included or not ?))
-      if (((config_.min_angle < config_.max_angle && 
-          azimuth_corrected >= config_.min_angle &&
-          azimuth_corrected <= config_.max_angle) || 
+      if (((config_.min_angle < config_.max_angle &&
+        azimuth_corrected >= config_.min_angle &&
+        azimuth_corrected <= config_.max_angle) ||
         (config_.min_angle > config_.max_angle)) &&
         pointInRange(distance))
       {
-
         // convert polar coordinates to Euclidean XYZ
-        // Each laser has an vertical offset and 
+        // Each laser has an vertical offset and
         // an horizontal offset in addition to azimut
         float cos_vert_angle = corrections.cos_vert_correction;
         float sin_vert_angle = corrections.sin_vert_correction;
@@ -590,7 +589,7 @@ void RawData::unpack_vls128(
           sin_rot_table_[azimuth_corrected] * cos_rot_correction -
           cos_rot_table_[azimuth_corrected] * sin_rot_correction;
 
-        // (TODO) Improve calculation. 
+        // (TODO) Improve calculation.
         // We can see different calculation in the implementation of other sensors.
         // This implementation is in agreement (if no error was made) with VLS128 manuel,
         // But it might not be the case with physics.
@@ -612,7 +611,7 @@ void RawData::unpack_vls128(
           corrections.laser_ring,
           // azimuth_corrected,
           distance,
-          current_block.data[k + 2], // intensity
+          current_block.data[k + 2],  // intensity
           time);
       } else {
         // call to addPoint is still required since output could be organized
@@ -621,10 +620,10 @@ void RawData::unpack_vls128(
       }
     }
 
-      if (current_block.header == VLS128_BANK_4) {
-        // add a new line only after the last bank (VLS128_BANK_4)
-        data.newLine();
-      }
+    if (current_block.header == VLS128_BANK_4) {
+      // add a new line only after the last bank (VLS128_BANK_4)
+      data.newLine();
+    }
   }
 }
 
