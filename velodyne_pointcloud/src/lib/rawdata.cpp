@@ -39,8 +39,6 @@
 
 #include <velodyne_msgs/msg/velodyne_packet.hpp>
 
-#include <velodyne_msgs/msg/velodyne_packet.hpp>
-
 #include "velodyne_pointcloud/datacontainerbase.hpp"
 #include "velodyne_pointcloud/rawdata.hpp"
 
