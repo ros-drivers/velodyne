@@ -1,0 +1,10 @@
+velodyne_transform_node:
+    ros__parameters:
+        calibration: VLS128.yaml
+        model: VLS128
+        min_range: 0.4
+        max_range: 300.0
+        view_direction: 0.0
+        fixed_frame: ""
+        target_frame: ""
+        organize_cloud: true
