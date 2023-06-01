@@ -54,6 +54,9 @@
 #include <dynamic_reconfigure/server.h>
 #include <velodyne_pointcloud/TransformNodeConfig.h>
 
+#include <visualization_msgs/Marker.h>
+#include <visualization_msgs/MarkerArray.h>
+
 namespace velodyne_pointcloud
 {
 using TransformNodeCfg = velodyne_pointcloud::TransformNodeConfig;
@@ -76,9 +79,19 @@ private:
   boost::shared_ptr<dynamic_reconfigure::Server<velodyne_pointcloud::TransformNodeConfig>> srv_;
   void reconfigure_callback(velodyne_pointcloud::TransformNodeConfig& config, uint32_t level);
 
+  visualization_msgs::Marker create_laser_marker(const std::string & frame_id,
+                                                 const std::string & ns,
+                                                 const size_t & marker_id,
+                                                 const float & marker_color_r,
+                                                 const float & marker_color_g,
+                                                 const float & marker_color_b,
+                                                 const geometry_msgs::Point & pt1,
+                                                 const geometry_msgs::Point & pt2) const;
+
   boost::shared_ptr<velodyne_rawdata::RawData> data_;
   ros::Subscriber velodyne_scan_;
   ros::Publisher output_;
+  ros::Publisher rviz_;
 
   /// configuration parameters
   typedef struct
