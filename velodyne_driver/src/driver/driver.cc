@@ -147,6 +147,31 @@ VelodyneDriver::VelodyneDriver(ros::NodeHandle node,
   // which is used in velodyne packets
   config_.cut_angle = int((cut_angle*360/(2*M_PI))*100);
 
+  double timestamp_angle;
+  private_nh.param("timestamp_angle", timestamp_angle, -0.01);
+  if (timestamp_angle < 0.0)
+  {
+    ROS_INFO_STREAM("Time at specific angle feature deactivated.");
+  }
+  else if (timestamp_angle < (2*M_PI))
+  {
+    ROS_INFO_STREAM("Time at specific angle feature activated. "
+                    "Set to " << timestamp_angle << " rad.");
+    if (config_.timestamp_first_packet){
+      ROS_ERROR_STREAM("timestamp_first_packet AND timestamp_angle configured! timestamp_first_packet will be used!");
+    }
+  }
+  else
+  {
+    ROS_ERROR_STREAM("timestamp_angle is out of range. Allowed range is "
+                       << "between 0.0 and 2*PI or negative values to deactivate this feature.");
+    timestamp_angle = -0.01;
+  }
+
+  // Convert timestamp_angle from radian to one-hundredth degree,
+  // which is used in velodyne packets
+  config_.timestamp_angle = int((timestamp_angle*360/(2*M_PI))*100);
+
   int udp_port;
   private_nh.param("port", udp_port, (int) DATA_PORT_NUMBER);
 
@@ -213,6 +238,8 @@ bool VelodyneDriver::poll(void)
   // Allocate a new shared pointer for zero-copy sharing with other nodelets.
   velodyne_msgs::VelodyneScanPtr scan(new velodyne_msgs::VelodyneScan);
 
+  ros::Time time_angle;
+
   if( config_.cut_angle >= 0) //Cut at specific angle feature enabled
   {
     scan->packets.reserve(config_.npackets);
@@ -237,6 +264,14 @@ bool VelodyneDriver::poll(void)
       	 last_azimuth_ = azimuth;
       	 continue;
       }
+
+      if((last_azimuth_ < config_.timestamp_angle && config_.timestamp_angle <= azimuth)
+         || ( config_.timestamp_angle <= azimuth && azimuth < last_azimuth_)
+         || (azimuth < last_azimuth_ && last_azimuth_ < config_.timestamp_angle))
+      {
+        time_angle = tmp_packet.stamp;
+      }
+
       if((last_azimuth_ < config_.cut_angle && config_.cut_angle <= azimuth)
       	 || ( config_.cut_angle <= azimuth && azimuth < last_azimuth_)
       	 || (azimuth < last_azimuth_ && last_azimuth_ < config_.cut_angle))
@@ -269,6 +304,9 @@ bool VelodyneDriver::poll(void)
   ROS_DEBUG("Publishing a full Velodyne scan.");
   if (config_.timestamp_first_packet){
     scan->header.stamp = scan->packets.front().stamp;
+  }
+  else if(config_.timestamp_angle >= 0.0){
+    scan->header.stamp = time_angle;
   }
   else{
     scan->header.stamp = scan->packets.back().stamp;
