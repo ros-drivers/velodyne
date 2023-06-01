@@ -37,7 +37,7 @@ jobs:
             velodyne_laserscan
             velodyne_msgs
             velodyne_pointcloud
-          target-ros2-distro: rolling
+          target-ros2-distro: ${{ matrix.ros-version }}
       - name: Upload logs
         uses: actions/upload-artifact@v1
         with:
