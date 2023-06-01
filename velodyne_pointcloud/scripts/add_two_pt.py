@@ -42,6 +42,7 @@ https://github.com/ros-drivers/velodyne/blob/master/velodyne_pointcloud/src/lib/
 https://github.com/ros-drivers/velodyne/blob/master/velodyne_pointcloud/src/lib/calibration.cc#L70
 """
 import sys
+
 import yaml
 
 calibration = yaml.safe_load(sys.stdin)
