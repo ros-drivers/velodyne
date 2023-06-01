@@ -5,17 +5,29 @@ on:
   - push
 
 jobs:
-  build-rolling:
+  build-ros2-latest:
     runs-on: ubuntu-22.04
-    container:
-      image: rostooling/setup-ros-docker:ubuntu-jammy-ros-rolling-ros-base-latest
     strategy:
+      matrix:
+        image:
+          - rostooling/setup-ros-docker:ubuntu-jammy-ros-iron-ros-base-latest
+          - rostooling/setup-ros-docker:ubuntu-jammy-ros-rolling-ros-base-latest
+        ros-version:
+          - iron
+          - rolling
+        exclude:
+          - image: rostooling/setup-ros-docker:ubuntu-jammy-ros-iron-ros-base-latest
+            ros-version: rolling
+          - image: rostooling/setup-ros-docker:ubuntu-jammy-ros-rolling-ros-base-latest
+            ros-version: iron
       fail-fast: false
+    container:
+      image: ${{ matrix.image }}
     steps:
       - name: Build Environment
         uses: ros-tooling/setup-ros@v0.6
         with:
-          required-ros-distributions: rolling
+          required-ros-distributions: ${{ matrix.ros-version }}
       - name: Run Tests
         uses: ros-tooling/action-ros-ci@v0.3
         with:
