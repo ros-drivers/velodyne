@@ -61,6 +61,12 @@ class GenCalibration:
             print('converting "' + self.xml_file + '" to "' + self.yaml_file + '"')
             self.parse_xml()
 
+        # fix #473 : take into acount HDL-64 correction_{x,y}, related to:
+        #            commit/f30d68735c47312aa73d29203ddb16abc01357f4
+        for laser in self.calibration['lasers']:
+            if laser.get('dist_correction_x', 0) and laser.get('dist_correction_y', 0):
+                laser['two_pt_correction_available'] = True
+
         if self.calibration_good:
             self.write_calibration_file()
 
