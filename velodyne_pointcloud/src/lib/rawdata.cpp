@@ -306,7 +306,6 @@ void RawData::unpack(
       float x, y, z;
       float intensity;
       const uint8_t laser_number = j + bank_origin;
-      float time = 0;
 
       const velodyne_pointcloud::LaserCorrection & corrections =
         calibration_->laser_corrections[laser_number];
