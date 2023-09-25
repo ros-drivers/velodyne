@@ -247,7 +247,7 @@ int InputSocket::getPacket(velodyne_msgs::msg::VelodynePacket * pkt, const doubl
   if (!gps_time_) {
     // Average the times at which we begin and end reading.  Use that to
     // estimate when the scan occurred. Add the time offset.
-    pkt->stamp = rclcpp::Time((time2.nanoseconds() + time1.nanoseconds()) / 2.0 + time_offset);
+    pkt->stamp = rclcpp::Time((time2.nanoseconds() + time1.nanoseconds()) / 2.0 + rclcpp::Duration::from_seconds(time_offset).nanoseconds());
   } else {
     // time for each packet is a 4 byte uint located starting at offset 1200 in
     // the data packet
