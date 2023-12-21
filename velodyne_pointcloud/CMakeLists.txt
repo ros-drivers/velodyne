@@ -112,4 +112,6 @@ if(BUILD_TESTING)
   add_subdirectory(tests)
 endif()
 
+ament_export_include_directories(include)
+ament_export_dependencies(velodyne_msgs)
 ament_package()
