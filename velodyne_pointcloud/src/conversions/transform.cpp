@@ -118,10 +118,10 @@ Transform::Transform(const rclcpp::NodeOptions & options)
   }
 
   // advertise output point cloud (before subscribing to input data)
-  output_ = this->create_publisher<sensor_msgs::msg::PointCloud2>("velodyne_points", 10);
+  output_ = this->create_publisher<sensor_msgs::msg::PointCloud2>("velodyne_points", rclcpp::SystemDefaultsQoS());
 
   velodyne_scan_ = this->create_subscription<velodyne_msgs::msg::VelodyneScan>(
-    "velodyne_packets", 10, std::bind(&Transform::processScan, this, std::placeholders::_1));
+    "velodyne_packets", rclcpp::SystemDefaultsQoS(), std::bind(&Transform::processScan, this, std::placeholders::_1));
 
   // Diagnostics
   diagnostics_.setHardwareID("Velodyne Transform");
