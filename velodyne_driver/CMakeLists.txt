@@ -11,7 +11,6 @@ if(CMAKE_COMPILER_IS_GNUCXX OR CMAKE_CXX_COMPILER_ID MATCHES "Clang")
 endif()
 
 find_package(ament_cmake_ros REQUIRED)
-find_package(diagnostic_msgs REQUIRED)
 find_package(diagnostic_updater REQUIRED)
 find_package(rclcpp REQUIRED)
 find_package(rclcpp_components REQUIRED)
@@ -21,31 +20,39 @@ find_package(velodyne_msgs REQUIRED)
 # libpcap provides no pkg-config or find_package module:
 set(libpcap_LIBRARIES -lpcap)
 
-include_directories(include)
-
 # compile the driver and input library
-add_subdirectory(src/lib)
+add_library(velodyne_input SHARED src/lib/input.cpp)
+target_include_directories(velodyne_input PUBLIC
+  "$<BUILD_INTERFACE:${CMAKE_CURRENT_SOURCE_DIR}/include>"
+  "$<INSTALL_INTERFACE:include/${PROJECT_NAME}>")
+target_link_libraries(velodyne_input PUBLIC
+  ${libpcap_LIBRARIES}
+  rclcpp::rclcpp
+  ${velodyne_msgs_TARGETS}
+)
 
 # build the driver node
 add_library(velodyne_driver SHARED src/driver/driver.cpp)
-ament_target_dependencies(velodyne_driver
-  diagnostic_msgs
-  diagnostic_updater
-  rclcpp
-  rclcpp_components
-  tf2_ros
-  velodyne_msgs
+target_include_directories(velodyne_driver PUBLIC
+  "$<BUILD_INTERFACE:${CMAKE_CURRENT_SOURCE_DIR}/include>"
+  "$<INSTALL_INTERFACE:include/${PROJECT_NAME}>")
+target_link_libraries(velodyne_driver PUBLIC
+  diagnostic_updater::diagnostic_updater
+  rclcpp::rclcpp
+  velodyne_input
+  ${velodyne_msgs_TARGETS}
 )
-target_link_libraries(velodyne_driver velodyne_input)
+target_link_libraries(velodyne_driver PRIVATE
+  rclcpp_components::component
+  tf2_ros::tf2_ros
+)
 
 add_executable(velodyne_driver_node src/driver/velodyne_node.cpp)
-ament_target_dependencies(velodyne_driver_node
-  rclcpp
-)
-target_link_libraries(velodyne_driver_node velodyne_driver)
+target_link_libraries(velodyne_driver_node PRIVATE rclcpp::rclcpp velodyne_driver)
 
 # install runtime and library files
-install(TARGETS velodyne_driver
+install(TARGETS velodyne_input velodyne_driver
+  EXPORT velodyne_driver
   ARCHIVE DESTINATION lib
   LIBRARY DESTINATION lib
   RUNTIME DESTINATION bin
@@ -75,35 +82,14 @@ if(BUILD_TESTING)
   # unit test
   ament_add_gtest(time_test tests/timeconversiontest.cpp)
   target_link_libraries(time_test velodyne_input)
-
-  # Download packet capture (PCAP) files containing test data.
-  # Store them in devel-space, so rostest can easily find them.
-  # catkin_download_test_data(
-  #   ${PROJECT_NAME}_tests_class.pcap
-  #   http://download.ros.org/data/velodyne/class.pcap
-  #   DESTINATION ${CATKIN_DEVEL_PREFIX}/${CATKIN_PACKAGE_SHARE_DESTINATION}/tests
-  #   MD5 65808d25772101358a3719b451b3d015)
-  # catkin_download_test_data(
-  #   ${PROJECT_NAME}_tests_32e.pcap
-  #   http://download.ros.org/data/velodyne/32e.pcap
-  #   DESTINATION ${CATKIN_DEVEL_PREFIX}/${CATKIN_PACKAGE_SHARE_DESTINATION}/tests
-  #   MD5 e41d02aac34f0967c03a5597e1d554a9)
-  # catkin_download_test_data(
-  #   ${PROJECT_NAME}_tests_vlp16.pcap
-  #   http://download.ros.org/data/velodyne/vlp16.pcap
-  #   DESTINATION ${CATKIN_DEVEL_PREFIX}/${CATKIN_PACKAGE_SHARE_DESTINATION}/tests
-  #   MD5 f45c2bb1d7ee358274e423ea3b66fd73)
-
-  # unit tests
-  # add_rostest(tests/pcap_node_hertz.test)
-  # add_rostest(tests/pcap_nodelet_hertz.test)
-  # add_rostest(tests/pcap_32e_node_hertz.test)
-  # add_rostest(tests/pcap_32e_nodelet_hertz.test)
-  # add_rostest(tests/pcap_vlp16_node_hertz.test)
-  # add_rostest(tests/pcap_vlp16_nodelet_hertz.test)
-
-  # parse check all the launch/*.launch files
-  # roslaunch_add_file_check(launch)
 endif()
+
+ament_export_include_directories(include/${PROJECT_NAME})
+ament_export_targets(velodyne_driver)
+ament_export_dependencies(
+  diagnostic_updater
+  rclcpp
+  velodyne_msgs
+)
 
 ament_package()
