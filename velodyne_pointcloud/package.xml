@@ -20,6 +20,7 @@
 
   <depend>angles</depend>
   <depend>diagnostic_updater</depend>
+  <depend>eigen</depend>
   <depend>geometry_msgs</depend>
   <depend>libpcl-all-dev</depend>
   <depend>message_filters</depend>
@@ -30,7 +31,6 @@
   <depend>tf2_ros</depend>
   <depend>velodyne_msgs</depend>
   <depend>yaml-cpp</depend>
-  <depend>eigen</depend>
 
   <test_depend>ament_cmake_gtest</test_depend>
   <test_depend>ament_index_cpp</test_depend>
