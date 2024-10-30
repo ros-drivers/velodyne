@@ -85,7 +85,7 @@ VelodyneDriver::VelodyneDriver(const rclcpp::NodeOptions & options)
 
   param_subscriber_ = std::make_shared<rclcpp::ParameterEventHandler>(this);
   param_enabled_cb_handle_ = param_subscriber_->add_parameter_callback(
-    "enabled", [this](const rclcpp::Parameter & p) { this->config_.enabled.store(p.as_bool()); });
+    "enabled", [this](const rclcpp::Parameter & p) {this->config_.enabled.store(p.as_bool());});
 
   future_ = exit_signal_.get_future();
 
