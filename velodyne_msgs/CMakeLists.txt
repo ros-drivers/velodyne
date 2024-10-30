@@ -19,8 +19,7 @@ find_package(std_msgs REQUIRED)
 rosidl_generate_interfaces(${PROJECT_NAME}
   "msg/VelodynePacket.msg"
   "msg/VelodyneScan.msg"
-  DEPENDENCIES std_msgs
-  DEPENDENCIES builtin_interfaces
+  DEPENDENCIES builtin_interfaces std_msgs
   ADD_LINTER_TESTS
 )
 
