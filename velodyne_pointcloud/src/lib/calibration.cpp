@@ -44,8 +44,6 @@
 
 #include "velodyne_pointcloud/calibration.hpp"
 
-#ifdef HAVE_NEW_YAMLCPP
-
 namespace YAML
 {
 
@@ -58,8 +56,6 @@ void operator>>(const YAML::Node & node, T & i)
 }
 
 }  // namespace YAML
-
-#endif  // HAVE_NEW_YAMLCPP
 
 namespace velodyne_pointcloud
 {
@@ -90,18 +86,10 @@ void operator>>(const YAML::Node & node, std::pair<int, LaserCorrection> & corre
   node[VERT_CORRECTION] >> correction.second.vert_correction;
   node[DIST_CORRECTION] >> correction.second.dist_correction;
 
-#ifdef HAVE_NEW_YAMLCPP
-
   if (node[TWO_PT_CORRECTION_AVAILABLE]) {
     node[TWO_PT_CORRECTION_AVAILABLE] >>
     correction.second.two_pt_correction_available;
   } else {
-#else
-
-  if (const YAML::Node * pName = node.FindValue(TWO_PT_CORRECTION_AVAILABLE)) {
-    *pName >> correction.second.two_pt_correction_available;
-  } else {
-#endif
     correction.second.two_pt_correction_available = false;
   }
 
@@ -109,54 +97,26 @@ void operator>>(const YAML::Node & node, std::pair<int, LaserCorrection> & corre
   node[DIST_CORRECTION_Y] >> correction.second.dist_correction_y;
   node[VERT_OFFSET_CORRECTION] >> correction.second.vert_offset_correction;
 
-#ifdef HAVE_NEW_YAMLCPP
-
   if (node[HORIZ_OFFSET_CORRECTION]) {
     node[HORIZ_OFFSET_CORRECTION] >>
     correction.second.horiz_offset_correction;
   } else {
-#else
-
-  if (const YAML::Node * pName = node.FindValue(HORIZ_OFFSET_CORRECTION)) {
-    *pName >> correction.second.horiz_offset_correction;
-  } else {
-#endif
     correction.second.horiz_offset_correction = 0;
   }
 
   float max_intensity_float = 255.0;
 
-#ifdef HAVE_NEW_YAMLCPP
-
   if (node[MAX_INTENSITY]) {
     node[MAX_INTENSITY] >> max_intensity_float;
   }
-
-#else
-
-  if (const YAML::Node * pName = node.FindValue(MAX_INTENSITY)) {
-    *pName >> max_intensity_float;
-  }
-
-#endif
 
   correction.second.max_intensity = ::floorf(max_intensity_float);
 
   float min_intensity_float = 0.0;
 
-#ifdef HAVE_NEW_YAMLCPP
-
   if (node[MIN_INTENSITY]) {
     node[MIN_INTENSITY] >> min_intensity_float;
   }
-
-#else
-
-  if (const YAML::Node * pName = node.FindValue(MIN_INTENSITY)) {
-    *pName >> min_intensity_float;
-  }
-
-#endif
 
   correction.second.min_intensity = ::floorf(min_intensity_float);
 
@@ -241,17 +201,9 @@ Calibration::Calibration(const std::string & calibration_file)
   try {
     YAML::Node doc;
 
-#ifdef HAVE_NEW_YAMLCPP
-
     fin.close();
     doc = YAML::LoadFile(calibration_file);
 
-#else
-
-    YAML::Parser parser(fin);
-    parser.GetNextDocument(doc);
-
-#endif
     doc >> *this;
   } catch (YAML::Exception & e) {
     fin.close();

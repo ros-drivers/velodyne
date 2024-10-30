@@ -8,7 +8,6 @@
   </description>
   <maintainer email="whitleysoftwareservices@gmail.com">Josh Whitley</maintainer>
   <license>BSD</license>
-  <url type="website">http://ros.org/wiki/velodyne_pointcloud</url>
   <url type="repository">https://github.com/ros-drivers/velodyne</url>
   <url type="bugtracker">https://github.com/ros-drivers/velodyne/issues</url>
   <author>Jack O'Quin</author>
@@ -17,8 +16,6 @@
   <author>Andreas Klintberg</author>
 
   <buildtool_depend>ament_cmake</buildtool_depend>
-
-  <build_depend>pkg-config</build_depend>
 
   <depend>angles</depend>
   <depend>diagnostic_updater</depend>

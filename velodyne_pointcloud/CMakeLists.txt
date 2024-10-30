@@ -23,57 +23,86 @@ find_package(sensor_msgs REQUIRED)
 find_package(tf2 REQUIRED)
 find_package(tf2_ros REQUIRED)
 find_package(velodyne_msgs REQUIRED)
+find_package(yaml-cpp REQUIRED)
 
-# Resolve system dependency on yaml-cpp, which apparently does not
-# provide a CMake find_package() module.
-find_package(PkgConfig REQUIRED)
-pkg_check_modules(YAML_CPP REQUIRED yaml-cpp)
-find_path(YAML_CPP_INCLUDE_DIR
-  NAMES yaml_cpp.h
-  PATHS ${YAML_CPP_INCLUDE_DIRS})
-find_library(YAML_CPP_LIBRARY
-  NAMES YAML_CPP
-  PATHS ${YAML_CPP_LIBRARY_DIRS})
-
-link_directories(${YAML_CPP_LIBRARY_DIRS})
-
-if(NOT ${YAML_CPP_VERSION} VERSION_LESS "0.5")
-  add_definitions(-DHAVE_NEW_YAMLCPP)
+# Older versions of yaml-cpp have a target called "yaml-cpp",
+# so use that where appropriate.
+if(TARGET yaml-cpp::yaml-cpp)
+  set(YAML_CPP_TARGET "yaml-cpp::yaml-cpp")
+else()
+  set(YAML_CPP_TARGET ${YAML_CPP_LIBRARIES})
 endif()
 
-include_directories(include ${PCL_COMMON_INCLUDE_DIRS})
+add_library(velodyne_rawdata SHARED
+  src/lib/rawdata.cpp
+  src/lib/calibration.cpp)
+target_include_directories(velodyne_rawdata PUBLIC
+  "$<BUILD_INTERFACE:${CMAKE_CURRENT_SOURCE_DIR}/include>"
+  "$<INSTALL_INTERFACE:include/${PROJECT_NAME}>")
+target_link_libraries(velodyne_rawdata PUBLIC
+  angles::angles
+  ${geometry_msgs_TARGETS}
+  ${PCL_LIBRARIES}
+  rclcpp::rclcpp
+  ${sensor_msgs_TARGETS}
+  tf2::tf2
+  tf2_ros::tf2_ros
+  ${velodyne_msgs_TARGETS}
+  ${YAML_CPP_TARGET}
+)
 
-add_subdirectory(src/lib)
+add_library(velodyne_cloud_types SHARED
+  src/lib/pointcloudXYZIRT.cpp
+  src/lib/organized_cloudXYZIRT.cpp
+)
+target_include_directories(velodyne_cloud_types PUBLIC
+  "$<BUILD_INTERFACE:${CMAKE_CURRENT_SOURCE_DIR}/include>"
+  "$<INSTALL_INTERFACE:include/${PROJECT_NAME}>")
+target_link_libraries(velodyne_cloud_types PUBLIC
+  ${PCL_LIBRARIES}
+  rclcpp::rclcpp
+  ${sensor_msgs_TARGETS}
+  tf2_ros::tf2_ros
+  ${velodyne_msgs_TARGETS}
+)
 
 add_library(transform SHARED
   src/conversions/transform.cpp)
-ament_target_dependencies(transform
-  diagnostic_updater
-  message_filters
-  rclcpp
-  rclcpp_components
-  tf2
-  tf2_ros
-)
-target_link_libraries(transform
+target_include_directories(transform PUBLIC
+  "$<BUILD_INTERFACE:${CMAKE_CURRENT_SOURCE_DIR}/include>"
+  "$<INSTALL_INTERFACE:include/${PROJECT_NAME}>")
+target_link_libraries(transform PUBLIC
+  diagnostic_updater::diagnostic_updater
+  message_filters::message_filters
+  rclcpp::rclcpp
+  tf2::tf2
+  tf2_ros::tf2_ros
   velodyne_cloud_types
   velodyne_rawdata
-  ${YAML_CPP_LIBRARIES})
-install(TARGETS transform
-  ARCHIVE DESTINATION lib
-  LIBRARY DESTINATION lib
-  RUNTIME DESTINATION bin
+  ${YAML_CPP_TARGET}
 )
+target_link_libraries(transform PRIVATE
+  rclcpp_components::component
+)
+
+install(TARGETS velodyne_cloud_types velodyne_rawdata transform
+  EXPORT ${PROJECT_NAME}
+  RUNTIME DESTINATION bin
+  ARCHIVE DESTINATION lib
+  LIBRARY DESTINATION lib)
+
 rclcpp_components_register_nodes(transform
   "velodyne_pointcloud::Transform")
 
 add_executable(velodyne_transform_node
   src/conversions/transform_node.cpp)
-ament_target_dependencies(velodyne_transform_node
-  rclcpp
+target_include_directories(velodyne_transform_node PUBLIC
+  "$<BUILD_INTERFACE:${CMAKE_CURRENT_SOURCE_DIR}/include>"
+  "$<INSTALL_INTERFACE:include/${PROJECT_NAME}>")
+target_link_libraries(velodyne_transform_node PRIVATE
+  rclcpp::rclcpp
+  transform
 )
-target_link_libraries(velodyne_transform_node
-  transform)
 install(TARGETS velodyne_transform_node
   DESTINATION lib/${PROJECT_NAME})
 
@@ -81,8 +110,6 @@ install(DIRECTORY include/${PROJECT_NAME}/
   DESTINATION include/${PROJECT_NAME})
 install(DIRECTORY config launch params
   DESTINATION share/${PROJECT_NAME})
-# install(PROGRAMS scripts/gen_calibration.py
-#         DESTINATION ${CATKIN_PACKAGE_BIN_DESTINATION})
 
 if(BUILD_TESTING)
   # Remove empty.xml from lint
@@ -112,7 +139,7 @@ if(BUILD_TESTING)
   add_subdirectory(tests)
 endif()
 
-ament_export_include_directories(include)
+ament_export_include_directories(include/${PROJECT_NAME})
 ament_export_dependencies(
   diagnostic_updater
   eigen
@@ -126,4 +153,6 @@ ament_export_dependencies(
   velodyne_msgs
 )
 ament_export_libraries(velodyne_rawdata velodyne_cloud_types)
+ament_export_targets(${PROJECT_NAME})
+
 ament_package()
