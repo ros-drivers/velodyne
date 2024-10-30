@@ -8,7 +8,6 @@
   </description>
   <maintainer email="whitleysoftwareservices@gmail.com">Josh Whitley</maintainer>
   <license>BSD</license>
-  <url type="website">http://ros.org/wiki/velodyne_laserscan</url>
   <url type="repository">https://github.com/ros-drivers/velodyne</url>
   <url type="bugtracker">https://github.com/ros-drivers/velodyne/issues</url>
   <author>Micho Radovnikovich</author>

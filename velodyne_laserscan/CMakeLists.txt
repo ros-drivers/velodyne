@@ -15,15 +15,18 @@ find_package(rclcpp REQUIRED)
 find_package(rclcpp_components REQUIRED)
 find_package(sensor_msgs REQUIRED)
 
-include_directories(include)
-
 add_library(${PROJECT_NAME} SHARED
   src/velodyne_laserscan.cpp
 )
-ament_target_dependencies(${PROJECT_NAME}
-  rclcpp
-  rclcpp_components
-  sensor_msgs
+target_include_directories(${PROJECT_NAME} PUBLIC
+  "$<BUILD_INTERFACE:${CMAKE_CURRENT_SOURCE_DIR}/include>"
+  "$<INSTALL_INTERFACE:include/${PROJECT_NAME}>")
+target_link_libraries(${PROJECT_NAME} PUBLIC
+  rclcpp::rclcpp
+  ${sensor_msgs_TARGETS}
+)
+target_link_libraries(${PROJECT_NAME} PUBLIC
+  rclcpp_components::component
 )
 
 rclcpp_components_register_nodes(${PROJECT_NAME}
@@ -32,12 +35,10 @@ rclcpp_components_register_nodes(${PROJECT_NAME}
 add_executable(${PROJECT_NAME}_node
   src/node.cpp
 )
-ament_target_dependencies(${PROJECT_NAME}_node
-  rclcpp
-)
-target_link_libraries(${PROJECT_NAME}_node ${PROJECT_NAME})
+target_link_libraries(${PROJECT_NAME}_node PRIVATE rclcpp::rclcpp ${PROJECT_NAME})
 
 install(TARGETS ${PROJECT_NAME}
+  EXPORT ${PROJECT_NAME}
   ARCHIVE DESTINATION lib
   LIBRARY DESTINATION lib
   RUNTIME DESTINATION bin
@@ -56,7 +57,10 @@ install(DIRECTORY config launch
 if(BUILD_TESTING)
   find_package(ament_lint_auto REQUIRED)
   ament_lint_auto_find_test_dependencies()
-#   add_subdirectory(tests)
 endif()
+
+ament_export_include_directories(include/${PROJECT_NAME})
+ament_export_targets(${PROJECT_NAME})
+ament_export_dependencies(rclcpp sensor_msgs)
 
 ament_package()
