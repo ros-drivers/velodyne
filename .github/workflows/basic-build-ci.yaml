@@ -5,53 +5,19 @@ on:
   - push
 
 jobs:
-  build-ros2-latest:
-    runs-on: ubuntu-22.04
+  build:
+    runs-on: ubuntu-latest
     strategy:
       matrix:
-        image:
-          - rostooling/setup-ros-docker:ubuntu-jammy-ros-humble-ros-base-latest
-          - rostooling/setup-ros-docker:ubuntu-jammy-ros-iron-ros-base-latest
-          - rostooling/setup-ros-docker:ubuntu-noble-ros-jazzy-ros-base-latest
-          - rostooling/setup-ros-docker:ubuntu-noble-ros-rolling-ros-base-latest
-        ros-version:
-          - humble
-          - iron
-          - jazzy
-          - rolling
-        exclude:
-          - image: rostooling/setup-ros-docker:ubuntu-jammy-ros-humble-ros-base-latest
-            ros-version: iron
-          - image: rostooling/setup-ros-docker:ubuntu-jammy-ros-humble-ros-base-latest
-            ros-version: jazzy
-          - image: rostooling/setup-ros-docker:ubuntu-jammy-ros-humble-ros-base-latest
-            ros-version: rolling
-          - image: rostooling/setup-ros-docker:ubuntu-jammy-ros-iron-ros-base-latest
-            ros-version: humble
-          - image: rostooling/setup-ros-docker:ubuntu-jammy-ros-iron-ros-base-latest
-            ros-version: jazzy
-          - image: rostooling/setup-ros-docker:ubuntu-jammy-ros-iron-ros-base-latest
-            ros-version: rolling
-          - image: rostooling/setup-ros-docker:ubuntu-noble-ros-jazzy-ros-base-latest
-            ros-version: humble
-          - image: rostooling/setup-ros-docker:ubuntu-noble-ros-jazzy-ros-base-latest
-            ros-version: iron
-          - image: rostooling/setup-ros-docker:ubuntu-noble-ros-jazzy-ros-base-latest
-            ros-version: rolling
-          - image: rostooling/setup-ros-docker:ubuntu-noble-ros-rolling-ros-base-latest
-            ros-version: humble
-          - image: rostooling/setup-ros-docker:ubuntu-noble-ros-rolling-ros-base-latest
-            ros-version: iron
-          - image: rostooling/setup-ros-docker:ubuntu-noble-ros-rolling-ros-base-latest
-            ros-version: jazzy
+        rosdistro: [humble, iron, jazzy, rolling]
       fail-fast: false
     container:
-      image: ${{ matrix.image }}
+      image: ros:${{ matrix.rosdistro }}-ros-base
     steps:
       - name: Build Environment
         uses: ros-tooling/setup-ros@v0.7
         with:
-          required-ros-distributions: ${{ matrix.ros-version }}
+          required-ros-distributions: ${{ matrix.rosdistro }}
       - name: Run Tests
         uses: ros-tooling/action-ros-ci@v0.3
         with:
@@ -61,7 +27,7 @@ jobs:
             velodyne_laserscan
             velodyne_msgs
             velodyne_pointcloud
-          target-ros2-distro: ${{ matrix.ros-version }}
+          target-ros2-distro: ${{ matrix.rosdistro }}
       - name: Upload logs
         uses: actions/upload-artifact@v4
         with:
