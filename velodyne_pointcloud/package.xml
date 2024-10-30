@@ -18,6 +18,8 @@
 
   <buildtool_depend>ament_cmake</buildtool_depend>
 
+  <build_depend>pkg-config</build_depend>
+
   <depend>angles</depend>
   <depend>diagnostic_updater</depend>
   <depend>eigen</depend>
