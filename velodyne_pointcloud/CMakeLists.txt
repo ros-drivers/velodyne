@@ -33,6 +33,12 @@ else()
   set(YAML_CPP_TARGET ${YAML_CPP_LIBRARIES})
 endif()
 
+# Work around broken find module in AlmaLinux/RHEL eigen3-devel from PowerTools repo
+find_package(Eigen3 QUIET NO_MODULE)
+if(NOT Eigen3_FOUND)
+  find_package(Eigen3 REQUIRED)
+endif()
+
 add_library(velodyne_rawdata SHARED
   src/lib/rawdata.cpp
   src/lib/calibration.cpp)
@@ -41,6 +47,7 @@ target_include_directories(velodyne_rawdata PUBLIC
   "$<INSTALL_INTERFACE:include/${PROJECT_NAME}>")
 target_link_libraries(velodyne_rawdata PUBLIC
   angles::angles
+  Eigen3::Eigen
   ${geometry_msgs_TARGETS}
   ${PCL_LIBRARIES}
   rclcpp::rclcpp
@@ -59,6 +66,7 @@ target_include_directories(velodyne_cloud_types PUBLIC
   "$<BUILD_INTERFACE:${CMAKE_CURRENT_SOURCE_DIR}/include>"
   "$<INSTALL_INTERFACE:include/${PROJECT_NAME}>")
 target_link_libraries(velodyne_cloud_types PUBLIC
+  Eigen3::Eigen
   ${PCL_LIBRARIES}
   rclcpp::rclcpp
   ${sensor_msgs_TARGETS}
@@ -73,6 +81,7 @@ target_include_directories(transform PUBLIC
   "$<INSTALL_INTERFACE:include/${PROJECT_NAME}>")
 target_link_libraries(transform PUBLIC
   diagnostic_updater::diagnostic_updater
+  Eigen3::Eigen
   message_filters::message_filters
   rclcpp::rclcpp
   tf2::tf2
