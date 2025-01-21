@@ -33,6 +33,7 @@
 """Launch the velodyne driver node with default configuration."""
 
 import os
+import yaml
 
 import ament_index_python.packages
 import launch
@@ -43,7 +44,11 @@ def generate_launch_description():
     config_directory = os.path.join(
         ament_index_python.packages.get_package_share_directory('velodyne_driver'),
         'config')
-    params = os.path.join(config_directory, 'VLS128-velodyne_driver_node-params.yaml')
+    param_config = os.path.join(config_directory, 'VLS128-velodyne_driver_node-params.yaml')
+
+    # Load the parameters from YAML file
+    with open(param_config, 'r') as f:
+        params = yaml.safe_load(f)['velodyne_driver_node']['ros__parameters']
     velodyne_driver_node = launch_ros.actions.Node(package='velodyne_driver',
                                                    executable='velodyne_driver_node',
                                                    output='both',
