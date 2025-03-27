@@ -158,6 +158,7 @@ ament_export_dependencies(
   rclcpp
   sensor_msgs
   tf2
+  yaml-cpp
   tf2_ros
   velodyne_msgs
 )
