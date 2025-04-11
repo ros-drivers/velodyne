@@ -16,6 +16,8 @@
   <arg name="gps_time" default="false" />
   <arg name="pcap_time" default="false" />
   <arg name="cut_angle" default="-0.01" />
+  <arg name="fov_start_angle" default="-1" />
+  <arg name="fov_end_angle" default="-1" />
   <arg name="timestamp_first_packet" default="false" />
   <arg name="diagnostic_frequency_tolerance" default="0.1" />
 
@@ -37,6 +39,8 @@
     <param name="gps_time" value="$(arg gps_time)"/>
     <param name="pcap_time" value="$(arg pcap_time)"/>
     <param name="cut_angle" value="$(arg cut_angle)"/>
+    <param name="fov_start_angle" value="$(arg fov_start_angle)" />
+    <param name="fov_end_angle" value="$(arg fov_end_angle)" />
     <param name="timestamp_first_packet" value="$(arg timestamp_first_packet)"/>
     <param name="diagnostic_frequency_tolerance" value="$(arg diagnostic_frequency_tolerance)"/>
   </node>

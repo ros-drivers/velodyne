@@ -41,6 +41,7 @@
 
 #include <velodyne_driver/input.h>
 #include <velodyne_driver/VelodyneNodeConfig.h>
+#include <velodyne_msgs/VelodyneScan.h>
 
 namespace velodyne_driver
 {
@@ -65,6 +66,10 @@ private:
   // Pointer to dynamic reconfigure service srv_
   boost::shared_ptr<dynamic_reconfigure::Server<velodyne_driver::
               VelodyneNodeConfig> > srv_;
+  // Publish packets assigned to current scan
+  void publishScan(const velodyne_msgs::VelodyneScanPtr &scan);
+  // Helper function to determine if one value is between start and end value
+  bool isBetween(const int value, const int start, const int end) const;
 
   // configuration parameters
   struct
@@ -74,6 +79,7 @@ private:
     int    npackets;                 // number of packets to collect
     double rpm;                      // device rotation rate (RPMs)
     int cut_angle;                   // cutting angle in 1/100°
+    int fov_start_angle, fov_end_angle;  // FOV cut angles in 1/100°, < 0 if disabled
     double time_offset;              // time in seconds added to each velodyne time stamp
     bool enabled;                    // polling is enabled
     bool timestamp_first_packet;

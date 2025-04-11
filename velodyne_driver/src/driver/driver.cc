@@ -40,7 +40,6 @@
 
 #include <ros/ros.h>
 #include <tf/transform_listener.h>
-#include <velodyne_msgs/VelodyneScan.h>
 
 #include "velodyne_driver/driver.h"
 
@@ -114,8 +113,7 @@ VelodyneDriver::VelodyneDriver(ros::NodeHandle node,
   // default number of packets for each scan is a single revolution
   // (fractions rounded up)
   config_.npackets = (int) ceil(packet_rate / frequency);
-  private_nh.getParam("npackets", config_.npackets);
-  ROS_INFO_STREAM("publishing " << config_.npackets << " packets per scan");
+  // private_nh.getParam("npackets", config_.npackets);
 
   // if we are timestamping based on the first or last packet in the scan
   private_nh.param("timestamp_first_packet", config_.timestamp_first_packet, false);
@@ -133,6 +131,9 @@ VelodyneDriver::VelodyneDriver(ros::NodeHandle node,
   }
   else if (cut_angle < (2*M_PI))
   {
+      // Recompute expected number of packets in scan based on FOV section
+      config_.npackets = (int) (config_.npackets * cut_angle / (2*M_PI)) + 1;
+
       ROS_INFO_STREAM("Cut at specific angle feature activated. "
         "Cutting velodyne points always at " << cut_angle << " rad.");
   }
@@ -143,9 +144,36 @@ VelodyneDriver::VelodyneDriver(ros::NodeHandle node,
     cut_angle = -0.01;
   }
 
+  int fov_start_angle, fov_end_angle;
+  private_nh.param("fov_start_angle", fov_start_angle, -1);
+  private_nh.param("fov_end_angle", fov_end_angle, -1);
+  if (fov_start_angle < 0 || fov_end_angle < 0)
+  {
+    ROS_INFO_STREAM("Cut FOV in angle range feature deactivated.");
+  }
+  else if (fov_start_angle <= 360 && fov_end_angle <= 360)
+  {
+    // Recompute expected number of packets in scan based on FOV section
+    const int section = fov_end_angle - fov_start_angle + (fov_start_angle <= fov_end_angle ? 0 : 360);
+    config_.npackets = (int) (config_.npackets * section / 360) + 1;
+
+    ROS_INFO_STREAM("Cut FOV in angle range feature activated. "
+        "Cutting velodyne points from " << fov_start_angle << " to " << fov_end_angle << " degrees.");
+  }
+  else
+  {
+    ROS_ERROR_STREAM("fov_start_angle or fov_end_angle parameter is out of range. Allowed range is "
+    << "between 0 and 360 or negative values to deactivate this feature.");
+    fov_start_angle = fov_end_angle = -1;
+  }
+
+  ROS_INFO_STREAM("publishing " << config_.npackets << " packets per scan");
+
   // Convert cut_angle from radian to one-hundredth degree,
   // which is used in velodyne packets
   config_.cut_angle = int((cut_angle*360/(2*M_PI))*100);
+  config_.fov_start_angle = fov_start_angle * 100;
+  config_.fov_end_angle = fov_end_angle * 100;
 
   int udp_port;
   private_nh.param("port", udp_port, (int) DATA_PORT_NUMBER);
@@ -160,7 +188,7 @@ VelodyneDriver::VelodyneDriver(ros::NodeHandle node,
 
   // initialize diagnostics
   diagnostics_.setHardwareID(deviceName);
-  const double diag_freq = packet_rate/config_.npackets;
+  const double diag_freq = frequency;
   diag_max_freq_ = diag_freq;
   diag_min_freq_ = diag_freq;
   ROS_INFO("expected frequency: %.3f (Hz)", diag_freq);
@@ -212,12 +240,27 @@ bool VelodyneDriver::poll(void)
 
   // Allocate a new shared pointer for zero-copy sharing with other nodelets.
   velodyne_msgs::VelodyneScanPtr scan(new velodyne_msgs::VelodyneScan);
+  scan->packets.reserve(config_.npackets);
 
-  if( config_.cut_angle >= 0) //Cut at specific angle feature enabled
+  if(config_.cut_angle >= 0
+  || config_.fov_start_angle >= 0 && config_.fov_end_angle >= 0) // Cut at specific angle feature enabled
   {
-    scan->packets.reserve(config_.npackets);
     velodyne_msgs::VelodynePacket tmp_packet;
-    while(true)
+
+    int start_angle, end_angle;
+    if(config_.cut_angle >= 0)  // Filtering by cut angle
+    {
+      start_angle = 0;
+      end_angle = config_.cut_angle;
+    }
+    else  // Filtering by FOV range
+    {
+      start_angle = config_.fov_start_angle;
+      end_angle = config_.fov_end_angle;
+    }
+
+    int process = 1;
+    while(process)
     {
       while(true)
       {
@@ -226,24 +269,29 @@ bool VelodyneDriver::poll(void)
         if (rc < 0) return false; // end of file reached?
         if (rc == 0) continue;    //timeout?
       }
-      scan->packets.push_back(tmp_packet);
 
       // Extract base rotation of first block in packet
-      std::size_t azimuth_data_pos = 100*0+2;
-      int azimuth = *( (u_int16_t*) (&tmp_packet.data[azimuth_data_pos]));
+      const std::size_t azimuth_data_pos = 100*0+2;
+      const int azimuth = *( (u_int16_t*) (&tmp_packet.data[azimuth_data_pos]));
 
-      //if first packet in scan, there is no "valid" last_azimuth_
-      if (last_azimuth_ == -1) {
-      	 last_azimuth_ = azimuth;
-      	 continue;
-      }
-      if((last_azimuth_ < config_.cut_angle && config_.cut_angle <= azimuth)
-      	 || ( config_.cut_angle <= azimuth && azimuth < last_azimuth_)
-      	 || (azimuth < last_azimuth_ && last_azimuth_ < config_.cut_angle))
+      if(isBetween(azimuth, start_angle, end_angle))  // azimuth is in FOV cut
       {
-        last_azimuth_ = azimuth;
-        break; // Cut angle passed, one full revolution collected
+        if(isBetween(end_angle, azimuth, last_azimuth_) || isBetween(azimuth, last_azimuth_, end_angle))
+        { // add packet to scan
+          scan->packets.push_back(tmp_packet);
+        }
+        else if(isBetween(last_azimuth_, azimuth, end_angle)) // new scan started
+        { // publish current scan and brake loop
+          publishScan(scan);
+          process = 0;
+        }
       }
+      else if(last_azimuth_ != -1 && isBetween(last_azimuth_, start_angle, end_angle))  // last azimuth is in FOV cut
+      { // publish current scan and brake loop
+        publishScan(scan);
+        process = 0;
+      }
+
       last_azimuth_ = azimuth;
     }
   }
@@ -263,8 +311,14 @@ bool VelodyneDriver::poll(void)
           if (rc == 0) continue;    //timeout?
         }
     }
+    publishScan(scan);
   }
 
+  return true;
+}
+
+void VelodyneDriver::publishScan(const velodyne_msgs::VelodyneScanPtr &scan)
+{
   // publish message using time of last packet read
   ROS_DEBUG("Publishing a full Velodyne scan.");
   if (config_.timestamp_first_packet){
@@ -280,8 +334,18 @@ bool VelodyneDriver::poll(void)
   // its status
   diag_topic_->tick(scan->header.stamp);
   diagnostics_.update();
+}
 
-  return true;
+bool VelodyneDriver::isBetween(const int value, const int start, const int end) const
+{
+  if(start <= end)
+  {
+    return value > start && value < end;
+  }
+  else
+  {
+    return value > start || value < end;
+  }
 }
 
 void VelodyneDriver::callback(velodyne_driver::VelodyneNodeConfig &config,
