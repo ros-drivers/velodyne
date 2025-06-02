@@ -329,6 +329,8 @@ void RawData::unpack(
         if (timing_offsets_.size()) {
           time = timing_offsets_[i][j] + time_diff_start_to_this_packet;
         }
+        else
+          time = time_diff_start_to_this_packet;
 
         if (tmp.uint == 0) {  // no valid laser beam return
           // call to addPoint is still required since output could be organized
@@ -547,6 +549,8 @@ void RawData::unpack_vls128(
         time = timing_offsets_[block / 4][firing_order + laser_number / 64] +
           time_diff_start_to_this_packet;
       }
+      else
+        time = time_diff_start_to_this_packet;
 
       velodyne_pointcloud::LaserCorrection & corrections =
         calibration_->laser_corrections[laser_number];
@@ -812,6 +816,8 @@ void RawData::unpack_vlp16(
           if (timing_offsets_.size()) {
             time = timing_offsets_[block][firing * 16 + dsr] + time_diff_start_to_this_packet;
           }
+          else
+            time = time_diff_start_to_this_packet;
 
           data.addPoint(
             x_coord, y_coord, z_coord, corrections.laser_ring,
