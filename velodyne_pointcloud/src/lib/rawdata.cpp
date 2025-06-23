@@ -331,7 +331,7 @@ void RawData::unpack(
         } else {
           time = time_diff_start_to_this_packet;
         }
-        
+
         if (tmp.uint == 0) {  // no valid laser beam return
           // call to addPoint is still required since output could be organized
           data.addPoint(
@@ -551,7 +551,7 @@ void RawData::unpack_vls128(
       } else {
         time = time_diff_start_to_this_packet;
       }
-      
+
       velodyne_pointcloud::LaserCorrection & corrections =
         calibration_->laser_corrections[laser_number];
 
@@ -818,7 +818,7 @@ void RawData::unpack_vlp16(
           } else {
             time = time_diff_start_to_this_packet;
           }
-          
+
           data.addPoint(
             x_coord, y_coord, z_coord, corrections.laser_ring,
             distance, intensity, time);
