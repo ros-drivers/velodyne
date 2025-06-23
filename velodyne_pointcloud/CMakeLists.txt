@@ -78,7 +78,7 @@ add_library(transform SHARED
   src/conversions/transform.cpp)
 message("rosidl_cmake_VERSION: ${rosidl_cmake_VERSION}")
 if(${rosidl_cmake_VERSION} VERSION_EQUAL 4.0.1)
-  target_compile_definitions(transform PRIVATE ROS2_IRON)
+  target_compile_definitions(transform PUBLIC ROS2_IRON)
 endif()
 target_include_directories(transform PUBLIC
   "$<BUILD_INTERFACE:${CMAKE_CURRENT_SOURCE_DIR}/include>"
