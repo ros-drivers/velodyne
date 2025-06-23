@@ -33,7 +33,7 @@
 #ifndef VELODYNE_POINTCLOUD__TRANSFORM_HPP_
 #define VELODYNE_POINTCLOUD__TRANSFORM_HPP_
 
-#include <message_filters/subscriber.h>
+#include <message_filters/subscriber.hpp>
 #include <tf2_ros/buffer.h>
 #include <tf2_ros/message_filter.h>
 #include <tf2_ros/transform_listener.h>
