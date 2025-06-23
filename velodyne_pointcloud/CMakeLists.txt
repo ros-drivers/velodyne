@@ -76,6 +76,7 @@ target_link_libraries(velodyne_cloud_types PUBLIC
 )
 add_library(transform SHARED
   src/conversions/transform.cpp)
+message("rosidl_cmake_VERSION: ${rosidl_cmake_VERSION}")
 if(${rosidl_cmake_VERSION} VERSION_EQUAL 4.0.1)
   target_compile_definitions(transform PRIVATE ROS2_IRON)
 endif()
