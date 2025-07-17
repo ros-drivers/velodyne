@@ -23,6 +23,7 @@ find_package(sensor_msgs REQUIRED)
 find_package(tf2 REQUIRED)
 find_package(tf2_ros REQUIRED)
 find_package(velodyne_msgs REQUIRED)
+find_package(yaml_cpp_vendor REQUIRED)
 find_package(yaml-cpp REQUIRED)
 
 # Older versions of yaml-cpp have a target called "yaml-cpp",
@@ -160,6 +161,7 @@ ament_export_dependencies(
   tf2
   tf2_ros
   velodyne_msgs
+  yaml-cpp
 )
 ament_export_libraries(velodyne_rawdata velodyne_cloud_types)
 ament_export_targets(${PROJECT_NAME})
