@@ -24,4 +24,4 @@ The current ``dashing-devel`` branch works with ROS Dashing.
 
 For users encountering networking or performance issues with high-bandwidth sensors (such as data loss, discussed in [Issue #557](https://github.com/ros-drivers/velodyne/issues/557)), switching the default ROS 2 middleware may resolve the problem.
 
-This package is compatible with alternative RMW implementations, including [Zenoh](https://zenoh.io/). You can use the [Zenoh RMW implementation for ROS 2 (`rmw_zenoh`)](https://github.com/ros2/rmw_zenoh) by following the [official ROS 2 documentation](https://docs.ros.org/en/jazzy/Installation/RMW-Implementations/Non-DDS-Implementations/Working-with-Zenoh.html) on how to install and select a different middleware.
+This package is compatible with alternative RMW implementations. You can follow the [official ROS 2 documentation](https://docs.ros.org/en/jazzy/Installation/RMW-Implementations.html) on how to install and select a different middleware.
