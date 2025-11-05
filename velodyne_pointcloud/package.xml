@@ -16,6 +16,7 @@
   <author>Andreas Klintberg</author>
 
   <buildtool_depend>ament_cmake</buildtool_depend>
+  <build_depend>rosidl_cmake</build_depend>
 
   <depend>angles</depend>
   <depend>diagnostic_updater</depend>

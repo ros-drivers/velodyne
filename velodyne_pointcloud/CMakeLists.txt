@@ -19,6 +19,7 @@ find_package(message_filters REQUIRED)
 find_package(PCL REQUIRED COMPONENTS common)
 find_package(rclcpp REQUIRED)
 find_package(rclcpp_components REQUIRED)
+find_package(rosidl_cmake REQUIRED)
 find_package(sensor_msgs REQUIRED)
 find_package(tf2 REQUIRED)
 find_package(tf2_ros REQUIRED)
@@ -74,9 +75,11 @@ target_link_libraries(velodyne_cloud_types PUBLIC
   tf2_ros::tf2_ros
   ${velodyne_msgs_TARGETS}
 )
-
 add_library(transform SHARED
   src/conversions/transform.cpp)
+if(${rosidl_cmake_VERSION} VERSION_EQUAL 4.0.1)
+  target_compile_definitions(transform PUBLIC ROS2_IRON)
+endif()
 target_include_directories(transform PUBLIC
   "$<BUILD_INTERFACE:${CMAKE_CURRENT_SOURCE_DIR}/include>"
   "$<INSTALL_INTERFACE:include/${PROJECT_NAME}>")
