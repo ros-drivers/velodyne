@@ -33,12 +33,10 @@
 #ifndef VELODYNE_POINTCLOUD__POINTCLOUDXYZIRT_HPP_
 #define VELODYNE_POINTCLOUD__POINTCLOUDXYZIRT_HPP_
 
-#include <tf2/buffer_core.h>
-
-#include <memory>
 #include <string>
 
 #include <sensor_msgs/point_cloud2_iterator.hpp>
+#include <tf2/buffer_core.hpp>
 #include <velodyne_msgs/msg/velodyne_scan.hpp>
 
 #include "velodyne_pointcloud/datacontainerbase.hpp"

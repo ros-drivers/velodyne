@@ -33,12 +33,6 @@
 #ifndef VELODYNE_POINTCLOUD__DATACONTAINERBASE_HPP_
 #define VELODYNE_POINTCLOUD__DATACONTAINERBASE_HPP_
 
-#include <tf2/LinearMath/Quaternion.h>
-#include <tf2/LinearMath/Vector3.h>
-#include <tf2/buffer_core.h>
-#include <tf2/exceptions.h>
-#include <tf2_ros/buffer.h>
-#include <tf2_ros/transform_listener.h>
 
 #include <Eigen/Core>
 #include <Eigen/Geometry>
@@ -48,11 +42,16 @@
 #include <memory>
 #include <string>
 
-#include <rclcpp/time.hpp>
 #include <geometry_msgs/msg/transform_stamped.hpp>
+#include <rclcpp/time.hpp>
 #include <sensor_msgs/msg/point_cloud2.hpp>
 #include <sensor_msgs/point_cloud2_iterator.hpp>
-
+#include <tf2/LinearMath/Quaternion.hpp>
+#include <tf2/LinearMath/Vector3.hpp>
+#include <tf2/buffer_core.hpp>
+#include <tf2/exceptions.hpp>
+#include <tf2_ros/buffer.hpp>
+#include <tf2_ros/transform_listener.hpp>
 #include <velodyne_msgs/msg/velodyne_scan.hpp>
 
 namespace velodyne_rawdata
@@ -167,7 +166,7 @@ public:
     }
 
     // avoid doing transformation when sensor_frame equals target frame
-    // and no ego motion compensation is perfomed
+    // and no ego motion compensation is performed
     if (config_.fixed_frame.empty() && sensor_frame_ == config_.target_frame) {
       // when the string is empty the points will not be transformed later on
       config_.target_frame = "";
