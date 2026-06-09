@@ -30,7 +30,7 @@
 // ANY WAY OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE
 // POSSIBILITY OF SUCH DAMAGE.
 
-#include <tf2/buffer_core.h>
+#include <tf2/buffer_core.hpp>
 
 #include <memory>
 #include <string>

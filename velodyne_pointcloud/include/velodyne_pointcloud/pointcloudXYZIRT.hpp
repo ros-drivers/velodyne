@@ -33,7 +33,7 @@
 #ifndef VELODYNE_POINTCLOUD__POINTCLOUDXYZIRT_HPP_
 #define VELODYNE_POINTCLOUD__POINTCLOUDXYZIRT_HPP_
 
-#include <tf2/buffer_core.h>
+#include <tf2/buffer_core.hpp>
 
 #include <memory>
 #include <string>
