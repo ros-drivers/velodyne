@@ -32,7 +32,7 @@
 
 #include <gtest/gtest.h>
 
-#include <tf2/buffer_core.h>
+#include <tf2/buffer_core.hpp>
 
 #include <memory>
 
