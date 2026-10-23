@@ -32,8 +32,8 @@
 
 #include "velodyne_pointcloud/transform.hpp"
 
-#include <tf2_ros/message_filter.h>
-#include <tf2_ros/transform_listener.h>
+#include <tf2_ros/message_filter.hpp>
+#include <tf2_ros/transform_listener.hpp>
 
 #include <cmath>
 #include <functional>
