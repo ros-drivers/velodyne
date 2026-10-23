@@ -151,11 +151,12 @@ endif()
 
 ament_export_include_directories(include/${PROJECT_NAME})
 ament_export_dependencies(
+  angles
   diagnostic_updater
-  eigen
+  Eigen3
   geometry_msgs
   message_filters
-  pcl
+  PCL
   rclcpp
   sensor_msgs
   tf2
