@@ -82,6 +82,7 @@ VelodyneDriver::VelodyneDriver(const rclcpp::NodeOptions & options)
   double cut_angle = this->declare_parameter("cut_angle", -1.0);
   int udp_port = this->declare_parameter("port", static_cast<int>(DATA_PORT_NUMBER));
   config_.timestamp_first_packet = this->declare_parameter("timestamp_first_packet", false);
+  int npackets_override = this->declare_parameter("npackets", 0);  // 0 = auto-calculate
 
   param_subscriber_ = std::make_shared<rclcpp::ParameterEventHandler>(this);
   param_enabled_cb_handle_ = param_subscriber_->add_parameter_callback(
@@ -127,9 +128,14 @@ VelodyneDriver::VelodyneDriver(const rclcpp::NodeOptions & options)
   double frequency = (config_.rpm / 60.0);     // expected Hz rate
 
   // default number of packets for each scan is a single revolution
-  // (fractions rounded up)
-  config_.npackets = static_cast<int>(std::ceil(packet_rate / frequency));
-  RCLCPP_INFO(this->get_logger(), "publishing %d packets per scan", config_.npackets);
+  // (fractions rounded up), unless overridden by npackets parameter
+  if (npackets_override > 0) {
+    config_.npackets = npackets_override;
+    RCLCPP_INFO(this->get_logger(), "publishing %d packets per scan (user override)", config_.npackets);
+  } else {
+    config_.npackets = static_cast<int>(std::ceil(packet_rate / frequency));
+    RCLCPP_INFO(this->get_logger(), "publishing %d packets per scan", config_.npackets);
+  }
 
   if (cut_angle < 0.0) {
     RCLCPP_INFO(this->get_logger(), "Cut at specific angle feature deactivated.");
