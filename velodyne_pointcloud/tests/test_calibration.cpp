@@ -34,7 +34,7 @@
 
 #include <string>
 
-#include <ament_index_cpp/get_package_share_directory.hpp>
+#include <ament_index_cpp/get_package_share_path.hpp>
 
 #include <velodyne_pointcloud/calibration.hpp>
 
@@ -43,7 +43,7 @@ using namespace velodyne_pointcloud;  // NOLINT
 std::string get_package_path()
 {
   std::string g_package_name("velodyne_pointcloud");
-  return ament_index_cpp::get_package_share_directory(g_package_name);
+  return ament_index_cpp::get_package_share_path(g_package_name).string();
 }
 
 ///////////////////////////////////////////////////////////////
