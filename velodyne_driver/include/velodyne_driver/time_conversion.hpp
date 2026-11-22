@@ -53,10 +53,10 @@ rclcpp::Time resolveHourAmbiguity(const rclcpp::Time & stamp, const rclcpp::Time
 
   if (nominal_stamp.seconds() > stamp.seconds()) {
     if (nominal_stamp.seconds() - stamp.seconds() > HALFHOUR_TO_SEC) {
-      retval = rclcpp::Time(retval.seconds() + 2 * HALFHOUR_TO_SEC);
+      retval = retval + rclcpp::Duration(2 * HALFHOUR_TO_SEC, 0);
     }
   } else if (stamp.seconds() - nominal_stamp.seconds() > HALFHOUR_TO_SEC) {
-    retval = rclcpp::Time(retval.seconds() - 2 * HALFHOUR_TO_SEC);
+    retval = retval - rclcpp::Duration(2 * HALFHOUR_TO_SEC, 0);
   }
 
   return retval;
