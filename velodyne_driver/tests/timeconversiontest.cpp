@@ -62,6 +62,43 @@ TEST(TimeConversion, BytesToTimestamp)
   ASSERT_NEAR(ros_stamp_converted.nanoseconds(), ros_stamp.nanoseconds(), 2000);
 }
 
+static void toNativeFormat(uint32_t usecs, uint8_t * native_format)
+{
+  native_format[0] = 0xFF & usecs;
+  native_format[1] = 0xFF & (usecs >> 8);
+  native_format[2] = 0xFF & (usecs >> 16);
+  native_format[3] = 0xFF & (usecs >> 24);
+}
+
+// 2023-11-14 22:00:00 UTC, the top of an hour
+static const int64_t kTopOfHourSec = 1700000000LL - (1700000000LL % 3600);
+
+TEST(TimeConversion, PacketStampedJustBeforeHostHour)
+{
+  // The host clock has just passed the top of the hour, but the packet
+  // was stamped 100 ms before it, at 3599.9 s past the previous hour.
+  rclcpp::Time host_stamp(RCL_S_TO_NS(kTopOfHourSec) + RCL_MS_TO_NS(100));
+  uint8_t native_format[4];
+  toNativeFormat(3599900000U, native_format);
+
+  rclcpp::Time converted = rosTimeFromGpsTimestamp(host_stamp, native_format);
+
+  EXPECT_EQ(converted.nanoseconds(), RCL_S_TO_NS(kTopOfHourSec) - RCL_MS_TO_NS(100));
+}
+
+TEST(TimeConversion, PacketStampedJustAfterHostHour)
+{
+  // The host clock is 100 ms before the top of the hour, but the packet
+  // was stamped 100 ms after it.
+  rclcpp::Time host_stamp(RCL_S_TO_NS(kTopOfHourSec) - RCL_MS_TO_NS(100));
+  uint8_t native_format[4];
+  toNativeFormat(100000U, native_format);
+
+  rclcpp::Time converted = rosTimeFromGpsTimestamp(host_stamp, native_format);
+
+  EXPECT_EQ(converted.nanoseconds(), RCL_S_TO_NS(kTopOfHourSec) + RCL_MS_TO_NS(100));
+}
+
 int main(int argc, char ** argv)
 {
   ::testing::InitGoogleTest(&argc, argv);
